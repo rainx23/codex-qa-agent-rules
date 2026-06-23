@@ -16,6 +16,10 @@
 - 同规则多模块用例合并
 - 相同入口公共节点分组，降低 XMind 视觉疲劳
 - 短文本用例风格，自动去重并补充高风险场景
+- 待确认点分级：阻塞类、非阻塞类、建议确认类
+- 需求-Diff-测试点追踪矩阵
+- P0/P1/P2 优先级规则
+- 查询、列表、弹窗、跳转、导出、接口、SQL、权限等通用业务模板
 
 ## 目录结构
 
@@ -25,6 +29,8 @@
 ├── docs/
 │   └── codex/
 │       ├── code-diff-review-rules.md
+│       ├── qa-common-templates.md
+│       ├── qa-priority-rules.md
 │       ├── qa-requirement-analysis-rules.md
 │       └── xmind-case-rules.md
 ├── scripts/
@@ -83,6 +89,8 @@ testcases/
 - Markdown：`xxx_xmind_yyyyMMdd_HHmmss.md`
 - XMind：`xxx_workbook_yyyyMMdd_HHmmss.xmind`
 
+`testcases/index.md` 会记录版本状态，建议使用：草稿、待确认、已确认、已更新、已废弃。
+
 ## XMind 转换脚本
 
 脚本不依赖第三方库，使用 Python 标准库生成 XMind 2020+ 可识别的 `.xmind` 压缩包结构。
@@ -128,6 +136,8 @@ testcases/zentao/xmind/example_workbook_20260623_120000.xmind
 - 双 commit 按用户给定范围分析
 - diff 为空或 commit 不存在必须说明
 - 结合需求规则判断实现覆盖、偏差和回归风险
+- 输出需求-Diff-测试点追踪矩阵
+- 识别接口契约、安全、性能、调用链和影响链风险
 
 ### xmind-case-rules.md
 
@@ -144,15 +154,47 @@ testcases/zentao/xmind/example_workbook_20260623_120000.xmind
 - 删除重复、低价值用例
 - 补充高风险边界场景
 - 生成 Markdown 后转换 `.xmind`
+- 转换失败时保留 Markdown，说明失败原因，不伪造 `.xmind` 产物
+
+### qa-priority-rules.md
+
+用于统一 P0/P1/P2 风险和用例优先级判定。
+
+核心要求：
+
+- P0 聚焦核心链路、核心数据、严重权限、接口契约和重大兼容风险
+- P1 聚焦主要功能、关键口径、较大范围回归和复杂条件组合
+- P2 聚焦局部展示、低频边界和补充回归
+- 不为凑数量生成低价值 P1/P2 用例
+
+### qa-common-templates.md
+
+用于沉淀常见业务类型的测试关注点。
+
+覆盖：
+
+- 查询
+- 列表和表格
+- 弹窗
+- 跳转和下钻
+- 导出
+- 接口
+- SQL 和数据口径
+- 权限
+- 状态和流程
+- 配置和开关
+- 日志、审计和通知
+
+模板只作为分析辅助，不要求每个需求全部展开。
 
 ## 推荐工作流
 
 1. 用户提供需求、OpenSpec、diff 或 commit。
 2. Codex 先解析规则和影响范围。
-3. 如有不明确口径，先输出待确认点并暂停最终用例。
+3. 如有不明确口径，先按阻塞类、非阻塞类、建议确认类输出待确认点。
 4. 用户确认或选择跳过。
 5. Codex 生成分析报告、XMind Markdown 用例和 `.xmind` 文件。
-6. Codex 更新 `testcases/index.md`。
+6. Codex 更新 `testcases/index.md`，记录版本状态和产物路径。
 
 ## 示例提示词
 
@@ -189,4 +231,3 @@ testcases/zentao/xmind/example_workbook_20260623_120000.xmind
 ## License
 
 如需开源发布，建议在仓库中补充 `LICENSE` 文件。
-
