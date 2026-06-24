@@ -16,6 +16,7 @@
 - 对话展示与本地 XMind Markdown 文件格式分离
 - Markdown 用例自动转换为 `.xmind` 文件
 - 本地输出索引维护
+- 规则验收清单，支持规则修改后的自检和回归验证
 - 最小有效用例集，避免机械穷举
 - 同规则多模块用例合并
 - 相同入口公共节点分组，降低 XMind 视觉疲劳
@@ -37,6 +38,7 @@
 │       ├── qa-common-templates.md
 │       ├── qa-priority-rules.md
 │       ├── qa-requirement-analysis-rules.md
+│       ├── rule-validation-checklist.md
 │       └── xmind-case-rules.md
 ├── scripts/
 │   └── md_to_xmind.py
@@ -199,6 +201,10 @@ testcases/zentao/xmind/example_workbook_20260623_120000.xmind
 - 日志、审计和通知
 
 模板只作为分析辅助，不要求每个需求全部展开。
+
+### rule-validation-checklist.md
+
+用于规则修改后的自检和发布前验收，覆盖纯需求、纯 diff、需求 + diff 一致、需求 + diff 不一致、证据不足、无业务 diff、XMind 对话展示、本地 XMind 文件、最小有效用例集、金融/交易/策略数据类等场景。
 
 ## 推荐工作流
 
