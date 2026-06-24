@@ -10,6 +10,7 @@
 - Git diff / commit 测试影响分析
 - 需求与 diff 联动校验
 - 疑似缺陷识别与验证建议
+- Diff 默认输出“疑似缺陷”章节；需求 + diff 联动时按证据输出疑似缺陷
 - 测试点、风险点、待确认点、回归范围输出
 - XMind Markdown 测试用例生成
 - 对话展示与本地 XMind Markdown 文件格式分离
@@ -129,6 +130,7 @@ testcases/zentao/xmind/example_workbook_20260623_120000.xmind
 - 用户确认前不生成最终 XMind 用例
 - 不虚构 SQL、字段、接口、页面入口
 - 输出分析报告和本地文件路径
+- 同时存在需求和 diff 且证据明确时，分析报告可输出疑似缺陷
 
 ### code-diff-review-rules.md
 
@@ -143,6 +145,7 @@ testcases/zentao/xmind/example_workbook_20260623_120000.xmind
 - 输出需求-Diff-测试点追踪矩阵
 - 识别接口契约、安全、性能、调用链和影响链风险
 - 识别需求与 diff 明确不一致导致的疑似缺陷，并输出证据、影响范围和验证建议
+- 未发现明确疑似缺陷时，在“疑似缺陷”章节输出“未发现明确疑似缺陷”
 
 ### xmind-case-rules.md
 
