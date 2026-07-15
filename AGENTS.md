@@ -39,6 +39,8 @@
 - 用户说跳过、不用管、继续生成或按默认处理时继续，但报告保留待确认点，未确认内容不得写成事实。
 - 需求与 Diff 并存时必须输出需求-Diff-测试点追踪矩阵；只有双重证据充分时才可称为疑似缺陷。
 - 分析报告先按 rules/core/analysis-report-contract.md 识别纯需求、纯 Diff 或联动模式，再执行对应章节门禁。
+- Skills 按 rules/core/structured-model-contract.md 交接 Requirement Analysis、Diff Impact、Risk Coverage Matrix 和 Testcase Model；结构化模型不得改变最终 XMind 层级。
+- 仓库行为由 rules-repository.json 显式区分 standalone 与 integrated；只有 integrated 模式执行双目录一致性门禁。
 - 最终用例严格遵守 rules/core/testcase-quality-rules.md；转换或校验失败不得宣称产物完成。
 - 每次生成报告或用例后按 rules/core/artifact-governance-rules.md 校验 Manifest 并更新索引。
 - 规则相关同名文件在根目录与 codex-qa-agent-rules 中同步；历史索引行可不同，但编码和表结构必须一致。

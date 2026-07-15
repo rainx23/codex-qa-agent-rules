@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0.0",
+  "analysis_id": "AN-DIFF-001",
+  "report_mode": "combined",
+  "repository": "example/customer-query",
+  "comparison_type": "commit-range",
+  "comparison_expression": "abc123..def456",
+  "base_commit": "abc123",
+  "head_commit": "def456",
+  "working_tree_state": "clean",
+  "changed_files": [
+    {"path": "src/customer-query.java", "status": "M", "change_category": "business", "business_relevance": true, "generated_file": false, "formatting_only": false}
+  ],
+  "change_items": [
+    {"change_id": "CHG-001", "file": "src/customer-query.java", "symbol_or_location": "queryCustomers", "change_type": "logic", "summary": "客户编号条件传递到数据访问层", "evidence_reference": "diff:hunk-1", "affected_contracts": ["客户查询"], "direct_callers": ["CustomerController"], "indirect_callers": [], "existing_tests": ["CustomerQueryTest"]},
+    {"change_id": "CHG-002", "file": "src/customer-query.java", "symbol_or_location": "queryCustomers", "change_type": "state", "summary": "分页请求保留筛选和排序字段", "evidence_reference": "diff:hunk-2", "affected_contracts": ["分页查询"], "direct_callers": ["CustomerController"], "indirect_callers": [], "existing_tests": ["CustomerQueryTest"]}
+  ],
+  "impact_chains": [
+    {"change_ids": ["CHG-001"], "path": ["CustomerController", "queryCustomers", "data access"]}
+  ],
+  "coverage_results": [
+    {"requirement_id": "REQ-POINT-001", "change_ids": ["CHG-001"], "coverage_status": "已覆盖", "evidence_state": "已确认", "risk_ids": ["RISK-001"]},
+    {"requirement_id": "REQ-POINT-002", "change_ids": ["CHG-002"], "coverage_status": "已覆盖", "evidence_state": "已确认", "risk_ids": ["RISK-002"]}
+  ],
+  "suspected_defects": [],
+  "risks": ["RISK-001", "RISK-002"],
+  "regression_scope": ["核心回归", "关联回归"],
+  "matched_profiles": ["api"]
+}

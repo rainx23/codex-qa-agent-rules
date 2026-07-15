@@ -1,0 +1,6 @@
+{
+  "analysis_id": "AN-DIFF-001",
+  "change_ids": ["CHG-001", "CHG-002"],
+  "coverage": {"REQ-POINT-001": "已覆盖", "REQ-POINT-002": "已覆盖"},
+  "risk_ids": ["RISK-001", "RISK-002"]
+}

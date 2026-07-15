@@ -16,31 +16,47 @@
 
        python -m unittest discover -s tests -v
 
-4. Manifest 示例和索引编码：
+4. 单一版本、生成 Schema 和仓库模式：
+
+       python scripts/generate_schemas.py --check
+       python scripts/validate_schemas.py
+       python scripts/validate_rule_version.py
+       python scripts/validate_repository_mode.py
+       python scripts/validate_ci_workflow.py
+
+5. Manifest 示例和索引编码：
 
        python scripts/validate_manifest.py testcases/manifest.example.json
        python scripts/repair_text_encoding.py testcases/index.md --check
 
-5. 三种分析报告模式：
+6. 三种分析报告模式：
 
        python scripts/validate_analysis_report.py tests/fixtures/reports/requirement_only.md --mode requirement
        python scripts/validate_analysis_report.py tests/fixtures/reports/diff_only.md --mode diff
        python scripts/validate_analysis_report.py tests/fixtures/reports/requirement_diff_combined.md --mode combined
 
-6. XMind 样例：
+7. 逐行追踪和 XMind 样例：
 
+       python scripts/validate_traceability.py tests/fixtures/reports/combined_consistent.md tests/fixtures/valid_case_xmind.md --mode combined --risk-matrix tests/fixtures/models/risk-coverage-matrix.json --testcase-model tests/fixtures/models/testcase-model.json
        python scripts/validate_xmind_md.py tests/fixtures/valid_case_xmind.md
        python scripts/md_to_xmind.py tests/fixtures/valid_case_xmind.md -o 临时输出路径
 
-7. 根目录和 codex-qa-agent-rules 的同名规则、Skills、脚本和测试逐文件比较哈希。
+8. CI 工作流必须覆盖 Python 3.10 和 3.12，并以实际 YAML 解析器检查语法。
+
+9. 集成模式下根目录和 `codex-qa-agent-rules` 的同名规则、Skills、脚本和测试逐文件比较哈希；独立模式不得要求嵌套仓库。
+
+10. 检查校验命令未产生非预期文件变化；干净仓库执行 `git diff --exit-code`。
 
 ## 必须覆盖的失败路径
 
-- 多根、TC 跳号和重复、非法维度、Tab、非 4 空格、层级跳跃。
-- 标签节点、模糊预期、语义重复、未确认口径写死。
+- 多根、TC 跳号和重复、非三位 TC、非法维度、Tab、非 4 空格、层级跳跃。
+- 标签节点、泛化“正常”预期、状态值 `NORMAL`、语义重复 error、疑似重复 warning、未确认口径写死。
 - 报告缺章节、联动报告缺追踪矩阵、疑似缺陷缺双证据、P0 无测试映射。
+- TC 仅出现在普通正文、缺需求证据或 Diff 变更 ID、TC 范围、多风险映射和模型/Markdown 不一致。
 - 中文/数字编号章节正文提取、三种报告模式、禅道第三部分优先、目标偏差和产品规则冲突。
-- Manifest 负数、非法枚举、路径缺失、计数不一致和 Workbook 损坏。
-- 输出文件已存在、批量转换部分失败、索引 artifact_id 重复。
+- 结构化模型的事实状态、冲突确认、Diff 覆盖状态、P0 风险和 TC 来源校验。
+- Manifest 来源哈希、规则版本、时区、待确认/P0 计数、安全路径、supersedes 循环、状态语义和 Workbook 损坏。
+- 输出文件已存在、两份批量成功加一份局部失败、失败无伪 Workbook、索引 artifact_id 重复。
+- 真实历史 XMind Markdown 原样识别，迁移样例合并重复、移除模糊预期且不降低 P0 业务覆盖。
 
 任一必需步骤失败时不得发布或宣称完整重构完成。

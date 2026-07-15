@@ -1,47 +1,217 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Generated from scripts/qa_contracts.py; do not edit manually.",
+  "x-rule-version": "2.2.0",
   "title": "QA Artifact Manifest",
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "artifact_id", "source_type", "source_id", "source_hash", "rule_version",
-    "generated_at", "report_path", "xmind_md_path", "xmind_path",
-    "case_count", "p0_count", "pending_count", "validation_status",
-    "relation", "supersedes"
+    "schema_version",
+    "artifact_id",
+    "source_type",
+    "source_id",
+    "source_files",
+    "source_hash_algorithm",
+    "source_hash",
+    "rule_version",
+    "generated_at",
+    "generated_timezone",
+    "report_mode",
+    "report_path",
+    "analysis_model_paths",
+    "risk_matrix_path",
+    "testcase_model_path",
+    "xmind_md_path",
+    "xmind_path",
+    "case_count",
+    "p0_count",
+    "p0_risk_count",
+    "p0_case_count",
+    "pending_count",
+    "blocking_pending_count",
+    "nonblocking_pending_count",
+    "suggested_pending_count",
+    "validation_status",
+    "relation",
+    "supersedes",
+    "failure_reason",
+    "pending_reason"
   ],
   "properties": {
-    "artifact_id": {"type": "string", "minLength": 1},
-    "source_type": {"type": "string", "minLength": 1},
-    "source_id": {"type": "string", "minLength": 1},
-    "source_hash": {"type": "string", "pattern": "^sha256:[0-9a-fA-F]{64}$"},
-    "requirement_id": {"type": "string"},
-    "commit_range": {"type": "string"},
-    "rule_version": {"type": "string", "minLength": 1},
-    "generated_at": {"type": "string", "minLength": 1},
-    "report_path": {"type": "string"},
-    "xmind_md_path": {"type": "string"},
-    "xmind_path": {"type": "string"},
-    "case_count": {"type": "integer", "minimum": 0},
-    "p0_count": {"type": "integer", "minimum": 0},
-    "pending_count": {"type": "integer", "minimum": 0},
-    "validation_status": {"enum": ["passed", "failed", "pending"]},
-    "relation": {"enum": ["新增", "补充", "替代", "废弃"]},
-    "supersedes": {"type": ["string", "null"]},
-    "failure_reason": {"type": "string"}
-  },
-  "anyOf": [
-    {"required": ["requirement_id"]},
-    {"required": ["commit_range"]}
-  ],
-  "allOf": [
-    {
-      "if": {"properties": {"relation": {"enum": ["替代", "废弃"]}}},
-      "then": {"properties": {"supersedes": {"type": "string", "minLength": 1}}}
+    "schema_version": {
+      "const": "1.0.0"
     },
-    {
-      "if": {"properties": {"validation_status": {"const": "failed"}}},
-      "then": {"required": ["failure_reason"]}
+    "artifact_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_files": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "source_snapshot_path": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "source_hash_algorithm": {
+      "const": "sha256"
+    },
+    "source_hash": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^sha256:[0-9a-fA-F]{64}$"
+    },
+    "requirement_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "commit_range": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "rule_version": {
+      "const": "2.2.0"
+    },
+    "generated_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generated_timezone": {
+      "enum": [
+        "Asia/Shanghai",
+        "UTC"
+      ]
+    },
+    "report_mode": {
+      "enum": [
+        "requirement",
+        "diff",
+        "combined"
+      ]
+    },
+    "report_path": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "analysis_model_paths": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "risk_matrix_path": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "testcase_model_path": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "xmind_md_path": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "xmind_path": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "case_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "p0_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Compatibility alias of p0_case_count."
+    },
+    "p0_risk_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "p0_case_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "pending_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "blocking_pending_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "nonblocking_pending_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "suggested_pending_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "validation_status": {
+      "enum": [
+        "passed",
+        "failed",
+        "pending"
+      ]
+    },
+    "relation": {
+      "enum": [
+        "新增",
+        "补充",
+        "替代",
+        "废弃"
+      ]
+    },
+    "supersedes": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "failure_reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "pending_reason": {
+      "type": [
+        "string",
+        "null"
+      ]
     }
-  ]
+  }
 }
-

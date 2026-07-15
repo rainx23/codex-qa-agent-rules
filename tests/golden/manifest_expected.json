@@ -1,0 +1,12 @@
+{
+  "rule_version": "2.2.0",
+  "validation_status": "pending",
+  "counts": {
+    "case_count": 0,
+    "p0_risk_count": 0,
+    "p0_case_count": 0,
+    "pending_count": 0
+  },
+  "relation": "新增",
+  "pending_reason": "示例 Manifest，尚未生成正式产物。"
+}

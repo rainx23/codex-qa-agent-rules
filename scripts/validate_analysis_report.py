@@ -10,7 +10,7 @@ import unicodedata
 from pathlib import Path
 
 from heading_utils import MarkdownSection, heading_key, parse_markdown_sections
-from qa_validation import ValidationError, validate_markdown_file
+from qa_validation import ValidationError, parse_traceability_records, validate_markdown_file
 
 
 MODE_REQUIREMENT = "requirement"
@@ -86,12 +86,12 @@ REQUIRED_BY_MODE = {
 }
 
 TRACE_FIELD_GROUPS = (
-    ("需求点",),
+    ("需求点ID", "需求点"),
     ("需求证据",),
-    ("Diff 实现",),
+    ("Diff变更ID", "Diff 实现"),
     ("覆盖状态", "覆盖情况", "覆盖"),
-    ("风险",),
-    ("测试点", "TC"),
+    ("风险ID", "风险"),
+    ("测试点或TC", "测试点", "TC"),
 )
 ALLOWED_COVERAGE = {"已覆盖", "疑似遗漏", "实现不一致", "需求外变更", "无法判断"}
 ALLOWED_EVIDENCE = re.compile(
@@ -189,27 +189,7 @@ def _no_defect_conclusion(body: str) -> bool:
 
 
 def _validate_trace_matrix(trace: str) -> list[str]:
-    errors: list[str] = []
-    missing = [
-        "/".join(group)
-        for group in TRACE_FIELD_GROUPS
-        if not any(field in trace for field in group)
-    ]
-    if missing:
-        errors.append(f"追踪矩阵缺少字段：{missing}")
-
-    lines = [line.strip() for line in trace.splitlines() if line.strip().startswith("|")]
-    if len(lines) >= 3:
-        header = [cell.strip() for cell in lines[0].strip("|").split("|")]
-        coverage_index = next(
-            (index for index, value in enumerate(header) if value in {"覆盖状态", "覆盖情况", "覆盖"}),
-            None,
-        )
-        if coverage_index is not None:
-            for line in lines[2:]:
-                cells = [cell.strip() for cell in line.strip("|").split("|")]
-                if coverage_index < len(cells) and cells[coverage_index] not in ALLOWED_COVERAGE:
-                    errors.append(f"追踪矩阵覆盖状态非法：{cells[coverage_index]}")
+    _, errors = parse_traceability_records(trace, "combined")
     return errors
 
 
@@ -260,7 +240,7 @@ def validate(
     risk = _body(bodies, *risk_names)
     summary = _body(bodies, "测试点摘要")
     p0_risks = len(re.findall(r"风险等级[:：]\s*P0|\bP0\b", risk))
-    mapped_tc = set(re.findall(r"TC\d{3,}", summary + "\n" + trace))
+    mapped_tc = set(re.findall(r"TC\d{3}", summary + "\n" + trace))
     if p0_risks and not mapped_tc and not re.search(r"P0\s*测试点[:：]\s*\S+", summary):
         errors.append("P0 风险未映射到具体测试点或 TC")
 
@@ -313,6 +293,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"FAIL {path} mode={resolved_mode}: " + "；".join(errors), file=sys.stderr)
         else:
             print(f"PASS {path} mode={resolved_mode}")
+    print(f"SUMMARY passed={len(args.files) - failed} warning=0 failed={failed}")
     return 1 if failed else 0
 
 

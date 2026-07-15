@@ -69,6 +69,7 @@ def main() -> int:
     parser.add_argument("--reference", type=Path, help="使用参考索引按时间戳恢复无法直接解码的历史行")
     args = parser.parse_args()
     changed = 0
+    repaired_count = 0
     for path in args.files:
         original = path.read_text(encoding="utf-8-sig")
         repaired = repair_text(original)
@@ -79,11 +80,20 @@ def main() -> int:
             changed += 1
             if args.in_place:
                 path.write_text(repaired, encoding="utf-8")
-                print(f"REPAIRED {path}")
+                repaired_count += 1
+                print(f"PASS {path}: repaired")
+            elif args.check:
+                print(f"FAIL {path}: reversible encoding repair required")
             else:
-                print(f"NEEDS_REPAIR {path}")
+                print(f"WARNING {path}: reversible encoding repair available")
         else:
             print(f"PASS {path}")
+    failed = changed if args.check else 0
+    warnings = changed if not args.check and not args.in_place else 0
+    passed = len(args.files) - failed - warnings
+    if args.in_place:
+        passed = len(args.files)
+    print(f"SUMMARY passed={passed} warning={warnings} failed={failed} repaired={repaired_count}")
     return 1 if args.check and changed else 0
 
 

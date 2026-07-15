@@ -1,0 +1,71 @@
+name: QA Rules Validation
+
+on:
+  push:
+    paths:
+      - "AGENTS.md"
+      - "README.md"
+      - "RULE_VERSION"
+      - "rules-repository.json"
+      - "skills/**"
+      - "rules/**"
+      - "scripts/**"
+      - "tests/**"
+      - "testcases/manifest.example.json"
+      - "docs/codex/**"
+      - ".github/workflows/**"
+  pull_request:
+    paths:
+      - "AGENTS.md"
+      - "README.md"
+      - "RULE_VERSION"
+      - "rules-repository.json"
+      - "skills/**"
+      - "rules/**"
+      - "scripts/**"
+      - "tests/**"
+      - "testcases/manifest.example.json"
+      - "docs/codex/**"
+      - ".github/workflows/**"
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.12"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile Python
+        run: python -m compileall -q scripts tests
+      - name: Validate Skills
+        run: python scripts/validate_skill_contracts.py skills
+      - name: Check generated Schemas
+        run: python scripts/generate_schemas.py --check
+      - name: Validate Schemas and rule version
+        run: |
+          python scripts/validate_schemas.py
+          python scripts/validate_rule_version.py
+      - name: Validate repository mode
+        run: python scripts/validate_repository_mode.py
+      - name: Run behavior tests
+        run: python -m unittest discover -s tests -v
+      - name: Validate Manifest and index encoding
+        run: |
+          python scripts/validate_manifest.py testcases/manifest.example.json
+          python scripts/repair_text_encoding.py testcases/index.md --check
+      - name: Convert and verify XMind fixture in temp directory
+        shell: bash
+        run: |
+          output="${RUNNER_TEMP}/valid_case_workbook.xmind"
+          python scripts/validate_xmind_md.py tests/fixtures/valid_case_xmind.md
+          python scripts/md_to_xmind.py tests/fixtures/valid_case_xmind.md -o "$output"
+      - name: Ensure checks leave no generated changes
+        run: git diff --exit-code

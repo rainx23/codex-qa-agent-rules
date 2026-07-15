@@ -64,9 +64,10 @@ def main(argv: list[str] | None = None) -> int:
             print(f"FAIL {skill_dir}: " + "；".join(errors), file=sys.stderr)
         else:
             print(f"PASS {skill_dir}")
+    total = sum(1 for path in args.skills_root.iterdir() if path.is_dir())
+    print(f"SUMMARY passed={total - failed} warning=0 failed={failed}")
     return 1 if failed else 0
 
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

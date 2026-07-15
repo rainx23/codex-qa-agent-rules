@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Generated from scripts/qa_contracts.py; do not edit manually.",
+  "x-rule-version": "2.2.0",
+  "title": "Risk Coverage Matrix",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "matrix_id",
+    "analysis_ids",
+    "risk_items",
+    "coverage_summary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "matrix_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "analysis_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "risk_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "risk_id",
+          "requirement_ids",
+          "change_ids",
+          "business_entry",
+          "business_entries",
+          "business_object",
+          "conditions",
+          "data_shapes",
+          "core_action",
+          "core_assertion",
+          "business_impact",
+          "test_priority",
+          "evidence_state",
+          "regression_scope",
+          "merge_key",
+          "testcase_ids"
+        ],
+        "properties": {
+          "risk_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "requirement_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "change_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "business_entry": {
+            "type": "string",
+            "minLength": 1
+          },
+          "business_entries": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "business_object": {
+            "type": "string",
+            "minLength": 1
+          },
+          "conditions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "data_shapes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "core_action": {
+            "type": "string",
+            "minLength": 1
+          },
+          "core_assertion": {
+            "type": "string",
+            "minLength": 1
+          },
+          "business_impact": {
+            "enum": [
+              "critical",
+              "high",
+              "medium",
+              "low"
+            ]
+          },
+          "test_priority": {
+            "enum": [
+              "P0",
+              "P1",
+              "P2"
+            ]
+          },
+          "evidence_state": {
+            "enum": [
+              "已确认",
+              "疑似",
+              "待确认"
+            ]
+          },
+          "regression_scope": {
+            "enum": [
+              "核心回归",
+              "关联回归",
+              "冒烟回归"
+            ]
+          },
+          "merge_key": {
+            "type": "string",
+            "minLength": 1
+          },
+          "testcase_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^TC\\d{3}$"
+            },
+            "uniqueItems": true
+          }
+        }
+      },
+      "minItems": 1
+    },
+    "coverage_summary": {
+      "type": "object"
+    }
+  }
+}

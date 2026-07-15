@@ -1,0 +1,270 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Generated from scripts/qa_contracts.py; do not edit manually.",
+  "x-rule-version": "2.2.0",
+  "title": "Diff Impact Model",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "analysis_id",
+    "report_mode",
+    "repository",
+    "comparison_type",
+    "comparison_expression",
+    "base_commit",
+    "head_commit",
+    "working_tree_state",
+    "changed_files",
+    "change_items",
+    "impact_chains",
+    "coverage_results",
+    "suspected_defects",
+    "risks",
+    "regression_scope",
+    "matched_profiles"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "analysis_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "report_mode": {
+      "enum": [
+        "diff",
+        "combined"
+      ]
+    },
+    "repository": {
+      "type": "string",
+      "minLength": 1
+    },
+    "comparison_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "comparison_expression": {
+      "type": "string",
+      "minLength": 1
+    },
+    "base_commit": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "head_commit": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "working_tree_state": {
+      "type": "string",
+      "minLength": 1
+    },
+    "changed_files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "status",
+          "change_category",
+          "business_relevance",
+          "generated_file",
+          "formatting_only"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "minLength": 1
+          },
+          "change_category": {
+            "type": "string",
+            "minLength": 1
+          },
+          "business_relevance": {
+            "type": "boolean"
+          },
+          "generated_file": {
+            "type": "boolean"
+          },
+          "formatting_only": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "change_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "change_id",
+          "file",
+          "symbol_or_location",
+          "change_type",
+          "summary",
+          "evidence_reference",
+          "affected_contracts",
+          "direct_callers",
+          "indirect_callers",
+          "existing_tests"
+        ],
+        "properties": {
+          "change_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "file": {
+            "type": "string",
+            "minLength": 1
+          },
+          "symbol_or_location": {
+            "type": "string",
+            "minLength": 1
+          },
+          "change_type": {
+            "type": "string",
+            "minLength": 1
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence_reference": {
+            "type": "string",
+            "minLength": 1
+          },
+          "affected_contracts": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "direct_callers": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "indirect_callers": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "existing_tests": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          }
+        }
+      }
+    },
+    "impact_chains": {
+      "type": "array"
+    },
+    "coverage_results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "requirement_id",
+          "change_ids",
+          "coverage_status",
+          "evidence_state",
+          "risk_ids"
+        ],
+        "properties": {
+          "requirement_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "change_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "coverage_status": {
+            "enum": [
+              "已覆盖",
+              "疑似遗漏",
+              "实现不一致",
+              "需求外变更",
+              "无法判断"
+            ]
+          },
+          "evidence_state": {
+            "enum": [
+              "已确认",
+              "疑似",
+              "待确认"
+            ]
+          },
+          "risk_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          }
+        }
+      }
+    },
+    "suspected_defects": {
+      "type": "array"
+    },
+    "risks": {
+      "type": "array"
+    },
+    "regression_scope": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "matched_profiles": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    }
+  }
+}

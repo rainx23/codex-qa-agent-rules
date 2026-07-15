@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import contextlib
+import io
 import json
 import sys
 import tempfile
@@ -10,7 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from md_to_xmind import convert_file, iter_inputs
+from md_to_xmind import convert_file, iter_inputs, main
 from qa_validation import ValidationError, validate_xmind_archive
 
 
@@ -69,7 +71,27 @@ class ConverterTests(unittest.TestCase):
         self.source.write_text(content, encoding="utf-8-sig")
         self.assertTrue(convert_file(self.source).is_file())
 
+    def test_batch_keeps_two_successes_and_no_fake_output_for_partial_failure(self):
+        second = self.directory / "second_xmind.md"
+        second.write_text(self.source.read_text(encoding="utf-8"), encoding="utf-8")
+        broken = self.directory / "broken_xmind.md"
+        broken.write_text("- 根\n        - 功能测试\n", encoding="utf-8")
+        stdout, stderr = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+            result = main([str(self.directory)])
+        self.assertEqual(1, result)
+        self.assertIn("SUMMARY success=2 failed=1", stdout.getvalue())
+        self.assertIn("FAIL", stderr.getvalue())
+        self.assertTrue((self.directory / "sample_workbook_20260715.xmind").is_file())
+        self.assertTrue((self.directory / "second_workbook.xmind").is_file())
+        self.assertFalse((self.directory / "broken_workbook.xmind").exists())
+
+    def test_corrupt_workbook_is_detected(self):
+        output = convert_file(self.source)
+        output.write_bytes(b"not-a-zip")
+        with self.assertRaisesRegex(ValidationError, "工作簿无法读取"):
+            validate_xmind_archive(output)
+
 
 if __name__ == "__main__":
     unittest.main()
-

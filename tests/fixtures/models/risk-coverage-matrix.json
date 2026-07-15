@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0.0",
+  "matrix_id": "MATRIX-001",
+  "analysis_ids": ["AN-REQ-001", "AN-DIFF-001"],
+  "risk_items": [
+    {
+      "risk_id": "RISK-001",
+      "requirement_ids": ["REQ-POINT-001"],
+      "change_ids": ["CHG-001"],
+      "business_entry": "客户列表查询入口",
+      "business_entries": ["客户列表查询入口"],
+      "business_object": "客户记录",
+      "conditions": ["客户编号有值"],
+      "data_shapes": ["目标客户", "非目标客户"],
+      "core_action": "按客户编号查询",
+      "core_assertion": "返回集合只包含目标客户",
+      "business_impact": "critical",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "merge_key": "客户列表查询入口|客户记录|客户编号有值|查询|只返回目标客户|RISK-001",
+      "testcase_ids": ["TC001"]
+    },
+    {
+      "risk_id": "RISK-002",
+      "requirement_ids": ["REQ-POINT-002"],
+      "change_ids": ["CHG-002"],
+      "business_entry": "客户列表查询入口",
+      "business_entries": ["客户列表查询入口"],
+      "business_object": "分页查询状态",
+      "conditions": ["已筛选后翻页"],
+      "data_shapes": ["第二页"],
+      "core_action": "切换页码",
+      "core_assertion": "请求保留筛选和排序字段",
+      "business_impact": "high",
+      "test_priority": "P1",
+      "evidence_state": "已确认",
+      "regression_scope": "关联回归",
+      "merge_key": "客户列表查询入口|分页查询状态|已筛选|翻页|保留条件|RISK-002",
+      "testcase_ids": ["TC002"]
+    }
+  ],
+  "coverage_summary": {"risk_count": 2, "p0_risk_count": 1, "covered_risk_count": 2}
+}

@@ -1,0 +1,6 @@
+{
+  "analysis_id": "AN-REQ-001",
+  "confirmed_fact_ids": ["FACT-001", "FACT-002"],
+  "risk_ids": ["RISK-001", "RISK-002"],
+  "criterion_fact_links": {"REQ-POINT-001": ["FACT-001"], "REQ-POINT-002": ["FACT-002"]}
+}

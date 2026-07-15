@@ -1,0 +1,21 @@
+{
+  "source_sha256": "0d278d6d665c1249f24c92ab676f7d9331846d4be9d6b5d6523ba3ef381bd2b0",
+  "source_case_count": 36,
+  "migrated_case_count": 35,
+  "merged_cases": {
+    "TC024": [
+      "列表页已买、买入失败、已卖、卖出失败、欠股、多买股弹窗",
+      "汇总页多买股、欠股、T0股弹窗"
+    ]
+  },
+  "p0_coverage_terms": [
+    "宽表和挂靠表",
+    "状态允许和标识满足",
+    "人买卖、人买、人卖、空排列"
+  ],
+  "removed_fuzzy_assertions": [
+    "页面正常加载",
+    "功能正常",
+    "交互正常"
+  ]
+}

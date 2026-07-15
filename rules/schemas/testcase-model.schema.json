@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Generated from scripts/qa_contracts.py; do not edit manually.",
+  "x-rule-version": "2.2.0",
+  "title": "Testcase Model",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "root_title",
+    "cases"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "root_title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "tc_id",
+          "dimension",
+          "common_entry",
+          "module_level_1",
+          "module_level_2",
+          "test_point",
+          "steps",
+          "expected_results",
+          "risk_ids",
+          "requirement_ids",
+          "change_ids",
+          "historical_defect_ids",
+          "test_priority",
+          "evidence_state",
+          "regression_scope",
+          "deduplication_key"
+        ],
+        "properties": {
+          "tc_id": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^TC\\d{3}$"
+          },
+          "dimension": {
+            "enum": [
+              "功能测试",
+              "数据测试",
+              "异常测试",
+              "权限测试",
+              "导出测试",
+              "兼容性测试",
+              "回归测试",
+              "SQL验证"
+            ]
+          },
+          "common_entry": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "module_level_1": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "module_level_2": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "test_point": {
+            "type": "string",
+            "minLength": 1
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "expected_results": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "risk_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "requirement_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "change_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "historical_defect_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "test_priority": {
+            "enum": [
+              "P0",
+              "P1",
+              "P2"
+            ]
+          },
+          "evidence_state": {
+            "enum": [
+              "已确认",
+              "疑似",
+              "待确认"
+            ]
+          },
+          "regression_scope": {
+            "enum": [
+              "核心回归",
+              "关联回归",
+              "冒烟回归"
+            ]
+          },
+          "deduplication_key": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "minItems": 1
+    }
+  }
+}

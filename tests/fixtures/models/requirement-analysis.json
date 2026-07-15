@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0.0",
+  "analysis_id": "AN-REQ-001",
+  "report_mode": "combined",
+  "source_type": "requirement",
+  "source_ids": ["REQ-001"],
+  "analysis_scope": "客户编号查询和分页状态",
+  "business_goal": "准确定位客户并在分页时保持查询状态",
+  "acceptance_basis": "客户编号精确过滤，翻页保留筛选和排序",
+  "facts": [
+    {
+      "fact_id": "FACT-001",
+      "category": "confirmed",
+      "statement": "客户编号使用精确过滤",
+      "source_type": "requirement",
+      "source_reference": "REQ-001 第三部分查询规则",
+      "confidence": "high",
+      "affects_core_expectation": true,
+      "handling": null
+    },
+    {
+      "fact_id": "FACT-002",
+      "category": "confirmed",
+      "statement": "翻页保留筛选条件和排序字段",
+      "source_type": "requirement",
+      "source_reference": "REQ-001 第三部分分页规则",
+      "confidence": "high",
+      "affects_core_expectation": true,
+      "handling": null
+    }
+  ],
+  "confirmation_points": [],
+  "risks": [
+    {"risk_id": "RISK-001", "statement": "客户编号条件可能丢失", "test_priority": "P0", "evidence_state": "已确认"},
+    {"risk_id": "RISK-002", "statement": "翻页可能丢失查询状态", "test_priority": "P1", "evidence_state": "已确认"}
+  ],
+  "acceptance_criteria": [
+    {"criterion_id": "REQ-POINT-001", "statement": "返回集合只包含目标客户", "fact_ids": ["FACT-001"], "risk_ids": ["RISK-001"]},
+    {"criterion_id": "REQ-POINT-002", "statement": "翻页保留筛选和排序", "fact_ids": ["FACT-002"], "risk_ids": ["RISK-002"]}
+  ],
+  "regression_scope": ["核心回归", "关联回归"],
+  "matched_profiles": ["web-ui", "api"]
+}

@@ -1,0 +1,6 @@
+{
+  "matrix_id": "MATRIX-001",
+  "risk_to_tc": {"RISK-001": ["TC001"], "RISK-002": ["TC002"]},
+  "p0_risk_ids": ["RISK-001"],
+  "coverage_summary": {"risk_count": 2, "p0_risk_count": 1, "covered_risk_count": 2}
+}

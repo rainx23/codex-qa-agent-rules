@@ -53,12 +53,19 @@ def iter_inputs(paths: Iterable[Path]) -> Iterable[Path]:
         else:
             yield path
 
-def convert_file(input_path: Path, output: Path | None = None, overwrite: bool = False) -> Path:
+def convert_file(
+    input_path: Path,
+    output: Path | None = None,
+    overwrite: bool = False,
+    strict: bool = False,
+) -> Path:
     input_path = input_path.resolve()
     output = (output or default_output_path(input_path)).resolve()
     if output.exists() and not overwrite:
         raise FileExistsError(f"{output}: 输出已存在；使用 --overwrite 明确覆盖")
     outline = validate_markdown_file(input_path)
+    if strict and outline.warnings:
+        raise ValidationError(f"{input_path}: strict 模式拒绝 {len(outline.warnings)} 个 warning")
     write_xmind(outline.root, output)
     try:
         validate_xmind_archive(output, outline.root.title, len(outline.tc_nodes), count_tree_nodes(outline.root))
@@ -72,6 +79,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("inputs", nargs="+", type=Path)
     parser.add_argument("-o", "--output", type=Path)
     parser.add_argument("--overwrite", action="store_true")
+    parser.add_argument("--strict", action="store_true", help="warning 也导致当前文件转换失败")
     args = parser.parse_args(argv)
     files = list(iter_inputs(args.inputs))
     if not files:
@@ -82,7 +90,10 @@ def main(argv: list[str] | None = None) -> int:
     failed: list[str] = []
     for path in files:
         try:
-            output = convert_file(path, args.output, args.overwrite)
+            outline = validate_markdown_file(path)
+            for warning in outline.warnings:
+                print(f"WARNING {warning}")
+            output = convert_file(path, args.output, args.overwrite, args.strict)
             passed.append(f"{path} -> {output}")
         except (OSError, ValidationError, ValueError, zipfile.BadZipFile) as exc:
             failed.append(f"{path}: {exc}")

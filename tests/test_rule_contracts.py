@@ -2,26 +2,21 @@ from __future__ import annotations
 
 import json
 import re
+import sys
 import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+
+from validate_repository_mode import validate_mode
 
 
 class RuleContractTests(unittest.TestCase):
     def test_all_mirrored_rule_assets_match(self):
-        mirror = ROOT / "codex-qa-agent-rules"
-        if not mirror.is_dir():
-            self.skipTest("standalone template repository")
-        roots = ["AGENTS.md", "README.md", "docs", "rules", "skills", "scripts", "tests", "testcases/manifest.example.json"]
-        for entry in roots:
-            path = ROOT / entry
-            files = [path] if path.is_file() else [item for item in path.rglob("*") if item.is_file() and "__pycache__" not in item.parts and item.suffix != ".pyc"]
-            for source in files:
-                relative = source.relative_to(ROOT)
-                target = mirror / relative
-                self.assertTrue(target.is_file(), str(relative))
-                self.assertEqual(source.read_bytes(), target.read_bytes(), str(relative))
+        mode, errors = validate_mode(ROOT / "rules-repository.json")
+        self.assertIn(mode, {"standalone", "integrated"})
+        self.assertEqual([], errors)
 
     def test_profile_capabilities_are_preserved(self):
         web = (ROOT / "rules/profiles/web-ui.md").read_text(encoding="utf-8")
