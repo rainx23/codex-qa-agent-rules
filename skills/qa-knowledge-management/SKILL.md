@@ -1,31 +1,31 @@
 ---
 name: qa-knowledge-management
-description: Search, draft, compare, validate, and explicitly persist sanitized historical business knowledge, DDL, logic, metrics, data-validation decisions, and read-only SQL plans without database access.
+description: 用于检索、起草、比较、校验并在明确确认后持久化脱敏历史业务知识、DDL、逻辑、指标、数据验证决策和只读 SQL 计划；全程不连接数据库。Knowledge management, historical QA knowledge, DDL comparison, data validation and read-only SQL governance.
 ---
 
-# QA Knowledge Management
+# QA 知识管理（QA Knowledge Management）
 
-Resolve the repository root as two levels above this SKILL.md.
+将本 Skill 的根目录解析为当前 `SKILL.md` 向上两级的仓库根目录。
 
-## Load rules
+## 规则加载
 
-1. Read ../../rules/core/evidence-rules.md, ../../rules/core/analysis-report-contract.md, ../../rules/core/structured-model-contract.md, and ../../rules/core/sql-coding-standards.md.
-2. Resolve `rules-repository.json`: integrated repositories use the business project's `qa-knowledge/`; standalone repositories use `qa-knowledge/examples/` for sanitized fixtures.
-3. Load only indexes first. Read active hits and the smallest relevant current/history files; do not load the complete knowledge tree by default.
+1. 读取 `../../rules/core/evidence-rules.md`、`../../rules/core/analysis-report-contract.md`、`../../rules/core/structured-model-contract.md` 和 `../../rules/core/sql-coding-standards.md`。
+2. 解析 `rules-repository.json`：integrated 仓库使用业务项目的 `qa-knowledge/`；standalone 仓库使用 `qa-knowledge/examples/` 中的脱敏夹具。
+3. 优先只加载索引，再读取最小相关的 active 命中及 current/history 文件；默认不加载完整知识树。
 
-## Modes
+## 模式
 
-- `search`: extract requirement, domain, entry, table, field, logic, metric and Diff identifiers; query indexes; return active/candidate/conflicting/superseded/deprecated/missing evidence with paths and applicability warnings.
-- `draft`: parse complete pasted DDL or partial fields, calculate raw/normalized hashes, compare existing knowledge, and produce a review-only change draft. Do not write formal knowledge.
-- `persist`: write only after explicit user confirmation. Preserve current/history separation, IDs, hashes, supersedes and index stability. Never persist inferred facts, credentials or a partial schema over a complete schema.
-- `compare`: compare old/new DDL, logic, formulas, filters, joins, time, precision and exceptions; report added/removed/changed/unaffected behavior and regression scope.
-- `validate`: run knowledge, schema, reference, hash, active-version, supersedes-cycle, index-drift and sensitive-information checks.
+- `search`：提取需求、域、入口、表、字段、逻辑、指标和 Diff 标识符；查询索引并返回 active/candidate/conflicting/superseded/deprecated/missing 证据，同时说明路径和适用性风险。
+- `draft`：解析完整粘贴 DDL 或局部字段，计算原始/规范化哈希，比较已有知识并生成仅供评审的变更草稿；不得写入正式知识。
+- `persist`：仅在用户明确确认后写入。保持 current/history 分离、ID、哈希、supersedes 和索引稳定；不得持久化推断事实、凭据，也不得用 partial schema 覆盖完整 schema。
+- `compare`：比较新旧 DDL、逻辑、公式、过滤、连接、时间、精度和例外，报告新增/删除/变更/不受影响的行为及回归范围。
+- `validate`：执行知识、Schema、引用、哈希、active 版本、supersedes 环、索引漂移和敏感信息检查。
 
-## Data validation and SQL
+## 数据验证与 SQL
 
-1. Set `data_validation_required` to `required`, `optional`, `not_required`, or `blocked` with a reason and missing information.
-2. Use `sql` for indicator accuracy by default; use `cross_source_reconciliation` only with explicit baseline/target, fields, filters, time, tolerance and evidence; use `mixed` when both are needed.
-3. Generate only read-only SQL. `SQLV###` and `REC###` are reusable references and may be shared by multiple TCs. XMind must reference IDs rather than embedding large SQL.
-4. SQL can reach `generated` or `reviewed` after static checks. Without user execution results it cannot be `executed`, `passed`, or `failed`.
+1. 将 `data_validation_required` 设置为 `required`、`optional`、`not_required` 或 `blocked`，同时填写原因和缺失信息。
+2. 指标准确性默认使用 `sql`；只有存在明确的基线/目标、字段、过滤、时间、容差和证据时才使用 `cross_source_reconciliation`；两者都需要时使用 `mixed`。
+3. 只生成只读 SQL。`SQLV###` 和 `REC###` 是可被多个 TC 复用的引用；XMind 引用 ID，不嵌入大段 SQL。
+4. 静态检查通过后 SQL 可以处于 `generated` 或 `reviewed`；没有用户执行结果时不得标记为 `executed`、`passed` 或 `failed`。
 
-The Skill never connects to a database, executes SQL, stores credentials, or promotes historical knowledge above current user-confirmed requirements.
+本 Skill 永不连接数据库、执行 SQL、保存凭据，也不会将历史知识提升为高于当前用户确认需求的事实。

@@ -1,4 +1,4 @@
 interface:
-  display_name: "QA Artifact Validation"
-  short_description: "QA report, XMind, manifest, index, and release validation"
-  default_prompt: "Use $qa-artifact-validation to validate all QA artifacts and block incomplete outputs."
+  display_name: "QA 测试产物校验"
+  short_description: "校验 QA 报告、XMind、Manifest、索引和发布就绪状态"
+  default_prompt: "使用 $qa-artifact-validation 校验全部 QA 产物，任一必需检查失败时阻止不完整交付。"

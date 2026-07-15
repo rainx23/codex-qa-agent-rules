@@ -1,35 +1,35 @@
 ---
 name: qa-requirement-analysis
-description: Analyze QA requirements from Zentao, OpenSpec, Markdown, screenshots, or pasted text; build evidence-backed facts, confirmation gates, risks, acceptance criteria, and regression scope. Use when the user asks for requirement analysis, a new requirement review, OpenSpec analysis, or needs a requirement baseline before Diff analysis.
+description: 用于分析禅道、OpenSpec、Markdown、截图或粘贴文本中的 QA 需求，建立基于证据的事实、待确认门禁、风险、验收标准和回归范围。适用于需求分析、新需求评审以及 Diff 分析前的需求基线建立。Requirement analysis, Zentao, OpenSpec, acceptance baseline, QA risk and regression scope.
 ---
 
-# QA Requirement Analysis
+# QA 需求分析（QA Requirement Analysis）
 
-Resolve the repository root as two levels above this SKILL.md.
+将本 Skill 的根目录解析为当前 `SKILL.md` 向上两级的仓库根目录。
 
-## Load rules
+## 规则加载
 
-1. Read ../../rules/core/evidence-rules.md completely.
-2. Read ../../rules/core/confirmation-gate.md completely.
-3. Read ../../rules/core/analysis-report-contract.md completely.
-4. Read ../../rules/core/traceability-rules.md completely.
-5. Read ../../rules/core/structured-model-contract.md completely.
-6. For Zentao or an equivalent sectioned requirement, read ../../rules/profiles/zentao.md and use the third-part product rules as the default acceptance basis.
-7. Read only the other ../../rules/profiles files matched by the requirement.
-8. If final cases are requested, hand the structured result to ../qa-testcase-design/SKILL.md.
+1. 完整读取 `../../rules/core/evidence-rules.md`。
+2. 完整读取 `../../rules/core/confirmation-gate.md`。
+3. 完整读取 `../../rules/core/analysis-report-contract.md`。
+4. 完整读取 `../../rules/core/traceability-rules.md`。
+5. 完整读取 `../../rules/core/structured-model-contract.md`。
+6. 对禅道或同类分段需求，读取 `../../rules/profiles/zentao.md`，并以第三部分产品规则作为默认验收依据。
+7. 仅读取与需求匹配的其他 `../../rules/profiles` 文件。
+8. 用户要求生成最终用例时，将结构化结果交给 `../qa-testcase-design/SKILL.md`。
 
-## Execute
+## 执行流程
 
-1. Confirm that every requested source is readable and state the analysis scope.
-2. For Zentao, distinguish the first-part business background from the third-part product implementation rules. Apply user-confirmed scope first; do not treat ordinary background-versus-plan differences as blocking conflicts.
-3. Extract the business goal, system or page entry, actor, main flow, field rules, data definitions, acceptance criteria, exception behavior, and stated exclusions.
-4. Build a fact table with confirmed, conflicting, inferred, and missing facts. Attach an allowed source label to every core conclusion.
-5. Apply the confirmation gate. Ask only blocking questions; retain non-blocking and suggested questions in the report without stopping known work.
-6. Build a Requirement Analysis Model that validates against ../../rules/schemas/requirement-analysis.schema.json. Derive the report and model from the same facts; verify criteria reference confirmed fact IDs and conflicts reference confirmation points.
-7. For requirement-only input, output the pure-requirement contract: analysis scope, requirement understanding, rule decomposition, evidence, pending questions, risks, test-point summary, and regression scope. Do not require a suspected-defect section.
-8. When Diff evidence exists, pass the Requirement Analysis Model to the Diff skill and switch the final report to the combined contract before designing cases.
-9. Before finalizing a requirement analysis, invoke `qa-knowledge-management` in `search` mode. Record active/candidate/conflicting/superseded hits and never treat historical knowledge as current confirmation.
-10. Populate data impact and validation decisions: `data_validation_required`, reason, recommended method, SQL generation status, metric definition gaps, and blocking questions. Indicator accuracy defaults to SQL unless the user supplies an explicit trusted reconciliation basis.
-11. If a complete DDL is pasted, parse it into a draft and compare the normalized hash with knowledge; if only a few fields are supplied, mark the scope partial and do not create or overwrite a complete table DDL.
+1. 确认每个需求来源均可读取，并说明本次分析范围。
+2. 分析禅道需求时，区分第一部分业务背景与第三部分产品实现规则；优先采用用户确认的范围，不把普通背景与计划差异直接判定为阻塞冲突。
+3. 提取业务目标、系统或页面入口、角色、主流程、字段规则、数据定义、验收标准、异常行为和明确排除项。
+4. 建立事实表，区分确定事实、冲突事实、推断事实和缺失事实；每个核心结论都必须附允许的证据来源标签。
+5. 应用确认门禁：只询问阻塞类待确认点；非阻塞类和建议确认类继续保留在报告中，不阻断已确定的分析。
+6. 建立并校验 `../../rules/schemas/requirement-analysis.schema.json` 约束的 Requirement Analysis Model。报告与模型必须来自同一组事实；验收标准引用已确认事实 ID，冲突事实引用对应确认点。
+7. 只有需求输入时，输出纯需求分析契约：分析范围、需求理解、规则拆解、证据、待确认点、风险、测试点摘要和回归范围；不强制要求疑似缺陷章节。
+8. 存在 Diff 证据时，将 Requirement Analysis Model 交给 Diff Skill，并在设计用例前切换到联合分析契约。
+9. 定稿前必须调用 `qa-knowledge-management` 的 `search` 模式。记录 active/candidate/conflicting/superseded 命中，历史知识不得直接视为当前确认事实。
+10. 填充数据影响与验证决策：`data_validation_required`、原因、推荐方式、SQL 生成状态、指标定义缺口和阻塞问题。指标准确性默认采用 SQL，除非用户提供明确且可信的对账依据。
+11. 用户粘贴完整 DDL 时，解析草稿并与知识库比较规范化哈希；只提供少量字段时标记为 partial，不创建或覆盖完整表 DDL。
 
-Do not render XMind here. Do not promote templates, code behavior, or inference into requirement facts.
+本 Skill 不渲染 XMind；不得把模板、代码行为或推断升级为需求事实。

@@ -1,4 +1,4 @@
 interface:
-  display_name: "QA Testcase Design"
-  short_description: "Minimal risk-driven XMind testcase design and deduplication"
-  default_prompt: "Use $qa-testcase-design to turn the confirmed analysis into a minimal effective XMind testcase set."
+  display_name: "QA 测试用例设计"
+  short_description: "基于风险设计最小有效 XMind 测试用例并执行去重与追踪"
+  default_prompt: "使用 $qa-testcase-design 将已确认的分析结果转换为最小有效的 XMind 测试用例集。"

@@ -14,7 +14,10 @@ def validate_skill(skill_dir: Path) -> list[str]:
     skill_file = skill_dir / "SKILL.md"
     if not skill_file.is_file():
         return ["缺少 SKILL.md"]
-    text = skill_file.read_text(encoding="utf-8-sig")
+    try:
+        text = skill_file.read_text(encoding="utf-8-sig")
+    except UnicodeDecodeError:
+        return ["SKILL.md 必须使用 UTF-8 编码"]
     match = re.match(r"^---\n(.*?)\n---\n", text, re.DOTALL)
     if not match:
         return ["缺少合法 YAML frontmatter"]
@@ -30,8 +33,13 @@ def validate_skill(skill_dir: Path) -> list[str]:
     name = values.get("name", "")
     if name != skill_dir.name or not re.fullmatch(r"[a-z0-9-]{1,64}", name):
         errors.append("name 必须与目录一致并使用 hyphen-case")
-    if not values.get("description"):
+    description = values.get("description", "")
+    if not description:
         errors.append("description 不能为空")
+    elif not re.search(r"[\u4e00-\u9fff]", description):
+        errors.append("description 必须以中文场景说明为主")
+    elif not re.search(r"[A-Za-z]", description):
+        errors.append("description 必须保留必要的英文触发关键词")
 
     references = set(re.findall(r"(?:\.\./){2}(?:rules|scripts)/[A-Za-z0-9_./-]+", text))
     for reference in sorted(references):
@@ -43,12 +51,21 @@ def validate_skill(skill_dir: Path) -> list[str]:
     if not agent_file.is_file():
         errors.append("缺少 agents/openai.yaml")
     else:
-        agent = agent_file.read_text(encoding="utf-8-sig")
+        try:
+            agent = agent_file.read_text(encoding="utf-8-sig")
+        except UnicodeDecodeError:
+            errors.append("openai.yaml 必须使用 UTF-8 编码")
+            agent = ""
         for field in ("display_name:", "short_description:", "default_prompt:"):
             if field not in agent:
                 errors.append(f"openai.yaml 缺少 {field}")
+        if "interface:" not in agent:
+            errors.append("openai.yaml 缺少 interface:")
         if "$" + name not in agent:
             errors.append("default_prompt 必须显式引用 Skill 名称")
+        for field in ("display_name:", "short_description:", "default_prompt:"):
+            if not re.search(rf"(?m)^\s*{re.escape(field)}\s*\S", agent):
+                errors.append(f"openai.yaml 的 {field[:-1]} 不能为空")
     return errors
 
 

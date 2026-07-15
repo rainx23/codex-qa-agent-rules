@@ -132,6 +132,10 @@ flowchart TD
 | [`qa-artifact-validation`](skills/qa-artifact-validation/SKILL.md) | 校验、转换、发布、索引 | 报告、Markdown、Workbook、Manifest 和索引校验 | 校验结果和最终产物 |
 | [`qa-knowledge-management`](skills/qa-knowledge-management/SKILL.md) | 历史知识、DDL、指标、数据验证、SQL/REC | 检索、比较、草稿、确认后持久化和离线校验 | 知识快照、数据验证模型、SQL/REC 计划 |
 
+### Skill 语言约定
+
+Skill 的工作流说明、章节标题、边界和用户可见提示词统一使用中文；`description` 采用“中文场景说明 + 精简英文触发关键词”，以兼顾中文使用体验和英文路由兼容性。Skill 名称、目录名、YAML/JSON 字段、Schema、枚举、固定 ID、命令参数和文件路径属于机器标识，继续保持英文且不得翻译。
+
 职责边界：需求 Skill 不直接渲染 XMind；Diff Skill 不凭代码行为定义业务预期；用例 Skill 不绕过待确认门禁；产物 Skill 不修改业务规则来让校验通过。
 
 ## 核心规则

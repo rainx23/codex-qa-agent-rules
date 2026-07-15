@@ -1,4 +1,4 @@
 interface:
-  display_name: "QA Requirement Analysis"
-  short_description: "Evidence-based requirement analysis and acceptance baseline"
-  default_prompt: "Use $qa-requirement-analysis to analyze this requirement and produce an evidence-backed acceptance baseline."
+  display_name: "QA 需求分析"
+  short_description: "基于证据建立需求事实、待确认点、验收基准、风险和回归范围"
+  default_prompt: "使用 $qa-requirement-analysis 分析当前需求，输出基于证据的需求事实、待确认点、验收基准、风险和回归范围。"
