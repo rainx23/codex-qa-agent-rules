@@ -1,5 +1,7 @@
 # 产物治理规则
 
+分析报告的三种模式和章节要求以 `rules/core/analysis-report-contract.md` 为唯一正文来源。
+
 ## 产物集合
 
 完整输出必须包含分析报告、XMind Markdown、经复验的 .xmind Workbook、Manifest 和 testcases/index.md 记录。新版本不得覆盖历史文件。
@@ -31,4 +33,3 @@ Manifest 至少记录：
 ## 索引
 
 索引保留历史记录，统一 UTF-8，表头固定。不同项目副本可保留各自历史行，但规则、脚本和表结构必须一致。乱码历史行应进行可逆编码修复，无法可靠修复时原样保留并在备注标记。
-

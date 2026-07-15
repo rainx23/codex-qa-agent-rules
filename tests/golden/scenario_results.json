@@ -4,6 +4,8 @@
   "combined_inconsistent": [],
   "evidence_insufficient": [],
   "finance_precision": [],
-  "personalization": []
+  "personalization": [],
+  "requirement_only": [],
+  "diff_only": [],
+  "requirement_diff_combined": []
 }
-

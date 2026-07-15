@@ -9,7 +9,7 @@ Resolve the repository root as two levels above this SKILL.md.
 
 ## Execute
 
-1. Run ../../scripts/validate_analysis_report.py for required sections, evidence, automatic combined-mode traceability, suspected-defect proof, and P0 mapping.
+1. Read ../../rules/core/analysis-report-contract.md, identify the explicit or automatic report mode, and run ../../scripts/validate_analysis_report.py with the corresponding `--mode` when needed. Validate mode-specific sections, evidence, suspected-defect proof, P0 mapping, and combined traceability.
 2. Run ../../scripts/validate_xmind_md.py for roots, fixed hierarchy, dimensions, numbering, syntax, structure, duplicate semantics, assertions, and unknown-rule leakage.
 3. Run ../../scripts/validate_testcase_quality.py with the analysis report when available to verify TC traceability.
 4. Run ../../scripts/md_to_xmind.py and re-read content.json, metadata.json, and manifest.json to compare root, TC count, and total node count.
@@ -19,4 +19,3 @@ Resolve the repository root as two levels above this SKILL.md.
 8. Mark validation failed and stop completion claims whenever any required check fails.
 
 Keep historical artifacts. Never repair or overwrite an existing artifact unless the operation is explicitly versioned or authorized.
-
