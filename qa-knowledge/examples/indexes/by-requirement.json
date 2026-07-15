@@ -1,0 +1,13 @@
+[
+  {
+    "id": "REQ-DEMO-001",
+    "kind": "requirement",
+    "keywords": [
+      "REQ-DEMO-001",
+      "demo"
+    ],
+    "status": "active_confirmed",
+    "version": "v1",
+    "path": "domains/demo/requirements/REQ-DEMO-001.json"
+  }
+]

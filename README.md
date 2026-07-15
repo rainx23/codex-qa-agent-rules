@@ -122,7 +122,7 @@ flowchart TD
 - **何时使用**：旧项目仍引用 `docs/codex`，或执行发布前验收时。
 - **主要目录**：[docs/codex](docs/codex/)。
 
-## 四个 QA Skills
+## 五个 QA Skills
 
 | Skill | 触发场景 | 主要职责 | 主要输出 |
 | --- | --- | --- | --- |
@@ -130,6 +130,7 @@ flowchart TD
 | [`qa-diff-impact-analysis`](skills/qa-diff-impact-analysis/SKILL.md) | Commit、Diff、分支、工作区变更 | 变更范围、调用链、需求覆盖、疑似风险和回归范围 | Diff 影响分析 |
 | [`qa-testcase-design`](skills/qa-testcase-design/SKILL.md) | 测试点、测试用例、XMind、P0/P1/P2 | 风险矩阵、去重、最小有效用例集和固定格式输出 | XMind Markdown |
 | [`qa-artifact-validation`](skills/qa-artifact-validation/SKILL.md) | 校验、转换、发布、索引 | 报告、Markdown、Workbook、Manifest 和索引校验 | 校验结果和最终产物 |
+| [`qa-knowledge-management`](skills/qa-knowledge-management/SKILL.md) | 历史知识、DDL、指标、数据验证、SQL/REC | 检索、比较、草稿、确认后持久化和离线校验 | 知识快照、数据验证模型、SQL/REC 计划 |
 
 职责边界：需求 Skill 不直接渲染 XMind；Diff Skill 不凭代码行为定义业务预期；用例 Skill 不绕过待确认门禁；产物 Skill 不修改业务规则来让校验通过。
 
@@ -145,6 +146,7 @@ flowchart TD
 | [testcase-quality-rules.md](rules/core/testcase-quality-rules.md) | 用例质量、去重、模糊断言和固定 XMind 格式 |
 | [traceability-rules.md](rules/core/traceability-rules.md) | 需求、Diff、风险和测试点追踪 |
 | [artifact-governance-rules.md](rules/core/artifact-governance-rules.md) | 报告、XMind、Manifest 和索引治理 |
+| [sql-coding-standards.md](rules/core/sql-coding-standards.md) | 验证 SQL 唯一编写规范和安全边界 |
 | [structured-model-contract.md](rules/core/structured-model-contract.md) | 四个 Skills 的结构化交接模型、生命周期和 Schema 生成规则 |
 
 四个 Skills 通过 Requirement Analysis、Diff Impact、Risk Coverage Matrix、Testcase Model 依次交接。Python 契约定义在 [qa_contracts.py](scripts/qa_contracts.py)，`rules/schemas/*.schema.json` 是生成产物，不是第二份手工维护的规则正文。
@@ -258,6 +260,29 @@ flowchart TD
 
 完整规则见 [testcase-quality-rules.md](rules/core/testcase-quality-rules.md)。当前格式不增加独立“前置条件”或“优先级”层级，前置条件融入入口、测试点或步骤，优先级保留在分析报告和追踪矩阵中；`entry_branches` 只表达同一 TC 的入口分支，不增加 TC 或 Manifest 计数。
 
+## 历史业务知识与数据验证
+
+需求、Diff、用例和验证 SQL 生成前，`qa-knowledge-management` 会按业务域、表、字段、逻辑、指标和需求 ID 检索命中的 active 知识。公共规则仓库只提供脱敏的 [`qa-knowledge/examples`](qa-knowledge/examples)；集成项目把真实知识放在项目自己的 `qa-knowledge/`，不会把全部历史文件一次性加载。
+
+用户可以直接在 Chat/Codex 粘贴一张或多张完整 `create table` DDL，也可以只提供少量字段。`parse_chat_ddl.py` 只做离线识别、拆分、哈希和结构化草稿：完整 DDL 进入 `current.sql`/`metadata.json`，局部字段标记 `schema_scope=partial`，不补齐字段、不覆盖 complete DDL。相同规范化哈希只增加引用；结构变化由 `compare_ddl.py` 输出差异，旧版本移入 history，正式持久化必须经过用户确认。
+
+数据影响结论使用 `required`、`optional`、`not_required`、`blocked`，方式使用 `sql`、`cross_source_reconciliation`、`mixed`、`not_applicable`、`blocked`。新增字段、指标/口径、数据源、过滤、关联、聚合、时间、权限或历史兼容变化默认需要数据验证；纯样式和文案可标记 `not_required`。指标准确性默认必须生成 SQL，因为两个页面可能共享同一错误数据源。只有用户或明确验收文档提供基准入口、对比字段、过滤、时间和容忍度时，才允许 `cross_source_reconciliation`；系统不会根据入口名称或代码自行猜测 B/C 可以对数。
+
+验证 SQL 独立保存并使用 `SQLV001` 等 ID，直接对数方案使用 `REC001` 等 ID，XMind 只引用 ID，不嵌入大段 SQL。SQL 最多到 `generated/reviewed`，没有用户执行结果不得标记 `executed/passed/failed`。唯一 SQL 规范见 [`sql-coding-standards.md`](rules/core/sql-coding-standards.md)，静态检查禁止数据库连接、SQL 执行、DML、危险 DDL 和凭据。
+
+常用命令：
+
+```bash
+python scripts/parse_chat_ddl.py pasted.txt -o draft.json
+python scripts/compare_ddl.py old.sql new.sql
+python scripts/validate_knowledge.py qa-knowledge/examples
+python scripts/build_knowledge_index.py qa-knowledge/examples --check
+python scripts/search_knowledge.py qa-knowledge/examples --table demo.orders
+python scripts/validate_data_validation.py path/to/data-validation-model.json
+python scripts/validate_sql_style.py path/to/validation_sql.sql --strict
+python scripts/validate_sql_artifact.py path/to/validation-sql-manifest.json
+```
+
 ## 测试产物
 
 | 产物 | 用途 |
@@ -265,6 +290,7 @@ flowchart TD
 | 分析报告 | 记录需求、Diff、证据、待确认、风险、测试点和回归范围 |
 | XMind Markdown | 可审阅、可 Diff、可版本管理的主要用例源文件 |
 | `.xmind` Workbook | Markdown 校验通过后生成、可由 XMind 打开的交付文件 |
+| 数据验证模型 / SQL / REC 计划 | 独立记录数据验证决策、只读 SQL 和直接对数关系，不嵌入 XMind |
 | Manifest | 记录来源哈希、规则版本、时区、待确认/P0 计数、安全路径、状态和版本关系 |
 | `testcases/index.md` | 分离管理校验状态、产物关系和旧业务状态；旧行显式标记“未按当前规则校验/未迁移” |
 

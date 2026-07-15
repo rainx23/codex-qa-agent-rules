@@ -1,0 +1,16 @@
+{
+  "data_validation_required": "required",
+  "reason": "指标准确性验证需要确认计算、过滤和汇总口径",
+  "validation_method": "sql",
+  "sql_generation_status": "ready",
+  "schema_sources": ["demo_orders"],
+  "metric_ids": ["METRIC-DEMO-ORDER-AMOUNT"],
+  "validation_queries": [
+    {"sql_id": "SQLV001", "purpose": "验证订单金额汇总", "status": "generated"}
+  ],
+  "reconciliation_plans": [],
+  "blocking_questions": [],
+  "requirement_ids": ["REQ-DEMO-001"],
+  "risk_ids": ["RISK-DEMO-001"],
+  "tc_ids": ["TC001"]
+}

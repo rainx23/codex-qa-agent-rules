@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "reconciliation_plans": [
+    {
+      "reconciliation_id": "REC001",
+      "baseline_entry": "订单明细入口",
+      "target_entry": "订单汇总入口",
+      "comparison_dimensions": ["order_id", "trade_date"],
+      "comparison_fields": ["amount"],
+      "filters": ["status = 已确认"],
+      "time_range": "同一交易日",
+      "tolerance": "金额差异为 0",
+      "requirement_ids": ["REQ-DEMO-002"],
+      "risk_ids": ["RISK-DEMO-002"],
+      "tc_ids": ["TC002"],
+      "evidence_sources": ["REQ-DEMO-002"],
+      "status": "planned"
+    }
+  ]
+}

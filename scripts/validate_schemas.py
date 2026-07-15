@@ -29,6 +29,7 @@ def main() -> int:
         "diff": "diff-impact.json",
         "risk": "risk-coverage-matrix.json",
         "testcase": "testcase-model.json",
+        "data_validation": "data-validation-valid.json",
     }
     models: dict[str, dict] = {}
     for kind, name in fixture_names.items():

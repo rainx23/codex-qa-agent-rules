@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Generated from scripts/qa_contracts.py; do not edit manually.",
+  "x-rule-version": "2.3.0",
+  "title": "Validation SQL Artifact Model",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "sql_items"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "sql_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sql_id",
+          "purpose",
+          "requirement_ids",
+          "risk_ids",
+          "tc_ids",
+          "dialect",
+          "tables",
+          "fields",
+          "parameters",
+          "metric_ids",
+          "expected_assertion",
+          "execution_status",
+          "sql_path",
+          "evidence_sources"
+        ],
+        "properties": {
+          "sql_id": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^SQLV\\d{3}$"
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 1
+          },
+          "requirement_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "risk_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "tc_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^TC\\d{3}$"
+            },
+            "uniqueItems": true
+          },
+          "dialect": {
+            "type": "string",
+            "minLength": 1
+          },
+          "tables": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "parameters": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "metric_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "expected_assertion": {
+            "type": "string",
+            "minLength": 1
+          },
+          "execution_status": {
+            "enum": [
+              "planned",
+              "generated",
+              "reviewed",
+              "executed",
+              "passed",
+              "failed",
+              "blocked"
+            ]
+          },
+          "sql_path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence_sources": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "execution_evidence": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "minItems": 1
+    }
+  }
+}

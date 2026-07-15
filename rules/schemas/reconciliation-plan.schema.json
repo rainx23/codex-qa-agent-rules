@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Generated from scripts/qa_contracts.py; do not edit manually.",
+  "x-rule-version": "2.3.0",
+  "title": "Reconciliation Plan Model",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "reconciliation_plans"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "reconciliation_plans": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reconciliation_id",
+          "baseline_entry",
+          "target_entry",
+          "comparison_dimensions",
+          "comparison_fields",
+          "filters",
+          "time_range",
+          "tolerance",
+          "requirement_ids",
+          "risk_ids",
+          "tc_ids",
+          "evidence_sources",
+          "status"
+        ],
+        "properties": {
+          "reconciliation_id": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^REC\\d{3}$"
+          },
+          "baseline_entry": {
+            "type": "string",
+            "minLength": 1
+          },
+          "target_entry": {
+            "type": "string",
+            "minLength": 1
+          },
+          "comparison_dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "comparison_fields": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "filters": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "time_range": {
+            "type": "string",
+            "minLength": 1
+          },
+          "tolerance": {
+            "type": "string",
+            "minLength": 1
+          },
+          "requirement_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "risk_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "tc_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^TC\\d{3}$"
+            },
+            "uniqueItems": true
+          },
+          "evidence_sources": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "status": {
+            "enum": [
+              "planned",
+              "generated",
+              "reviewed",
+              "executed",
+              "passed",
+              "failed",
+              "blocked"
+            ]
+          }
+        }
+      },
+      "minItems": 1
+    }
+  }
+}

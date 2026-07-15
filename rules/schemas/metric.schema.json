@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Generated from scripts/qa_contracts.py; do not edit manually.",
+  "x-rule-version": "2.3.0",
+  "title": "Metric Model",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "metric_id",
+    "metric_name",
+    "business_definition",
+    "numerator",
+    "denominator",
+    "calculation_order",
+    "multiplier",
+    "dimensions",
+    "data_sources",
+    "join_keys",
+    "filters",
+    "deduplication_key",
+    "time_range",
+    "timezone_or_trade_calendar",
+    "null_rule",
+    "zero_denominator_rule",
+    "precision",
+    "rounding_position",
+    "aggregation_method",
+    "detail_summary_relation",
+    "formal_simulated_scope",
+    "evidence_sources",
+    "status"
+  ],
+  "properties": {
+    "metric_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "metric_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "business_definition": {
+      "type": "string",
+      "minLength": 1
+    },
+    "numerator": {
+      "type": "string",
+      "minLength": 1
+    },
+    "denominator": {
+      "type": "string",
+      "minLength": 1
+    },
+    "calculation_order": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "multiplier": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dimensions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "data_sources": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "join_keys": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "filters": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "deduplication_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "time_range": {
+      "type": "string",
+      "minLength": 1
+    },
+    "timezone_or_trade_calendar": {
+      "type": "string",
+      "minLength": 1
+    },
+    "null_rule": {
+      "type": "string",
+      "minLength": 1
+    },
+    "zero_denominator_rule": {
+      "type": "string",
+      "minLength": 1
+    },
+    "precision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rounding_position": {
+      "type": "string",
+      "minLength": 1
+    },
+    "aggregation_method": {
+      "type": "string",
+      "minLength": 1
+    },
+    "detail_summary_relation": {
+      "type": "string",
+      "minLength": 1
+    },
+    "formal_simulated_scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_sources": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "status": {
+      "enum": [
+        "active_confirmed",
+        "candidate",
+        "conflicting",
+        "superseded",
+        "deprecated",
+        "missing"
+      ]
+    }
+  }
+}

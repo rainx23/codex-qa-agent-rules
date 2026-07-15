@@ -9,7 +9,7 @@
   "source_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
   "requirement_id": "REQ-EXAMPLE",
   "commit_range": null,
-  "rule_version": "2.2.0",
+  "rule_version": "2.3.0",
   "generated_at": "2026-07-15 00:00:00",
   "generated_timezone": "Asia/Shanghai",
   "report_mode": "requirement",

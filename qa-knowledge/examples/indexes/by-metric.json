@@ -1,0 +1,13 @@
+[
+  {
+    "id": "METRIC-DEMO-ORDER-AMOUNT",
+    "kind": "metric",
+    "keywords": [
+      "METRIC-DEMO-ORDER-AMOUNT",
+      "订单金额"
+    ],
+    "status": "active_confirmed",
+    "version": null,
+    "path": "domains/demo/metrics/order_amount/current.json"
+  }
+]

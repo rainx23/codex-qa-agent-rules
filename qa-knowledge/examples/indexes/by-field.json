@@ -1,0 +1,26 @@
+[
+  {
+    "id": "amount",
+    "table_id": "demo_orders",
+    "status": "active_confirmed",
+    "path": "domains/demo/tables/demo.orders/metadata.json"
+  },
+  {
+    "id": "order_id",
+    "table_id": "demo_orders",
+    "status": "active_confirmed",
+    "path": "domains/demo/tables/demo.orders/metadata.json"
+  },
+  {
+    "id": "status",
+    "table_id": "demo_orders",
+    "status": "active_confirmed",
+    "path": "domains/demo/tables/demo.orders/metadata.json"
+  },
+  {
+    "id": "trade_date",
+    "table_id": "demo_orders",
+    "status": "active_confirmed",
+    "path": "domains/demo/tables/demo.orders/metadata.json"
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "data_validation_required": "required",
+  "reason": "指标准确性验证仅通过页面对页面比对",
+  "validation_method": "cross_source_reconciliation",
+  "sql_generation_status": "not_required",
+  "schema_sources": [],
+  "metric_ids": ["METRIC-DEMO-ORDER-AMOUNT"],
+  "validation_queries": [],
+  "reconciliation_plans": [],
+  "blocking_questions": [],
+  "requirement_ids": ["REQ-DEMO-004"],
+  "risk_ids": ["RISK-DEMO-004"],
+  "tc_ids": ["TC004"]
+}

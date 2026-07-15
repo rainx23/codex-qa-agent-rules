@@ -1,0 +1,26 @@
+{
+  "table_id": "demo_orders",
+  "domain": "demo",
+  "database": "demo",
+  "table_name": "orders",
+  "full_name": "demo.orders",
+  "dialect": "doris/starrocks",
+  "schema_scope": "complete",
+  "current_ddl_path": "current.sql",
+  "raw_hash": "sha256:1277d0a542666d9b0cd64217456df2ebc567d7d2535af35f3852a4c0fe03ab03",
+  "normalized_hash": "sha256:dbf1d000e66e3aa6527c310f1db9b0467dd39b133116293f81e9f5a53f2c1754",
+  "fields": [
+    {"name": "order_id", "type": "bigint", "nullable": false, "default": null, "comment": "脱敏订单标识", "ordinal": 1},
+    {"name": "trade_date", "type": "date", "nullable": false, "default": null, "comment": null, "ordinal": 2},
+    {"name": "amount", "type": "decimal(18, 2)", "nullable": true, "default": null, "comment": null, "ordinal": 3},
+    {"name": "status", "type": "varchar(16)", "nullable": true, "default": null, "comment": null, "ordinal": 4}
+  ],
+  "keys": ["primary key (order_id)"],
+  "partitions": [],
+  "indexes": ["distributed by hash(order_id) buckets 3"],
+  "engine_properties": {"engine": "olap", "replication_num": "1"},
+  "status": "active_confirmed",
+  "source_type": "sanitized_example",
+  "source_requirement_ids": ["REQ-DEMO-001"],
+  "last_verified_at": "2026-07-15 00:00:00"
+}

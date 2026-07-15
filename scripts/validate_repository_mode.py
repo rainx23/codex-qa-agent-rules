@@ -12,7 +12,7 @@ from pathlib import Path
 
 MIRRORED_ENTRIES = (
     "AGENTS.md", "README.md", "RULE_VERSION", ".github", "docs", "rules", "skills", "scripts", "tests",
-    "testcases/manifest.example.json",
+    "testcases/manifest.example.json", "qa-knowledge",
 )
 
 

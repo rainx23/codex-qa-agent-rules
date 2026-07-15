@@ -1,0 +1,50 @@
+[
+  {
+    "id": "LOGIC-DEMO-ORDER-AMOUNT",
+    "kind": "logic",
+    "keywords": [
+      "LOGIC-DEMO-ORDER-AMOUNT",
+      "demo",
+      "订单金额汇总"
+    ],
+    "status": "active_confirmed",
+    "version": "v1",
+    "path": "domains/demo/logic/order_amount/current.json"
+  },
+  {
+    "id": "METRIC-DEMO-ORDER-AMOUNT",
+    "kind": "metric",
+    "keywords": [
+      "METRIC-DEMO-ORDER-AMOUNT",
+      "订单金额"
+    ],
+    "status": "active_confirmed",
+    "version": null,
+    "path": "domains/demo/metrics/order_amount/current.json"
+  },
+  {
+    "id": "REQ-DEMO-001",
+    "kind": "requirement",
+    "keywords": [
+      "REQ-DEMO-001",
+      "demo"
+    ],
+    "status": "active_confirmed",
+    "version": "v1",
+    "path": "domains/demo/requirements/REQ-DEMO-001.json"
+  },
+  {
+    "id": "demo_orders",
+    "kind": "table",
+    "keywords": [
+      "REQ-DEMO-001",
+      "demo",
+      "demo.orders",
+      "demo_orders",
+      "orders"
+    ],
+    "status": "active_confirmed",
+    "version": null,
+    "path": "domains/demo/tables/demo.orders/metadata.json"
+  }
+]

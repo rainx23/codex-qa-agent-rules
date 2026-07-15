@@ -16,6 +16,7 @@ Manifest 至少记录：
 - report_path、分析模型路径、风险矩阵路径、Testcase Model 路径、xmind_md_path、xmind_path。
 - case_count、明确表示 P0 用例数的 p0_count/p0_case_count、p0_risk_count。
 - `case_count`、`p0_count/p0_case_count` 按 TC 统计；同一 TC 下的 `entry_branches` 只用于表达入口分支，不得被计为额外 TC。
+- 可选记录 `knowledge_snapshot`、`data_validation_model`、`validation_sql`、`reconciliation_plan`、`sql_count`、`reconciliation_count`、`sql_status`、DDL/逻辑/指标版本。SQL 和 REC 数量按 ID 统计，未有用户执行结果不得标记 passed。
 - pending_count 及 blocking/nonblocking/suggested 三类分项。
 - validation_status、relation、supersedes、failure_reason 和 pending_reason。
 

@@ -23,6 +23,11 @@
        python scripts/validate_rule_version.py
        python scripts/validate_repository_mode.py
        python scripts/validate_ci_workflow.py
+       python scripts/validate_knowledge.py qa-knowledge/examples
+       python scripts/build_knowledge_index.py qa-knowledge/examples --check
+       python scripts/validate_sql_style.py tests/fixtures/sql/valid_validation_sql.sql --strict
+       python scripts/validate_data_validation.py tests/fixtures/models/data-validation-valid.json
+       python scripts/validate_sql_artifact.py tests/fixtures/artifacts/validation-sql-manifest.json
 
 5. Manifest 示例和索引编码：
 
@@ -62,5 +67,9 @@
 - 真实历史 XMind Markdown 原样识别，迁移样例合并重复、移除模糊预期且不降低 P0 业务覆盖。
 - 多入口有效分支、无公共入口多入口、单入口多余层级、混合直接步骤、单分支、占位入口名和拼接入口步骤；普通组合操作不得被误报。
 - 多入口转换后 TC 数保持不变，分支顺序和 golden topic 顺序保持不变，Testcase Model 与 XMind 的分支数量、顺序、名称、步骤和预期一致。
+- 单/多张完整 DDL 拆分、规范化哈希去重、格式变化、字段/类型/键/分区/索引变化、partial 不覆盖 complete、解析 warning、敏感信息拒绝。
+- 知识按表/字段/逻辑/指标检索、默认 active、历史按需加载、active 重复、supersedes 循环、索引漂移和同 DDL 重复引用。
+- 数据验证 required/optional/not_required/blocked、指标默认 SQL、明确 REC、禁止猜测对数、mixed、SQL 信息不足和 SQL/REC/TC 追踪失败。
+- SQL 星号头、author/北京时间秒、关键字小写、逗号前置、CTE v_、只读安全、无 select */limit/DML/凭据、StarRocks lateral json_each 及 strict warning。
 
 任一必需步骤失败时不得发布或宣称完整重构完成。

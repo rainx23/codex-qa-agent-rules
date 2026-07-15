@@ -1,0 +1,210 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Generated from scripts/qa_contracts.py; do not edit manually.",
+  "x-rule-version": "2.3.0",
+  "title": "Knowledge Table Model",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "table_id",
+    "domain",
+    "database",
+    "table_name",
+    "full_name",
+    "dialect",
+    "schema_scope",
+    "current_ddl_path",
+    "raw_hash",
+    "normalized_hash",
+    "fields",
+    "keys",
+    "partitions",
+    "indexes",
+    "engine_properties",
+    "status",
+    "source_type",
+    "source_requirement_ids",
+    "last_verified_at"
+  ],
+  "properties": {
+    "table_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "domain": {
+      "type": "string",
+      "minLength": 1
+    },
+    "database": {
+      "type": "string",
+      "minLength": 1
+    },
+    "table_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "full_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dialect": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schema_scope": {
+      "enum": [
+        "complete",
+        "partial"
+      ]
+    },
+    "current_ddl_path": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "raw_ddl": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "normalized_ddl": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "raw_hash": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^sha256:[0-9a-fA-F]{64}$"
+    },
+    "normalized_hash": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^sha256:[0-9a-fA-F]{64}$"
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "type",
+          "nullable",
+          "default",
+          "comment",
+          "ordinal"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "type": "string",
+            "minLength": 1
+          },
+          "nullable": {
+            "type": "boolean"
+          },
+          "default": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "comment": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ordinal": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    },
+    "keys": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "partitions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "indexes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "engine_properties": {
+      "type": "object"
+    },
+    "status": {
+      "enum": [
+        "active_confirmed",
+        "candidate",
+        "conflicting",
+        "superseded",
+        "deprecated",
+        "missing"
+      ]
+    },
+    "source_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_requirement_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "last_verified_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "related_logic_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "related_metric_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    }
+  }
+}

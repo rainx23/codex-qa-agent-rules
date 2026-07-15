@@ -12,7 +12,7 @@ from typing import Any
 
 from heading_utils import parse_markdown_sections
 from qa_contracts import (
-    ALLOWED_TIMEZONES, MODEL_VALIDATORS, RELATIONS, SCHEMA_VERSION, VALIDATION_STATUSES,
+    ALLOWED_TIMEZONES, MODEL_VALIDATORS, RELATIONS, SCHEMA_VERSION, VALIDATION_STATUSES, SQL_EXECUTION_STATUSES,
     ZERO_HASH, load_json, manifest_schema, read_rule_version, stable_source_hash, valid_generated_at,
     validate_model_links, validate_risk_matrix, validate_testcase_model,
     validate_schema_shape,
@@ -179,10 +179,14 @@ def validate_manifest_data(data: dict[str, Any], manifest_path: Path) -> list[st
         errors.append(f"validation_status 非法：{data.get('validation_status')}")
     if data.get("relation") not in RELATIONS:
         errors.append(f"relation 非法：{data.get('relation')}")
-    for key in ("case_count", "p0_count", "p0_risk_count", "p0_case_count", "pending_count", "blocking_pending_count", "nonblocking_pending_count", "suggested_pending_count"):
+    for key in ("case_count", "p0_count", "p0_risk_count", "p0_case_count", "pending_count", "blocking_pending_count", "nonblocking_pending_count", "suggested_pending_count", "sql_count", "reconciliation_count"):
         value = data.get(key)
-        if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+        if value is not None and (not isinstance(value, int) or isinstance(value, bool) or value < 0):
             errors.append(f"{key} 必须是非负整数")
+    if data.get("sql_status") is not None and data.get("sql_status") not in SQL_EXECUTION_STATUSES:
+        errors.append(f"sql_status 非法：{data.get('sql_status')}")
+    if data.get("sql_status") in {"executed", "passed", "failed"} and not data.get("execution_evidence"):
+        errors.append("没有用户执行结果时，sql_status 不得标记 executed/passed/failed")
     if data.get("p0_count") != data.get("p0_case_count"):
         errors.append("兼容字段 p0_count 必须等于 p0_case_count")
     pending_sum = sum(data.get(key, 0) for key in ("blocking_pending_count", "nonblocking_pending_count", "suggested_pending_count") if isinstance(data.get(key), int))
@@ -235,6 +239,15 @@ def validate_manifest_data(data: dict[str, Any], manifest_path: Path) -> list[st
             errors.append(f"{key} 路径不存在：{data.get(key)}")
         else:
             paths[key] = path
+    optional_paths = {"knowledge_snapshot": False, "data_validation_model": True, "validation_sql": True, "reconciliation_plan": True}
+    for key, artifact in optional_paths.items():
+        if data.get(key) is None:
+            continue
+        path, path_error = resolve_safe_path(data.get(key), manifest_path, artifact=artifact)
+        if path_error:
+            errors.append(f"{key}: {path_error}")
+        elif path is None or not path.is_file():
+            errors.append(f"{key} 路径不存在：{data.get(key)}")
     analysis_paths: list[Path] = []
     if not isinstance(data.get("analysis_model_paths"), list) or not data["analysis_model_paths"]:
         errors.append("passed 状态必须至少包含一个结构化分析模型")

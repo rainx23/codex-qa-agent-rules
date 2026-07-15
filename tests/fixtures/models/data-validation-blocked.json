@@ -1,0 +1,14 @@
+{
+  "data_validation_required": "blocked",
+  "reason": "缺少确认的数据源、关联键和指标口径",
+  "validation_method": "blocked",
+  "sql_generation_status": "blocked",
+  "schema_sources": [],
+  "metric_ids": [],
+  "validation_queries": [],
+  "reconciliation_plans": [],
+  "blocking_questions": ["请确认数据源、字段、关联键和时间口径"],
+  "requirement_ids": ["REQ-DEMO-003"],
+  "risk_ids": ["RISK-DEMO-003"],
+  "tc_ids": ["TC003"]
+}

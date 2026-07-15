@@ -1,0 +1,14 @@
+{
+  "requirement_id": "REQ-DEMO-001",
+  "title": "脱敏订单金额查询",
+  "domain": "demo",
+  "status": "active_confirmed",
+  "related_tables": ["demo_orders"],
+  "used_fields": ["demo.orders.order_id", "demo.orders.trade_date", "demo.orders.amount", "demo.orders.status"],
+  "related_logic_ids": ["LOGIC-DEMO-ORDER-AMOUNT"],
+  "related_metric_ids": ["METRIC-DEMO-ORDER-AMOUNT"],
+  "related_requirements": [],
+  "changed_items": [],
+  "report_path": null,
+  "effective_version": "v1"
+}

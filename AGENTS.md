@@ -20,6 +20,8 @@
 - diff、commit、变更评审或影响分析：执行 skills/qa-diff-impact-analysis/SKILL.md。
 - 测试点、测试用例、XMind Markdown、P0/P1/P2：执行 skills/qa-testcase-design/SKILL.md。
 - 产物验收、格式校验、转换、索引或发布前检查：执行 skills/qa-artifact-validation/SKILL.md。
+- 历史业务知识、DDL、逻辑/指标复用或数据验证决策：执行 skills/qa-knowledge-management/SKILL.md。
+- 验证 SQL 生成、静态规范或 SQL/REC 产物校验：同时执行 rules/core/sql-coding-standards.md 和 qa-artifact-validation 的 SQL 门禁。
 - 同时存在需求和 Diff：先需求分析，再 Diff 影响分析，最后用例设计与产物校验。
 - 禅道需求额外加载 rules/profiles/zentao.md，默认以第三部分产品实现方案和规则为确定性验收依据；用户本轮指定范围优先。
 - 咨询、评审、给建议或先分析不要改：只输出问题、风险和建议，不生成最终用例，除非用户明确要求。
@@ -45,3 +47,5 @@
 - 每次生成报告或用例后按 rules/core/artifact-governance-rules.md 校验 Manifest 并更新索引。
 - 规则相关同名文件在根目录与 codex-qa-agent-rules 中同步；历史索引行可不同，但编码和表结构必须一致。
 - 发布前完整执行 skills/qa-artifact-validation/SKILL.md 和 docs/codex/rule-validation-checklist.md。
+- 严禁新增数据库连接、数据库探测或 SQL 自动执行；SQL 只能生成和静态校验，没有用户执行结果不得标记 executed/passed/failed。
+- 公共规则仓库只保存脱敏 `qa-knowledge/examples`；真实 DDL、指标和历史需求应保存在业务项目 `qa-knowledge/`，不得把推断自动持久化。

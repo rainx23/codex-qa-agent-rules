@@ -1,0 +1,14 @@
+[
+  {
+    "id": "LOGIC-DEMO-ORDER-AMOUNT",
+    "kind": "logic",
+    "keywords": [
+      "LOGIC-DEMO-ORDER-AMOUNT",
+      "demo",
+      "订单金额汇总"
+    ],
+    "status": "active_confirmed",
+    "version": "v1",
+    "path": "domains/demo/logic/order_amount/current.json"
+  }
+]

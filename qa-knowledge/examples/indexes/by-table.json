@@ -1,0 +1,16 @@
+[
+  {
+    "id": "demo_orders",
+    "kind": "table",
+    "keywords": [
+      "REQ-DEMO-001",
+      "demo",
+      "demo.orders",
+      "demo_orders",
+      "orders"
+    ],
+    "status": "active_confirmed",
+    "version": null,
+    "path": "domains/demo/tables/demo.orders/metadata.json"
+  }
+]

@@ -39,5 +39,10 @@
     {"criterion_id": "REQ-POINT-002", "statement": "翻页保留筛选和排序", "fact_ids": ["FACT-002"], "risk_ids": ["RISK-002"]}
   ],
   "regression_scope": ["核心回归", "关联回归"],
-  "matched_profiles": ["web-ui", "api"]
+  "matched_profiles": ["web-ui", "api"],
+  "data_validation_required": "optional",
+  "data_validation_reason": "当前需求主要验证查询和分页行为，数据准确性作为关联回归关注",
+  "recommended_validation_method": "sql",
+  "sql_generation_status": "partial",
+  "validation_missing_information": ["完整指标口径和执行参数"]
 }

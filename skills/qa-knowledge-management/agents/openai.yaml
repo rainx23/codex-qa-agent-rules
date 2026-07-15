@@ -1,0 +1,3 @@
+display_name: QA Knowledge Management
+short_description: Manage historical QA knowledge, data validation decisions, and read-only SQL plans.
+default_prompt: Use $qa-knowledge-management to search or validate sanitized knowledge, compare DDL, decide data validation, and govern SQL/REC artifacts without database access.

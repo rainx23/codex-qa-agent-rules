@@ -12,6 +12,11 @@ on:
       - "scripts/**"
       - "tests/**"
       - "testcases/manifest.example.json"
+      - "testcases/index.md"
+      - "testcases/**/*.json"
+      - "testcases/**/*.md"
+      - "testcases/**/*.sql"
+      - "qa-knowledge/**"
       - "docs/codex/**"
       - ".github/workflows/**"
   pull_request:
@@ -25,6 +30,11 @@ on:
       - "scripts/**"
       - "tests/**"
       - "testcases/manifest.example.json"
+      - "testcases/index.md"
+      - "testcases/**/*.json"
+      - "testcases/**/*.md"
+      - "testcases/**/*.sql"
+      - "qa-knowledge/**"
       - "docs/codex/**"
       - ".github/workflows/**"
   workflow_dispatch:
@@ -55,6 +65,13 @@ jobs:
           python scripts/validate_rule_version.py
       - name: Validate repository mode
         run: python scripts/validate_repository_mode.py
+      - name: Validate knowledge, data validation and SQL artifacts
+        run: |
+          python scripts/validate_knowledge.py qa-knowledge/examples
+          python scripts/build_knowledge_index.py qa-knowledge/examples --check
+          python scripts/validate_data_validation.py tests/fixtures/models/data-validation-valid.json
+          python scripts/validate_sql_style.py tests/fixtures/sql/valid_validation_sql.sql --strict
+          python scripts/validate_sql_artifact.py tests/fixtures/artifacts/validation-sql-manifest.json
       - name: Run behavior tests
         run: python -m unittest discover -s tests -v
       - name: Validate Manifest and index encoding

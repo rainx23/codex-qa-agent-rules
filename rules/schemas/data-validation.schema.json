@@ -1,0 +1,196 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Generated from scripts/qa_contracts.py; do not edit manually.",
+  "x-rule-version": "2.3.0",
+  "title": "Data Validation Model",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "data_validation_required",
+    "reason",
+    "validation_method",
+    "sql_generation_status",
+    "schema_sources",
+    "metric_ids",
+    "validation_queries",
+    "reconciliation_plans",
+    "blocking_questions"
+  ],
+  "properties": {
+    "data_validation_required": {
+      "enum": [
+        "required",
+        "optional",
+        "not_required",
+        "blocked"
+      ]
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "validation_method": {
+      "enum": [
+        "sql",
+        "cross_source_reconciliation",
+        "mixed",
+        "not_applicable",
+        "blocked"
+      ]
+    },
+    "sql_generation_status": {
+      "enum": [
+        "ready",
+        "partial",
+        "blocked",
+        "not_required"
+      ]
+    },
+    "schema_sources": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "metric_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "validation_queries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sql_id",
+          "purpose",
+          "status"
+        ],
+        "properties": {
+          "sql_id": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^SQLV\\d{3}$"
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": [
+              "planned",
+              "generated",
+              "reviewed",
+              "executed",
+              "passed",
+              "failed",
+              "blocked"
+            ]
+          },
+          "evidence_sources": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "execution_evidence": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "reconciliation_plans": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reconciliation_id",
+          "purpose",
+          "status"
+        ],
+        "properties": {
+          "reconciliation_id": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^REC\\d{3}$"
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": [
+              "planned",
+              "generated",
+              "reviewed",
+              "executed",
+              "passed",
+              "failed",
+              "blocked"
+            ]
+          },
+          "evidence_sources": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          }
+        }
+      }
+    },
+    "blocking_questions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "requirement_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "risk_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "tc_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "pattern": "^TC\\d{3}$"
+      },
+      "uniqueItems": true
+    }
+  }
+}

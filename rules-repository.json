@@ -1,3 +1,4 @@
 {
-  "repository_mode": "standalone"
+  "repository_mode": "standalone",
+  "knowledge_path": "qa-knowledge/examples"
 }

@@ -29,5 +29,6 @@ Resolve the repository root as two levels above this SKILL.md.
    - Require at least two named peer entrances, independent branch steps and expectations, no mixed direct steps, and no joined text such as “分别打开/依次进入多个入口”.
 7. Run ../../scripts/validate_xmind_md.py and ../../scripts/validate_testcase_quality.py with the report, risk matrix and testcase model. Treat explicit duplicates as errors and review warnings without silently deleting cases.
 8. Convert only after validation passes, then hand the models and rendered artifacts to ../qa-artifact-validation/SKILL.md.
+9. Consume the Knowledge Search result and Data Validation Model before selecting risks. Separate UI behavior, business data assertions, SQL validation, reconciliation and presentation checks; reference `SQLV###` or `REC###` instead of embedding large SQL in XMind.
 
 For changes to existing logic, focus on changed conditions, inverse paths, combinations, and boundaries. Do not pad the set with unchanged entry, button, or display smoke cases.

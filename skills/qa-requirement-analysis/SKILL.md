@@ -28,5 +28,8 @@ Resolve the repository root as two levels above this SKILL.md.
 6. Build a Requirement Analysis Model that validates against ../../rules/schemas/requirement-analysis.schema.json. Derive the report and model from the same facts; verify criteria reference confirmed fact IDs and conflicts reference confirmation points.
 7. For requirement-only input, output the pure-requirement contract: analysis scope, requirement understanding, rule decomposition, evidence, pending questions, risks, test-point summary, and regression scope. Do not require a suspected-defect section.
 8. When Diff evidence exists, pass the Requirement Analysis Model to the Diff skill and switch the final report to the combined contract before designing cases.
+9. Before finalizing a requirement analysis, invoke `qa-knowledge-management` in `search` mode. Record active/candidate/conflicting/superseded hits and never treat historical knowledge as current confirmation.
+10. Populate data impact and validation decisions: `data_validation_required`, reason, recommended method, SQL generation status, metric definition gaps, and blocking questions. Indicator accuracy defaults to SQL unless the user supplies an explicit trusted reconciliation basis.
+11. If a complete DDL is pasted, parse it into a draft and compare the normalized hash with knowledge; if only a few fields are supplied, mark the scope partial and do not create or overwrite a complete table DDL.
 
 Do not render XMind here. Do not promote templates, code behavior, or inference into requirement facts.

@@ -1,0 +1,16 @@
+{
+  "data_validation_required": "required",
+  "reason": "需求明确提供两个入口的展示一致性对数关系",
+  "validation_method": "cross_source_reconciliation",
+  "sql_generation_status": "not_required",
+  "schema_sources": [],
+  "metric_ids": [],
+  "validation_queries": [],
+  "reconciliation_plans": [
+    {"reconciliation_id": "REC001", "purpose": "入口 B 与入口 C 按明确字段对比", "status": "planned", "evidence_sources": ["REQ-DEMO-002"]}
+  ],
+  "blocking_questions": [],
+  "requirement_ids": ["REQ-DEMO-002"],
+  "risk_ids": ["RISK-DEMO-002"],
+  "tc_ids": ["TC002"]
+}

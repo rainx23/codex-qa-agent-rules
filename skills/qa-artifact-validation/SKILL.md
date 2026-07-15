@@ -18,5 +18,6 @@ Resolve the repository root as two levels above this SKILL.md.
 7. Run ../../scripts/build_testcase_index.py only after Manifest validation, then verify the artifact id occurs exactly once and the validation status is not mixed with business status.
 8. Run syntax, schema generation check, rule-version check, all tests, Skill validation, repository-mode validation and CI static checks.
 9. Mark validation failed and stop completion claims whenever any required check fails.
+10. Run `validate_knowledge.py`, `build_knowledge_index.py --check`, `validate_data_validation.py`, `validate_sql_style.py --strict`, and `validate_sql_artifact.py` when those artifacts are present. Confirm that SQL is read-only and only generated/reviewed unless user execution evidence exists.
 
 Keep historical artifacts. Never repair or overwrite an existing artifact unless the operation is explicitly versioned or authorized.

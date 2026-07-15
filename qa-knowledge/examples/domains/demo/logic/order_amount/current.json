@@ -1,0 +1,19 @@
+{
+  "logic_id": "LOGIC-DEMO-ORDER-AMOUNT",
+  "name": "订单金额汇总",
+  "domain": "demo",
+  "version": "v1",
+  "status": "active_confirmed",
+  "effective_from": "2026-01-01",
+  "effective_to": null,
+  "conditions": ["按确认交易日筛选"],
+  "data_sources": ["demo.orders"],
+  "join_rules": [],
+  "filters": ["status = 已确认"],
+  "calculation": "sum(amount)",
+  "result": "按交易日汇总订单金额",
+  "exceptions": ["空金额按需求口径处理"],
+  "supersedes": null,
+  "changed_by_requirement": "REQ-DEMO-001",
+  "evidence_sources": ["sanitized-example"]
+}

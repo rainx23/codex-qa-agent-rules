@@ -37,6 +37,13 @@ SEMVER_PATTERN = r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$"
 GENERATED_AT_FORMAT = "%Y-%m-%d %H:%M:%S"
 ALLOWED_TIMEZONES = ("Asia/Shanghai", "UTC")
 ZERO_HASH = "sha256:" + "0" * 64
+KNOWLEDGE_STATUSES = ("active_confirmed", "candidate", "conflicting", "superseded", "deprecated", "missing")
+SCHEMA_SCOPES = ("complete", "partial")
+DATA_VALIDATION_REQUIREMENTS = ("required", "optional", "not_required", "blocked")
+VALIDATION_METHODS = ("sql", "cross_source_reconciliation", "mixed", "not_applicable", "blocked")
+SQL_GENERATION_STATUSES = ("ready", "partial", "blocked", "not_required")
+SQL_EXECUTION_STATUSES = ("planned", "generated", "reviewed", "executed", "passed", "failed", "blocked")
+SENSITIVE_PATTERN = re.compile(r"(?i)(?:password|passwd|token|jdbc|private[_ -]?key|secret)\s*[:=]")
 
 
 def read_rule_version(root: Path) -> str:
@@ -152,7 +159,7 @@ def requirement_schema(version: str) -> dict[str, Any]:
         {"criterion_id": _string(), "statement": _string(), "fact_ids": _strings(1), "risk_ids": _strings()},
     )
     body = _object(
-        ["schema_version", "analysis_id", "report_mode", "source_type", "source_ids", "analysis_scope", "business_goal", "acceptance_basis", "facts", "confirmation_points", "risks", "acceptance_criteria", "regression_scope", "matched_profiles"],
+        ["schema_version", "analysis_id", "report_mode", "source_type", "source_ids", "analysis_scope", "business_goal", "acceptance_basis", "facts", "confirmation_points", "risks", "acceptance_criteria", "regression_scope", "matched_profiles", "data_validation_required", "data_validation_reason", "recommended_validation_method", "sql_generation_status", "validation_missing_information"],
         {
             "schema_version": {"const": SCHEMA_VERSION}, "analysis_id": _string(),
             "report_mode": {"enum": ["requirement", "combined"]}, "source_type": _string(),
@@ -161,6 +168,9 @@ def requirement_schema(version: str) -> dict[str, Any]:
             "confirmation_points": {"type": "array", "items": confirmation},
             "risks": {"type": "array", "items": risk}, "acceptance_criteria": {"type": "array", "items": criterion},
             "regression_scope": _strings(1), "matched_profiles": _strings(),
+            "data_validation_required": {"enum": list(DATA_VALIDATION_REQUIREMENTS)}, "data_validation_reason": _string(),
+            "recommended_validation_method": {"enum": list(VALIDATION_METHODS)}, "sql_generation_status": {"enum": list(SQL_GENERATION_STATUSES)},
+            "validation_missing_information": _strings(),
         },
     )
     return _base_schema("Requirement Analysis Model", version, body)
@@ -192,6 +202,119 @@ def diff_schema(version: str) -> dict[str, Any]:
         },
     )
     return _base_schema("Diff Impact Model", version, body)
+
+
+def knowledge_table_schema(version: str) -> dict[str, Any]:
+    field = _object(
+        ["name", "type", "nullable", "default", "comment", "ordinal"],
+        {
+            "name": _string(), "type": _string(), "nullable": {"type": "boolean"},
+            "default": {"type": ["string", "null"]}, "comment": {"type": ["string", "null"]},
+            "ordinal": {"type": "integer", "minimum": 1},
+        },
+    )
+    body = _object(
+        ["table_id", "domain", "database", "table_name", "full_name", "dialect", "schema_scope", "current_ddl_path", "raw_hash", "normalized_hash", "fields", "keys", "partitions", "indexes", "engine_properties", "status", "source_type", "source_requirement_ids", "last_verified_at"],
+        {
+            "table_id": _string(), "domain": _string(), "database": _string(), "table_name": _string(), "full_name": _string(),
+            "dialect": _string(), "schema_scope": {"enum": list(SCHEMA_SCOPES)},
+            "current_ddl_path": {"type": ["string", "null"]}, "raw_ddl": {"type": ["string", "null"]}, "normalized_ddl": {"type": ["string", "null"]},
+            "raw_hash": _string(pattern=r"^sha256:[0-9a-fA-F]{64}$"),
+            "normalized_hash": _string(pattern=r"^sha256:[0-9a-fA-F]{64}$"), "fields": {"type": "array", "items": field},
+            "keys": _strings(), "partitions": _strings(), "indexes": _strings(), "engine_properties": {"type": "object"},
+            "status": {"enum": list(KNOWLEDGE_STATUSES)}, "source_type": _string(), "source_requirement_ids": _strings(),
+            "last_verified_at": {"type": ["string", "null"]}, "related_logic_ids": _strings(), "related_metric_ids": _strings(),
+        },
+    )
+    return _base_schema("Knowledge Table Model", version, body)
+
+
+def logic_version_schema(version: str) -> dict[str, Any]:
+    body = _object(
+        ["logic_id", "name", "domain", "version", "status", "effective_from", "effective_to", "conditions", "data_sources", "join_rules", "filters", "calculation", "result", "exceptions", "supersedes", "changed_by_requirement", "evidence_sources"],
+        {
+            "logic_id": _string(), "name": _string(), "domain": _string(), "version": _string(), "status": {"enum": list(KNOWLEDGE_STATUSES)},
+            "effective_from": {"type": ["string", "null"]}, "effective_to": {"type": ["string", "null"]},
+            "conditions": _strings(), "data_sources": _strings(), "join_rules": _strings(), "filters": _strings(),
+            "calculation": _string(), "result": _string(), "exceptions": _strings(), "supersedes": {"type": ["string", "null"]},
+            "changed_by_requirement": {"type": ["string", "null"]}, "evidence_sources": _strings(1),
+        },
+    )
+    return _base_schema("Logic Version Model", version, body)
+
+
+def metric_schema(version: str) -> dict[str, Any]:
+    body = _object(
+        ["metric_id", "metric_name", "business_definition", "numerator", "denominator", "calculation_order", "multiplier", "dimensions", "data_sources", "join_keys", "filters", "deduplication_key", "time_range", "timezone_or_trade_calendar", "null_rule", "zero_denominator_rule", "precision", "rounding_position", "aggregation_method", "detail_summary_relation", "formal_simulated_scope", "evidence_sources", "status"],
+        {
+            "metric_id": _string(), "metric_name": _string(), "business_definition": _string(), "numerator": _string(), "denominator": _string(),
+            "calculation_order": _strings(1), "multiplier": _string(), "dimensions": _strings(), "data_sources": _strings(1), "join_keys": _strings(),
+            "filters": _strings(), "deduplication_key": _string(), "time_range": _string(), "timezone_or_trade_calendar": _string(),
+            "null_rule": _string(), "zero_denominator_rule": _string(), "precision": _string(), "rounding_position": _string(),
+            "aggregation_method": _string(), "detail_summary_relation": _string(), "formal_simulated_scope": _string(),
+            "evidence_sources": _strings(1), "status": {"enum": list(KNOWLEDGE_STATUSES)},
+        },
+    )
+    return _base_schema("Metric Model", version, body)
+
+
+def requirement_knowledge_schema(version: str) -> dict[str, Any]:
+    body = _object(
+        ["requirement_id", "title", "domain", "status", "related_tables", "used_fields", "related_logic_ids", "related_metric_ids", "related_requirements", "changed_items", "report_path", "effective_version"],
+        {
+            "requirement_id": _string(), "title": _string(), "domain": _string(), "status": {"enum": list(KNOWLEDGE_STATUSES)},
+            "related_tables": _strings(), "used_fields": _strings(), "related_logic_ids": _strings(), "related_metric_ids": _strings(),
+            "related_requirements": _strings(), "changed_items": _strings(), "report_path": {"type": ["string", "null"]}, "effective_version": _string(),
+        },
+    )
+    return _base_schema("Requirement Knowledge Model", version, body)
+
+
+def data_validation_schema(version: str) -> dict[str, Any]:
+    query_ref = _object(
+        ["sql_id", "purpose", "status"],
+        {"sql_id": _string(pattern=r"^SQLV\d{3}$"), "purpose": _string(), "status": {"enum": list(SQL_EXECUTION_STATUSES)}, "evidence_sources": _strings(), "execution_evidence": {"type": ["string", "null"]}},
+    )
+    reconciliation_ref = _object(
+        ["reconciliation_id", "purpose", "status"],
+        {"reconciliation_id": _string(pattern=r"^REC\d{3}$"), "purpose": _string(), "status": {"enum": list(SQL_EXECUTION_STATUSES)}, "evidence_sources": _strings()},
+    )
+    body = _object(
+        ["data_validation_required", "reason", "validation_method", "sql_generation_status", "schema_sources", "metric_ids", "validation_queries", "reconciliation_plans", "blocking_questions"],
+        {
+            "data_validation_required": {"enum": list(DATA_VALIDATION_REQUIREMENTS)}, "reason": _string(), "validation_method": {"enum": list(VALIDATION_METHODS)},
+            "sql_generation_status": {"enum": list(SQL_GENERATION_STATUSES)}, "schema_sources": _strings(), "metric_ids": _strings(),
+            "validation_queries": {"type": "array", "items": query_ref}, "reconciliation_plans": {"type": "array", "items": reconciliation_ref},
+            "blocking_questions": _strings(), "requirement_ids": _strings(), "risk_ids": _strings(), "tc_ids": {"type": "array", "items": _string(pattern=TC_PATTERN), "uniqueItems": True},
+        },
+    )
+    return _base_schema("Data Validation Model", version, body)
+
+
+def validation_sql_schema(version: str) -> dict[str, Any]:
+    query = _object(
+        ["sql_id", "purpose", "requirement_ids", "risk_ids", "tc_ids", "dialect", "tables", "fields", "parameters", "metric_ids", "expected_assertion", "execution_status", "sql_path", "evidence_sources"],
+        {
+            "sql_id": _string(pattern=r"^SQLV\d{3}$"), "purpose": _string(), "requirement_ids": _strings(), "risk_ids": _strings(),
+            "tc_ids": {"type": "array", "items": _string(pattern=TC_PATTERN), "uniqueItems": True}, "dialect": _string(), "tables": _strings(1), "fields": _strings(),
+            "parameters": _strings(), "metric_ids": _strings(), "expected_assertion": _string(), "execution_status": {"enum": list(SQL_EXECUTION_STATUSES)},
+            "sql_path": _string(), "evidence_sources": _strings(1), "execution_evidence": {"type": ["string", "null"]},
+        },
+    )
+    body = _object(["schema_version", "sql_items"], {"schema_version": {"const": SCHEMA_VERSION}, "sql_items": {"type": "array", "items": query, "minItems": 1}})
+    return _base_schema("Validation SQL Artifact Model", version, body)
+
+
+def reconciliation_schema(version: str) -> dict[str, Any]:
+    plan = _object(
+        ["reconciliation_id", "baseline_entry", "target_entry", "comparison_dimensions", "comparison_fields", "filters", "time_range", "tolerance", "requirement_ids", "risk_ids", "tc_ids", "evidence_sources", "status"],
+        {
+            "reconciliation_id": _string(pattern=r"^REC\d{3}$"), "baseline_entry": _string(), "target_entry": _string(), "comparison_dimensions": _strings(1),
+            "comparison_fields": _strings(1), "filters": _strings(), "time_range": _string(), "tolerance": _string(), "requirement_ids": _strings(), "risk_ids": _strings(),
+            "tc_ids": {"type": "array", "items": _string(pattern=TC_PATTERN), "uniqueItems": True}, "evidence_sources": _strings(1), "status": {"enum": list(SQL_EXECUTION_STATUSES)},
+        },
+    )
+    return _base_schema("Reconciliation Plan Model", version, _object(["schema_version", "reconciliation_plans"], {"schema_version": {"const": SCHEMA_VERSION}, "reconciliation_plans": {"type": "array", "items": plan, "minItems": 1}}))
 
 
 def risk_matrix_schema(version: str) -> dict[str, Any]:
@@ -264,6 +387,10 @@ def manifest_schema(version: str) -> dict[str, Any]:
         "p0_risk_count": {"type": "integer", "minimum": 0}, "p0_case_count": {"type": "integer", "minimum": 0},
         "pending_count": {"type": "integer", "minimum": 0}, "blocking_pending_count": {"type": "integer", "minimum": 0},
         "nonblocking_pending_count": {"type": "integer", "minimum": 0}, "suggested_pending_count": {"type": "integer", "minimum": 0},
+        "knowledge_snapshot": {"type": ["string", "null"]}, "data_validation_model": {"type": ["string", "null"]},
+        "validation_sql": {"type": ["string", "null"]}, "reconciliation_plan": {"type": ["string", "null"]},
+        "sql_count": {"type": "integer", "minimum": 0}, "reconciliation_count": {"type": "integer", "minimum": 0},
+        "sql_status": {"enum": list(SQL_EXECUTION_STATUSES)}, "execution_evidence": {"type": ["string", "null"]}, "ddl_hashes": _strings(), "logic_versions": _strings(), "metric_versions": _strings(),
         "validation_status": {"enum": list(VALIDATION_STATUSES)}, "relation": {"enum": list(RELATIONS)},
         "supersedes": {"type": ["string", "null"]}, "failure_reason": {"type": ["string", "null"]},
         "pending_reason": {"type": ["string", "null"]},
@@ -279,6 +406,13 @@ def schema_documents(root: Path) -> dict[str, dict[str, Any]]:
         "risk-coverage-matrix.schema.json": risk_matrix_schema(version),
         "testcase-model.schema.json": testcase_schema(version),
         "artifact-manifest.schema.json": manifest_schema(version),
+        "knowledge-table.schema.json": knowledge_table_schema(version),
+        "logic-version.schema.json": logic_version_schema(version),
+        "metric.schema.json": metric_schema(version),
+        "requirement-knowledge.schema.json": requirement_knowledge_schema(version),
+        "data-validation.schema.json": data_validation_schema(version),
+        "validation-sql.schema.json": validation_sql_schema(version),
+        "reconciliation-plan.schema.json": reconciliation_schema(version),
     }
 
 
@@ -296,6 +430,16 @@ def _unique_ids(items: list[dict[str, Any]], key: str) -> tuple[set[str], list[s
 
 def validate_requirement_model(data: dict[str, Any]) -> list[str]:
     errors = validate_schema_shape(data, requirement_schema("0.0.0"))
+    requirement = data.get("data_validation_required")
+    method = data.get("recommended_validation_method")
+    reason = str(data.get("data_validation_reason", ""))
+    indicator_accuracy = any(token in reason for token in ("指标准确", "计算准确", "数值正确", "金额", "比例", "收益率", "完成率"))
+    if requirement == "not_required" and method != "not_applicable":
+        errors.append("not_required 数据验证必须推荐 not_applicable")
+    if indicator_accuracy and method not in {"sql", "mixed"}:
+        errors.append("指标准确性需求默认必须推荐 SQL")
+    if requirement == "blocked" and method != "blocked":
+        errors.append("blocked 数据验证必须推荐 blocked")
     facts = data.get("facts", []) if isinstance(data.get("facts"), list) else []
     confirmations = data.get("confirmation_points", []) if isinstance(data.get("confirmation_points"), list) else []
     criteria = data.get("acceptance_criteria", []) if isinstance(data.get("acceptance_criteria"), list) else []
@@ -423,6 +567,113 @@ def validate_testcase_model(data: dict[str, Any]) -> list[str]:
     return list(dict.fromkeys(errors))
 
 
+def _validate_id_items(items: list[dict[str, Any]], field: str, label: str) -> list[str]:
+    _, errors = _unique_ids(items, field)
+    return [f"{label}{error}" for error in errors]
+
+
+def validate_knowledge_table(data: dict[str, Any]) -> list[str]:
+    errors = validate_schema_shape(data, knowledge_table_schema("0.0.0"))
+    if data.get("full_name") != f"{data.get('database')}.{data.get('table_name')}":
+        errors.append("full_name 必须等于 database.table_name")
+    if data.get("schema_scope") == "partial" and data.get("current_ddl_path"):
+        errors.append("partial schema_scope 不得填写整表 current_ddl_path")
+    fields = data.get("fields", []) if isinstance(data.get("fields"), list) else []
+    names = [item.get("name") for item in fields]
+    if len(names) != len(set(names)):
+        errors.append("字段名必须唯一")
+    if data.get("status") == "active_confirmed" and not data.get("source_requirement_ids"):
+        errors.append("active_confirmed 表知识必须关联来源需求")
+    return list(dict.fromkeys(errors))
+
+
+def validate_logic_version(data: dict[str, Any]) -> list[str]:
+    errors = validate_schema_shape(data, logic_version_schema("0.0.0"))
+    if data.get("status") == "active_confirmed" and not data.get("evidence_sources"):
+        errors.append("active_confirmed 逻辑必须有关联证据")
+    if data.get("supersedes") == data.get("logic_id"):
+        errors.append("logic supersedes 不能指向自身")
+    return list(dict.fromkeys(errors))
+
+
+def validate_metric(data: dict[str, Any]) -> list[str]:
+    errors = validate_schema_shape(data, metric_schema("0.0.0"))
+    if data.get("status") == "active_confirmed" and not data.get("evidence_sources"):
+        errors.append("active_confirmed 指标必须有关联证据")
+    if any(token in str(data.get("business_definition", "")) for token in ("未知", "待确认", "猜测")):
+        errors.append("指标业务定义不能包含未确认推断")
+    return list(dict.fromkeys(errors))
+
+
+def validate_requirement_knowledge(data: dict[str, Any]) -> list[str]:
+    errors = validate_schema_shape(data, requirement_knowledge_schema("0.0.0"))
+    if data.get("status") == "active_confirmed" and not data.get("effective_version"):
+        errors.append("active_confirmed 需求知识必须有 effective_version")
+    return list(dict.fromkeys(errors))
+
+
+def validate_data_validation(data: dict[str, Any]) -> list[str]:
+    errors = validate_schema_shape(data, data_validation_schema("0.0.0"))
+    requirement = data.get("data_validation_required")
+    method = data.get("validation_method")
+    generation = data.get("sql_generation_status")
+    queries = data.get("validation_queries", []) if isinstance(data.get("validation_queries"), list) else []
+    recs = data.get("reconciliation_plans", []) if isinstance(data.get("reconciliation_plans"), list) else []
+    reason = str(data.get("reason", ""))
+    indicator_accuracy = any(token in reason for token in ("指标准确", "计算准确", "数值正确", "金额", "比例", "收益率", "完成率"))
+    if requirement == "required" and method in {"sql", "mixed"} and not queries:
+        errors.append("required 的 SQL 数据验证必须关联 validation_queries")
+    if method == "cross_source_reconciliation" and not recs:
+        errors.append("cross_source_reconciliation 必须关联 reconciliation_plans")
+    if method == "mixed" and (not queries or not recs):
+        errors.append("mixed 必须同时包含 SQL 和直接对数方案")
+    if indicator_accuracy and method not in {"sql", "mixed"}:
+        errors.append("指标准确性默认必须使用 SQL，页面对页面不能替代 SQL")
+    if requirement == "not_required" and method != "not_applicable":
+        errors.append("not_required 必须使用 not_applicable")
+    if requirement == "blocked":
+        if method != "blocked" or generation not in {"blocked", "partial"}:
+            errors.append("blocked 数据验证必须标记 blocked 方法和 SQL 状态")
+        if queries:
+            errors.append("blocked 不得生成正式 validation_queries")
+    if method == "cross_source_reconciliation":
+        for rec in recs:
+            if not rec.get("evidence_sources"):
+                errors.append("直接对数方案必须提供明确证据来源")
+    if generation == "not_required" and requirement not in {"not_required", "blocked"} and method != "cross_source_reconciliation":
+        errors.append("SQL generation status=not_required 仅适用于不需要验证或阻塞")
+    for query in queries:
+        if query.get("status") in {"executed", "passed", "failed"} and not query.get("execution_evidence"):
+            errors.append(f"{query.get('sql_id')} 没有执行结果证据，不得标记 {query.get('status')}")
+    return list(dict.fromkeys(errors))
+
+
+def validate_validation_sql(data: dict[str, Any]) -> list[str]:
+    errors = validate_schema_shape(data, validation_sql_schema("0.0.0"))
+    items = data.get("sql_items", []) if isinstance(data.get("sql_items"), list) else []
+    errors.extend(_validate_id_items(items, "sql_id", "SQL"))
+    for item in items:
+        if item.get("execution_status") in {"executed", "passed", "failed"} and not item.get("execution_evidence"):
+            errors.append(f"{item.get('sql_id')} 未有用户执行结果时不得标记 {item.get('execution_status')}")
+        if not item.get("tc_ids"):
+            errors.append(f"{item.get('sql_id')} 必须关联至少一个 TC")
+    return list(dict.fromkeys(errors))
+
+
+def validate_reconciliation(data: dict[str, Any]) -> list[str]:
+    errors = validate_schema_shape(data, reconciliation_schema("0.0.0"))
+    items = data.get("reconciliation_plans", []) if isinstance(data.get("reconciliation_plans"), list) else []
+    errors.extend(_validate_id_items(items, "reconciliation_id", "REC"))
+    for item in items:
+        if item.get("baseline_entry") == item.get("target_entry"):
+            errors.append(f"{item.get('reconciliation_id')} baseline_entry 与 target_entry 不得相同")
+    return list(dict.fromkeys(errors))
+
+
+validate_reconciliation_plan = validate_reconciliation
+validate_validation_sql_model = validate_validation_sql
+
+
 def validate_model_links(
     requirement: dict[str, Any] | None,
     diff: dict[str, Any] | None,
@@ -481,6 +732,14 @@ MODEL_VALIDATORS: dict[str, Callable[[dict[str, Any]], list[str]]] = {
     "diff": validate_diff_model,
     "risk": validate_risk_matrix,
     "testcase": validate_testcase_model,
+    "knowledge_table": validate_knowledge_table,
+    "logic": validate_logic_version,
+    "metric": validate_metric,
+    "requirement_knowledge": validate_requirement_knowledge,
+    "data_validation": validate_data_validation,
+    "validation_sql": validate_validation_sql,
+    "reconciliation": validate_reconciliation,
+    "reconciliation_plan": validate_reconciliation,
 }
 
 
