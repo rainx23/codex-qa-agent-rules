@@ -74,6 +74,18 @@ class StructuredModelTests(unittest.TestCase):
         data["cases"][0]["expected_results"] = ["页面正常展示"]
         self.assertTrue(any("模糊断言" in error for error in validate_testcase_model(data)))
 
+    def test_multi_entry_testcase_model_requires_branch_only_steps(self):
+        data = self.load("testcase-model-multi-entry.json")
+        self.assertEqual([], validate_testcase_model(data))
+        data["cases"][0]["steps"] = ["误放在顶层的统一步骤"]
+        self.assertTrue(any("顶层 steps" in error for error in validate_testcase_model(data)))
+        data = self.load("testcase-model-multi-entry.json")
+        data["cases"][0]["entry_branches"][1]["entry_name"] = data["cases"][0]["entry_branches"][0]["entry_name"]
+        self.assertTrue(any("entry_name 必须唯一" in error for error in validate_testcase_model(data)))
+        data = self.load("testcase-model-multi-entry.json")
+        data["cases"][0]["entry_branches"][0]["entry_name"] = "入口A"
+        self.assertTrue(any("缺少业务语义" in error for error in validate_testcase_model(data)))
+
     def test_cross_model_links_are_bidirectional(self):
         requirement = self.load("requirement-analysis.json")
         diff = self.load("diff-impact.json")

@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from qa_contracts import load_json
+from qa_validation import validate_markdown_file, validate_traceability_mapping
 from validate_traceability import validate_files
 
 
@@ -99,6 +100,32 @@ class TraceabilityTests(unittest.TestCase):
             self.assertTrue(any("集合不一致" in error or "连续" in error for error in self.validate_text(self.report_text, testcase=path)))
         finally:
             path.unlink()
+
+    def test_multi_entry_model_and_xmind_branch_order_are_compared(self):
+        outline = validate_markdown_file(ROOT / "tests/fixtures/multi_entry_valid_xmind.md")
+        model = load_json(ROOT / "tests/fixtures/models/testcase-model-multi-entry.json")
+        report = """| 需求点ID | 需求证据 | 风险ID | 测试点或TC |
+| --- | --- | --- | --- |
+| REQ-MULTI-001 | 需求原文 | RISK-MULTI-001 | TC001 |
+"""
+        errors, _, _ = validate_traceability_mapping(report, "requirement", outline, None, model)
+        self.assertEqual([], errors)
+
+        model["cases"][0]["entry_branches"][1]["entry_name"] = "不存在的入口"
+        errors, _, _ = validate_traceability_mapping(report, "requirement", outline, None, model)
+        self.assertTrue(any("入口平级分支" in error for error in errors))
+
+    def test_multi_entry_model_rejects_top_level_step_and_branch_content_mismatch(self):
+        outline = validate_markdown_file(ROOT / "tests/fixtures/multi_entry_valid_xmind.md")
+        model = load_json(ROOT / "tests/fixtures/models/testcase-model-multi-entry.json")
+        report = """| 需求点ID | 需求证据 | 风险ID | 测试点或TC |
+| --- | --- | --- | --- |
+| REQ-MULTI-001 | 需求原文 | RISK-MULTI-001 | TC001 |
+"""
+        model["cases"][0]["steps"] = []
+        model["cases"][0]["entry_branches"][0]["steps"] = ["错误步骤"]
+        errors, _, _ = validate_traceability_mapping(report, "requirement", outline, None, model)
+        self.assertTrue(any("steps 与 XMind 不一致" in error or "入口平级分支" in error for error in errors))
 
 
 if __name__ == "__main__":

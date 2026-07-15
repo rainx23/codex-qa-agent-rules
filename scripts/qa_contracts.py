@@ -214,14 +214,22 @@ def risk_matrix_schema(version: str) -> dict[str, Any]:
 
 
 def testcase_schema(version: str) -> dict[str, Any]:
+    entry_branch = _object(
+        ["entry_name", "steps", "expected_results"],
+        {
+            "entry_name": _string(),
+            "steps": _strings(1), "expected_results": _strings(1),
+        },
+    )
     case = _object(
         ["tc_id", "dimension", "common_entry", "module_level_1", "module_level_2", "test_point", "steps", "expected_results", "risk_ids", "requirement_ids", "change_ids", "historical_defect_ids", "test_priority", "evidence_state", "regression_scope", "deduplication_key"],
         {
             "tc_id": _string(pattern=TC_PATTERN), "dimension": {"enum": list(DIMENSIONS)},
             "common_entry": {"type": ["string", "null"]}, "module_level_1": {"type": ["string", "null"]},
             "module_level_2": {"type": ["string", "null"]}, "test_point": _string(),
-            "steps": _strings(1), "expected_results": _strings(1), "risk_ids": _strings(1),
+            "steps": _strings(), "expected_results": _strings(), "risk_ids": _strings(1),
             "requirement_ids": _strings(), "change_ids": _strings(), "historical_defect_ids": _strings(),
+            "entry_branches": {"type": "array", "items": entry_branch, "minItems": 2, "uniqueItems": True},
             "test_priority": {"enum": list(TEST_PRIORITIES)}, "evidence_state": {"enum": list(EVIDENCE_STATES)},
             "regression_scope": {"enum": list(REGRESSION_SCOPES)}, "deduplication_key": _string(),
         },
@@ -387,8 +395,21 @@ def validate_testcase_model(data: dict[str, Any]) -> list[str]:
         modules = bool(case.get("module_level_1") and case.get("module_level_2"))
         if bool(common) == modules:
             errors.append(f"{tc_id} 必须在 common_entry 与两级模块结构中二选一")
-        if not case.get("test_point") or not case.get("steps") or not case.get("expected_results"):
-            errors.append(f"{tc_id} 缺少唯一测试点、步骤或预期")
+        branches = case.get("entry_branches", [])
+        if branches:
+            if case.get("steps") or case.get("expected_results"):
+                errors.append(f"{tc_id} 多入口模型顶层 steps 和 expected_results 必须为空")
+            branch_names = [branch.get("entry_name") for branch in branches]
+            if len(branch_names) != len(set(branch_names)):
+                errors.append(f"{tc_id} 入口分支 entry_name 必须唯一")
+            for branch in branches:
+                if re.fullmatch(r"(?:入口|页面|弹窗)[A-Z一二三四五六七八九十0-9]+", str(branch.get("entry_name"))):
+                    errors.append(f"{tc_id} 入口名称缺少业务语义：{branch.get('entry_name')}")
+        else:
+            if not case.get("test_point") or not case.get("steps") or not case.get("expected_results"):
+                errors.append(f"{tc_id} 缺少唯一测试点、步骤或预期")
+        if not branches and case.get("common_entry") and any(token in " ".join(case.get("steps", [])) for token in ("/", "、", "分别", "以及")):
+            errors.append(f"{tc_id} 可能将多个入口压在同一步骤，必须填写 entry_branches 并拆成平级分支")
         for expected_result in case.get("expected_results", []):
             vague = next(
                 (

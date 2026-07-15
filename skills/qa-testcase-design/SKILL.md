@@ -21,9 +21,12 @@ Resolve the repository root as two levels above this SKILL.md.
 1. Stop final XMind only when a blocking gate remains unresolved.
 2. Build a Risk Coverage Matrix that validates against ../../rules/schemas/risk-coverage-matrix.schema.json before writing any TC. Do not jump directly from raw requirement text to cases.
 3. Select equivalence, boundary, decision-table, state-transition, user-path, pairwise, or risk-driven techniques according to the facts.
-4. Derive one case per independently diagnosable risk. Merge only when entry, object, condition, action, assertion, risk and protected context are equivalent; keep formal/simulated sources, permissions, data types, exception paths and different P0 risks separate when they change diagnosis.
+4. Derive one case per independently diagnosable risk. Merge only when core rule, trigger, operation, data source/口径, assertion, risk and protected context are equivalent; keep formal/simulated sources, permissions, data types, exception paths and different P0 risks separate when they change diagnosis. If one rule covers multiple real entrances, keep one TC only when those dimensions are identical and render each entrance as an independent peer branch; split TCs when data source, permission, expected result, exception path, risk or failure localization differs.
 5. Verify every retained TC has a requirement, Diff, or historical-defect mapping and a distinct failure diagnosis.
 6. Build a Testcase Model that validates against ../../rules/schemas/testcase-model.schema.json, then render only one of the two fixed XMind hierarchies and number TC globally from TC001.
+   - Single entrance: retain the existing `TC → 测试点 → 步骤 → 预期` or direct-module hierarchy without an artificial entry layer.
+   - Grouped multi-entry: use `TC → 测试点 → 具体入口 → 步骤 → 预期`; direct multi-entry: use `TC → 一级模块 → 二级功能点 → 具体入口 → 步骤 → 预期`.
+   - Require at least two named peer entrances, independent branch steps and expectations, no mixed direct steps, and no joined text such as “分别打开/依次进入多个入口”.
 7. Run ../../scripts/validate_xmind_md.py and ../../scripts/validate_testcase_quality.py with the report, risk matrix and testcase model. Treat explicit duplicates as errors and review warnings without silently deleting cases.
 8. Convert only after validation passes, then hand the models and rendered artifacts to ../qa-artifact-validation/SKILL.md.
 

@@ -92,6 +92,24 @@ class ConverterTests(unittest.TestCase):
         with self.assertRaisesRegex(ValidationError, "工作簿无法读取"):
             validate_xmind_archive(output)
 
+    def test_multi_entry_conversion_preserves_branch_order_and_tc_count(self):
+        source = ROOT / "tests/fixtures/multi_entry_valid_xmind.md"
+        output = convert_file(source, self.directory / "multi_entry_workbook.xmind")
+        result = validate_xmind_archive(output, "临底汇总指定弹窗列宽记忆", 1, 14)
+        self.assertEqual(1, result["tc_count"])
+        with zipfile.ZipFile(output) as archive:
+            content = json.loads(archive.read("content.json"))
+        titles = []
+
+        def walk(topic):
+            titles.append(topic["title"])
+            for child in topic.get("children", {}).get("attached", []):
+                walk(child)
+
+        walk(content[0]["rootTopic"])
+        golden = json.loads((ROOT / "tests/golden/multi_entry_topics_expected.json").read_text(encoding="utf-8"))
+        self.assertEqual(golden, titles)
+
 
 if __name__ == "__main__":
     unittest.main()

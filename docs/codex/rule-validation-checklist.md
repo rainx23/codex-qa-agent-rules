@@ -39,6 +39,8 @@
 
        python scripts/validate_traceability.py tests/fixtures/reports/combined_consistent.md tests/fixtures/valid_case_xmind.md --mode combined --risk-matrix tests/fixtures/models/risk-coverage-matrix.json --testcase-model tests/fixtures/models/testcase-model.json
        python scripts/validate_xmind_md.py tests/fixtures/valid_case_xmind.md
+       python scripts/validate_xmind_md.py tests/fixtures/multi_entry_valid_xmind.md
+       python scripts/validate_xmind_md.py tests/fixtures/multi_entry_direct_valid_xmind.md
        python scripts/md_to_xmind.py tests/fixtures/valid_case_xmind.md -o 临时输出路径
 
 8. CI 工作流必须覆盖 Python 3.10 和 3.12，并以实际 YAML 解析器检查语法。
@@ -58,5 +60,7 @@
 - Manifest 来源哈希、规则版本、时区、待确认/P0 计数、安全路径、supersedes 循环、状态语义和 Workbook 损坏。
 - 输出文件已存在、两份批量成功加一份局部失败、失败无伪 Workbook、索引 artifact_id 重复。
 - 真实历史 XMind Markdown 原样识别，迁移样例合并重复、移除模糊预期且不降低 P0 业务覆盖。
+- 多入口有效分支、无公共入口多入口、单入口多余层级、混合直接步骤、单分支、占位入口名和拼接入口步骤；普通组合操作不得被误报。
+- 多入口转换后 TC 数保持不变，分支顺序和 golden topic 顺序保持不变，Testcase Model 与 XMind 的分支数量、顺序、名称、步骤和预期一致。
 
 任一必需步骤失败时不得发布或宣称完整重构完成。

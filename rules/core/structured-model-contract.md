@@ -17,4 +17,10 @@
 4. Testcase Model 渲染固定 XMind Markdown；模型字段不得成为新的 XMind 节点。
 5. 产物 Skill 依次校验报告、分析模型、风险矩阵、用例模型、Markdown、Workbook、Manifest 和索引。
 
-报告与模型必须来自同一分析结果，不得在事实、待确认点、风险、模式或计数上互相矛盾。Risk Coverage Matrix 同时保存主 `business_entry` 和用于合并场景的 `business_entries` 覆盖入口列表。需求点、Diff 变更、风险和 TC 的 ID 必须双向一致；所有 P0 风险必须映射 TC；模型 TC 与 Markdown TC 集合、测试点和预期必须一致。
+报告与模型必须来自同一分析结果，不得在事实、待确认点、风险、模式或计数上互相矛盾。Risk Coverage Matrix 同时保存主 `business_entry` 和用于合并场景的 `business_entries` 覆盖入口列表。需求点、Diff 变更、风险和 TC 的 ID 必须双向一致；所有 P0 风险必须映射 TC；模型 TC 与 Markdown TC 集合、维度、公共入口/模块层级、测试点、步骤和预期必须一致。
+
+## 多入口 Testcase Model
+
+- Testcase Model 可选 `entry_branches`；每个分支严格包含 `entry_name`、`steps`、`expected_results`，可附带需求、Diff 和风险关联字段。
+- 单入口时 `entry_branches` 缺省或为空，顶层 `steps`、`expected_results` 必须非空；多入口时至少两个分支，顶层步骤和预期必须为空，禁止两种表达混用。
+- 分支顺序、入口名称、步骤和预期必须与 XMind Markdown 一一对应；校验器比较分支数量、顺序、名称、步骤和预期，不以分支数量替代 TC 数量。

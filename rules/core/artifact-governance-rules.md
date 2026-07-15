@@ -15,6 +15,7 @@ Manifest 至少记录：
 - 从 `RULE_VERSION` 读取的 rule_version 和报告模式。
 - report_path、分析模型路径、风险矩阵路径、Testcase Model 路径、xmind_md_path、xmind_path。
 - case_count、明确表示 P0 用例数的 p0_count/p0_case_count、p0_risk_count。
+- `case_count`、`p0_count/p0_case_count` 按 TC 统计；同一 TC 下的 `entry_branches` 只用于表达入口分支，不得被计为额外 TC。
 - pending_count 及 blocking/nonblocking/suggested 三类分项。
 - validation_status、relation、supersedes、failure_reason 和 pending_reason。
 

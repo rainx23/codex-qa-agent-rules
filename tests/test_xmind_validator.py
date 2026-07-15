@@ -134,6 +134,32 @@ class XMindValidatorTests(unittest.TestCase):
             self.assertEqual(0, validate_cli([str(path)]))
             self.assertEqual(1, validate_cli([str(path), "--strict"]))
 
+    def test_multi_entry_grouped_structure_is_valid_and_keeps_single_tc(self):
+        path = ROOT / "tests/fixtures/multi_entry_valid_xmind.md"
+        outline = validate_markdown_text(path.read_text(encoding="utf-8"), path)
+        self.assertEqual(["TC001"], [node.title for node in outline.tc_nodes])
+        self.assertEqual(3, len(outline.tc_nodes[0].children[0].children))
+
+    def test_multi_entry_direct_structure_is_valid(self):
+        path = ROOT / "tests/fixtures/multi_entry_direct_valid_xmind.md"
+        outline = validate_markdown_text(path.read_text(encoding="utf-8"), path)
+        self.assertEqual(1, len(outline.tc_nodes))
+
+    def test_multi_entry_structure_boundaries_fail(self):
+        for name, token in (
+            ("multi_entry_mixed_invalid_xmind.md", "层级必须严格|入口必须是独立"),
+            ("multi_entry_single_branch_invalid_xmind.md", "至少需要两个入口"),
+            ("multi_entry_joined_line_invalid_xmind.md", "拼接在同一步骤"),
+        ):
+            self.assert_invalid(
+                (ROOT / "tests/fixtures" / name).read_text(encoding="utf-8"),
+                token,
+            )
+
+    def test_regular_combination_operation_is_not_multi_entry_error(self):
+        text = VALID.replace("输入已确认的客户编号并查询", "输入股票代码和交易日期后查询")
+        self.assertEqual(2, len(validate_markdown_text(text).tc_nodes))
+
 
 if __name__ == "__main__":
     unittest.main()
