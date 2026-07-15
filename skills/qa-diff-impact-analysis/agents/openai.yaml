@@ -1,0 +1,4 @@
+interface:
+  display_name: "QA Diff Impact Analysis"
+  short_description: "Git Diff impact, call-chain, risk, and regression analysis"
+  default_prompt: "Use $qa-diff-impact-analysis to review this commit range and identify QA impact and regression scope."

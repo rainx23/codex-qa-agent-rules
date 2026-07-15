@@ -1,256 +1,56 @@
 # Codex QA Agent Rules
 
-一套面向 Codex 的测试分析规则模板，用于把需求、禅道内容、OpenSpec、Git diff 或 commit 变更转成结构化测试分析、测试点、回归范围和可导入 XMind 的测试用例。
-
-它适合 QA、测试架构师或研发团队在提测评审、需求评审、回归范围判断时使用，重点是让 Codex 按固定测试方法工作：不编造、不越界改业务代码、先确认不明确规则、输出本地可沉淀的测试产物。
-
-## 能力概览
-
-- 禅道 / OpenSpec / 手动需求分析
-- Git diff / commit 测试影响分析
-- 需求与 diff 联动校验
-- 疑似缺陷识别与验证建议
-- Diff 默认输出“疑似缺陷”章节；需求 + diff 联动时按证据输出疑似缺陷
-- 测试点、风险点、待确认点、回归范围输出
-- XMind Markdown 测试用例生成
-- 对话展示与本地 XMind Markdown 文件格式分离
-- Markdown 用例自动转换为 `.xmind` 文件
-- 本地输出索引维护
-- 规则验收清单，支持规则修改后的自检和回归验证
-- 最小有效用例集，避免机械穷举
-- 同规则多模块用例合并
-- 相同入口公共节点分组，降低 XMind 视觉疲劳
-- 短文本用例风格，自动去重并补充高风险场景
-- 待确认点分级：阻塞类、非阻塞类、建议确认类
-- 需求-Diff-测试点追踪矩阵
-- P0/P1/P2 优先级规则，不使用 P3
-- 查询、列表、弹窗、跳转、导出、接口、SQL、权限等通用业务模板
-- 金融/交易/策略数据类分析模板
-- 个性化配置、字段设置、快捷查询设置测试模板
+面向禅道、OpenSpec、Markdown、截图、Git Diff 和 commit 的证据驱动测试分析规则集。根目录是当前项目运行副本，codex-qa-agent-rules 是可复用模板；规则、Skills、脚本和测试必须同步，历史索引行可以按项目保留差异。
 
-## 目录结构
+## 架构
 
-```text
-.
-├── AGENTS.md
-├── docs/
-│   └── codex/
-│       ├── code-diff-review-rules.md
-│       ├── qa-common-templates.md
-│       ├── qa-priority-rules.md
-│       ├── qa-requirement-analysis-rules.md
-│       ├── rule-validation-checklist.md
-│       └── xmind-case-rules.md
-├── scripts/
-│   └── md_to_xmind.py
-└── testcases/
-    ├── diff/
-    │   ├── reports/
-    │   └── xmind/
-    ├── zentao/
-    │   ├── reports/
-    │   └── xmind/
-    └── index.md
-```
+- AGENTS.md：角色边界、优先级、任务路由和全局门禁。
+- rules/core：证据、确认门禁、用例质量、追踪和产物治理的唯一正文。
+- rules/profiles：Web、API、SQL 数据、金融交易、权限安全和非功能专项规则。
+- skills：需求分析、Diff 影响、用例设计、产物校验四个可触发工作流。
+- docs/codex：旧路径兼容入口，不复制正式规则。
+- scripts：报告、Markdown、Workbook、Manifest、索引和编码治理工具。
+- tests：真实 Fixtures、Golden 结果和规则契约回归。
 
-## 快速使用
+规则优先级为：用户本轮要求 > AGENTS 全局边界 > 当前 Skill > 核心规则 > Profile > 示例。
 
-把本仓库内容复制到目标项目根目录，确保目标项目根目录存在：
+## 工作流
 
-```text
-AGENTS.md
-docs/codex/
-scripts/md_to_xmind.py
-testcases/
-```
+1. 需求 Skill 建立结构化事实、验收基准和待确认分级。
+2. Diff Skill 校验范围、分析调用链并对照需求覆盖。
+3. 用例 Skill 建立风险矩阵，生成最小有效用例集和固定 XMind Markdown。
+4. 产物 Skill 校验报告、Markdown、Workbook、Manifest 和索引。
+5. 任一步失败时保留证据并停止完成声明。
 
-然后在 Codex 中直接提出测试分析任务，例如：
+只有阻塞类问题暂停最终用例；非阻塞类和建议确认类继续已明确部分。跳过的问题仍保留，假设不得升级为事实。
 
-```text
-按禅道用例规则分析下面需求，并输出到本地：
-<粘贴需求正文>
-```
+## 常用命令
 
-或：
+    python scripts/validate_analysis_report.py path/to/report.md --xmind-md path/to/case_xmind_yyyymmdd.md
+    python scripts/validate_xmind_md.py path/to/case_xmind_yyyymmdd.md
+    python scripts/validate_testcase_quality.py path/to/case_xmind_yyyymmdd.md --traceability-report path/to/report.md
+    python scripts/md_to_xmind.py path/to/case_xmind_yyyymmdd.md
+    python scripts/md_to_xmind.py testcases/zentao/xmind
+    python scripts/validate_manifest.py path/to/manifest.json
+    python scripts/build_testcase_index.py testcases/index.md path/to/manifest.json
+    python scripts/repair_text_encoding.py testcases/index.md --check
+    python scripts/validate_skill_contracts.py skills
+    python -m unittest discover -s tests -v
 
-```text
-分析 commit abc123 的测试影响，生成完整用例
-```
+本地 XMind Markdown 必须使用单根、固定维度、两种固定层级之一、4 空格和全局连续 TC 编号，不包含代码块、表格、JSON、说明或标签式节点。转换时默认拒绝覆盖，并自动复验压缩包。
 
-或：
+## 产物和版本
 
-```text
-对比 old_commit..new_commit，输出回归范围和 XMind 用例
-```
+完整产物包括报告、XMind Markdown、Workbook、Manifest 和索引。Manifest 结构见 rules/schemas/artifact-manifest.schema.json；使用新增、补充、替代、废弃描述版本关系，不覆盖历史文件。索引使用 UTF-8，artifact_id 唯一。
 
-## 输出产物
+## Skills
 
-默认“完整输出”会生成：
+每个 Skill 包含必需的 name 和 description frontmatter，以及 agents/openai.yaml。Skill 内引用以 Skill 目录为基准，使用 ../../rules 和 ../../scripts 到达仓库资源。
 
-- 分析报告：`testcases/zentao/reports/` 或 `testcases/diff/reports/`
-- XMind Markdown 用例：`testcases/zentao/xmind/` 或 `testcases/diff/xmind/`
-- XMind Workbook：同目录下的 `.xmind` 文件
-- 输出索引：`testcases/index.md`
+## 复用和扩展
 
-`.xmind` 文件命名会和 Markdown 文件区分：
+复制 AGENTS.md、rules、skills、docs/codex、scripts、tests 和 testcases 结构到目标项目。新增 Profile 时只维护领域特有规则，并从相关 Skill 按证据路由；不得复制核心规则正文。
 
-- Markdown：`xxx_xmind_yyyyMMdd_HHmmss.md`
-- XMind：`xxx_workbook_yyyyMMdd_HHmmss.xmind`
+## 发布前验收
 
-`testcases/index.md` 会记录版本状态，建议使用：草稿、待确认、已确认、已更新、已废弃。
-
-## XMind 转换脚本
-
-脚本不依赖第三方库，使用 Python 标准库生成 XMind 2020+ 可识别的 `.xmind` 压缩包结构。
-
-手动转换命令：
-
-```bash
-python scripts/md_to_xmind.py testcases/zentao/xmind/example_xmind_20260623_120000.md
-```
-
-转换后会生成：
-
-```text
-testcases/zentao/xmind/example_workbook_20260623_120000.xmind
-```
-
-脚本会校验 Markdown 必须是 `-` 层级结构，并使用 4 个空格缩进。
-
-## 规则说明
-
-### AGENTS.md
-
-总入口规则。定义 Codex 的默认测试专家角色、工作边界、输出模式、本地索引和触发规则。
-
-### qa-requirement-analysis-rules.md
-
-用于禅道需求、OpenSpec、手动粘贴需求、产品方案规则分析。
-
-核心要求：
-
-- 信息不足先抛待确认点
-- 用户确认前不生成最终 XMind 用例
-- 不虚构 SQL、字段、接口、页面入口
-- 输出分析报告和本地文件路径
-- 同时存在需求和 diff 且证据明确时，分析报告可输出疑似缺陷
-
-### code-diff-review-rules.md
-
-用于 Git diff、commit 分析、gray 单分支提测场景。
-
-核心要求：
-
-- 单 commit 默认对比父提交
-- 双 commit 按用户给定范围分析
-- diff 为空或 commit 不存在必须说明
-- 结合需求规则判断实现覆盖、偏差和回归风险
-- 输出需求-Diff-测试点追踪矩阵
-- 识别接口契约、安全、性能、调用链和影响链风险
-- 识别需求与 diff 明确不一致导致的疑似缺陷，并输出证据、影响范围和验证建议
-- 未发现明确疑似缺陷时，在“疑似缺陷”章节输出“未发现明确疑似缺陷”
-
-### xmind-case-rules.md
-
-用于生成可导入 XMind 的 Markdown 用例和 `.xmind` 文件。
-
-核心要求：
-
-- 只有一个业务根节点
-- 一级节点使用固定测试维度
-- 相同入口抽公共节点
-- TC 编号连续
-- 每个 TC 只验证一个核心点
-- 操作和预期使用短文本
-- 删除重复、低价值用例
-- 先扫描风险维度，只有命中真实需求、diff、代码证据或业务风险时才生成 TC
-- 使用最小有效用例集，减少低价值、重复、泛化用例
-- 补充高风险边界场景
-- 生成 Markdown 后转换 `.xmind`
-- 转换失败时保留 Markdown，说明失败原因，不伪造 `.xmind` 产物
-- 对话中展示完整 XMind Markdown 时可使用代码块，本地文件禁止代码块、解释说明、表格和 JSON
-
-### qa-priority-rules.md
-
-用于统一 P0/P1/P2 风险和用例优先级判定。
-
-核心要求：
-
-- P0 聚焦核心链路、核心数据、严重权限、接口契约和重大兼容风险
-- P1 聚焦主要功能、关键口径、较大范围回归和复杂条件组合
-- P2 聚焦局部展示、低频边界和补充回归
-- 不为凑数量生成低价值 P1/P2 用例
-- 轻微文案、日志、低价值体验问题一般不单独生成 TC
-
-### qa-common-templates.md
-
-用于沉淀常见业务类型的测试关注点。
-
-覆盖：
-
-- 查询
-- 列表和表格
-- 个性化配置 / 字段设置 / 快捷查询设置
-- 弹窗
-- 跳转和下钻
-- 导出
-- 接口
-- SQL 和数据口径
-- 金融/交易/策略数据
-- 权限
-- 状态和流程
-- 配置和开关
-- 日志、审计和通知
-
-模板只作为分析辅助，不要求每个需求全部展开。
-
-### rule-validation-checklist.md
-
-用于规则修改后的自检和发布前验收，覆盖纯需求、纯 diff、需求 + diff 一致、需求 + diff 不一致、证据不足、无业务 diff、XMind 对话展示、本地 XMind 文件、最小有效用例集、个性化配置 / 字段设置 / 快捷查询设置、金融/交易/策略数据类等场景。
-
-## 推荐工作流
-
-1. 用户提供需求、OpenSpec、diff 或 commit。
-2. Codex 先解析规则和影响范围。
-3. 如有不明确口径，先按阻塞类、非阻塞类、建议确认类输出待确认点。
-4. 用户确认或选择跳过。
-5. Codex 生成分析报告、XMind Markdown 用例和 `.xmind` 文件。
-6. Codex 更新 `testcases/index.md`，记录版本状态和产物路径。
-
-## 示例提示词
-
-```text
-按禅道用例规则分析下面需求，并输出到本地：
-...
-```
-
-```text
-分析最新 commit 的测试影响，生成完整输出
-```
-
-```text
-基于这个需求和 diff 联动分析，输出风险点、回归范围和 XMind 用例
-```
-
-```text
-只列 P0 核心用例
-```
-
-## 注意事项
-
-- 默认只做测试分析，不修改业务代码。
-- 规则不明确时必须先向用户确认。
-- 用户回复“跳过 / 不用管 / 继续生成 / 按默认处理”后，才允许继续生成最终用例。
-- 被跳过的问题仍会记录到分析报告的待确认点中。
-- 证据不足时只输出风险和待确认点，不生成确定性预期。
-- 修改规则文件前默认先输出预计修改文件、修改目的、删除影响、输出格式影响、同步范围和脚本/产物结构影响；用户明确要求直接修改时可直接执行。
-- 本地 XMind Markdown 文件必须从 `- 根节点名称` 开始，并保持纯 `-` 层级结构；对话代码块不能写入本地文件。
-
-## 环境要求
-
-- Python 3.10+，用于 Markdown 转 `.xmind`
-- Codex 或支持 `AGENTS.md` 的 AI coding agent
-
-## License
-
-如需开源发布，建议在仓库中补充 `LICENSE` 文件。
+执行 docs/codex/rule-validation-checklist.md 中的命令，确认 Skill 校验、Python 语法、全部测试、无效样例拦截、历史样例转换、Workbook 复验、Manifest、索引和双目录哈希全部通过。Python 3.10+；运行时脚本只使用标准库。

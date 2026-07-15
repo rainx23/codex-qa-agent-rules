@@ -1,0 +1,23 @@
+[
+  {"id": 1, "name": "正常 XMind Markdown", "kind": "xmind", "expected": "pass"},
+  {"id": 2, "name": "多根节点", "kind": "xmind", "expected": "fail"},
+  {"id": 3, "name": "TC 跳号", "kind": "xmind", "expected": "fail"},
+  {"id": 4, "name": "TC 重复", "kind": "xmind", "expected": "fail"},
+  {"id": 5, "name": "非法测试维度", "kind": "xmind", "expected": "fail"},
+  {"id": 6, "name": "Tab 缩进", "kind": "xmind", "expected": "fail"},
+  {"id": 7, "name": "非 4 空格缩进", "kind": "xmind", "expected": "fail"},
+  {"id": 8, "name": "层级跳跃", "kind": "xmind", "expected": "fail"},
+  {"id": 9, "name": "标签式节点", "kind": "xmind", "expected": "fail"},
+  {"id": 10, "name": "模糊预期", "kind": "xmind", "expected": "fail"},
+  {"id": 11, "name": "重复用例", "kind": "xmind", "expected": "fail"},
+  {"id": 12, "name": "未确认口径写死", "kind": "xmind", "expected": "fail"},
+  {"id": 13, "name": "纯文档 Diff", "fixture": "reports/pure_document_diff.md", "expected": "pass"},
+  {"id": 14, "name": "需求和 Diff 一致", "fixture": "reports/combined_consistent.md", "expected": "pass"},
+  {"id": 15, "name": "需求和 Diff 不一致", "fixture": "reports/combined_inconsistent.md", "expected": "pass-with-dual-evidence"},
+  {"id": 16, "name": "证据不足", "fixture": "reports/evidence_insufficient.md", "expected": "pass-with-blocking-gate"},
+  {"id": 17, "name": "多模块同规则需要合并", "kind": "xmind", "expected": "fail"},
+  {"id": 18, "name": "金融数据聚合和精度风险", "fixture": "reports/finance_precision.md", "expected": "pass"},
+  {"id": 19, "name": "个性化配置需求", "fixture": "reports/personalization.md", "expected": "pass"},
+  {"id": 20, "name": "XMind 转换成功和失败", "kind": "conversion", "expected": "both"}
+]
+

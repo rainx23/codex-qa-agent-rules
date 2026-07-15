@@ -1,0 +1,4 @@
+interface:
+  display_name: "QA Artifact Validation"
+  short_description: "QA report, XMind, manifest, index, and release validation"
+  default_prompt: "Use $qa-artifact-validation to validate all QA artifacts and block incomplete outputs."

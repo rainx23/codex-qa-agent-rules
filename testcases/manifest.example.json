@@ -1,0 +1,20 @@
+{
+  "artifact_id": "QA-20260715-001",
+  "source_type": "example",
+  "source_id": "REQ-EXAMPLE",
+  "source_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "requirement_id": "REQ-EXAMPLE",
+  "commit_range": "",
+  "rule_version": "2.1.0",
+  "generated_at": "2026-07-15 00:00:00",
+  "report_path": "testcases/example/reports/example_analysis.md",
+  "xmind_md_path": "testcases/example/xmind/example_xmind_20260715.md",
+  "xmind_path": "testcases/example/xmind/example_workbook_20260715.xmind",
+  "case_count": 0,
+  "p0_count": 0,
+  "pending_count": 0,
+  "validation_status": "pending",
+  "relation": "新增",
+  "supersedes": null
+}
+

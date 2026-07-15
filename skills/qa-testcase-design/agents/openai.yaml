@@ -1,0 +1,4 @@
+interface:
+  display_name: "QA Testcase Design"
+  short_description: "Minimal risk-driven XMind testcase design and deduplication"
+  default_prompt: "Use $qa-testcase-design to turn the confirmed analysis into a minimal effective XMind testcase set."

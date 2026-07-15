@@ -1,0 +1,4 @@
+interface:
+  display_name: "QA Requirement Analysis"
+  short_description: "Evidence-based requirement analysis and acceptance baseline"
+  default_prompt: "Use $qa-requirement-analysis to analyze this requirement and produce an evidence-backed acceptance baseline."
