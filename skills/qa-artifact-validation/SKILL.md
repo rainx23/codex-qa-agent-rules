@@ -19,5 +19,6 @@ description: 用于校验 QA 分析报告、XMind Markdown、XMind Workbook、Ma
 8. 运行语法、Schema 生成检查、规则版本检查、全量测试、Skill 校验、仓库模式校验和 CI 静态检查。
 9. 任一必需检查失败时标记校验失败，并停止“完整交付”的结论。
 10. 产物存在时运行 `validate_knowledge.py`、`build_knowledge_index.py --check`、`validate_data_validation.py`、`validate_sql_style.py --strict` 和 `validate_sql_artifact.py`。确认 SQL 只读，且只有在用户提供执行证据时才标记为已执行/通过/失败。
+11. 接口自动化产物存在时，运行 `../../scripts/validate_api_automation_artifacts.py --excel <case.xlsx> --parameters <parameter.txt> --model <api-automation.json>`；固定表头、JSON、健康校验、变量和参数维度任一失败都阻止交付。
 
 保留历史产物。除非操作已版本化或得到明确授权，不修复或覆盖已有产物。

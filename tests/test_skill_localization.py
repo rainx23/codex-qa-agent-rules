@@ -12,7 +12,7 @@ class SkillLocalizationTests(unittest.TestCase):
     def test_all_skills_keep_machine_identifiers_and_use_chinese_descriptions(self):
         skills_root = ROOT / "skills"
         skill_dirs = sorted(path for path in skills_root.iterdir() if path.is_dir())
-        self.assertEqual(5, len(skill_dirs))
+        self.assertEqual(6, len(skill_dirs))
         for skill_dir in skill_dirs:
             skill_file = skill_dir / "SKILL.md"
             text = skill_file.read_text(encoding="utf-8")
@@ -39,6 +39,7 @@ class SkillLocalizationTests(unittest.TestCase):
             "qa-testcase-design": (("测试用例", "XMind"), ("Testcase design", "XMind Markdown")),
             "qa-artifact-validation": (("校验", "产物"), ("Artifact validation", "manifest")),
             "qa-knowledge-management": (("知识", "DDL"), ("Knowledge management", "DDL")),
+            "qa-api-automation": (("接口自动化", "参数化"), ("API automation", "parameterization")),
         }
         for name, (chinese_words, english_words) in expected.items():
             text = (ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8")

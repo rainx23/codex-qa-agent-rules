@@ -1,0 +1,403 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Generated from scripts/qa_contracts.py; do not edit manually.",
+  "x-rule-version": "2.3.0",
+  "title": "API Automation Model",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "mode",
+    "automation_action",
+    "automation_required",
+    "endpoint",
+    "source_coverage",
+    "parameters",
+    "parameter_relationships",
+    "branches",
+    "parameterization",
+    "excel_case",
+    "assertion_level",
+    "blocking_questions",
+    "evidence",
+    "generated_artifacts",
+    "validation_status"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "mode": {
+      "enum": [
+        "new",
+        "maintenance"
+      ]
+    },
+    "automation_action": {
+      "enum": [
+        "create",
+        "update",
+        "none",
+        "blocked"
+      ]
+    },
+    "automation_required": {
+      "type": "boolean"
+    },
+    "endpoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "code",
+        "method",
+        "url",
+        "body_type"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "method": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "minLength": 1
+        },
+        "body_type": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "source_coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requirement",
+        "groovy_before",
+        "groovy_after",
+        "sql_before",
+        "sql_after",
+        "default_request",
+        "existing_automation"
+      ],
+      "properties": {
+        "requirement": {
+          "type": "boolean"
+        },
+        "groovy_before": {
+          "type": "boolean"
+        },
+        "groovy_after": {
+          "type": "boolean"
+        },
+        "sql_before": {
+          "type": "boolean"
+        },
+        "sql_after": {
+          "type": "boolean"
+        },
+        "default_request": {
+          "type": "boolean"
+        },
+        "existing_automation": {
+          "type": "boolean"
+        }
+      }
+    },
+    "parameters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "location",
+          "type",
+          "required",
+          "default_value",
+          "value_format",
+          "source",
+          "change_type",
+          "evidence",
+          "branch_ids"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "location": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "type": "string",
+            "minLength": 1
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "default_value": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "value_format": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1
+          },
+          "change_type": {
+            "enum": [
+              "added",
+              "removed",
+              "renamed",
+              "type_changed",
+              "default_changed",
+              "required_changed",
+              "format_changed",
+              "unchanged"
+            ]
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "branch_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          }
+        }
+      }
+    },
+    "parameter_relationships": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "parameter_names",
+          "relationship_type",
+          "condition",
+          "evidence"
+        ],
+        "properties": {
+          "parameter_names": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 2,
+            "uniqueItems": true
+          },
+          "relationship_type": {
+            "type": "string",
+            "minLength": 1
+          },
+          "condition": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          }
+        }
+      }
+    },
+    "branches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "branch_id",
+          "condition",
+          "source",
+          "status",
+          "covered"
+        ],
+        "properties": {
+          "branch_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "condition": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "minLength": 1
+          },
+          "covered": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "parameterization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "parameter_name_text",
+        "parameter_value_text",
+        "combination_count",
+        "generation_reason"
+      ],
+      "properties": {
+        "parameter_name_text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "parameter_value_text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "combination_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "generation_reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "excel_case": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "case_name",
+          "method",
+          "url",
+          "body_type",
+          "body",
+          "headers",
+          "validation",
+          "priority",
+          "interface_code"
+        ],
+        "properties": {
+          "case_name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "method": {
+            "type": "string",
+            "minLength": 1
+          },
+          "url": {
+            "type": "string",
+            "minLength": 1
+          },
+          "body_type": {
+            "type": "string",
+            "minLength": 1
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1
+          },
+          "headers": {
+            "type": "string",
+            "minLength": 1
+          },
+          "validation": {
+            "type": "string",
+            "minLength": 1
+          },
+          "priority": {
+            "type": "string",
+            "minLength": 1
+          },
+          "interface_code": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "assertion_level": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "health_check"
+      ],
+      "properties": {
+        "health_check": {
+          "const": true
+        }
+      }
+    },
+    "blocking_questions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "generated_artifacts": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "validation_status": {
+      "enum": [
+        "passed",
+        "failed",
+        "pending"
+      ]
+    }
+  }
+}

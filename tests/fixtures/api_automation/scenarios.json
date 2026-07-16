@@ -1,0 +1,18 @@
+[
+  {"id": "new-no-parameter", "mode": "new", "automation_action": "create"},
+  {"id": "new-single-parameter", "mode": "new", "automation_action": "create", "parameter": "isAnalysis", "values": ["0", "1", ""]},
+  {"id": "new-related-parameters", "mode": "new", "automation_action": "create", "parameter": "test1,test2", "values": [["1", "2"], ["", "3"], ["2", "1"]]},
+  {"id": "groovy-if-else-added", "mode": "maintenance", "automation_action": "update"},
+  {"id": "sql-dynamic-where-added", "mode": "maintenance", "automation_action": "update"},
+  {"id": "query-condition-without-code-evidence", "mode": "maintenance", "automation_action": "blocked"},
+  {"id": "string-to-array", "mode": "maintenance", "automation_action": "update"},
+  {"id": "single-to-multi", "mode": "maintenance", "automation_action": "update"},
+  {"id": "default-value-changed", "mode": "maintenance", "automation_action": "update"},
+  {"id": "existing-add-combination", "mode": "maintenance", "automation_action": "update"},
+  {"id": "sql-performance-only", "mode": "maintenance", "automation_action": "none"},
+  {"id": "frontend-style-only", "mode": "maintenance", "automation_action": "none"},
+  {"id": "missing-default-request", "mode": "new", "automation_action": "blocked"},
+  {"id": "invalid-validation-json", "expected": "validation_failed"},
+  {"id": "undefined-body-variable", "expected": "validation_failed"},
+  {"id": "duplicate-interface-row", "expected": "validation_failed"}
+]

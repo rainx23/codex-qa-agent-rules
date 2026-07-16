@@ -1,0 +1,4 @@
+interface:
+  display_name: "QA 接口自动化"
+  short_description: "分析接口自动化影响并生成可导入 Excel 与参数化文本"
+  default_prompt: "使用 $qa-api-automation 分析接口自动化影响，生成或维护 Excel 用例与参数化配置，并执行静态校验。"

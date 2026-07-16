@@ -42,6 +42,9 @@ SCHEMA_SCOPES = ("complete", "partial")
 DATA_VALIDATION_REQUIREMENTS = ("required", "optional", "not_required", "blocked")
 VALIDATION_METHODS = ("sql", "cross_source_reconciliation", "mixed", "not_applicable", "blocked")
 SQL_GENERATION_STATUSES = ("ready", "partial", "blocked", "not_required")
+API_AUTOMATION_MODES = ("new", "maintenance")
+API_AUTOMATION_ACTIONS = ("create", "update", "none", "blocked")
+API_PARAMETER_CHANGE_TYPES = ("added", "removed", "renamed", "type_changed", "default_changed", "required_changed", "format_changed", "unchanged")
 SQL_EXECUTION_STATUSES = ("planned", "generated", "reviewed", "executed", "passed", "failed", "blocked")
 SENSITIVE_PATTERN = re.compile(r"(?i)(?:password|passwd|token|jdbc|private[_ -]?key|secret)\s*[:=]")
 
@@ -317,6 +320,30 @@ def reconciliation_schema(version: str) -> dict[str, Any]:
     return _base_schema("Reconciliation Plan Model", version, _object(["schema_version", "reconciliation_plans"], {"schema_version": {"const": SCHEMA_VERSION}, "reconciliation_plans": {"type": "array", "items": plan, "minItems": 1}}))
 
 
+def api_automation_schema(version: str) -> dict[str, Any]:
+    endpoint = _object(
+        ["name", "code", "method", "url", "body_type"],
+        {"name": _string(), "code": _string(), "method": _string(), "url": _string(), "body_type": _string()},
+    )
+    coverage = _object(
+        ["requirement", "groovy_before", "groovy_after", "sql_before", "sql_after", "default_request", "existing_automation"],
+        {field: {"type": "boolean"} for field in ("requirement", "groovy_before", "groovy_after", "sql_before", "sql_after", "default_request", "existing_automation")},
+    )
+    parameter = _object(
+        ["name", "location", "type", "required", "default_value", "value_format", "source", "change_type", "evidence", "branch_ids"],
+        {"name": _string(), "location": _string(), "type": _string(), "required": {"type": "boolean"}, "default_value": {"type": ["string", "null"]}, "value_format": _string(), "source": _string(), "change_type": {"enum": list(API_PARAMETER_CHANGE_TYPES)}, "evidence": _strings(1), "branch_ids": _strings()},
+    )
+    relationship = _object(["parameter_names", "relationship_type", "condition", "evidence"], {"parameter_names": _strings(2), "relationship_type": _string(), "condition": _string(), "evidence": _strings(1)})
+    branch = _object(["branch_id", "condition", "source", "status", "covered"], {"branch_id": _string(), "condition": _string(), "source": _string(), "status": _string(), "covered": {"type": "boolean"}})
+    parameterization = _object(["parameter_name_text", "parameter_value_text", "combination_count", "generation_reason"], {"parameter_name_text": _string(), "parameter_value_text": _string(), "combination_count": {"type": "integer", "minimum": 1}, "generation_reason": _string()})
+    excel_case = _object(["case_name", "method", "url", "body_type", "body", "headers", "validation", "priority", "interface_code"], {"case_name": _string(), "method": _string(), "url": _string(), "body_type": _string(), "body": _string(), "headers": _string(), "validation": _string(), "priority": _string(), "interface_code": _string()})
+    body = _object(
+        ["schema_version", "mode", "automation_action", "automation_required", "endpoint", "source_coverage", "parameters", "parameter_relationships", "branches", "parameterization", "excel_case", "assertion_level", "blocking_questions", "evidence", "generated_artifacts", "validation_status"],
+        {"schema_version": {"const": SCHEMA_VERSION}, "mode": {"enum": list(API_AUTOMATION_MODES)}, "automation_action": {"enum": list(API_AUTOMATION_ACTIONS)}, "automation_required": {"type": "boolean"}, "endpoint": endpoint, "source_coverage": coverage, "parameters": {"type": "array", "items": parameter}, "parameter_relationships": {"type": "array", "items": relationship}, "branches": {"type": "array", "items": branch}, "parameterization": parameterization, "excel_case": {"type": "array", "items": excel_case}, "assertion_level": _object(["health_check"], {"health_check": {"const": True}}), "blocking_questions": _strings(), "evidence": _strings(1), "generated_artifacts": _strings(), "validation_status": {"enum": list(VALIDATION_STATUSES)}},
+    )
+    return _base_schema("API Automation Model", version, body)
+
+
 def risk_matrix_schema(version: str) -> dict[str, Any]:
     risk = _object(
         ["risk_id", "requirement_ids", "change_ids", "business_entry", "business_entries", "business_object", "conditions", "data_shapes", "core_action", "core_assertion", "business_impact", "test_priority", "evidence_state", "regression_scope", "merge_key", "testcase_ids"],
@@ -413,6 +440,7 @@ def schema_documents(root: Path) -> dict[str, dict[str, Any]]:
         "data-validation.schema.json": data_validation_schema(version),
         "validation-sql.schema.json": validation_sql_schema(version),
         "reconciliation-plan.schema.json": reconciliation_schema(version),
+        "api-automation.schema.json": api_automation_schema(version),
     }
 
 
@@ -670,6 +698,31 @@ def validate_reconciliation(data: dict[str, Any]) -> list[str]:
     return list(dict.fromkeys(errors))
 
 
+def validate_api_automation(data: dict[str, Any]) -> list[str]:
+    errors = validate_schema_shape(data, api_automation_schema("0.0.0"))
+    action = data.get("automation_action")
+    if action == "blocked" and not data.get("blocking_questions"):
+        errors.append("blocked 接口自动化必须提供 blocking_questions")
+    if action != "blocked" and data.get("blocking_questions") and data.get("validation_status") == "passed":
+        errors.append("非阻塞模型通过时不得保留 blocking_questions")
+    parameters = data.get("parameters", []) if isinstance(data.get("parameters"), list) else []
+    names = [item.get("name") for item in parameters]
+    if len(names) != len(set(names)):
+        errors.append("接口参数名必须唯一")
+    for item in parameters:
+        if not item.get("evidence"):
+            errors.append(f"参数 {item.get('name')} 缺少证据")
+    for case in data.get("excel_case", []) if isinstance(data.get("excel_case"), list) else []:
+        if case.get("method") != str(case.get("method", "")).lower():
+            errors.append("Excel 用例 method 必须为小写")
+        for field in ("body", "headers", "validation"):
+            try:
+                json.loads(case.get(field, ""))
+            except (TypeError, json.JSONDecodeError):
+                errors.append(f"Excel 用例 {field} 必须是合法 JSON")
+    return list(dict.fromkeys(errors))
+
+
 validate_reconciliation_plan = validate_reconciliation
 validate_validation_sql_model = validate_validation_sql
 
@@ -740,6 +793,7 @@ MODEL_VALIDATORS: dict[str, Callable[[dict[str, Any]], list[str]]] = {
     "validation_sql": validate_validation_sql,
     "reconciliation": validate_reconciliation,
     "reconciliation_plan": validate_reconciliation,
+    "api_automation": validate_api_automation,
 }
 
 

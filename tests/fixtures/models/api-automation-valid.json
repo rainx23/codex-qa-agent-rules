@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0.0",
+  "mode": "new",
+  "automation_action": "create",
+  "automation_required": true,
+  "endpoint": {"name": "bigdata.biz.global.cost.level3.waybill.analysis.pop.waybill.list", "code": "WAYBILL_LIST", "method": "post", "url": "https://example.invalid/api/waybill/list", "body_type": "json"},
+  "source_coverage": {"requirement": true, "groovy_before": false, "groovy_after": true, "sql_before": false, "sql_after": true, "default_request": true, "existing_automation": false},
+  "parameters": [{"name": "isAnalysis", "location": "body.params", "type": "String", "required": false, "default_value": "", "value_format": "single", "source": "Groovy request body", "change_type": "added", "evidence": ["fixture:body.params.isAnalysis"], "branch_ids": ["B001"]}],
+  "parameter_relationships": [],
+  "branches": [{"branch_id": "B001", "condition": "默认健康路径", "source": "default request", "status": "valid", "covered": true}],
+  "parameterization": {"parameter_name_text": "isAnalysis", "parameter_value_text": "[\"0\",\"1\",\"\"]", "combination_count": 3, "generation_reason": "覆盖单参数健康路径"},
+  "excel_case": [{"case_name": "AUTO-全局成本-运单分析-运单明细-bigdata.biz.global.cost.level3.waybill.analysis.pop.waybill.list", "method": "post", "url": "https://example.invalid/api/waybill/list", "body_type": "json", "body": "{\"params\":{\"isAnalysis\":\"$isAnalysis\"}}", "headers": "{}", "validation": "{\"validate\":[{\"check\":\"content.code\",\"comparator\":\"equals\",\"expected\":\"0\",\"type\":\"int\"},{\"check\":\"content.msg\",\"comparator\":\"equals\",\"expected\":\"OK\",\"type\":\"string\"}]}", "priority": "P1", "interface_code": "WAYBILL_LIST"}],
+  "assertion_level": {"health_check": true},
+  "blocking_questions": [],
+  "evidence": ["fixture:requirement", "fixture:groovy", "fixture:sql"],
+  "generated_artifacts": ["fixture-case.xlsx", "fixture-parameter.txt"],
+  "validation_status": "pending"
+}
