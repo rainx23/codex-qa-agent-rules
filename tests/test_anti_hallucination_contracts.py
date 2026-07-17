@@ -289,7 +289,7 @@ class AntiHallucinationContractTests(unittest.TestCase):
         self.assertEqual([], validate_sql(sql, True, ROOT / "rules-repository.json")[0])
         with tempfile.TemporaryDirectory() as temp:
             config = Path(temp) / "rules-repository.json"
-            config.write_text(json.dumps({"sql_defaults": {"author": "ootOther", "timezone": "Asia/Shanghai", "dialect": "starrocks"}}), encoding="utf-8")
+            config.write_text(json.dumps({"sql_defaults": {"author": "Other", "timezone": "Asia/Shanghai", "dialect": "starrocks"}}), encoding="utf-8")
             self.assertTrue(validate_sql(sql, True, config)[0])
             self.assertEqual([], validate_sql(sql.replace("author: Rainx", "author: Other"), True, config)[0])
 
