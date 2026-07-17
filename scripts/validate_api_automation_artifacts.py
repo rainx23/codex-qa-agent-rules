@@ -10,7 +10,9 @@ from qa_contracts import FIXED_API_ASSERTION_SCOPE, FIXED_API_HEALTH_CHECKS, _va
 
 NS = {"m": "http://schemas.openxmlformats.org/spreadsheetml/2006/main"}
 
-def _sha256(path: Path) -> str: return "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
+def _sha256(path: Path) -> str:
+    content = path.read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+    return "sha256:" + hashlib.sha256(content).hexdigest()
 
 def _subscript_path(node) -> str | None:
     parts = []

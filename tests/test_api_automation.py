@@ -49,6 +49,16 @@ class ApiAutomationTests(unittest.TestCase):
         for value in ([], "artifact", 0, None):
             self.assertTrue(any("object" in error for error in validate_api_automation_artifact(value, api_model=model, root=ROOT)))
 
+    def test_model_hash_is_stable_across_checkout_line_endings(self):
+        sys.path.insert(0, str(ROOT / "scripts"))
+        from validate_api_automation_artifacts import _sha256
+        with tempfile.TemporaryDirectory() as directory:
+            lf = Path(directory) / "lf.json"
+            crlf = Path(directory) / "crlf.json"
+            lf.write_bytes(b'{"model_id":"API-AUTO-001"}\n')
+            crlf.write_bytes(b'{"model_id":"API-AUTO-001"}\r\n')
+            self.assertEqual(_sha256(lf), _sha256(crlf))
+
     def test_script_default_value_swallow_and_business_assertions_fail(self):
         sys.path.insert(0, str(ROOT / "scripts"))
         from validate_api_automation_artifacts import _validate_script

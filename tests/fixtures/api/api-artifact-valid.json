@@ -3,7 +3,7 @@
   "model_reference": {
     "model_id": "API-AUTO-001",
     "model_path": "tests/fixtures/models/api-automation-valid.json",
-    "model_hash": "sha256:5a8fc217862971090cade5442b9159a6c767b84831c14a15e3664ca0793539e0"
+    "model_hash": "sha256:2e5b97b1d70a46aaea93d0cb9c242ec1dfc66b29f3ab32ded826c197bc9faeb3"
   },
   "script_path": "tests/fixtures/api/api-script-valid.py",
   "language": "python",
