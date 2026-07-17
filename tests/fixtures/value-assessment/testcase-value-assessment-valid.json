@@ -1,0 +1,52 @@
+{
+  "schema_version": "2.0.0",
+  "assessment_model_id": "TVA-001",
+  "algorithm_version": "1.0.0",
+  "testcase_model_reference": {
+    "model_id": "TC-MODEL-MULTI-ENTRY",
+    "path": "tests/fixtures/models/testcase-model-multi-entry.json",
+    "content_hash": "sha256:3cde035ca88fa0d208346833be8056f191fcea28dce14ff9a439a40011bcd4b2"
+  },
+  "risk_matrix_reference": {
+    "matrix_id": "MATRIX-001",
+    "path": "tests/fixtures/models/risk-coverage-matrix.json",
+    "content_hash": "sha256:1fb9e3bee3b5a950aa39797d4e5540d235c7abfa73d04cb6a7b21dca933f6f57"
+  },
+  "requirement_model_reference": {
+    "analysis_id": "AN-REQ-001",
+    "path": "tests/fixtures/models/requirement-analysis.json",
+    "content_hash": "sha256:7d5efd801d30a638fdefb8d258a7f63c420a1a09b5fa9f5630923a7375b4637d"
+  },
+  "maintenance_inputs": {
+    "TC001": {
+      "external_system_dependency_count": 0,
+      "mutable_shared_data_dependency_count": 0,
+      "manual_oracle_count": 0,
+      "environment_specific_dependency_count": 0
+    }
+  },
+  "assessments": [
+    {
+      "tc_id": "TC001",
+      "score_status": "insufficient_inputs",
+      "dimensions": {
+        "business_impact": 0,
+        "risk_coverage_value": 0,
+        "regression_value": 3,
+        "diagnostic_value": 0,
+        "evidence_confidence": 0,
+        "maintenance_cost": 4,
+        "redundancy_penalty": 0
+      },
+      "total_score": null,
+      "value_band": null,
+      "guardrails": [],
+      "reason_codes": [
+        "LOW_EVIDENCE_CONFIDENCE",
+        "HIGH_MAINTENANCE_COST",
+        "INSUFFICIENT_INPUTS"
+      ],
+      "recommendation": "insufficient_inputs"
+    }
+  ]
+}

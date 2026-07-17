@@ -10,7 +10,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable
 
-from validate_evidence import validate_evidence_references as validate_authentic_evidence_references
+from validate_evidence import (
+    _resolve_evidence_path,
+    validate_evidence_references as validate_authentic_evidence_references,
+)
+from validate_execution_instances import _sha as stable_normalized_file_hash
 
 
 SCHEMA_VERSION = "2.0.0"
@@ -47,6 +51,72 @@ FIXED_API_ASSERTION_SCOPE = "parameter_health"
 FIXED_API_HEALTH_CHECKS = (
     {"path": "content.code", "operator": "equals", "expected": 0},
     {"path": "content.msg", "operator": "equals", "expected": "OK"},
+)
+VALUE_ASSESSMENT_ALGORITHM_VERSION = "1.0.0"
+VALUE_ASSESSMENT_REASON_CODES = (
+    "CRITICAL_BUSINESS_IMPACT",
+    "HIGH_BUSINESS_IMPACT",
+    "P0_RISK_COVERAGE",
+    "UNIQUE_P1_RISK_COVERAGE",
+    "HISTORICAL_DEFECT_REGRESSION",
+    "CORE_REGRESSION",
+    "LOW_VALUE_REACHABILITY_ASSERTION",
+    "MULTI_RISK_DIAGNOSTIC_WEAKNESS",
+    "LOW_EVIDENCE_CONFIDENCE",
+    "HIGH_MAINTENANCE_COST",
+    "POSSIBLE_DUPLICATE",
+    "HIGH_SIMILARITY_DUPLICATE",
+    "INSUFFICIENT_INPUTS",
+)
+VALUE_ASSESSMENT_MAINTENANCE_FIELDS = (
+    "external_system_dependency_count",
+    "mutable_shared_data_dependency_count",
+    "manual_oracle_count",
+    "environment_specific_dependency_count",
+)
+VALUE_ASSESSMENT_DIMENSION_FIELDS = (
+    "business_impact",
+    "risk_coverage_value",
+    "regression_value",
+    "diagnostic_value",
+    "evidence_confidence",
+    "maintenance_cost",
+    "redundancy_penalty",
+)
+VALUE_ASSESSMENT_GUARDRAILS = ("p0_mapped", "historical_defect_regression")
+VALUE_ASSESSMENT_RECOMMENDATIONS = (
+    "retain",
+    "retain_guarded",
+    "retain_guarded_and_improve",
+    "standard_maintain",
+    "review_simplification",
+    "review_duplicate",
+    "retain_guarded_and_review_duplicate",
+    "split_for_diagnosis",
+    "reconfirm_priority_evidence",
+    "insufficient_inputs",
+)
+VALUE_ASSESSMENT_BANDS = (
+    "high_value_core",
+    "regression_keep",
+    "standard_value",
+    "review_simplify_or_merge",
+    "low_value_review",
+)
+VALUE_ASSESSMENT_WARNING_CODES = (
+    "LOW_EVIDENCE_CONFIDENCE",
+    "P0_LOW_SCORE_GUARDED",
+    "HISTORICAL_DEFECT_LOW_SCORE_GUARDED",
+    "POSSIBLE_DUPLICATE_REVIEW_REQUIRED",
+    "MULTI_RISK_DIAGNOSTIC_WEAKNESS",
+)
+VALUE_ASSESSMENT_SUGGESTION_CODES = (
+    "REVIEW_LOW_VALUE_SMOKE",
+    "REVIEW_SIMPLIFICATION",
+    "REVIEW_DUPLICATE",
+    "SPLIT_FOR_DIAGNOSIS",
+    "RECONFIRM_PRIORITY_EVIDENCE",
+    "RETAIN_GUARDED_AND_IMPROVE",
 )
 VAGUE_ASSERTIONS = (
     "页面正常", "功能正常", "展示正常", "运行正常", "交互正常", "数据正常", "符合预期",
@@ -152,6 +222,9 @@ def validate_schema_shape(value: Any, schema: dict[str, Any], path: str = "$") -
     if isinstance(value, int) and not isinstance(value, bool) and "minimum" in schema:
         if value < schema["minimum"]:
             errors.append(f"{path} 不得小于 {schema['minimum']}")
+    if isinstance(value, int) and not isinstance(value, bool) and "maximum" in schema:
+        if value > schema["maximum"]:
+            errors.append(f"{path} 不得大于 {schema['maximum']}")
     if isinstance(value, list):
         if len(value) < schema.get("minItems", 0):
             errors.append(f"{path} 数量不足 {schema['minItems']}")
@@ -167,9 +240,19 @@ def validate_schema_shape(value: Any, schema: dict[str, Any], path: str = "$") -
             if field not in value:
                 errors.append(f"{path} 缺少必填字段：{field}")
         properties = schema.get("properties", {})
-        if schema.get("additionalProperties") is False:
-            for field in value.keys() - properties.keys():
+        pattern_properties = schema.get("patternProperties", {})
+        for field in value.keys() - properties.keys():
+            matching = [
+                field_schema for pattern, field_schema in pattern_properties.items()
+                if re.fullmatch(pattern, str(field))
+            ]
+            if matching:
+                for field_schema in matching:
+                    errors.extend(validate_schema_shape(value[field], field_schema, f"{path}.{field}"))
+            elif schema.get("additionalProperties") is False:
                 errors.append(f"{path} 包含未定义字段：{field}")
+            elif isinstance(schema.get("additionalProperties"), dict):
+                errors.extend(validate_schema_shape(value[field], schema["additionalProperties"], f"{path}.{field}"))
         for field, field_schema in properties.items():
             if field in value:
                 errors.extend(validate_schema_shape(value[field], field_schema, f"{path}.{field}"))
@@ -513,6 +596,100 @@ def testcase_schema(version: str) -> dict[str, Any]:
     return _base_schema("Testcase Model", version, body)
 
 
+def testcase_value_assessment_schema(version: str) -> dict[str, Any]:
+    hash_value = _string(pattern=r"^sha256:[0-9a-f]{64}$")
+    testcase_reference = _object(
+        ["model_id", "path", "content_hash"],
+        {"model_id": _string(), "path": _string(), "content_hash": hash_value},
+    )
+    risk_reference = _object(
+        ["matrix_id", "path", "content_hash"],
+        {"matrix_id": _string(), "path": _string(), "content_hash": hash_value},
+    )
+    requirement_reference = {
+        "type": ["object", "null"],
+        "additionalProperties": False,
+        "required": ["analysis_id", "path", "content_hash"],
+        "properties": {
+            "analysis_id": _string(), "path": _string(), "content_hash": hash_value,
+        },
+    }
+    maintenance_value = _object(
+        list(VALUE_ASSESSMENT_MAINTENANCE_FIELDS),
+        {field: {"type": "integer", "minimum": 0} for field in VALUE_ASSESSMENT_MAINTENANCE_FIELDS},
+    )
+    maintenance_inputs = {
+        "type": "object",
+        "propertyNames": {"pattern": TC_PATTERN},
+        "patternProperties": {TC_PATTERN: maintenance_value},
+        "additionalProperties": False,
+    }
+    dimensions = _object(
+        list(VALUE_ASSESSMENT_DIMENSION_FIELDS),
+        {field: {"type": "integer", "minimum": 0, "maximum": 5} for field in VALUE_ASSESSMENT_DIMENSION_FIELDS},
+    )
+    assessment = _object(
+        [
+            "tc_id", "score_status", "dimensions", "total_score", "value_band",
+            "guardrails", "reason_codes", "recommendation",
+        ],
+        {
+            "tc_id": _string(pattern=TC_PATTERN),
+            "score_status": {"enum": ["computed", "insufficient_inputs"]},
+            "dimensions": dimensions,
+            "total_score": {"type": ["integer", "null"], "minimum": 0, "maximum": 100},
+            "value_band": {"enum": [*VALUE_ASSESSMENT_BANDS, None]},
+            "guardrails": {
+                "type": "array", "items": {"enum": list(VALUE_ASSESSMENT_GUARDRAILS)}, "uniqueItems": True,
+            },
+            "reason_codes": {
+                "type": "array", "items": {"enum": list(VALUE_ASSESSMENT_REASON_CODES)}, "uniqueItems": True,
+            },
+            "recommendation": {"enum": list(VALUE_ASSESSMENT_RECOMMENDATIONS)},
+        },
+    )
+    assessment["allOf"] = [
+        {
+            "if": {"properties": {"score_status": {"const": "computed"}}},
+            "then": {
+                "properties": {
+                    "total_score": {"type": "integer", "minimum": 0, "maximum": 100},
+                    "value_band": {"enum": list(VALUE_ASSESSMENT_BANDS)},
+                }
+            },
+        },
+        {
+            "if": {"properties": {"score_status": {"const": "insufficient_inputs"}}},
+            "then": {
+                "properties": {
+                    "total_score": {"type": "null"},
+                    "value_band": {"type": "null"},
+                    "recommendation": {"const": "insufficient_inputs"},
+                    "reason_codes": {"contains": {"const": "INSUFFICIENT_INPUTS"}},
+                }
+            },
+        },
+    ]
+    body = _object(
+        [
+            "schema_version", "assessment_model_id", "algorithm_version",
+            "testcase_model_reference", "risk_matrix_reference",
+            "requirement_model_reference", "assessments",
+        ],
+        {
+            "schema_version": {"const": SCHEMA_VERSION},
+            "assessment_model_id": _string(pattern=r"^TVA-\d{3}$"),
+            "algorithm_version": {"const": VALUE_ASSESSMENT_ALGORITHM_VERSION},
+            "testcase_model_reference": testcase_reference,
+            "risk_matrix_reference": risk_reference,
+            "requirement_model_reference": requirement_reference,
+            "maintenance_inputs": maintenance_inputs,
+            "assessments": {"type": "array", "items": assessment, "minItems": 1},
+        },
+    )
+    return _base_schema("Testcase Value Assessment Model", version, body)
+
+
 def manifest_schema(version: str) -> dict[str, Any]:
     required = [
         "schema_version", "artifact_id", "source_type", "source_id", "source_files", "source_hash_algorithm",
@@ -557,6 +734,7 @@ def schema_documents(root: Path) -> dict[str, dict[str, Any]]:
         "diff-impact.schema.json": diff_schema(version),
         "risk-coverage-matrix.schema.json": risk_matrix_schema(version),
         "testcase-model.schema.json": testcase_schema(version),
+        "testcase-value-assessment.schema.json": testcase_value_assessment_schema(version),
         "artifact-manifest.schema.json": manifest_schema(version),
         "knowledge-table.schema.json": knowledge_table_schema(version),
         "logic-version.schema.json": logic_version_schema(version),
@@ -1380,6 +1558,624 @@ def validate_model_links(
             if unknown:
                 errors.append(f"Diff 风险 {risk_id} 引用不存在 confirmed Fact：{sorted(unknown)}")
     return list(dict.fromkeys(errors))
+
+
+_VALUE_IMPACT_SCORES = {"critical": 5, "high": 4, "medium": 2, "low": 1}
+_VALUE_REGRESSION_SCORES = {"核心回归": 5, "关联回归": 3, "冒烟回归": 1}
+_VALUE_REACHABILITY_MARKERS = (
+    "页面打开", "成功打开", "可以打开", "可打开", "按钮可点击", "可以点击", "可点击",
+    "入口可访问", "可以访问", "可访问", "展示正常", "页面正常",
+)
+_VALUE_FORMATTING_PUNCTUATION = str.maketrans(
+    "", "", ",.;:!?，。；：！？、()（）[]【】{}<>《》\"'“”‘’`~*#_|/\\-"
+)
+
+
+def _value_normalize_text(value: Any) -> str:
+    if not isinstance(value, str):
+        return ""
+    normalized = re.sub(r"\s+", " ", value.casefold()).strip()
+    return normalized.translate(_VALUE_FORMATTING_PUNCTUATION)
+
+
+def _value_string_items(value: Any) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    return [item for item in value if isinstance(item, str) and item]
+
+
+def _value_execution_parts(case: dict[str, Any]) -> tuple[list[str], list[str], int]:
+    branches = case.get("entry_branches")
+    if isinstance(branches, list) and branches:
+        steps: list[str] = []
+        expected: list[str] = []
+        valid_paths = 0
+        valid_branches = [item for item in branches if isinstance(item, dict)]
+        for branch in sorted(valid_branches, key=lambda item: str(item.get("branch_id", ""))):
+            branch_steps = _value_string_items(branch.get("steps"))
+            branch_expected = _value_string_items(branch.get("expected_results"))
+            steps.extend(branch_steps)
+            expected.extend(branch_expected)
+            if branch_steps and branch_expected:
+                valid_paths += 1
+        return steps, expected, valid_paths
+    steps = _value_string_items(case.get("steps"))
+    expected = _value_string_items(case.get("expected_results"))
+    return steps, expected, 1 if steps and expected else 0
+
+
+def _value_case_semantics(case: dict[str, Any]) -> str:
+    parts = [_value_normalize_text(case.get("test_point"))]
+    parts.extend(_value_normalize_text(item) for item in _value_string_items(case.get("steps")))
+    parts.extend(_value_normalize_text(item) for item in _value_string_items(case.get("expected_results")))
+    branches = case.get("entry_branches")
+    if isinstance(branches, list):
+        valid_branches = [item for item in branches if isinstance(item, dict)]
+        for branch in sorted(valid_branches, key=lambda item: str(item.get("branch_id", ""))):
+            parts.append(_value_normalize_text(branch.get("entry_name")))
+            parts.extend(_value_normalize_text(item) for item in _value_string_items(branch.get("steps")))
+            parts.extend(_value_normalize_text(item) for item in _value_string_items(branch.get("expected_results")))
+    return "\x1f".join(item for item in parts if item)
+
+
+def _value_bigrams(value: str) -> set[str]:
+    if not value:
+        return set()
+    if len(value) == 1:
+        return {value}
+    return {value[index:index + 2] for index in range(len(value) - 1)}
+
+
+def _value_similarity_bp(left: str, right: str) -> int:
+    left_bigrams = _value_bigrams(left)
+    right_bigrams = _value_bigrams(right)
+    union = left_bigrams | right_bigrams
+    if not union:
+        return 0
+    return len(left_bigrams & right_bigrams) * 10000 // len(union)
+
+
+def _value_cost_score(units: int) -> int:
+    if units <= 0:
+        return 0
+    if units <= 2:
+        return 1
+    if units <= 5:
+        return 2
+    if units <= 9:
+        return 3
+    if units <= 14:
+        return 4
+    return 5
+
+
+def _validate_value_maintenance_inputs(
+    maintenance_inputs: dict[str, Any] | None,
+    testcase_ids: set[str],
+) -> dict[str, dict[str, int]]:
+    if maintenance_inputs is None:
+        return {}
+    if not isinstance(maintenance_inputs, dict):
+        raise ValueError("maintenance_inputs 必须是以 tc_id 为键的 object")
+    result: dict[str, dict[str, int]] = {}
+    allowed = set(VALUE_ASSESSMENT_MAINTENANCE_FIELDS)
+    for tc_id in sorted(maintenance_inputs):
+        if tc_id not in testcase_ids:
+            raise ValueError(f"maintenance_inputs 引用不存在 TC：{tc_id}")
+        values = maintenance_inputs[tc_id]
+        if not isinstance(values, dict):
+            raise ValueError(f"maintenance_inputs.{tc_id} 必须是 object")
+        unknown = sorted(set(values) - allowed)
+        if unknown:
+            raise ValueError(f"maintenance_inputs.{tc_id} 包含非法字段：{unknown}")
+        normalized: dict[str, int] = {}
+        for field in VALUE_ASSESSMENT_MAINTENANCE_FIELDS:
+            value = values.get(field, 0)
+            if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+                raise ValueError(f"maintenance_inputs.{tc_id}.{field} 必须是非负整数且不能是 boolean")
+            normalized[field] = value
+        result[tc_id] = normalized
+    return result
+
+
+def _value_evidence_confidence(
+    case: dict[str, Any],
+    risks: list[dict[str, Any]],
+    requirement_model: dict[str, Any] | None,
+) -> int:
+    states = [case.get("evidence_state")] + [risk.get("evidence_state") for risk in risks]
+    if any(state == "待确认" for state in states):
+        return 1
+    if any(state not in EVIDENCE_STATES for state in states):
+        return 0
+    if requirement_model is None:
+        return 3 if any(state == "疑似" for state in states) else 4
+
+    facts = requirement_model.get("facts")
+    if not isinstance(facts, list):
+        return 0
+    facts_by_id = {
+        str(fact.get("fact_id")): fact
+        for fact in facts
+        if isinstance(fact, dict) and isinstance(fact.get("fact_id"), str)
+    }
+    fact_ids = sorted({
+        str(fact_id)
+        for risk in risks
+        for fact_id in risk.get("fact_ids", []) if isinstance(risk.get("fact_ids"), list)
+        if isinstance(fact_id, str) and fact_id
+    })
+    if not fact_ids or any(fact_id not in facts_by_id for fact_id in fact_ids):
+        return 0
+    linked_facts = [facts_by_id[fact_id] for fact_id in fact_ids]
+    categories = [fact.get("category") for fact in linked_facts]
+    reference_statuses: list[Any] = []
+    for item in [*risks, *linked_facts]:
+        references = item.get("evidence_references")
+        if not isinstance(references, list) or not references:
+            return 0
+        reference_statuses.extend(
+            reference.get("evidence_status")
+            for reference in references
+            if isinstance(reference, dict)
+        )
+    if not reference_statuses or any(status not in {"current", "stale", "reconfirm_required"} for status in reference_statuses):
+        return 0
+    if "missing" in categories or any(status in {"stale", "reconfirm_required"} for status in reference_statuses):
+        return 1
+    if any(state == "疑似" for state in states) or any(category in {"conflicting", "inferred"} for category in categories):
+        return 3
+    if all(category == "confirmed" for category in categories) and all(status == "current" for status in reference_statuses):
+        return 5
+    return 0
+
+
+def calculate_testcase_value_assessments(
+    testcase_model: dict[str, Any],
+    risk_model: dict[str, Any],
+    requirement_model: dict[str, Any] | None = None,
+    maintenance_inputs: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Calculate deterministic, non-blocking testcase value assessments in memory."""
+
+    if not isinstance(testcase_model, dict):
+        raise ValueError("testcase_model 必须是 object")
+    if not isinstance(risk_model, dict):
+        raise ValueError("risk_model 必须是 object")
+    if requirement_model is not None and not isinstance(requirement_model, dict):
+        raise ValueError("requirement_model 必须是 object 或 None")
+
+    raw_cases = testcase_model.get("cases")
+    cases = [item for item in raw_cases if isinstance(item, dict)] if isinstance(raw_cases, list) else []
+    cases = sorted(cases, key=lambda item: str(item.get("tc_id", "")))
+    testcase_ids = {
+        str(case.get("tc_id"))
+        for case in cases
+        if isinstance(case.get("tc_id"), str) and case.get("tc_id")
+    }
+    normalized_maintenance = _validate_value_maintenance_inputs(maintenance_inputs, testcase_ids)
+
+    raw_risks = risk_model.get("risk_items")
+    risks = [item for item in raw_risks if isinstance(item, dict)] if isinstance(raw_risks, list) else []
+    risks = sorted(risks, key=lambda item: str(item.get("risk_id", "")))
+    risks_by_id = {
+        str(risk.get("risk_id")): risk
+        for risk in risks
+        if isinstance(risk.get("risk_id"), str) and risk.get("risk_id")
+    }
+
+    case_contexts: dict[str, dict[str, Any]] = {}
+    for case in cases:
+        tc_id = str(case.get("tc_id", ""))
+        risk_ids = sorted({
+            item for item in case.get("risk_ids", [])
+            if isinstance(case.get("risk_ids"), list) and isinstance(item, str)
+        })
+        linked_risks = [risks_by_id[risk_id] for risk_id in risk_ids if risk_id in risks_by_id]
+        valid_risks = [
+            risk for risk in linked_risks
+            if tc_id in {
+                item for item in risk.get("testcase_ids", [])
+                if isinstance(risk.get("testcase_ids"), list) and isinstance(item, str)
+            }
+        ]
+        merge_keys = tuple(sorted({
+            str(risk.get("merge_key")) for risk in valid_risks
+            if isinstance(risk.get("merge_key"), str) and risk.get("merge_key")
+        }))
+        case_contexts[tc_id] = {
+            "case": case,
+            "risks": valid_risks,
+            "merge_keys": merge_keys,
+            "semantics": _value_case_semantics(case),
+            "deduplication_key": str(case.get("deduplication_key", "")),
+        }
+
+    redundancy_by_tc = {tc_id: 0 for tc_id in sorted(case_contexts)}
+    sorted_ids = sorted(case_contexts)
+    for left_index, left_id in enumerate(sorted_ids):
+        left = case_contexts[left_id]
+        for right_id in sorted_ids[left_index + 1:]:
+            right = case_contexts[right_id]
+            same_deduplication_key = bool(left["deduplication_key"]) and left["deduplication_key"] == right["deduplication_key"]
+            same_merge_keys = bool(left["merge_keys"]) and left["merge_keys"] == right["merge_keys"]
+            if not (same_deduplication_key or same_merge_keys):
+                continue
+            similarity_bp = _value_similarity_bp(left["semantics"], right["semantics"])
+            penalty = 0
+            if same_deduplication_key and same_merge_keys and left["semantics"] == right["semantics"] and bool(left["semantics"]):
+                penalty = 5
+            elif similarity_bp >= 9500 and same_merge_keys:
+                penalty = 4
+            elif similarity_bp >= 8400:
+                penalty = 2
+            redundancy_by_tc[left_id] = max(redundancy_by_tc[left_id], penalty)
+            redundancy_by_tc[right_id] = max(redundancy_by_tc[right_id], penalty)
+
+    assessments: list[dict[str, Any]] = []
+    reason_order = {code: index for index, code in enumerate(VALUE_ASSESSMENT_REASON_CODES)}
+    for tc_id in sorted(case_contexts):
+        context = case_contexts[tc_id]
+        case = context["case"]
+        linked_risks = context["risks"]
+        merge_keys = context["merge_keys"]
+        reason_codes: set[str] = set()
+
+        business_impact = max((_VALUE_IMPACT_SCORES.get(str(risk.get("business_impact")), 0) for risk in linked_risks), default=0)
+        if business_impact == 5:
+            reason_codes.add("CRITICAL_BUSINESS_IMPACT")
+        elif business_impact == 4:
+            reason_codes.add("HIGH_BUSINESS_IMPACT")
+
+        coverage_values: list[int] = []
+        for risk in linked_risks:
+            priority = risk.get("test_priority")
+            covered_by = sorted({
+                item for item in risk.get("testcase_ids", [])
+                if isinstance(risk.get("testcase_ids"), list) and isinstance(item, str)
+            })
+            if priority == "P0":
+                coverage_values.append(5)
+            elif priority == "P1":
+                coverage_values.append(4 if covered_by == [tc_id] else 3)
+            elif priority == "P2":
+                coverage_values.append(2 if covered_by == [tc_id] else 1)
+        risk_coverage_value = max(coverage_values, default=0)
+        p0_mapped = any(risk.get("test_priority") == "P0" for risk in linked_risks)
+        if p0_mapped:
+            reason_codes.add("P0_RISK_COVERAGE")
+        if any(risk.get("test_priority") == "P1" and sorted(set(risk.get("testcase_ids", []))) == [tc_id] for risk in linked_risks):
+            reason_codes.add("UNIQUE_P1_RISK_COVERAGE")
+
+        historical_defect = bool(_value_string_items(case.get("historical_defect_ids")))
+        regression_value = 5 if historical_defect else _VALUE_REGRESSION_SCORES.get(str(case.get("regression_scope")), 0)
+        if historical_defect:
+            reason_codes.add("HISTORICAL_DEFECT_REGRESSION")
+        if case.get("regression_scope") == "核心回归":
+            reason_codes.add("CORE_REGRESSION")
+
+        steps, expected_results, execution_path_count = _value_execution_parts(case)
+        normalized_expected = [_value_normalize_text(item) for item in expected_results]
+        reachability_only = bool(normalized_expected) and all(
+            any(marker in expected for marker in _VALUE_REACHABILITY_MARKERS)
+            for expected in normalized_expected
+        )
+        if not steps or not expected_results or not merge_keys:
+            diagnostic_value = 0
+        elif len(merge_keys) == 1:
+            diagnostic_value = 5
+        elif len(merge_keys) == 2:
+            diagnostic_value = 3
+        else:
+            diagnostic_value = 1
+        if reachability_only:
+            diagnostic_value = min(diagnostic_value, 1)
+            reason_codes.add("LOW_VALUE_REACHABILITY_ASSERTION")
+        if len(merge_keys) >= 2:
+            reason_codes.add("MULTI_RISK_DIAGNOSTIC_WEAKNESS")
+
+        evidence_confidence = _value_evidence_confidence(case, linked_risks, requirement_model)
+        if evidence_confidence <= 1:
+            reason_codes.add("LOW_EVIDENCE_CONFIDENCE")
+
+        structural_units = (
+            len(steps)
+            + len(expected_results)
+            + sum(len(_value_string_items(case.get(field))) for field in (
+                "preconditions", "test_data_refs", "environment_refs", "role_refs",
+                "cleanup_steps", "oracle_sources",
+            ))
+            + 2 * max(execution_path_count - 1, 0)
+        )
+        structural_cost = _value_cost_score(structural_units)
+        observed = normalized_maintenance.get(tc_id, {})
+        observed_units = (
+            2 * observed.get("external_system_dependency_count", 0)
+            + 2 * observed.get("mutable_shared_data_dependency_count", 0)
+            + observed.get("manual_oracle_count", 0)
+            + observed.get("environment_specific_dependency_count", 0)
+        )
+        maintenance_cost = max(structural_cost, _value_cost_score(observed_units))
+        if maintenance_cost >= 4:
+            reason_codes.add("HIGH_MAINTENANCE_COST")
+
+        redundancy_penalty = redundancy_by_tc[tc_id]
+        if redundancy_penalty >= 2:
+            reason_codes.add("POSSIBLE_DUPLICATE")
+        if redundancy_penalty >= 4:
+            reason_codes.add("HIGH_SIMILARITY_DUPLICATE")
+
+        insufficient = not linked_risks
+        if insufficient:
+            reason_codes.add("INSUFFICIENT_INPUTS")
+        positive = (
+            6 * business_impact
+            + 5 * risk_coverage_value
+            + 4 * regression_value
+            + 3 * diagnostic_value
+            + 2 * evidence_confidence
+        )
+        penalty = 2 * maintenance_cost + 4 * redundancy_penalty
+        total_score = None if insufficient else min(max(positive - penalty, 0), 100)
+        if total_score is None:
+            value_band = None
+        elif total_score >= 80:
+            value_band = "high_value_core"
+        elif total_score >= 65:
+            value_band = "regression_keep"
+        elif total_score >= 45:
+            value_band = "standard_value"
+        elif total_score >= 25:
+            value_band = "review_simplify_or_merge"
+        else:
+            value_band = "low_value_review"
+
+        guardrails: list[str] = []
+        if p0_mapped:
+            guardrails.append("p0_mapped")
+        if historical_defect:
+            guardrails.append("historical_defect_regression")
+        guarded = bool(guardrails)
+        if insufficient:
+            recommendation = "insufficient_inputs"
+        elif redundancy_penalty >= 2:
+            recommendation = "retain_guarded_and_review_duplicate" if guarded else "review_duplicate"
+        elif guarded:
+            recommendation = "retain_guarded_and_improve" if total_score is not None and total_score < 65 else "retain_guarded"
+        elif evidence_confidence <= 1 and any(risk.get("test_priority") in {"P0", "P1"} for risk in linked_risks):
+            recommendation = "reconfirm_priority_evidence"
+        elif len(merge_keys) >= 2:
+            recommendation = "split_for_diagnosis"
+        elif maintenance_cost >= 4 or value_band in {"review_simplify_or_merge", "low_value_review"}:
+            recommendation = "review_simplification"
+        elif value_band == "standard_value":
+            recommendation = "standard_maintain"
+        else:
+            recommendation = "retain"
+
+        assessments.append({
+            "tc_id": tc_id,
+            "score_status": "insufficient_inputs" if insufficient else "computed",
+            "dimensions": {
+                "business_impact": business_impact,
+                "risk_coverage_value": risk_coverage_value,
+                "regression_value": regression_value,
+                "diagnostic_value": diagnostic_value,
+                "evidence_confidence": evidence_confidence,
+                "maintenance_cost": maintenance_cost,
+                "redundancy_penalty": redundancy_penalty,
+            },
+            "total_score": total_score,
+            "value_band": value_band,
+            "guardrails": guardrails,
+            "reason_codes": sorted(reason_codes, key=lambda code: reason_order[code]),
+            "recommendation": recommendation,
+        })
+    return {
+        "algorithm_version": VALUE_ASSESSMENT_ALGORITHM_VERSION,
+        "assessments": assessments,
+    }
+
+
+def _load_value_assessment_reference(
+    reference: Any,
+    *,
+    root: Path,
+    label: str,
+) -> tuple[dict[str, Any] | None, list[str]]:
+    if not isinstance(reference, dict):
+        return None, [f"{label} 必须是 object"]
+    resolved, errors = _resolve_evidence_path(reference.get("path"), root=root, label=f"{label}.path")
+    if errors or resolved is None:
+        return None, errors
+    actual_hash = stable_normalized_file_hash(resolved)
+    if reference.get("content_hash") != actual_hash:
+        return None, [f"{label}.content_hash 与归一化文件 Hash 不一致"]
+    try:
+        return load_json(resolved), []
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        return None, [f"{label} 无法读取：{exc}"]
+
+
+def validate_testcase_value_assessment(
+    assessment_model: dict[str, Any],
+    *,
+    root: Path,
+) -> list[str]:
+    """Validate persisted assessment references and every recomputed result field."""
+
+    errors = validate_schema_shape(
+        assessment_model,
+        testcase_value_assessment_schema("0.0.0"),
+    )
+    if not isinstance(assessment_model, dict):
+        return errors
+
+    assessments = assessment_model.get("assessments")
+    persisted = [item for item in assessments if isinstance(item, dict)] if isinstance(assessments, list) else []
+    persisted_ids = [item.get("tc_id") for item in persisted]
+    string_ids = [item for item in persisted_ids if isinstance(item, str)]
+    duplicate_ids = sorted({item for item in string_ids if string_ids.count(item) > 1})
+    if duplicate_ids:
+        errors.append(f"Assessment tc_id 重复：{duplicate_ids}")
+    for item in persisted:
+        status = item.get("score_status")
+        if status == "computed" and (not isinstance(item.get("total_score"), int) or isinstance(item.get("total_score"), bool) or item.get("value_band") is None):
+            errors.append(f"{item.get('tc_id')} computed 必须提供整数 total_score 和非空 value_band")
+        if status == "insufficient_inputs":
+            if item.get("total_score") is not None or item.get("value_band") is not None:
+                errors.append(f"{item.get('tc_id')} insufficient_inputs 的 total_score 和 value_band 必须为 null")
+            if item.get("recommendation") != "insufficient_inputs" or "INSUFFICIENT_INPUTS" not in item.get("reason_codes", []):
+                errors.append(f"{item.get('tc_id')} insufficient_inputs 缺少固定 recommendation 或 reason_code")
+
+    testcase_model, reference_errors = _load_value_assessment_reference(
+        assessment_model.get("testcase_model_reference"), root=root, label="testcase_model_reference",
+    )
+    errors.extend(reference_errors)
+    risk_model, reference_errors = _load_value_assessment_reference(
+        assessment_model.get("risk_matrix_reference"), root=root, label="risk_matrix_reference",
+    )
+    errors.extend(reference_errors)
+
+    requirement_reference = assessment_model.get("requirement_model_reference")
+    requirement_model: dict[str, Any] | None = None
+    if requirement_reference is not None:
+        requirement_model, reference_errors = _load_value_assessment_reference(
+            requirement_reference, root=root, label="requirement_model_reference",
+        )
+        errors.extend(reference_errors)
+
+    if testcase_model is not None:
+        reference = assessment_model.get("testcase_model_reference", {})
+        if isinstance(reference, dict) and reference.get("model_id") != testcase_model.get("model_id"):
+            errors.append("testcase_model_reference.model_id 与实际 Testcase Model 不一致")
+    if risk_model is not None:
+        reference = assessment_model.get("risk_matrix_reference", {})
+        if isinstance(reference, dict) and reference.get("matrix_id") != risk_model.get("matrix_id"):
+            errors.append("risk_matrix_reference.matrix_id 与实际 Risk Matrix 不一致")
+    if requirement_model is not None:
+        reference = assessment_model.get("requirement_model_reference", {})
+        if isinstance(reference, dict) and reference.get("analysis_id") != requirement_model.get("analysis_id"):
+            errors.append("requirement_model_reference.analysis_id 与实际 Requirement Model 不一致")
+
+    if testcase_model is None or risk_model is None:
+        return list(dict.fromkeys(errors))
+    try:
+        recomputed = calculate_testcase_value_assessments(
+            testcase_model,
+            risk_model,
+            requirement_model,
+            assessment_model.get("maintenance_inputs"),
+        )
+    except ValueError as exc:
+        errors.append(str(exc))
+        return list(dict.fromkeys(errors))
+
+    recomputed_items = recomputed["assessments"]
+    recomputed_by_id = {item["tc_id"]: item for item in recomputed_items}
+    persisted_by_id = {
+        str(item.get("tc_id")): item
+        for item in persisted
+        if isinstance(item.get("tc_id"), str)
+    }
+    unknown_ids = sorted(set(persisted_by_id) - set(recomputed_by_id))
+    missing_ids = sorted(set(recomputed_by_id) - set(persisted_by_id))
+    if unknown_ids:
+        errors.append(f"Assessment 包含 Testcase Model 不存在的 TC：{unknown_ids}")
+    if missing_ids:
+        errors.append(f"Assessment 遗漏可计算 TC：{missing_ids}")
+    compared_fields = (
+        "score_status", "dimensions", "total_score", "value_band",
+        "guardrails", "reason_codes", "recommendation",
+    )
+    for tc_id in sorted(set(persisted_by_id) & set(recomputed_by_id)):
+        for field in compared_fields:
+            if persisted_by_id[tc_id].get(field) != recomputed_by_id[tc_id].get(field):
+                errors.append(f"{tc_id} 持久化评分与重算结果不一致：{field}")
+    return list(dict.fromkeys(errors))
+
+
+def format_testcase_value_assessment(assessment_model: dict[str, Any]) -> list[str]:
+    """Format an already validated assessment with deterministic advisory messages."""
+
+    reason_order = {code: index for index, code in enumerate(VALUE_ASSESSMENT_REASON_CODES)}
+    guardrail_order = {code: index for index, code in enumerate(VALUE_ASSESSMENT_GUARDRAILS)}
+    lines: list[str] = []
+    warning_count = 0
+    suggestion_count = 0
+    computed_count = 0
+    insufficient_count = 0
+    assessments = sorted(assessment_model["assessments"], key=lambda item: item["tc_id"])
+    for assessment in assessments:
+        tc_id = assessment["tc_id"]
+        status = assessment["score_status"]
+        dimensions = assessment["dimensions"]
+        guardrails = sorted(assessment["guardrails"], key=lambda code: guardrail_order[code])
+        reason_codes = sorted(assessment["reason_codes"], key=lambda code: reason_order[code])
+        score = "null" if assessment["total_score"] is None else str(assessment["total_score"])
+        band = "null" if assessment["value_band"] is None else assessment["value_band"]
+        lines.append(
+            f"ASSESSMENT {tc_id} status={status} score={score} band={band} "
+            f"recommendation={assessment['recommendation']}"
+        )
+        lines.append(
+            f"DIMENSIONS {tc_id} "
+            + " ".join(f"{field}={dimensions[field]}" for field in VALUE_ASSESSMENT_DIMENSION_FIELDS)
+        )
+        lines.extend(f"GUARDRAIL {tc_id} {guardrail}" for guardrail in guardrails)
+        lines.extend(f"REASON {tc_id} {reason}" for reason in reason_codes)
+
+        if status == "computed":
+            computed_count += 1
+        else:
+            insufficient_count += 1
+
+        guarded = bool(guardrails)
+        low_band = assessment["value_band"] in {"review_simplify_or_merge", "low_value_review"}
+        high_priority = "p0_mapped" in guardrails or dimensions["risk_coverage_value"] >= 3
+        multi_risk = "MULTI_RISK_DIAGNOSTIC_WEAKNESS" in reason_codes
+        warnings: list[str] = []
+        suggestions: list[str] = []
+        if high_priority and dimensions["evidence_confidence"] <= 2:
+            warnings.append("LOW_EVIDENCE_CONFIDENCE")
+        if "p0_mapped" in guardrails and low_band:
+            warnings.append("P0_LOW_SCORE_GUARDED")
+        if "historical_defect_regression" in guardrails and low_band:
+            warnings.append("HISTORICAL_DEFECT_LOW_SCORE_GUARDED")
+        if dimensions["redundancy_penalty"] >= 2:
+            warnings.append("POSSIBLE_DUPLICATE_REVIEW_REQUIRED")
+        if dimensions["diagnostic_value"] <= 1 and multi_risk:
+            warnings.append("MULTI_RISK_DIAGNOSTIC_WEAKNESS")
+
+        if (
+            dimensions["business_impact"] <= 1
+            and dimensions["risk_coverage_value"] <= 2
+            and dimensions["diagnostic_value"] <= 1
+            and not guarded
+        ):
+            suggestions.append("REVIEW_LOW_VALUE_SMOKE")
+        if dimensions["maintenance_cost"] >= 4 and dimensions["business_impact"] <= 2 and not guarded:
+            suggestions.append("REVIEW_SIMPLIFICATION")
+        if dimensions["redundancy_penalty"] >= 2:
+            suggestions.append("REVIEW_DUPLICATE")
+        if dimensions["diagnostic_value"] <= 1 and multi_risk:
+            suggestions.append("SPLIT_FOR_DIAGNOSIS")
+        if high_priority and dimensions["evidence_confidence"] <= 2:
+            suggestions.append("RECONFIRM_PRIORITY_EVIDENCE")
+        if guarded and assessment["total_score"] is not None and assessment["total_score"] < 45:
+            suggestions.append("RETAIN_GUARDED_AND_IMPROVE")
+
+        lines.extend(f"WARNING {tc_id} {code}" for code in warnings)
+        lines.extend(f"SUGGESTION {tc_id} {code}" for code in suggestions)
+        warning_count += len(warnings)
+        suggestion_count += len(suggestions)
+
+    lines.append(
+        "SUMMARY testcase_value_assessment "
+        f"computed={computed_count} insufficient={insufficient_count} "
+        f"warning={warning_count} suggestion={suggestion_count} error=0"
+    )
+    return lines
 
 
 MODEL_VALIDATORS: dict[str, Callable[[dict[str, Any]], list[str]]] = {

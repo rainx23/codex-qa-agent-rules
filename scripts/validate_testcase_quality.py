@@ -4,11 +4,19 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
+from qa_contracts import (
+    format_testcase_value_assessment,
+    load_json,
+    validate_testcase_value_assessment,
+)
 from qa_validation import ValidationError, validate_markdown_file
 from validate_traceability import validate_files
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def validate_quality(
@@ -30,6 +38,21 @@ def validate_quality(
     return errors, list(dict.fromkeys(warnings))
 
 
+def validate_value_assessment_file(path: Path, *, root: Path = ROOT) -> tuple[list[str], list[str]]:
+    try:
+        assessment_model = load_json(path)
+    except FileNotFoundError:
+        return ["FILE_NOT_FOUND"], []
+    except json.JSONDecodeError:
+        return ["INVALID_JSON"], []
+    except OSError:
+        return ["READ_ERROR"], []
+    errors = validate_testcase_value_assessment(assessment_model, root=root)
+    if errors:
+        return errors, []
+    return [], format_testcase_value_assessment(assessment_model)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="校验最小有效用例集质量")
     parser.add_argument("files", nargs="+", type=Path)
@@ -37,6 +60,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--mode", choices=("auto", "requirement", "diff", "combined"), default="auto")
     parser.add_argument("--risk-matrix", type=Path)
     parser.add_argument("--testcase-model", type=Path)
+    parser.add_argument("--value-assessment", type=Path)
     parser.add_argument("--strict", action="store_true")
     args = parser.parse_args(argv)
     passed = warnings_count = failed = 0
@@ -60,7 +84,21 @@ def main(argv: list[str] | None = None) -> int:
             passed += 1
             print(f"PASS {path}: testcase quality valid")
     print(f"SUMMARY passed={passed} warning={warnings_count} failed={failed}")
-    return 1 if failed else 0
+    assessment_failed = False
+    if args.value_assessment is not None:
+        assessment_errors, assessment_lines = validate_value_assessment_file(args.value_assessment)
+        if assessment_errors:
+            assessment_failed = True
+            for error in assessment_errors:
+                print(f"ERROR testcase_value_assessment {error}", file=sys.stderr)
+            print(
+                "SUMMARY testcase_value_assessment "
+                f"computed=0 insufficient=0 warning=0 suggestion=0 error={len(assessment_errors)}"
+            )
+        else:
+            for line in assessment_lines:
+                print(line)
+    return 1 if failed or assessment_failed else 0
 
 
 if __name__ == "__main__":

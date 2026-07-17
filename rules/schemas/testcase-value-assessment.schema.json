@@ -1,0 +1,342 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Generated from scripts/qa_contracts.py; do not edit manually.",
+  "x-rule-version": "2.6.0",
+  "title": "Testcase Value Assessment Model",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "assessment_model_id",
+    "algorithm_version",
+    "testcase_model_reference",
+    "risk_matrix_reference",
+    "requirement_model_reference",
+    "assessments"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "2.0.0"
+    },
+    "assessment_model_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^TVA-\\d{3}$"
+    },
+    "algorithm_version": {
+      "const": "1.0.0"
+    },
+    "testcase_model_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model_id",
+        "path",
+        "content_hash"
+      ],
+      "properties": {
+        "model_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "content_hash": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    },
+    "risk_matrix_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "matrix_id",
+        "path",
+        "content_hash"
+      ],
+      "properties": {
+        "matrix_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "content_hash": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    },
+    "requirement_model_reference": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "analysis_id",
+        "path",
+        "content_hash"
+      ],
+      "properties": {
+        "analysis_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "content_hash": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    },
+    "maintenance_inputs": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^TC\\d{3}$"
+      },
+      "patternProperties": {
+        "^TC\\d{3}$": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "external_system_dependency_count",
+            "mutable_shared_data_dependency_count",
+            "manual_oracle_count",
+            "environment_specific_dependency_count"
+          ],
+          "properties": {
+            "external_system_dependency_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "mutable_shared_data_dependency_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "manual_oracle_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "environment_specific_dependency_count": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "assessments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "tc_id",
+          "score_status",
+          "dimensions",
+          "total_score",
+          "value_band",
+          "guardrails",
+          "reason_codes",
+          "recommendation"
+        ],
+        "properties": {
+          "tc_id": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^TC\\d{3}$"
+          },
+          "score_status": {
+            "enum": [
+              "computed",
+              "insufficient_inputs"
+            ]
+          },
+          "dimensions": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "business_impact",
+              "risk_coverage_value",
+              "regression_value",
+              "diagnostic_value",
+              "evidence_confidence",
+              "maintenance_cost",
+              "redundancy_penalty"
+            ],
+            "properties": {
+              "business_impact": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 5
+              },
+              "risk_coverage_value": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 5
+              },
+              "regression_value": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 5
+              },
+              "diagnostic_value": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 5
+              },
+              "evidence_confidence": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 5
+              },
+              "maintenance_cost": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 5
+              },
+              "redundancy_penalty": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 5
+              }
+            }
+          },
+          "total_score": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 100
+          },
+          "value_band": {
+            "enum": [
+              "high_value_core",
+              "regression_keep",
+              "standard_value",
+              "review_simplify_or_merge",
+              "low_value_review",
+              null
+            ]
+          },
+          "guardrails": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "p0_mapped",
+                "historical_defect_regression"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "reason_codes": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "CRITICAL_BUSINESS_IMPACT",
+                "HIGH_BUSINESS_IMPACT",
+                "P0_RISK_COVERAGE",
+                "UNIQUE_P1_RISK_COVERAGE",
+                "HISTORICAL_DEFECT_REGRESSION",
+                "CORE_REGRESSION",
+                "LOW_VALUE_REACHABILITY_ASSERTION",
+                "MULTI_RISK_DIAGNOSTIC_WEAKNESS",
+                "LOW_EVIDENCE_CONFIDENCE",
+                "HIGH_MAINTENANCE_COST",
+                "POSSIBLE_DUPLICATE",
+                "HIGH_SIMILARITY_DUPLICATE",
+                "INSUFFICIENT_INPUTS"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "recommendation": {
+            "enum": [
+              "retain",
+              "retain_guarded",
+              "retain_guarded_and_improve",
+              "standard_maintain",
+              "review_simplification",
+              "review_duplicate",
+              "retain_guarded_and_review_duplicate",
+              "split_for_diagnosis",
+              "reconfirm_priority_evidence",
+              "insufficient_inputs"
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "score_status": {
+                  "const": "computed"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "total_score": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100
+                },
+                "value_band": {
+                  "enum": [
+                    "high_value_core",
+                    "regression_keep",
+                    "standard_value",
+                    "review_simplify_or_merge",
+                    "low_value_review"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "score_status": {
+                  "const": "insufficient_inputs"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "total_score": {
+                  "type": "null"
+                },
+                "value_band": {
+                  "type": "null"
+                },
+                "recommendation": {
+                  "const": "insufficient_inputs"
+                },
+                "reason_codes": {
+                  "contains": {
+                    "const": "INSUFFICIENT_INPUTS"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "minItems": 1
+    }
+  }
+}
