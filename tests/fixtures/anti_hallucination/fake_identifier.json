@@ -1,0 +1,1 @@
+{"kind":"validation_sql","base":"tests/fixtures/artifacts/validation-sql-manifest.json","invalid":{"remove_identifier":"amount"},"expected_failure":"标识缺少证据","golden":{"valid":true,"invalid":false}}

@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from qa_contracts import validate_reconciliation, validate_validation_sql
-from validate_sql_style import validate_sql
+from validate_sql_style import find_config, validate_sql
 
 
 def validate_artifact(path: Path) -> list[str]:
@@ -28,17 +28,29 @@ def validate_artifact(path: Path) -> list[str]:
     sql_items = sql_model.get("sql_items", [])
     known_risks = set(data.get("risk_ids", []))
     known_tcs = set(data.get("tc_ids", []))
+    config = find_config(path.parent)
+    root = config.parent.resolve() if config else path.parent.resolve()
     for item in sql_items:
-        if known_risks and not set(item.get("risk_ids", [])).issubset(known_risks):
+        if not known_risks:
+            errors.append("SQL Artifact 顶层 risk_ids 不能为空")
+        elif not set(item.get("risk_ids", [])).issubset(known_risks):
             errors.append(f"{item.get('sql_id')} 引用未映射风险")
-        if known_tcs and not set(item.get("tc_ids", [])).issubset(known_tcs):
+        if not known_tcs:
+            errors.append("SQL Artifact 顶层 tc_ids 不能为空")
+        elif not set(item.get("tc_ids", [])).issubset(known_tcs):
             errors.append(f"{item.get('sql_id')} 引用未映射 TC")
         sql_path = Path(str(item.get("sql_path", "")))
-        resolved = (path.parent / sql_path).resolve()
-        if not sql_path or not resolved.is_file():
+        if sql_path.is_absolute() or ".." in sql_path.parts:
+            errors.append(f"{item.get('sql_id')} SQL 路径禁止绝对路径或 ..：{sql_path}")
+            continue
+        resolved = (root / sql_path).resolve()
+        if resolved != root and root not in resolved.parents:
+            errors.append(f"{item.get('sql_id')} SQL 路径越界：{sql_path}")
+            continue
+        if not sql_path.parts or sql_path.parts[0] not in {"tests", "testcases"} or not resolved.is_file():
             errors.append(f"{item.get('sql_id')} SQL 文件不存在：{sql_path}")
             continue
-        style_errors, _ = validate_sql(resolved.read_text(encoding="utf-8-sig"), strict=True)
+        style_errors, _ = validate_sql(resolved.read_text(encoding="utf-8-sig"), strict=True, config=config)
         errors.extend(f"{item.get('sql_id')}: {error}" for error in style_errors)
     sql_status = data.get("sql_status")
     if sql_status in {"executed", "passed", "failed"} and not data.get("execution_evidence"):

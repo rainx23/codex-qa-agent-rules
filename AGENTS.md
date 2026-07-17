@@ -5,6 +5,7 @@
 - 用户要求修改仓库结构、规则、Skill、脚本、测试、README、版本或发布内容时，先加载 `rules/core/repository-documentation-rules.md`。
 - 完成规则、Skill、脚本、测试或目录修改前，必须进行文档与版本影响判断；需要更新 README、CHANGELOG 或 RULE_VERSION 时不得遗漏。
 - 小内容修改仅可按正式规则中的豁免条件处理；不得在本文件复制完整版本判定规则。
+- 生成真实结构化模型后运行 `scripts/validate_models.py`；最终交付仍必须由 `validate_manifest.py` 全链路复验。
 
 ## 角色与边界
 

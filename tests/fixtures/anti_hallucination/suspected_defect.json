@@ -1,0 +1,1 @@
+{"kind":"suspected_defect","base":"tests/fixtures/models/diff-impact.json","valid_change_id":"CHG-001","invalid_change_id":"CHG-UNKNOWN","expected_failure":"不存在 change_id","golden":{"valid":true,"invalid":false}}

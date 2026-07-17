@@ -135,7 +135,10 @@ def parse_statement(statement: str, index: int = 1) -> tuple[dict[str, Any] | No
     for item in _split_top_level(body):
         stripped = item.strip()
         upper = stripped.upper()
-        if upper.startswith(("PRIMARY KEY", "UNIQUE KEY", "UNIQUE INDEX", "KEY ", "INDEX ", "CONSTRAINT")):
+        if upper.startswith(("UNIQUE INDEX", "INDEX ", "KEY ")):
+            indexes.append(stripped)
+            continue
+        if upper.startswith(("PRIMARY KEY", "UNIQUE KEY", "CONSTRAINT")):
             keys.append(stripped)
             continue
         match = FIELD_RE.match(stripped)
@@ -146,13 +149,21 @@ def parse_statement(statement: str, index: int = 1) -> tuple[dict[str, Any] | No
         type_name = match.group("type").strip()
         default_match = re.search(r"(?is)\bdefault\s+([^\s,]+)", stripped)
         comment_match = re.search(r"(?is)\bcomment\s+'((?:''|[^'])*)'", stripped)
+        nullable_known = bool(re.search(r"(?i)\b(?:not\s+null|null)\b", stripped))
+        default_value = default_match.group(1) if default_match else None
+        default_state = "known_null" if default_value and default_value.casefold() == "null" else "known_value" if default_match else "unknown"
+        evidence_fields = ["name", "type"] + (["nullable"] if nullable_known else []) + (["default"] if default_match else []) + (["comment"] if comment_match else [])
+        unknown_fields = [field for field in ("nullable", "default", "comment") if field not in evidence_fields]
         fields.append({
             "name": name,
             "type": type_name,
-            "nullable": not bool(re.search(r"(?i)\bnot\s+null\b", stripped)),
-            "default": default_match.group(1) if default_match else None,
+            "nullable": (not bool(re.search(r"(?i)\bnot\s+null\b", stripped))) if nullable_known else None,
+            "default": default_value,
+            "default_state": default_state,
             "comment": comment_match.group(1).replace("''", "'") if comment_match else None,
             "ordinal": len(fields) + 1,
+            "evidence_fields": evidence_fields,
+            "unknown_fields": unknown_fields,
         })
     tail = statement[close_paren + 1:]
     partition_match = re.search(r"(?is)\bpartition\s+by\s+(.+?)(?=\border\s+by\b|\bdistributed\s+by\b|\bproperties\b|$)", tail)
@@ -171,13 +182,29 @@ def parse_statement(statement: str, index: int = 1) -> tuple[dict[str, Any] | No
         for key, value in re.findall(r"['\"]?([\w-]+)['\"]?\s*=\s*['\"]?([^,'\"]+)['\"]?", properties_match.group(1)):
             engine_properties[key] = value.strip()
     raw = statement.strip()
+    structure_checks = (
+        (r"(?i)\bprimary\s+key\b", "主键", bool(keys)),
+        (r"(?i)\bunique\s+key\b", "唯一键", any("UNIQUE KEY" in item.upper() for item in keys)),
+        (r"(?i)\bduplicate\s+key\b", "Duplicate Key", any("DUPLICATE KEY" in item.upper() for item in keys)),
+        (r"(?i)\baggregate\s+key\b", "Aggregate Key", any("AGGREGATE KEY" in item.upper() for item in keys)),
+        (r"(?i)\bpartition\s+by\b", "分区", bool(partitions)),
+        (r"(?i)\bdistributed\s+by\b", "分桶", any("DISTRIBUTED BY" in item.upper() for item in indexes)),
+        (r"(?i)\b(?:unique\s+)?index\s+\w+", "索引", bool(indexes)),
+        (r"(?i)\bengine\s*=", "Engine", "engine" in engine_properties),
+        (r"(?i)\bproperties\s*\(", "Properties", bool(properties_match) and len(engine_properties) > int("engine" in engine_properties)),
+    )
+    for pattern, label, parsed in structure_checks:
+        if re.search(pattern, raw) and not parsed:
+            warnings.append(f"表 {full_name} 包含 {label}，但未能稳定提取")
     normalized = normalize_ddl(raw)
     model = {
         "table_id": full_name.replace(".", "_"), "domain": "unknown", "database": database,
-        "table_name": table_name, "full_name": full_name, "dialect": detect_dialect(raw), "schema_scope": "complete", "current_ddl_path": None,
+        "table_name": table_name, "full_name": full_name, "dialect": detect_dialect(raw),
+        "schema_scope": "complete" if fields and not warnings else "partial" if fields else "blocked", "current_ddl_path": None,
         "raw_ddl": raw, "normalized_ddl": normalized, "raw_hash": _sha256(raw), "normalized_hash": _sha256(normalized),
         "fields": fields, "keys": keys, "partitions": partitions, "indexes": indexes, "engine_properties": engine_properties,
         "status": "candidate", "source_type": "chat_ddl", "source_requirement_ids": [], "last_verified_at": None,
+        "parse_warnings": warnings, "applicability_scope": None,
     }
     return model, warnings
 
@@ -211,8 +238,9 @@ def parse_partial_fields(text: str, full_name: str, domain: str = "unknown") -> 
         match = FIELD_RE.match(line.strip().rstrip(",;"))
         if not match:
             continue
-        fields.append({"name": match.group("name").strip("`\""), "type": match.group("type").strip(), "nullable": True, "default": None, "comment": None, "ordinal": len(fields) + 1})
-    return {"tables": [{"table_id": full_name.replace(".", "_"), "domain": domain, "database": database, "table_name": table_name, "full_name": full_name, "dialect": "unspecified", "schema_scope": "partial", "current_ddl_path": None, "raw_hash": _sha256(text), "normalized_hash": _sha256(normalize_ddl(text)), "fields": fields, "keys": [], "partitions": [], "indexes": [], "engine_properties": {}, "status": "candidate", "source_type": "chat_partial_fields", "source_requirement_ids": [], "last_verified_at": None}], "warnings": [] if fields else ["未识别到明确字段；未补齐整表结构"], "sensitive": bool(SENSITIVE_RE.search(text)), "input_raw_hash": _sha256(text), "input_normalized_hash": _sha256(normalize_ddl(text))}
+        fields.append({"name": match.group("name").strip("`\""), "type": match.group("type").strip(), "nullable": None, "default": None, "default_state": "unknown", "comment": None, "ordinal": len(fields) + 1, "evidence_fields": ["name", "type"], "unknown_fields": ["nullable", "default", "comment"]})
+    item_warnings = [] if fields else ["未识别到明确字段；未补齐整表结构"]
+    return {"tables": [{"table_id": full_name.replace(".", "_"), "domain": domain, "database": database, "table_name": table_name, "full_name": full_name, "dialect": "unspecified", "schema_scope": "partial" if fields else "blocked", "current_ddl_path": None, "raw_hash": _sha256(text), "normalized_hash": _sha256(normalize_ddl(text)), "fields": fields, "keys": [], "partitions": [], "indexes": [], "engine_properties": {}, "status": "candidate", "source_type": "chat_partial_fields", "source_requirement_ids": [], "last_verified_at": None, "parse_warnings": item_warnings, "applicability_scope": f"仅限用户明确提供的 {len(fields)} 个字段" if fields else None}], "warnings": item_warnings, "sensitive": bool(SENSITIVE_RE.search(text)), "input_raw_hash": _sha256(text), "input_normalized_hash": _sha256(normalize_ddl(text))}
 
 
 def main(argv: list[str] | None = None) -> int:

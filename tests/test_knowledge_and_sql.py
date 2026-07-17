@@ -45,6 +45,30 @@ create table demo.b (code varchar(16));"""
         self.assertEqual(["amount"], diff["type_changed_fields"])
         self.assertTrue(diff["structural_change"])
 
+    def test_complete_ddl_preserves_explicit_table_structures(self):
+        ddl = """create table demo.orders (
+  order_id bigint not null,
+  amount decimal(18,2),
+  primary key (order_id),
+  index idx_amount (amount)
+) engine=olap
+partition by range(order_id) ()
+distributed by hash(order_id) buckets 3
+properties ("replication_num"="1");"""
+        table = parse_ddl(ddl)["tables"][0]
+        self.assertEqual("complete", table["schema_scope"])
+        self.assertTrue(any("PRIMARY KEY" in item.upper() for item in table["keys"]))
+        self.assertTrue(table["partitions"])
+        self.assertTrue(any("INDEX" in item.upper() for item in table["indexes"]))
+        self.assertTrue(any("DISTRIBUTED BY" in item.upper() for item in table["indexes"]))
+        self.assertEqual("olap", table["engine_properties"]["engine"].lower())
+        self.assertEqual("1", table["engine_properties"]["replication_num"])
+
+    def test_explicit_unparsed_ddl_structure_downgrades_complete(self):
+        table = parse_ddl("create table demo.a (id bigint) engine= properties (); ")["tables"][0]
+        self.assertEqual("partial", table["schema_scope"])
+        self.assertTrue(any("Engine" in warning or "Properties" in warning for warning in table["parse_warnings"]))
+
     def test_partial_model_cannot_be_complete_table(self):
         table = load_json(ROOT / "qa-knowledge/examples/domains/demo/tables/demo.orders/metadata.json")
         table["schema_scope"] = "partial"

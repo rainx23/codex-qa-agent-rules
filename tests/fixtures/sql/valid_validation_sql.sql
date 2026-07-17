@@ -1,6 +1,6 @@
 /************************************************************************************************
 ** sql
-** author: 卢更鑫
+** author: Rainx
 ** create time: 2026-07-15 00:00:00
 ** description: 验证脱敏订单金额汇总
 ** comment: SELECT * FROM database.tablename WHERE id=${id} AND address='${address}';

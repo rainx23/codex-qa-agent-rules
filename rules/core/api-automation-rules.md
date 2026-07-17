@@ -1,5 +1,7 @@
 # 接口自动化分析与用例生成规则
 
+当前接口自动化只支持 `assertion_scope=parameter_health`，固定健康检查为 `content.code=0` 与 `content.msg=OK`。健康性断言只证明参数组合能够成功传递并触发有效分支，健康性断言 ≠ 业务数据断言；不得据此宣称业务返回数据、指标、排序、跨接口一致性、数据库结果或页面对账正确。`business_assertion_status` 当前固定为 `not_implemented`，缺少业务响应字段断言不构成 blocked。
+
 本文件是接口自动化通用规则的唯一正文来源。Skill 只规定加载、交接和输出，不复制本文件。
 
 ## 定位与证据

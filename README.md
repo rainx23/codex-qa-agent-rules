@@ -17,6 +17,8 @@
 
 当前版本只读取根目录 [RULE_VERSION](RULE_VERSION)。完整历史统一维护在 [CHANGELOG.md](CHANGELOG.md)；README 不单独维护版本号或复制完整版本历史。
 
+接口自动化当前保留 `content.code=0`、`content.msg=OK` 参数健康检查；健康性断言 ≠ 业务数据断言。本阶段只支持 `assertion_scope=parameter_health`，不自动生成业务响应字段、指标、排序、数据库或跨系统一致性断言。
+
 [![QA Rules Validation](https://github.com/rainx23/codex-qa-agent-rules/actions/workflows/qa-rules-validation.yml/badge.svg)](https://github.com/rainx23/codex-qa-agent-rules/actions/workflows/qa-rules-validation.yml)
 
 `codex-qa-agent-rules` 是一套面向软件测试工作的 Codex QA 规则与 Skills 框架。它把需求分析、Diff 影响分析、风险识别、测试用例设计、XMind 产物生成、自动质量校验和测试产物治理串成一条可复用工作流。

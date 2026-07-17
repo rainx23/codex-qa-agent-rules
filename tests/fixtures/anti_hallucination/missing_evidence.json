@@ -1,0 +1,1 @@
+{"kind":"requirement","base":"tests/fixtures/models/requirement-analysis.json","invalid":{"remove":"facts.0.evidence_references"},"expected_failure":"evidence_references","golden":{"valid":true,"invalid":false}}

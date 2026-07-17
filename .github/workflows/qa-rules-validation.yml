@@ -66,6 +66,7 @@ jobs:
           python scripts/validate_schemas.py
           python scripts/validate_rule_version.py
           python scripts/validate_repository_docs.py
+          python scripts/validate_models.py --requirement tests/fixtures/models/requirement-analysis.json --diff tests/fixtures/models/diff-impact.json --risk tests/fixtures/models/risk-coverage-matrix.json --testcase tests/fixtures/models/testcase-model.json
       - name: Validate repository mode
         run: python scripts/validate_repository_mode.py
       - name: Validate knowledge, data validation and SQL artifacts
@@ -76,7 +77,9 @@ jobs:
           python scripts/validate_sql_style.py tests/fixtures/sql/valid_validation_sql.sql --strict
           python scripts/validate_sql_artifact.py tests/fixtures/artifacts/validation-sql-manifest.json
       - name: Run behavior tests
-        run: python -m unittest discover -s tests -v
+        run: |
+          python -m unittest discover -s tests -p test_anti_hallucination_fixtures.py -v
+          python -m unittest discover -s tests -v
       - name: Validate Manifest and index encoding
         run: |
           python scripts/validate_manifest.py testcases/manifest.example.json

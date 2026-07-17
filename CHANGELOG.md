@@ -14,6 +14,31 @@
 
 ### Removed
 
+## [2.5.0] - 2026-07-17
+
+### Added
+
+- 新增真实 Requirement、Diff、Risk、Testcase 模型联合校验器 `scripts/validate_models.py`。
+- 新增结构化疑似缺陷、风险处置状态、SQL 标识证据、Testcase 执行辅助字段与 API 参数健康断言范围契约。
+- 新增统一 Evidence Reference、可选 Testcase Execution Instance，以及来源文件哈希变化后的 stale/reconfirm 校验。
+- 新增 `tests/fixtures/anti_hallucination/` 八类独立反幻觉夹具、Golden 结果和 CI 统一回归入口。
+
+### Changed
+
+- 阻塞待确认点强制保持 pending，未分类待确认点不再默认为 nonblocking。
+- 收紧 confirmed Fact、DDL complete/partial、P0/P1/P2 覆盖、步骤预期、模糊断言和 SQL 路径规则。
+- SQL author 改由 `rules-repository.json.sql_defaults.author` 配置，默认 `Rainx`。
+- 调整禅道证据优先级和权限相关场景的默认判断。
+- Diff Impact 的 `impact_chains`、`risks`、`suspected_defects` 全面强类型化，并增加引用 ID 的存在性与双向交叉校验。
+- Testcase 独立维护分支数和执行实例数；执行实例不计入 `case_count`，无实际执行证据时仅允许 `not_run`。
+- Complete DDL 增加主键、唯一键、Duplicate/Aggregate Key、分区、分桶、索引、Engine、Properties 的完整解析门禁。
+
+### Fixed
+
+- 修复 inference 可伪装 confirmed、DDL 解析警告仍标记 complete、阻塞问题仍可 passed、风险静默丢失和 SQL 顶层空映射绕过校验的问题。
+- 明确 `content.code=0` 与 `content.msg=OK` 仅证明参数组合健康，不代表业务响应数据正确。
+- integrated 仓库缺少 `sql_defaults.author` 时改为明确迁移失败，禁止旧姓名、系统用户名和静默回退。
+
 ## [2.4.0] - 2026-07-17
 
 ### Added

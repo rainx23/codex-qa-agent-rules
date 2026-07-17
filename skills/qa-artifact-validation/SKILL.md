@@ -5,6 +5,8 @@ description: 用于校验 QA 分析报告、XMind Markdown、XMind Workbook、Ma
 
 # QA 测试产物校验（QA Artifact Validation）
 
+模型校验职责分离：`validate_schemas.py` 校验仓库契约与固定 Fixture；`validate_models.py` 校验本次真实模型；`validate_manifest.py` 对最终报告、模型、XMind、Workbook 和计数做全链路复验。
+
 将本 Skill 的根目录解析为当前 `SKILL.md` 向上两级的仓库根目录。
 
 ## 执行流程
@@ -17,6 +19,7 @@ description: 用于校验 QA 分析报告、XMind Markdown、XMind Workbook、Ma
 6. 运行 `../../scripts/validate_manifest.py`，校验规则版本、来源哈希、待确认/P0 数量、安全路径、模型、Workbook 内容和 supersedes 关系。
 7. 仅在 Manifest 校验通过后运行 `../../scripts/build_testcase_index.py`，再确认 artifact id 只出现一次，且校验状态没有与业务状态混用。
 8. 运行语法、Schema 生成检查、规则版本检查、全量测试、Skill 校验、仓库模式校验和 CI 静态检查。
+   - 先运行 `python -m unittest discover -s tests -p test_anti_hallucination_fixtures.py -v`，确保八类独立反幻觉夹具通过，再运行全量测试。
 9. 任一必需检查失败时标记校验失败，并停止“完整交付”的结论。
 10. 产物存在时运行 `validate_knowledge.py`、`build_knowledge_index.py --check`、`validate_data_validation.py`、`validate_sql_style.py --strict` 和 `validate_sql_artifact.py`。确认 SQL 只读，且只有在用户提供执行证据时才标记为已执行/通过/失败。
 11. 接口自动化产物存在时，运行 `../../scripts/validate_api_automation_artifacts.py --excel <case.xlsx> --parameters <parameter.txt> --model <api-automation.json>`；固定表头、JSON、健康校验、变量和参数维度任一失败都阻止交付。

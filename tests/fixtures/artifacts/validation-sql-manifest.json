@@ -4,6 +4,8 @@
   "sql_status": "generated",
   "sql_count": 1,
   "reconciliation_count": 0,
+  "risk_ids": ["RISK-DEMO-001"],
+  "tc_ids": ["TC001"],
   "sql_items": [
     {
       "sql_id": "SQLV001",
@@ -18,8 +20,17 @@
       "metric_ids": ["METRIC-DEMO-ORDER-AMOUNT"],
       "expected_assertion": "SQL 汇总值按需求精度与页面指标一致",
       "execution_status": "generated",
-      "sql_path": "../sql/valid_validation_sql.sql",
-      "evidence_sources": ["REQ-DEMO-001"]
+      "sql_path": "tests/fixtures/sql/valid_validation_sql.sql",
+      "evidence_sources": ["REQ-DEMO-001"],
+      "identifier_evidence": [
+        {"identifier": "demo.orders", "identifier_type": "table", "source_reference": "qa-knowledge/examples/domains/demo/tables/demo.orders/metadata.json", "evidence_state": "confirmed"},
+        {"identifier": "order_id", "identifier_type": "field", "source_reference": "qa-knowledge/examples/domains/demo/tables/demo.orders/metadata.json", "evidence_state": "confirmed"},
+        {"identifier": "trade_date", "identifier_type": "field", "source_reference": "qa-knowledge/examples/domains/demo/tables/demo.orders/metadata.json", "evidence_state": "confirmed"},
+        {"identifier": "amount", "identifier_type": "field", "source_reference": "qa-knowledge/examples/domains/demo/tables/demo.orders/metadata.json", "evidence_state": "confirmed"},
+        {"identifier": "status", "identifier_type": "field", "source_reference": "qa-knowledge/examples/domains/demo/tables/demo.orders/metadata.json", "evidence_state": "confirmed"},
+        {"identifier": "trade_date", "identifier_type": "parameter", "source_reference": "REQ-DEMO-001", "evidence_state": "confirmed"},
+        {"identifier": "METRIC-DEMO-ORDER-AMOUNT", "identifier_type": "metric", "source_reference": "qa-knowledge/examples/domains/demo/metrics/order_amount/current.json", "evidence_state": "confirmed"}
+      ]
     }
   ],
   "reconciliation_plans": []

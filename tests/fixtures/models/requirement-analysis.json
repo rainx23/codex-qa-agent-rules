@@ -16,7 +16,8 @@
       "source_reference": "REQ-001 第三部分查询规则",
       "confidence": "high",
       "affects_core_expectation": true,
-      "handling": null
+      "handling": null,
+      "evidence_references": [{"source_type":"requirement","source_path":"tests/fixtures/sources/requirement.md","line_start":1,"line_end":3,"commit_sha":null,"content_hash":"sha256:f18b428754d35a54896bca7fdc32d51291720d95731f614cda782bc6c30ef3a2","excerpt":"客户编号精确过滤，翻页时保留筛选条件和排序字段。","captured_at":"2026-07-17 00:00:00","evidence_status":"current"}]
     },
     {
       "fact_id": "FACT-002",
@@ -26,17 +27,18 @@
       "source_reference": "REQ-001 第三部分分页规则",
       "confidence": "high",
       "affects_core_expectation": true,
-      "handling": null
+      "handling": null,
+      "evidence_references": [{"source_type":"requirement","source_path":"tests/fixtures/sources/requirement.md","line_start":1,"line_end":3,"commit_sha":null,"content_hash":"sha256:f18b428754d35a54896bca7fdc32d51291720d95731f614cda782bc6c30ef3a2","excerpt":"客户编号精确过滤，翻页时保留筛选条件和排序字段。","captured_at":"2026-07-17 00:00:00","evidence_status":"current"}]
     }
   ],
   "confirmation_points": [],
   "risks": [
-    {"risk_id": "RISK-001", "statement": "客户编号条件可能丢失", "test_priority": "P0", "evidence_state": "已确认"},
-    {"risk_id": "RISK-002", "statement": "翻页可能丢失查询状态", "test_priority": "P1", "evidence_state": "已确认"}
+    {"risk_id": "RISK-001", "statement": "客户编号条件可能丢失", "test_priority": "P0", "evidence_state": "已确认", "evidence_references": [{"source_type":"requirement","source_path":"tests/fixtures/sources/requirement.md","line_start":1,"line_end":3,"commit_sha":null,"content_hash":"sha256:f18b428754d35a54896bca7fdc32d51291720d95731f614cda782bc6c30ef3a2","excerpt":"客户编号精确过滤，翻页时保留筛选条件和排序字段。","captured_at":"2026-07-17 00:00:00","evidence_status":"current"}]},
+    {"risk_id": "RISK-002", "statement": "翻页可能丢失查询状态", "test_priority": "P1", "evidence_state": "已确认", "evidence_references": [{"source_type":"requirement","source_path":"tests/fixtures/sources/requirement.md","line_start":1,"line_end":3,"commit_sha":null,"content_hash":"sha256:f18b428754d35a54896bca7fdc32d51291720d95731f614cda782bc6c30ef3a2","excerpt":"客户编号精确过滤，翻页时保留筛选条件和排序字段。","captured_at":"2026-07-17 00:00:00","evidence_status":"current"}]}
   ],
   "acceptance_criteria": [
-    {"criterion_id": "REQ-POINT-001", "statement": "返回集合只包含目标客户", "fact_ids": ["FACT-001"], "risk_ids": ["RISK-001"]},
-    {"criterion_id": "REQ-POINT-002", "statement": "翻页保留筛选和排序", "fact_ids": ["FACT-002"], "risk_ids": ["RISK-002"]}
+    {"criterion_id": "REQ-POINT-001", "statement": "返回集合只包含目标客户", "fact_ids": ["FACT-001"], "risk_ids": ["RISK-001"], "evidence_references": [{"source_type":"requirement","source_path":"tests/fixtures/sources/requirement.md","line_start":1,"line_end":3,"commit_sha":null,"content_hash":"sha256:f18b428754d35a54896bca7fdc32d51291720d95731f614cda782bc6c30ef3a2","excerpt":"客户编号精确过滤，翻页时保留筛选条件和排序字段。","captured_at":"2026-07-17 00:00:00","evidence_status":"current"}]},
+    {"criterion_id": "REQ-POINT-002", "statement": "翻页保留筛选和排序", "fact_ids": ["FACT-002"], "risk_ids": ["RISK-002"], "evidence_references": [{"source_type":"requirement","source_path":"tests/fixtures/sources/requirement.md","line_start":1,"line_end":3,"commit_sha":null,"content_hash":"sha256:f18b428754d35a54896bca7fdc32d51291720d95731f614cda782bc6c30ef3a2","excerpt":"客户编号精确过滤，翻页时保留筛选条件和排序字段。","captured_at":"2026-07-17 00:00:00","evidence_status":"current"}]}
   ],
   "regression_scope": ["核心回归", "关联回归"],
   "matched_profiles": ["web-ui", "api"],

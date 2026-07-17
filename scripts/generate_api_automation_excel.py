@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import sys
 from pathlib import Path
 from zipfile import ZIP_DEFLATED, ZipFile
 from xml.sax.saxutils import escape
@@ -41,6 +42,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--parameter-output", type=Path)
     args = parser.parse_args(argv)
     model = json.loads(args.model.read_text(encoding="utf-8-sig"))
+    from qa_contracts import validate_api_automation
+    errors = validate_api_automation(model)
+    if errors:
+        for error in errors:
+            print(f"FAIL {error}", file=sys.stderr)
+        return 1
     cases = model.get("excel_case", [])
     rows = [HEADERS]
     for index, item in enumerate(cases, 1):

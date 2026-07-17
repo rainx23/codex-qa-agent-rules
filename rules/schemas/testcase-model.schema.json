@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$comment": "Generated from scripts/qa_contracts.py; do not edit manually.",
-  "x-rule-version": "2.4.0",
+  "x-rule-version": "2.5.0",
   "title": "Testcase Model",
   "type": "object",
   "additionalProperties": false,
@@ -99,6 +99,38 @@
             "minItems": 0,
             "uniqueItems": true
           },
+          "actions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "step_id",
+                "action",
+                "expected_results"
+              ],
+              "properties": {
+                "step_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "^STEP\\d{3}$"
+                },
+                "action": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "expected_results": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "minItems": 1,
+                  "uniqueItems": true
+                }
+              }
+            }
+          },
           "risk_ids": {
             "type": "array",
             "items": {
@@ -141,11 +173,16 @@
               "type": "object",
               "additionalProperties": false,
               "required": [
+                "branch_id",
                 "entry_name",
                 "steps",
                 "expected_results"
               ],
               "properties": {
+                "branch_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
                 "entry_name": {
                   "type": "string",
                   "minLength": 1
@@ -172,6 +209,71 @@
             },
             "minItems": 2,
             "uniqueItems": true
+          },
+          "preconditions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "test_data_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "environment_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "role_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "cleanup_steps": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "oracle_sources": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "automation_candidate": {
+            "enum": [
+              "yes",
+              "no",
+              "unknown"
+            ]
+          },
+          "automation_reason": {
+            "type": "string",
+            "minLength": 1
           },
           "test_priority": {
             "enum": [
@@ -201,6 +303,91 @@
         }
       },
       "minItems": 1
+    },
+    "branch_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "execution_instance_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "execution_instances": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "execution_instance_id",
+          "tc_id",
+          "branch_id",
+          "execution_status",
+          "executor",
+          "executed_at",
+          "defect_ids",
+          "rerun_of",
+          "execution_evidence"
+        ],
+        "properties": {
+          "execution_instance_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "tc_id": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^TC\\d{3}$"
+          },
+          "branch_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "execution_status": {
+            "enum": [
+              "not_run",
+              "passed",
+              "failed",
+              "blocked",
+              "skipped"
+            ]
+          },
+          "executor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "executed_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "defect_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "rerun_of": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "execution_evidence": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
     }
   }
 }

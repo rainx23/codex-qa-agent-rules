@@ -1,0 +1,1 @@
+{"kind":"requirement","base":"tests/fixtures/models/requirement-analysis.json","invalid":{"path":"facts.0.source_type","value":"inference"},"expected_failure":"限制性来源","golden":{"valid":true,"invalid":false}}

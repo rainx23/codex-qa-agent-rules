@@ -1,0 +1,1 @@
+{"kind":"ddl","valid_input":"create table demo.a (id bigint, name varchar(20));","invalid_input":"create table demo.a (id bigint, ??? unsupported);","expected_failure":"不得标记 complete","golden":{"valid_scope":"complete","invalid_scope":"partial"}}

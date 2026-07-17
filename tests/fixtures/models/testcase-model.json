@@ -1,6 +1,9 @@
 {
   "schema_version": "1.0.0",
   "root_title": "客户查询结果",
+  "branch_count": 0,
+  "execution_instance_count": 0,
+  "execution_instances": [],
   "cases": [
     {
       "tc_id": "TC001",

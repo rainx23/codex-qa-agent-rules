@@ -78,8 +78,6 @@ def _pending_counts(report_text: str) -> tuple[int, int, int, int]:
     blocking = sum("阻塞类" in item and "非阻塞类" not in item for item in items)
     nonblocking = sum("非阻塞类" in item for item in items)
     suggested = sum("建议确认类" in item for item in items)
-    unclassified = len(items) - blocking - nonblocking - suggested
-    nonblocking += max(unclassified, 0)
     return len(items), blocking, nonblocking, suggested
 
 
@@ -197,6 +195,11 @@ def validate_manifest_data(data: dict[str, Any], manifest_path: Path) -> list[st
     errors.extend(_validate_supersedes(data, manifest_path))
 
     status = data.get("validation_status")
+    if data.get("blocking_pending_count", 0) > 0:
+        if status != "pending":
+            errors.append("blocking_pending_count > 0 时 validation_status 必须为 pending")
+        if not data.get("pending_reason"):
+            errors.append("阻塞类待确认点必须在 pending_reason 说明原因")
     if status == "failed":
         if not data.get("failure_reason"):
             errors.append("failed 状态必须填写 failure_reason")
@@ -290,6 +293,8 @@ def validate_manifest_data(data: dict[str, Any], manifest_path: Path) -> list[st
         expected_pending = (data["pending_count"], data["blocking_pending_count"], data["nonblocking_pending_count"], data["suggested_pending_count"])
         if actual_pending != expected_pending:
             errors.append(f"待确认点计数不一致：Manifest={expected_pending} report={actual_pending}")
+        if total_pending != blocking + nonblocking + suggested:
+            errors.append("报告存在未分类待确认点；必须明确 blocking/nonblocking/suggested")
         risk_p0 = sum(risk.get("test_priority") == "P0" for risk in risk_matrix.get("risk_items", []))
         p0_case_ids = {
             case.get("tc_id") for case in testcase_model.get("cases", []) if case.get("test_priority") == "P0"

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import sys
 from datetime import datetime
@@ -15,9 +16,31 @@ UPPER_KEYWORDS = re.compile(r"\b(?:SELECT|FROM|WHERE|WITH|AS|JOIN|LEFT|RIGHT|FUL
 DANGEROUS = re.compile(r"(?i)\b(?:insert|update|delete|merge|alter|drop|truncate|create|grant|revoke|replace|call|execute)\b")
 
 
-def validate_sql(text: str, strict: bool = False) -> tuple[list[str], list[str]]:
+def find_config(start: Path) -> Path | None:
+    current = start.resolve()
+    for candidate in (current, *current.parents):
+        path = candidate / "rules-repository.json"
+        if path.is_file():
+            return path
+    return None
+
+
+def load_sql_defaults(config: Path | None) -> tuple[dict[str, str], list[str]]:
+    if config is None or not config.is_file():
+        return {}, ["缺少 rules-repository.json，无法读取 SQL 默认配置"]
+    try:
+        defaults = json.loads(config.read_text(encoding="utf-8-sig")).get("sql_defaults", {})
+    except (OSError, json.JSONDecodeError) as exc:
+        return {}, [f"SQL 配置无法读取：{exc}"]
+    errors = [f"sql_defaults.{key} 缺失或为空" for key in ("author", "timezone", "dialect") if not isinstance(defaults.get(key), str) or not defaults.get(key).strip()]
+    return defaults, errors
+
+
+def validate_sql(text: str, strict: bool = False, config: Path | None = None) -> tuple[list[str], list[str]]:
     errors: list[str] = []
     warnings: list[str] = []
+    defaults, config_errors = load_sql_defaults(config or find_config(Path.cwd()))
+    errors.extend(config_errors)
     header = HEADER_RE.match(text.lstrip("\ufeff"))
     if not header:
         errors.append("SQL 顶部必须使用固定星号注释块")
@@ -25,8 +48,9 @@ def validate_sql(text: str, strict: bool = False) -> tuple[list[str], list[str]]
         body = header.group("body")
         if not re.search(r"(?m)^\*\* sql\s*$", body):
             errors.append("顶部注释缺少 ** sql")
-        if not re.search(r"(?m)^\*\* author:\s*卢更鑫\s*$", body):
-            errors.append("顶部注释 author 必须为卢更鑫")
+        author = re.search(r"(?m)^\*\* author:\s*(\S.*?)\s*$", body)
+        if not author or author.group(1).strip() != defaults.get("author"):
+            errors.append(f"顶部注释 author 必须等于 sql_defaults.author={defaults.get('author')}")
         time_match = re.search(r"(?m)^\*\* create time:\s*(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\s*$", body)
         if not time_match:
             errors.append("顶部注释 create time 必须精确到秒")
@@ -34,7 +58,7 @@ def validate_sql(text: str, strict: bool = False) -> tuple[list[str], list[str]]
             try:
                 datetime.strptime(time_match.group(1), "%Y-%m-%d %H:%M:%S")
             except ValueError:
-                errors.append("create time 不是有效北京时间格式")
+                errors.append(f"create time 不是有效 {defaults.get('timezone')} 时间格式")
         if not re.search(r"(?m)^\*\* description:\s*\S+", body):
             errors.append("顶部注释 description 不能为空")
         if not re.search(r"(?m)^\*\* comment:\s*\S+", body):
@@ -96,9 +120,11 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="静态校验只读验证 SQL，不执行 SQL")
     parser.add_argument("sql", type=Path)
     parser.add_argument("--strict", action="store_true")
+    parser.add_argument("--config", type=Path)
     args = parser.parse_args(argv)
     try:
-        errors, warnings = validate_sql(args.sql.read_text(encoding="utf-8-sig"), args.strict)
+        config = args.config or find_config(args.sql.parent)
+        errors, warnings = validate_sql(args.sql.read_text(encoding="utf-8-sig"), args.strict, config)
     except OSError as exc:
         errors, warnings = [str(exc)], []
     for warning in warnings:

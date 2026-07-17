@@ -1,5 +1,7 @@
 # 验证 SQL 编写规范
 
+SQL author 唯一来源为 `rules-repository.json.sql_defaults.author`，时区和方言同样读取 `sql_defaults`；规则、脚本和样例不得写死个人姓名。SQL 样式通过仅证明静态格式与只读安全，不代表 SQL 业务口径正确，报告必须明确 SQL 未执行。
+
 本文件是验证 SQL 的唯一正式样式来源。其他规则和 Skills 只引用本文件，不复制完整正文。
 
 ## 顶部注释
@@ -9,14 +11,16 @@
 ```sql
 /************************************************************************************************
 ** sql
-** author: 卢更鑫
+** author: ${rules-repository.json.sql_defaults.author}
 ** create time: yyyy-MM-dd HH:mm:ss
 ** description: 根据当前需求生成具体描述
 ** comment: SELECT * FROM database.tablename WHERE id=${id} AND address='${address}';
 ************************************************************************************************/
 ```
 
-`author` 固定为卢更鑫，`create time` 使用北京时间并精确到秒。自动校验只检查格式，不依赖实时秒值。
+`author` 从 `rules-repository.json.sql_defaults.author` 读取，`create time` 使用配置时区并精确到秒。配置缺失或非法时校验失败，不能静默使用其他姓名。
+
+integrated 业务仓库缺少 `sql_defaults.author` 时必须输出明确迁移错误并停止；不得继续使用旧硬编码姓名、操作系统用户名或任何静默回退。公共规则仓库默认配置为 `Rainx`，但校验器不自动修改业务仓库配置，除非用户明确授权。
 
 ## 排版与方言
 

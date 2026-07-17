@@ -10,10 +10,10 @@
   "raw_hash": "sha256:1277d0a542666d9b0cd64217456df2ebc567d7d2535af35f3852a4c0fe03ab03",
   "normalized_hash": "sha256:dbf1d000e66e3aa6527c310f1db9b0467dd39b133116293f81e9f5a53f2c1754",
   "fields": [
-    {"name": "order_id", "type": "bigint", "nullable": false, "default": null, "comment": "脱敏订单标识", "ordinal": 1},
-    {"name": "trade_date", "type": "date", "nullable": false, "default": null, "comment": null, "ordinal": 2},
-    {"name": "amount", "type": "decimal(18, 2)", "nullable": true, "default": null, "comment": null, "ordinal": 3},
-    {"name": "status", "type": "varchar(16)", "nullable": true, "default": null, "comment": null, "ordinal": 4}
+    {"name": "order_id", "type": "bigint", "nullable": false, "default": null, "default_state": "unknown", "comment": "脱敏订单标识", "ordinal": 1, "evidence_fields": ["name", "type", "nullable", "comment"], "unknown_fields": ["default"]},
+    {"name": "trade_date", "type": "date", "nullable": false, "default": null, "default_state": "unknown", "comment": null, "ordinal": 2, "evidence_fields": ["name", "type", "nullable"], "unknown_fields": ["default", "comment"]},
+    {"name": "amount", "type": "decimal(18, 2)", "nullable": true, "default": null, "default_state": "unknown", "comment": null, "ordinal": 3, "evidence_fields": ["name", "type", "nullable"], "unknown_fields": ["default", "comment"]},
+    {"name": "status", "type": "varchar(16)", "nullable": true, "default": null, "default_state": "unknown", "comment": null, "ordinal": 4, "evidence_fields": ["name", "type", "nullable"], "unknown_fields": ["default", "comment"]}
   ],
   "keys": ["primary key (order_id)"],
   "partitions": [],
@@ -22,5 +22,7 @@
   "status": "active_confirmed",
   "source_type": "sanitized_example",
   "source_requirement_ids": ["REQ-DEMO-001"],
-  "last_verified_at": "2026-07-15 00:00:00"
+  "last_verified_at": "2026-07-15 00:00:00",
+  "parse_warnings": [],
+  "applicability_scope": null
 }

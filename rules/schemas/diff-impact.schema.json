@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$comment": "Generated from scripts/qa_contracts.py; do not edit manually.",
-  "x-rule-version": "2.4.0",
+  "x-rule-version": "2.5.0",
   "title": "Diff Impact Model",
   "type": "object",
   "additionalProperties": false,
@@ -116,6 +116,7 @@
           "change_type",
           "summary",
           "evidence_reference",
+          "evidence_references",
           "affected_contracts",
           "direct_callers",
           "indirect_callers",
@@ -145,6 +146,79 @@
           "evidence_reference": {
             "type": "string",
             "minLength": 1
+          },
+          "evidence_references": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source_type",
+                "source_path",
+                "line_start",
+                "line_end",
+                "commit_sha",
+                "content_hash",
+                "excerpt",
+                "captured_at",
+                "evidence_status"
+              ],
+              "properties": {
+                "source_type": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "source_path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "line_start": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1
+                },
+                "line_end": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1
+                },
+                "commit_sha": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "content_hash": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^sha256:[0-9a-fA-F]{64}$"
+                },
+                "excerpt": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "captured_at": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "evidence_status": {
+                  "enum": [
+                    "current",
+                    "stale",
+                    "reconfirm_required"
+                  ]
+                }
+              }
+            },
+            "minItems": 1
           },
           "affected_contracts": {
             "type": "array",
@@ -186,7 +260,147 @@
       }
     },
     "impact_chains": {
-      "type": "array"
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "chain_id",
+          "change_ids",
+          "source_component",
+          "affected_component",
+          "propagation_path",
+          "affected_contracts",
+          "impact_type",
+          "evidence_references",
+          "confidence"
+        ],
+        "properties": {
+          "chain_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "change_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "source_component": {
+            "type": "string",
+            "minLength": 1
+          },
+          "affected_component": {
+            "type": "string",
+            "minLength": 1
+          },
+          "propagation_path": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "affected_contracts": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "impact_type": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence_references": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source_type",
+                "source_path",
+                "line_start",
+                "line_end",
+                "commit_sha",
+                "content_hash",
+                "excerpt",
+                "captured_at",
+                "evidence_status"
+              ],
+              "properties": {
+                "source_type": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "source_path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "line_start": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1
+                },
+                "line_end": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1
+                },
+                "commit_sha": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "content_hash": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^sha256:[0-9a-fA-F]{64}$"
+                },
+                "excerpt": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "captured_at": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "evidence_status": {
+                  "enum": [
+                    "current",
+                    "stale",
+                    "reconfirm_required"
+                  ]
+                }
+              }
+            },
+            "minItems": 1
+          },
+          "confidence": {
+            "enum": [
+              "high",
+              "medium",
+              "low"
+            ]
+          }
+        }
+      }
     },
     "coverage_results": {
       "type": "array",
@@ -243,10 +457,308 @@
       }
     },
     "suspected_defects": {
-      "type": "array"
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "defect_id",
+          "title",
+          "requirement_fact_ids",
+          "change_ids",
+          "evidence_state",
+          "observed_behavior",
+          "expected_behavior",
+          "impact",
+          "confidence",
+          "handling",
+          "evidence_references"
+        ],
+        "properties": {
+          "defect_id": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^DEF\\d{3}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "requirement_fact_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "change_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "evidence_state": {
+            "enum": [
+              "已确认",
+              "疑似",
+              "待确认"
+            ]
+          },
+          "observed_behavior": {
+            "type": "string",
+            "minLength": 1
+          },
+          "expected_behavior": {
+            "type": "string",
+            "minLength": 1
+          },
+          "impact": {
+            "type": "string",
+            "minLength": 1
+          },
+          "confidence": {
+            "enum": [
+              "high",
+              "medium"
+            ]
+          },
+          "handling": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence_references": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source_type",
+                "source_path",
+                "line_start",
+                "line_end",
+                "commit_sha",
+                "content_hash",
+                "excerpt",
+                "captured_at",
+                "evidence_status"
+              ],
+              "properties": {
+                "source_type": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "source_path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "line_start": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1
+                },
+                "line_end": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1
+                },
+                "commit_sha": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "content_hash": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^sha256:[0-9a-fA-F]{64}$"
+                },
+                "excerpt": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "captured_at": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "evidence_status": {
+                  "enum": [
+                    "current",
+                    "stale",
+                    "reconfirm_required"
+                  ]
+                }
+              }
+            },
+            "minItems": 1
+          }
+        }
+      }
     },
     "risks": {
-      "type": "array"
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "risk_id",
+          "statement",
+          "change_ids",
+          "requirement_fact_ids",
+          "evidence_state",
+          "business_impact",
+          "test_priority",
+          "regression_scope",
+          "handling",
+          "evidence_references"
+        ],
+        "properties": {
+          "risk_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "statement": {
+            "type": "string",
+            "minLength": 1
+          },
+          "change_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "requirement_fact_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "evidence_state": {
+            "enum": [
+              "已确认",
+              "疑似",
+              "待确认"
+            ]
+          },
+          "business_impact": {
+            "enum": [
+              "critical",
+              "high",
+              "medium",
+              "low"
+            ]
+          },
+          "test_priority": {
+            "enum": [
+              "P0",
+              "P1",
+              "P2"
+            ]
+          },
+          "regression_scope": {
+            "enum": [
+              "核心回归",
+              "关联回归",
+              "冒烟回归"
+            ]
+          },
+          "handling": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence_references": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source_type",
+                "source_path",
+                "line_start",
+                "line_end",
+                "commit_sha",
+                "content_hash",
+                "excerpt",
+                "captured_at",
+                "evidence_status"
+              ],
+              "properties": {
+                "source_type": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "source_path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "line_start": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1
+                },
+                "line_end": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1
+                },
+                "commit_sha": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "content_hash": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^sha256:[0-9a-fA-F]{64}$"
+                },
+                "excerpt": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "captured_at": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "evidence_status": {
+                  "enum": [
+                    "current",
+                    "stale",
+                    "reconfirm_required"
+                  ]
+                }
+              }
+            },
+            "minItems": 1
+          }
+        }
+      }
     },
     "regression_scope": {
       "type": "array",

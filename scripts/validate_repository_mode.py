@@ -38,21 +38,25 @@ def validate_mode(config_path: Path) -> tuple[str, list[str]]:
     except (OSError, json.JSONDecodeError) as exc:
         return "unknown", [f"仓库模式配置无法读取：{exc}"]
     mode = data.get("repository_mode")
+    sql_defaults = data.get("sql_defaults")
+    migration_errors: list[str] = []
+    if not isinstance(sql_defaults, dict) or not isinstance(sql_defaults.get("author"), str) or not sql_defaults.get("author", "").strip():
+        migration_errors.append("SQL 配置迁移失败：必须显式配置 rules-repository.json.sql_defaults.author；禁止旧姓名、系统用户名或静默回退")
     if mode not in {"standalone", "integrated"}:
-        return str(mode), ["repository_mode 只允许 standalone 或 integrated"]
+        return str(mode), migration_errors + ["repository_mode 只允许 standalone 或 integrated"]
     if mode == "standalone":
         if data.get("template_path"):
-            return mode, ["standalone 模式不得配置 template_path"]
-        return mode, []
+            return mode, migration_errors + ["standalone 模式不得配置 template_path"]
+        return mode, migration_errors
 
     template_path = data.get("template_path")
     if not isinstance(template_path, str) or not template_path:
-        return mode, ["integrated 模式必须配置 template_path"]
+        return mode, migration_errors + ["integrated 模式必须配置 template_path"]
     root = repository_root(config_path)
     template = (root / template_path).resolve()
     if root.resolve() not in template.parents or not template.is_dir():
-        return mode, [f"integrated 模式模板目录不存在或越界：{template_path}"]
-    errors: list[str] = []
+        return mode, migration_errors + [f"integrated 模式模板目录不存在或越界：{template_path}"]
+    errors: list[str] = list(migration_errors)
     for entry in MIRRORED_ENTRIES:
         for source in _files(root, entry):
             relative = source.relative_to(root)

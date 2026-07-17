@@ -22,7 +22,7 @@ class CiAndRepositoryModeTests(unittest.TestCase):
     def test_standalone_does_not_require_nested_repository(self):
         with tempfile.TemporaryDirectory() as temp:
             config = Path(temp) / "rules-repository.json"
-            config.write_text(json.dumps({"repository_mode": "standalone"}), encoding="utf-8")
+            config.write_text(json.dumps({"repository_mode": "standalone", "sql_defaults": {"author": "Rainx"}}), encoding="utf-8")
             mode, errors = validate_mode(config)
             self.assertEqual("standalone", mode)
             self.assertEqual([], errors)
@@ -34,6 +34,13 @@ class CiAndRepositoryModeTests(unittest.TestCase):
             mode, errors = validate_mode(config)
             self.assertEqual("integrated", mode)
             self.assertTrue(any("不存在" in error for error in errors))
+
+    def test_integrated_missing_sql_author_has_explicit_migration_error(self):
+        with tempfile.TemporaryDirectory() as temp:
+            config = Path(temp) / "rules-repository.json"
+            config.write_text(json.dumps({"repository_mode": "integrated", "template_path": "missing"}), encoding="utf-8")
+            _, errors = validate_mode(config)
+            self.assertTrue(any("SQL 配置迁移失败" in error and "sql_defaults.author" in error for error in errors))
 
 
 if __name__ == "__main__":

@@ -1,4 +1,9 @@
 {
   "repository_mode": "standalone",
-  "knowledge_path": "qa-knowledge/examples"
+  "knowledge_path": "qa-knowledge/examples",
+  "sql_defaults": {
+    "author": "Rainx",
+    "timezone": "Asia/Shanghai",
+    "dialect": "starrocks"
+  }
 }

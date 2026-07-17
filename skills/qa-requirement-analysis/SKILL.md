@@ -5,6 +5,8 @@ description: 用于分析禅道、OpenSpec、Markdown、截图或粘贴文本中
 
 # QA 需求分析（QA Requirement Analysis）
 
+confirmed Fact 必须有非 inference 的可验证来源，不能使用 low confidence 或“推测/猜测/根据名称判断”作为来源；截图、当前代码和历史知识只能按其证据边界记录，不能自动升级为业务确定事实。
+
 将本 Skill 的根目录解析为当前 `SKILL.md` 向上两级的仓库根目录。
 
 ## 规则加载

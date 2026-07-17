@@ -43,7 +43,7 @@ class AnalysisWorkflowTests(unittest.TestCase):
     def test_numbered_defect_and_trace_sections_are_not_skipped(self):
         source = (REPORTS / "requirement_diff_combined.md").read_text(encoding="utf-8")
         self.assertEqual([], self._validate_text(source, mode="combined"))
-        no_diff_proof = source.replace("- Diff 证据：实现使用前缀匹配。\n", "")
+        no_diff_proof = source.replace("Diff 证据：实现使用前缀匹配；", "")
         self.assertTrue(any("双重证据" in error for error in self._validate_text(no_diff_proof, mode="combined")))
         bad_trace = source.replace("覆盖状态", "处理结果")
         self.assertTrue(any("追踪矩阵缺少字段" in error for error in self._validate_text(bad_trace, mode="combined")))
@@ -105,7 +105,7 @@ class AnalysisWorkflowTests(unittest.TestCase):
     def test_15_requirement_and_diff_inconsistent(self):
         path = REPORTS / "combined_inconsistent.md"
         self.assertEqual([], validate(path))
-        bad = path.read_text(encoding="utf-8").replace("- Diff 证据：实现使用前缀匹配。\n", "")
+        bad = path.read_text(encoding="utf-8").replace("Diff 证据：实现使用前缀匹配；", "")
         self.assertTrue(any("双重证据" in error for error in self._validate_text(bad)))
 
     def test_16_evidence_insufficient(self):

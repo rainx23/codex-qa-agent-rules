@@ -193,6 +193,33 @@ def _validate_trace_matrix(trace: str) -> list[str]:
     return errors
 
 
+def _validate_line_evidence(bodies: dict[str, list[str]], resolved_mode: str) -> list[str]:
+    errors: list[str] = []
+    requirements = {
+        "规则拆解": (r"\bFACT[A-Z0-9-]*\d+\b", "Fact ID"),
+        "风险点": (r"\bRISK[A-Z0-9-]*\d+\b.*\b(?:FACT|CHG|DEF)[A-Z0-9-]*\d+\b", "Risk ID 与来源 ID"),
+        "疑似风险点": (r"\bRISK[A-Z0-9-]*\d+\b.*\b(?:FACT|CHG|DEF)[A-Z0-9-]*\d+\b", "Risk ID 与来源 ID"),
+        "待确认点": (r"\bCONF[A-Z0-9-]*\d+\b.*\bFACT[A-Z0-9-]*\d+\b", "Confirmation ID 与 Fact ID"),
+        "测试点摘要": (r"\bRISK[A-Z0-9-]*\d+\b", "Risk ID"),
+    }
+    if resolved_mode == MODE_REQUIREMENT:
+        requirements.pop("疑似风险点", None)
+    for section, (pattern, label) in requirements.items():
+        for line in _body(bodies, section).splitlines():
+            item = re.match(r"\s*-\s+(.+)", line)
+            if not item or item.group(1).strip() in {"无", "无。", "暂无", "暂无。"}:
+                continue
+            if not re.search(pattern, item.group(1), re.I):
+                errors.append(f"{section} 行缺少 {label}：{item.group(1)[:60]}")
+    defect = _body(bodies, "疑似缺陷")
+    if defect and not _no_defect_conclusion(defect):
+        for line in defect.splitlines():
+            item = re.match(r"\s*-\s+(.+)", line)
+            if item and not all(re.search(rf"\b{kind}[A-Z0-9-]*\d+\b", item.group(1), re.I) for kind in ("DEF", "FACT", "CHG")):
+                errors.append("疑似缺陷行必须同时引用 DEF、FACT 和 CHG ID")
+    return errors
+
+
 def validate(
     path: Path,
     require_traceability: bool | None = None,
@@ -235,6 +262,9 @@ def validate(
     trace = _body(bodies, "需求-Diff-测试点追踪矩阵")
     if resolved_mode == MODE_COMBINED and trace:
         errors.extend(_validate_trace_matrix(trace))
+    # Legacy reports without structured Fact IDs remain readable; all model-driven reports use strict line evidence.
+    if re.search(r"\bFACT[A-Z0-9-]*\d+\b", text, re.I):
+        errors.extend(_validate_line_evidence(bodies, resolved_mode))
 
     risk_names = ("疑似风险点",) if resolved_mode == MODE_DIFF else ("风险点",)
     risk = _body(bodies, *risk_names)

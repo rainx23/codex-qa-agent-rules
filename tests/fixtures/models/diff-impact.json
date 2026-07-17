@@ -12,18 +12,21 @@
     {"path": "src/customer-query.java", "status": "M", "change_category": "business", "business_relevance": true, "generated_file": false, "formatting_only": false}
   ],
   "change_items": [
-    {"change_id": "CHG-001", "file": "src/customer-query.java", "symbol_or_location": "queryCustomers", "change_type": "logic", "summary": "客户编号条件传递到数据访问层", "evidence_reference": "diff:hunk-1", "affected_contracts": ["客户查询"], "direct_callers": ["CustomerController"], "indirect_callers": [], "existing_tests": ["CustomerQueryTest"]},
-    {"change_id": "CHG-002", "file": "src/customer-query.java", "symbol_or_location": "queryCustomers", "change_type": "state", "summary": "分页请求保留筛选和排序字段", "evidence_reference": "diff:hunk-2", "affected_contracts": ["分页查询"], "direct_callers": ["CustomerController"], "indirect_callers": [], "existing_tests": ["CustomerQueryTest"]}
+    {"change_id": "CHG-001", "file": "src/customer-query.java", "symbol_or_location": "queryCustomers", "change_type": "logic", "summary": "客户编号条件传递到数据访问层", "evidence_reference": "diff:hunk-1", "evidence_references": [{"source_type":"diff","source_path":"src/customer-query.java","line_start":10,"line_end":20,"commit_sha":"def456","content_hash":"sha256:1111111111111111111111111111111111111111111111111111111111111111","excerpt":"客户编号条件传递到数据访问层","captured_at":"2026-07-17 00:00:00","evidence_status":"current"}], "affected_contracts": ["客户查询"], "direct_callers": ["CustomerController"], "indirect_callers": [], "existing_tests": ["CustomerQueryTest"]},
+    {"change_id": "CHG-002", "file": "src/customer-query.java", "symbol_or_location": "queryCustomers", "change_type": "state", "summary": "分页请求保留筛选和排序字段", "evidence_reference": "diff:hunk-2", "evidence_references": [{"source_type":"diff","source_path":"src/customer-query.java","line_start":21,"line_end":30,"commit_sha":"def456","content_hash":"sha256:2222222222222222222222222222222222222222222222222222222222222222","excerpt":"分页请求保留筛选和排序字段","captured_at":"2026-07-17 00:00:00","evidence_status":"current"}], "affected_contracts": ["分页查询"], "direct_callers": ["CustomerController"], "indirect_callers": [], "existing_tests": ["CustomerQueryTest"]}
   ],
   "impact_chains": [
-    {"change_ids": ["CHG-001"], "path": ["CustomerController", "queryCustomers", "data access"]}
+    {"chain_id":"CHAIN-001","change_ids":["CHG-001"],"source_component":"CustomerController","affected_component":"data access","propagation_path":["CustomerController","queryCustomers","data access"],"affected_contracts":["客户查询"],"impact_type":"logic","evidence_references":[{"source_type":"diff","source_path":"src/customer-query.java","line_start":10,"line_end":20,"commit_sha":"def456","content_hash":"sha256:1111111111111111111111111111111111111111111111111111111111111111","excerpt":"客户编号条件传递到数据访问层","captured_at":"2026-07-17 00:00:00","evidence_status":"current"}],"confidence":"high"}
   ],
   "coverage_results": [
     {"requirement_id": "REQ-POINT-001", "change_ids": ["CHG-001"], "coverage_status": "已覆盖", "evidence_state": "已确认", "risk_ids": ["RISK-001"]},
     {"requirement_id": "REQ-POINT-002", "change_ids": ["CHG-002"], "coverage_status": "已覆盖", "evidence_state": "已确认", "risk_ids": ["RISK-002"]}
   ],
   "suspected_defects": [],
-  "risks": ["RISK-001", "RISK-002"],
+  "risks": [
+    {"risk_id":"RISK-001","statement":"客户编号条件可能丢失","change_ids":["CHG-001"],"requirement_fact_ids":["FACT-001"],"evidence_state":"已确认","business_impact":"critical","test_priority":"P0","regression_scope":"核心回归","handling":"由 TC001 覆盖","evidence_references":[{"source_type":"diff","source_path":"src/customer-query.java","line_start":10,"line_end":20,"commit_sha":"def456","content_hash":"sha256:1111111111111111111111111111111111111111111111111111111111111111","excerpt":"客户编号条件传递到数据访问层","captured_at":"2026-07-17 00:00:00","evidence_status":"current"}]},
+    {"risk_id":"RISK-002","statement":"翻页可能丢失查询状态","change_ids":["CHG-002"],"requirement_fact_ids":["FACT-002"],"evidence_state":"已确认","business_impact":"high","test_priority":"P1","regression_scope":"关联回归","handling":"由 TC002 覆盖","evidence_references":[{"source_type":"diff","source_path":"src/customer-query.java","line_start":21,"line_end":30,"commit_sha":"def456","content_hash":"sha256:2222222222222222222222222222222222222222222222222222222222222222","excerpt":"分页请求保留筛选和排序字段","captured_at":"2026-07-17 00:00:00","evidence_status":"current"}]}
+  ],
   "regression_scope": ["核心回归", "关联回归"],
   "matched_profiles": ["api"]
 }

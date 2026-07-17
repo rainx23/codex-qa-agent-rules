@@ -1,0 +1,1 @@
+{"kind":"testcase","base":"tests/fixtures/models/testcase-model.json","invalid":{"path":"cases.0.expected_results","value":["返回结果无误"]},"expected_failure":"模糊断言","golden":{"valid":true,"invalid":false}}

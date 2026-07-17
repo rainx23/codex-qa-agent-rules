@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$comment": "Generated from scripts/qa_contracts.py; do not edit manually.",
-  "x-rule-version": "2.4.0",
+  "x-rule-version": "2.5.0",
   "title": "Validation SQL Artifact Model",
   "type": "object",
   "additionalProperties": false,
@@ -32,7 +32,8 @@
           "expected_assertion",
           "execution_status",
           "sql_path",
-          "evidence_sources"
+          "evidence_sources",
+          "identifier_evidence"
         ],
         "properties": {
           "sql_id": {
@@ -59,7 +60,7 @@
               "type": "string",
               "minLength": 1
             },
-            "minItems": 0,
+            "minItems": 1,
             "uniqueItems": true
           },
           "tc_ids": {
@@ -69,6 +70,7 @@
               "minLength": 1,
               "pattern": "^TC\\d{3}$"
             },
+            "minItems": 1,
             "uniqueItems": true
           },
           "dialect": {
@@ -138,6 +140,41 @@
             },
             "minItems": 1,
             "uniqueItems": true
+          },
+          "identifier_evidence": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "identifier",
+                "identifier_type",
+                "source_reference",
+                "evidence_state"
+              ],
+              "properties": {
+                "identifier": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "identifier_type": {
+                  "enum": [
+                    "table",
+                    "field",
+                    "parameter",
+                    "metric"
+                  ]
+                },
+                "source_reference": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "evidence_state": {
+                  "const": "confirmed"
+                }
+              }
+            },
+            "minItems": 1
           },
           "execution_evidence": {
             "type": [

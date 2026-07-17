@@ -1,0 +1,1 @@
+{"kind":"api","base":"tests/fixtures/models/api-automation-valid.json","invalid":{"path":"assertion_scope","value":"business_data"},"expected_failure":"assertion_scope","golden":{"valid":true,"invalid":false}}

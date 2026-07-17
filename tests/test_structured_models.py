@@ -13,6 +13,7 @@ from qa_contracts import (
     load_json, validate_diff_model, validate_requirement_model, validate_risk_matrix,
     validate_model_links, validate_testcase_model,
 )
+from validate_models import validate_files
 
 MODELS = ROOT / "tests/fixtures/models"
 GOLDEN = ROOT / "tests/golden"
@@ -27,6 +28,31 @@ class StructuredModelTests(unittest.TestCase):
         self.assertEqual([], validate_diff_model(self.load("diff-impact.json")))
         self.assertEqual([], validate_risk_matrix(self.load("risk-coverage-matrix.json")))
         self.assertEqual([], validate_testcase_model(self.load("testcase-model.json")))
+
+    def test_changed_evidence_hash_requires_stale_or_reconfirmation(self):
+        requirement = self.load("requirement-analysis.json")
+        requirement["facts"][0]["evidence_references"][0]["content_hash"] = "sha256:" + "0" * 64
+        temporary = MODELS / "requirement-analysis-hash-mismatch.tmp.json"
+        temporary.write_text(json.dumps(requirement, ensure_ascii=False), encoding="utf-8")
+        try:
+            errors = validate_files(
+                temporary,
+                MODELS / "diff-impact.json",
+                MODELS / "risk-coverage-matrix.json",
+                MODELS / "testcase-model.json",
+            )
+            self.assertTrue(any("evidence_status" in error and "哈希已变化" in error for error in errors))
+            requirement["facts"][0]["evidence_references"][0]["evidence_status"] = "reconfirm_required"
+            temporary.write_text(json.dumps(requirement, ensure_ascii=False), encoding="utf-8")
+            errors = validate_files(
+                temporary,
+                MODELS / "diff-impact.json",
+                MODELS / "risk-coverage-matrix.json",
+                MODELS / "testcase-model.json",
+            )
+            self.assertFalse(any("哈希已变化" in error for error in errors))
+        finally:
+            temporary.unlink(missing_ok=True)
 
     def test_conflicting_fact_requires_confirmation_point(self):
         data = self.load("requirement-analysis.json")
@@ -96,6 +122,26 @@ class StructuredModelTests(unittest.TestCase):
         errors = validate_model_links(requirement, diff, risk, testcase)
         self.assertTrue(any("不存在风险" in error for error in errors))
         self.assertTrue(any("双向映射不一致" in error for error in errors))
+
+    def test_execution_instance_defect_id_must_exist(self):
+        requirement = self.load("requirement-analysis.json")
+        diff = self.load("diff-impact.json")
+        risk = self.load("risk-coverage-matrix.json")
+        testcase = self.load("testcase-model.json")
+        testcase["execution_instance_count"] = 1
+        testcase["execution_instances"] = [{
+            "execution_instance_id": "EXEC-001",
+            "tc_id": "TC001",
+            "branch_id": None,
+            "execution_status": "not_run",
+            "executor": None,
+            "executed_at": None,
+            "defect_ids": ["DEF999"],
+            "rerun_of": None,
+            "execution_evidence": None,
+        }]
+        errors = validate_model_links(requirement, diff, risk, testcase)
+        self.assertTrue(any("DEF999" in error and "不存在疑似缺陷" in error for error in errors))
 
     def test_golden_requirement_analysis_content(self):
         data = self.load("requirement-analysis.json")
