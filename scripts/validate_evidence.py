@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import hashlib
 import re
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any
 
 
@@ -34,12 +34,24 @@ BINARY_SUFFIXES = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".pdf", ".x
 INFERENCE_TOKENS = ("推断", "推测", "可能", "应该", "因此", "证明")
 
 
+def _is_absolute_evidence_path(value: str) -> bool:
+    native_path = Path(value)
+    posix_path = PurePosixPath(value)
+    windows_path = PureWindowsPath(value)
+    return (
+        native_path.is_absolute()
+        or posix_path.is_absolute()
+        or windows_path.is_absolute()
+        or bool(windows_path.drive)
+    )
+
+
 def _resolve_evidence_path(value: Any, *, root: Path, label: str) -> tuple[Path | None, list[str]]:
     errors: list[str] = []
     if not isinstance(value, str) or not value.strip():
         return None, [f"{label} 必须是非空仓库相对路径"]
     candidate = Path(value)
-    if candidate.is_absolute():
+    if _is_absolute_evidence_path(value):
         return None, [f"{label} 禁止绝对路径：{value}"]
     if ".." in candidate.parts:
         return None, [f"{label} 禁止包含 ../：{value}"]

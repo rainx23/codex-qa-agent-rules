@@ -21,12 +21,18 @@ from qa_contracts import (
 from validate_manifest import validate_manifest_data
 from validate_models import validate_files
 from validate_sql_style import validate_sql
-from validate_evidence import validate_evidence_reference
+from validate_evidence import _is_absolute_evidence_path, validate_evidence_reference
 
 MODELS = ROOT / "tests/fixtures/models"
 
 
 class AntiHallucinationContractTests(unittest.TestCase):
+    def test_evidence_path_absolute_detection_is_cross_platform(self):
+        for value in ("/outside.md", "C:/outside.md", r"C:\outside.md", r"\\server\share\outside.md"):
+            self.assertTrue(_is_absolute_evidence_path(value), value)
+        for value in ("tests/fixtures/sources/acceptance-REQ-001.md", "rules/core/evidence-rules.md"):
+            self.assertFalse(_is_absolute_evidence_path(value), value)
+
     def model(self, name: str) -> dict:
         return load_json(MODELS / name)
 
