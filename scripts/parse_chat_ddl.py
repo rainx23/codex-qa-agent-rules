@@ -14,7 +14,7 @@ from typing import Any
 
 CREATE_RE = re.compile(r"(?is)\bcreate\s+table\b")
 TABLE_NAME_RE = re.compile(r"(?is)\bcreate\s+table\s+(?:if\s+not\s+exists\s+)?(?P<name>(?:`[^`]+`|\"[^\"]+\"|[\w.]+))")
-FIELD_RE = re.compile(r"^\s*(?P<name>`[^`]+`|\"[^\"]+\"|[A-Za-z_][\w$]*)\s+(?P<type>[A-Za-z][\w]*(?:\s*\([^)]*\))?(?:\s+[A-Za-z]+)?)", re.I)
+FIELD_RE = re.compile(r"^\s*(?P<name>`[^`]+`|\"[^\"]+\"|[A-Za-z_][\w$]*)\s+(?P<type>[A-Za-z][\w]*(?:\s*\([^)]*\))?)", re.I)
 SENSITIVE_RE = re.compile(r"(?i)(?:password|passwd|token|jdbc|private[_ -]?key|secret)\s*[:=]")
 
 
@@ -135,11 +135,11 @@ def parse_statement(statement: str, index: int = 1) -> tuple[dict[str, Any] | No
     for item in _split_top_level(body):
         stripped = item.strip()
         upper = stripped.upper()
+        if upper.startswith(("PRIMARY KEY", "UNIQUE KEY", "DUPLICATE KEY", "AGGREGATE KEY", "FOREIGN KEY", "CHECK ", "CONSTRAINT")):
+            keys.append(stripped)
+            continue
         if upper.startswith(("UNIQUE INDEX", "INDEX ", "KEY ")):
             indexes.append(stripped)
-            continue
-        if upper.startswith(("PRIMARY KEY", "UNIQUE KEY", "CONSTRAINT")):
-            keys.append(stripped)
             continue
         match = FIELD_RE.match(stripped)
         if not match:
@@ -149,7 +149,10 @@ def parse_statement(statement: str, index: int = 1) -> tuple[dict[str, Any] | No
         type_name = match.group("type").strip()
         default_match = re.search(r"(?is)\bdefault\s+([^\s,]+)", stripped)
         comment_match = re.search(r"(?is)\bcomment\s+'((?:''|[^'])*)'", stripped)
-        nullable_known = bool(re.search(r"(?i)\b(?:not\s+null|null)\b", stripped))
+        constraint_text = re.sub(r"(?is)\bdefault\s+(?:'[^']*(?:''[^']*)*'|[^\s,]+)", " ", stripped)
+        constraint_text = re.sub(r"(?is)\bcomment\s+'(?:''|[^'])*'", " ", constraint_text)
+        constraint_text = re.sub(r"(?is)\bgenerated\s+(?:always\s+)?as\s*\(.*?\)", " ", constraint_text)
+        nullable_known = bool(re.search(r"(?i)(?:\bnot\s+null\b|(?<!\bdefault\s)\bnull\b)", constraint_text))
         default_value = default_match.group(1) if default_match else None
         default_state = "known_null" if default_value and default_value.casefold() == "null" else "known_value" if default_match else "unknown"
         evidence_fields = ["name", "type"] + (["nullable"] if nullable_known else []) + (["default"] if default_match else []) + (["comment"] if comment_match else [])
@@ -164,7 +167,16 @@ def parse_statement(statement: str, index: int = 1) -> tuple[dict[str, Any] | No
             "ordinal": len(fields) + 1,
             "evidence_fields": evidence_fields,
             "unknown_fields": unknown_fields,
+            "raw_fragment": stripped,
+            "parsed_tokens": [name, type_name] + (["nullable"] if nullable_known else []) + (["default"] if default_match else []) + (["comment"] if comment_match else []),
+            "unparsed_fragment": None,
         })
+        known_end = match.end()
+        remainder = stripped[known_end:].strip().rstrip(",")
+        remainder = re.sub(r"(?is)^(?:not\s+null|null|default\s+(?:'[^']*'|[^\s,]+)|comment\s+'(?:''|[^'])*'|generated\s+(?:always\s+)?as\s*\(.*?\))\s*", "", remainder).strip()
+        if remainder:
+            fields[-1]["unparsed_fragment"] = remainder
+            warnings.append(f"表 {full_name} 字段 {name} 含未识别语法: {remainder[:80]}")
     tail = statement[close_paren + 1:]
     partition_match = re.search(r"(?is)\bpartition\s+by\s+(.+?)(?=\border\s+by\b|\bdistributed\s+by\b|\bproperties\b|$)", tail)
     if partition_match:
@@ -238,7 +250,7 @@ def parse_partial_fields(text: str, full_name: str, domain: str = "unknown") -> 
         match = FIELD_RE.match(line.strip().rstrip(",;"))
         if not match:
             continue
-        fields.append({"name": match.group("name").strip("`\""), "type": match.group("type").strip(), "nullable": None, "default": None, "default_state": "unknown", "comment": None, "ordinal": len(fields) + 1, "evidence_fields": ["name", "type"], "unknown_fields": ["nullable", "default", "comment"]})
+        fields.append({"name": match.group("name").strip("`\""), "type": match.group("type").strip(), "nullable": None, "default": None, "default_state": "unknown", "comment": None, "ordinal": len(fields) + 1, "evidence_fields": ["name", "type"], "unknown_fields": ["nullable", "default", "comment"], "raw_fragment": line.strip(), "parsed_tokens": [match.group("name").strip("`\""), match.group("type").strip()], "unparsed_fragment": None})
     item_warnings = [] if fields else ["未识别到明确字段；未补齐整表结构"]
     return {"tables": [{"table_id": full_name.replace(".", "_"), "domain": domain, "database": database, "table_name": table_name, "full_name": full_name, "dialect": "unspecified", "schema_scope": "partial" if fields else "blocked", "current_ddl_path": None, "raw_hash": _sha256(text), "normalized_hash": _sha256(normalize_ddl(text)), "fields": fields, "keys": [], "partitions": [], "indexes": [], "engine_properties": {}, "status": "candidate", "source_type": "chat_partial_fields", "source_requirement_ids": [], "last_verified_at": None, "parse_warnings": item_warnings, "applicability_scope": f"仅限用户明确提供的 {len(fields)} 个字段" if fields else None}], "warnings": item_warnings, "sensitive": bool(SENSITIVE_RE.search(text)), "input_raw_hash": _sha256(text), "input_normalized_hash": _sha256(normalize_ddl(text))}
 

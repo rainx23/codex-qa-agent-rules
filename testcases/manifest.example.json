@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "2.0.0",
   "artifact_id": "QA-20260715-001",
   "source_type": "example",
   "source_id": "REQ-EXAMPLE",
@@ -9,7 +9,7 @@
   "source_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
   "requirement_id": "REQ-EXAMPLE",
   "commit_range": null,
-  "rule_version": "2.5.0",
+  "rule_version": "2.6.0",
   "generated_at": "2026-07-15 00:00:00",
   "generated_timezone": "Asia/Shanghai",
   "report_mode": "requirement",

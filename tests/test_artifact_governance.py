@@ -47,7 +47,7 @@ class ArtifactGovernanceTests(unittest.TestCase):
         convert_file(markdown, workbook)
         source_files = [self._relative(source)]
         data = {
-            "schema_version": "1.0.0",
+            "schema_version": "2.0.0",
             "artifact_id": "QA-TEST-001",
             "source_type": "unit",
             "source_id": "REQ-1",

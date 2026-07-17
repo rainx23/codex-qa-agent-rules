@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "2.0.0",
   "matrix_id": "MATRIX-001",
   "analysis_ids": ["AN-REQ-001", "AN-DIFF-001"],
   "risk_items": [
@@ -22,7 +22,7 @@
       "testcase_ids": ["TC001"],
       "disposition_status": "covered",
       "disposition_reason": "由 TC001 独立覆盖",
-      "evidence_references": [{"source_type":"requirement","source_path":"tests/fixtures/sources/requirement.md","line_start":1,"line_end":3,"commit_sha":null,"content_hash":"sha256:f18b428754d35a54896bca7fdc32d51291720d95731f614cda782bc6c30ef3a2","excerpt":"客户编号精确过滤，翻页时保留筛选条件和排序字段。","captured_at":"2026-07-17 00:00:00","evidence_status":"current"}]
+      "evidence_references": [{"source_type":"requirement","source_path":"tests/fixtures/sources/requirement.md","line_start":1,"line_end":3,"commit_sha":null,"content_hash":"sha256:f18b428754d35a54896bca7fdc32d51291720d95731f614cda782bc6c30ef3a2","excerpt":"客户编号精确过滤，翻页时保留筛选条件和排序字段。","captured_at":"2026-07-17 00:00:00","captured_timezone":"Asia/Shanghai","evidence_status":"current"}]
     },
     {
       "risk_id": "RISK-002",
@@ -43,7 +43,7 @@
       "testcase_ids": ["TC002"],
       "disposition_status": "covered",
       "disposition_reason": "由 TC002 独立覆盖",
-      "evidence_references": [{"source_type":"requirement","source_path":"tests/fixtures/sources/requirement.md","line_start":1,"line_end":3,"commit_sha":null,"content_hash":"sha256:f18b428754d35a54896bca7fdc32d51291720d95731f614cda782bc6c30ef3a2","excerpt":"客户编号精确过滤，翻页时保留筛选条件和排序字段。","captured_at":"2026-07-17 00:00:00","evidence_status":"current"}]
+      "evidence_references": [{"source_type":"requirement","source_path":"tests/fixtures/sources/requirement.md","line_start":1,"line_end":3,"commit_sha":null,"content_hash":"sha256:f18b428754d35a54896bca7fdc32d51291720d95731f614cda782bc6c30ef3a2","excerpt":"客户编号精确过滤，翻页时保留筛选条件和排序字段。","captured_at":"2026-07-17 00:00:00","captured_timezone":"Asia/Shanghai","evidence_status":"current"}]
     }
   ],
   "coverage_summary": {"risk_count": 2, "p0_risk_count": 1, "covered_risk_count": 2}

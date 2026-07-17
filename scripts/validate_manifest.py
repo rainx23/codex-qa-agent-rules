@@ -213,6 +213,8 @@ def validate_manifest_data(data: dict[str, Any], manifest_path: Path) -> list[st
     if status == "pending":
         if not data.get("pending_reason"):
             errors.append("pending 状态必须填写 pending_reason")
+        if data.get("xmind_path") is not None:
+            errors.append("pending 状态 xmind_path 必须为 null；正式 Workbook 只能在 passed 产物中声明")
         return list(dict.fromkeys(errors))
     if status != "passed" or errors:
         return list(dict.fromkeys(errors))
@@ -275,6 +277,10 @@ def validate_manifest_data(data: dict[str, Any], manifest_path: Path) -> list[st
         errors.extend(validate_testcase_model(testcase_model))
         requirement_model = next((model for model in models if "facts" in model), None)
         diff_model = next((model for model in models if "change_items" in model), None)
+        if requirement_model:
+            core_missing = [fact.get("fact_id") for fact in requirement_model.get("facts", []) if fact.get("category") == "missing" and fact.get("affects_core_expectation")]
+            if core_missing:
+                errors.append(f"passed 产物仍包含核心 missing Fact，不得正式交付：{core_missing}")
         errors.extend(validate_model_links(requirement_model, diff_model, risk_matrix, testcase_model))
         report_text = paths["report_path"].read_text(encoding="utf-8-sig")
         report_mode = detect_mode(report_text)

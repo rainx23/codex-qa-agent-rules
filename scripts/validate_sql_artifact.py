@@ -13,16 +13,44 @@ from qa_contracts import validate_reconciliation, validate_validation_sql
 from validate_sql_style import find_config, validate_sql
 
 
-def validate_artifact(path: Path) -> list[str]:
+def _load_ids(path: Path | None, key: str) -> set[str]:
+    if not path or not path.is_file():
+        return set()
+    data = json.loads(path.read_text(encoding="utf-8-sig"))
+    items = data.get("risk_items" if key == "risk_id" else "cases", [])
+    return {item.get(key) for item in items if isinstance(item, dict) and item.get(key)}
+
+
+def validate_artifact(path: Path, risk_matrix: Path | None = None, testcase_model: Path | None = None, knowledge_root: Path | None = None) -> list[str]:
     try:
         data = json.loads(path.read_text(encoding="utf-8-sig"))
     except (OSError, json.JSONDecodeError) as exc:
         return [str(exc)]
     errors: list[str] = []
-    sql_model = {"schema_version": data.get("schema_version", "1.0.0"), "sql_items": data.get("sql_items", data.get("validation_sql", []))}
+    sql_model = {"schema_version": data.get("schema_version", "2.0.0"), "sql_items": data.get("sql_items", data.get("validation_sql", []))}
     if sql_model.get("sql_items"):
-        errors.extend(validate_validation_sql(sql_model))
-    rec_model = {"schema_version": data.get("schema_version", "1.0.0"), "reconciliation_plans": data.get("reconciliation_plans", data.get("reconciliation_plan", []))}
+        risk_ids = _load_ids(risk_matrix, "risk_id") if risk_matrix else None
+        tc_ids = _load_ids(testcase_model, "tc_id") if testcase_model else None
+        facts: set[str] | None = None
+        confirmed: set[str] | None = None
+        if risk_matrix:
+            requirement = risk_matrix.parent / "requirement-analysis.json"
+            if requirement.is_file():
+                requirement_data = json.loads(requirement.read_text(encoding="utf-8-sig"))
+                facts = {item.get("fact_id") for item in requirement_data.get("facts", [])}
+                confirmed = {item.get("fact_id") for item in requirement_data.get("facts", []) if item.get("category") == "confirmed"}
+        tables: dict[str, dict[str, Any]] = {}
+        if knowledge_root and knowledge_root.is_dir():
+            for candidate in knowledge_root.rglob("*.json"):
+                try:
+                    value = json.loads(candidate.read_text(encoding="utf-8-sig"))
+                except (OSError, json.JSONDecodeError):
+                    continue
+                for table in value.get("tables", [value] if value.get("full_name") else []):
+                    if isinstance(table, dict) and table.get("full_name"):
+                        tables[table["full_name"]] = table
+        errors.extend(validate_validation_sql(sql_model, risk_ids=risk_ids, tc_ids=tc_ids, fact_ids=facts, confirmed_fact_ids=confirmed, knowledge_tables=tables) if risk_matrix or testcase_model or knowledge_root else validate_validation_sql(sql_model))
+    rec_model = {"schema_version": data.get("schema_version", "2.0.0"), "reconciliation_plans": data.get("reconciliation_plans", data.get("reconciliation_plan", []))}
     if rec_model.get("reconciliation_plans"):
         errors.extend(validate_reconciliation(rec_model))
     sql_items = sql_model.get("sql_items", [])
@@ -66,8 +94,11 @@ def validate_artifact(path: Path) -> list[str]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="校验验证 SQL 与直接对数产物，不执行 SQL")
     parser.add_argument("manifest", type=Path)
+    parser.add_argument("--risk-matrix", type=Path)
+    parser.add_argument("--testcase-model", type=Path)
+    parser.add_argument("--knowledge-root", type=Path)
     args = parser.parse_args(argv)
-    errors = validate_artifact(args.manifest)
+    errors = validate_artifact(args.manifest, args.risk_matrix, args.testcase_model, args.knowledge_root)
     if errors:
         for error in errors:
             print(f"FAIL {error}", file=sys.stderr)

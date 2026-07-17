@@ -11,13 +11,14 @@ from pathlib import Path
 from typing import Any, Callable
 
 
-SCHEMA_VERSION = "1.0.0"
+SCHEMA_VERSION = "2.0.0"
 REPORT_MODES = ("requirement", "diff", "combined")
 FACT_CATEGORIES = ("confirmed", "conflicting", "inferred", "missing")
 SOURCE_TYPES = (
-    "user_confirmation", "requirement", "zentao_section_3", "zentao_background",
+    "user_confirmation", "requirement", "zentao_section_3",
     "openspec", "markdown", "screenshot", "diff", "code_context",
-    "api_document", "sql_definition", "historical_defect", "inference",
+    "acceptance_criteria", "formal_change_record", "api_document", "sql_definition",
+    "complete_ddl", "knowledge_table", "historical_defect", "pasted_text", "chat_snapshot",
 )
 COVERAGE_STATUSES = ("已覆盖", "疑似遗漏", "实现不一致", "需求外变更", "无法判断")
 TEST_PRIORITIES = ("P0", "P1", "P2")
@@ -46,6 +47,8 @@ VAGUE_ASSERTIONS = (
     "没有出现异常情况", "结果与实际一致", "正常返回相关内容", "处理正确", "结果正确", "数据正确",
     "无异常", "无问题", "符合需求", "符合设计", "具体业务结果以确认口径为准", "按后续确认结果验证",
     "没有未处理异常即可",
+    "data correctness", "result correctness", "function works", "meets requirement", "meets expectation",
+    "no issue", "no problem", "no exception", "business handling is correct",
 )
 DATA_VALIDATION_REQUIREMENTS = ("required", "optional", "not_required", "blocked")
 VALIDATION_METHODS = ("sql", "cross_source_reconciliation", "mixed", "not_applicable", "blocked")
@@ -55,6 +58,12 @@ API_AUTOMATION_ACTIONS = ("create", "update", "none", "blocked")
 API_PARAMETER_CHANGE_TYPES = ("added", "removed", "renamed", "type_changed", "default_changed", "required_changed", "format_changed", "unchanged")
 SQL_EXECUTION_STATUSES = ("planned", "generated", "reviewed", "executed", "passed", "failed", "blocked")
 SENSITIVE_PATTERN = re.compile(r"(?i)(?:password|passwd|token|jdbc|private[_ -]?key|secret)\s*[:=]")
+COMMIT_SHA_PATTERN = r"^[0-9a-fA-F]{7,40}$"
+CAPTURED_AT_PATTERN = r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$"
+LOCAL_EVIDENCE_TYPES = {
+    "requirement", "markdown", "diff", "code_context", "api_document", "sql_definition",
+    "complete_ddl", "knowledge_table", "historical_defect", "pasted_text", "chat_snapshot",
+}
 
 
 def read_rule_version(root: Path) -> str:
@@ -86,10 +95,10 @@ def _evidence_reference() -> dict[str, Any]:
     return _object(
         ["source_type", "source_path", "line_start", "line_end", "commit_sha", "content_hash", "excerpt", "captured_at", "evidence_status"],
         {
-            "source_type": _string(), "source_path": {"type": ["string", "null"]},
+            "source_type": {"enum": list(SOURCE_TYPES)}, "source_path": {"type": ["string", "null"]},
             "line_start": {"type": ["integer", "null"], "minimum": 1}, "line_end": {"type": ["integer", "null"], "minimum": 1},
-            "commit_sha": {"type": ["string", "null"]}, "content_hash": {"type": ["string", "null"], "pattern": r"^sha256:[0-9a-fA-F]{64}$"},
-            "excerpt": _string(), "captured_at": _string(), "evidence_status": {"enum": ["current", "stale", "reconfirm_required"]},
+            "commit_sha": {"type": ["string", "null"], "pattern": COMMIT_SHA_PATTERN}, "content_hash": {"type": ["string", "null"], "pattern": r"^sha256:[0-9a-fA-F]{64}$"},
+            "excerpt": _string(), "captured_at": _string(pattern=CAPTURED_AT_PATTERN), "captured_timezone": {"enum": list(ALLOWED_TIMEZONES)}, "evidence_status": {"enum": ["current", "stale", "reconfirm_required"]},
         },
     )
 
@@ -172,6 +181,9 @@ def requirement_schema(version: str) -> dict[str, Any]:
         {
             "confirmation_id": _string(), "severity": {"enum": list(PENDING_SEVERITIES)},
             "statement": _string(), "fact_ids": _strings(1), "status": {"enum": list(PENDING_STATUSES)},
+            "resolution": {"type": ["string", "null"]}, "resolution_evidence_references": {"type": "array", "items": _evidence_reference()},
+            "resolved_at": {"type": ["string", "null"]}, "skip_reason": {"type": ["string", "null"]},
+            "decision_evidence": {"type": "array", "items": _evidence_reference()},
         },
     )
     risk = _object(
@@ -256,6 +268,7 @@ def knowledge_table_schema(version: str) -> dict[str, Any]:
             "default": {"type": ["string", "null"]}, "comment": {"type": ["string", "null"]},
             "default_state": {"enum": ["known_null", "known_value", "unknown"]}, "ordinal": {"type": "integer", "minimum": 1},
             "evidence_fields": _strings(1), "unknown_fields": _strings(),
+            "raw_fragment": _string(), "parsed_tokens": _strings(), "unparsed_fragment": {"type": ["string", "null"]},
         },
     )
     body = _object(
@@ -341,7 +354,8 @@ def validation_sql_schema(version: str) -> dict[str, Any]:
     identifier_evidence = _object(
         ["identifier", "identifier_type", "source_reference", "evidence_state"],
         {"identifier": _string(), "identifier_type": {"enum": ["table", "field", "parameter", "metric"]},
-         "source_reference": _string(), "evidence_state": {"const": "confirmed"}},
+         "source_reference": _string(), "source_reference_type": {"enum": ["fact", "complete_ddl", "knowledge", "sql_definition", "user_confirmation"]},
+         "source_reference_id": _string(), "evidence_references": {"type": "array", "items": _evidence_reference()}, "evidence_state": {"const": "confirmed"}},
     )
     query = _object(
         ["sql_id", "purpose", "requirement_ids", "risk_ids", "tc_ids", "dialect", "tables", "fields", "parameters", "metric_ids", "expected_assertion", "execution_status", "sql_path", "evidence_sources", "identifier_evidence"],
@@ -405,7 +419,7 @@ def risk_matrix_schema(version: str) -> dict[str, Any]:
             "business_impact": {"enum": list(BUSINESS_IMPACTS)}, "test_priority": {"enum": list(TEST_PRIORITIES)},
             "evidence_state": {"enum": list(EVIDENCE_STATES)}, "regression_scope": {"enum": list(REGRESSION_SCOPES)},
             "merge_key": _string(), "testcase_ids": {"type": "array", "items": _string(pattern=TC_PATTERN), "uniqueItems": True},
-            "disposition_status": {"enum": list(RISK_DISPOSITIONS)}, "disposition_reason": _string(), "merged_to": _strings(), "confirmation_ids": _strings(), "decision_evidence": _strings(),
+            "disposition_status": {"enum": list(RISK_DISPOSITIONS)}, "disposition_reason": _string(), "merged_to": _strings(), "confirmation_ids": _strings(), "decision_evidence": {"type": "array", "items": _evidence_reference()},
             "evidence_references": {"type": "array", "items": _evidence_reference(), "minItems": 1},
         },
     )
@@ -445,7 +459,8 @@ def testcase_schema(version: str) -> dict[str, Any]:
         {"execution_instance_id": _string(), "tc_id": _string(pattern=TC_PATTERN), "branch_id": {"type": ["string", "null"]},
          "execution_status": {"enum": ["not_run", "passed", "failed", "blocked", "skipped"]},
          "executor": {"type": ["string", "null"]}, "executed_at": {"type": ["string", "null"]}, "defect_ids": _strings(),
-         "rerun_of": {"type": ["string", "null"]}, "execution_evidence": {"type": ["string", "null"]}},
+         "rerun_of": {"type": ["string", "null"]}, "execution_evidence": {"type": ["object", "string", "null"]},
+         "failure_description": {"type": ["string", "null"]}, "confirmation_ids": _strings(), "decision_evidence": {"type": ["object", "string", "null"]}},
     )
     body = _object(
         ["schema_version", "root_title", "cases"],
@@ -475,6 +490,8 @@ def manifest_schema(version: str) -> dict[str, Any]:
         "analysis_model_paths": _strings(), "risk_matrix_path": {"type": ["string", "null"]},
         "testcase_model_path": {"type": ["string", "null"]}, "xmind_md_path": {"type": ["string", "null"]},
         "xmind_path": {"type": ["string", "null"]}, "case_count": {"type": "integer", "minimum": 0},
+        "draft_report_path": {"type": ["string", "null"]}, "draft_risk_matrix_path": {"type": ["string", "null"]},
+        "draft_testcase_model_path": {"type": ["string", "null"]}, "draft_xmind_md_path": {"type": ["string", "null"]},
         "p0_count": {"type": "integer", "minimum": 0, "description": "Compatibility alias of p0_case_count."},
         "p0_risk_count": {"type": "integer", "minimum": 0}, "p0_case_count": {"type": "integer", "minimum": 0},
         "pending_count": {"type": "integer", "minimum": 0}, "blocking_pending_count": {"type": "integer", "minimum": 0},
@@ -529,14 +546,29 @@ def _validate_evidence_references(items: Any, label: str, confirmed: bool = Fals
         if (start is None) != (end is None) or isinstance(start, int) and isinstance(end, int) and start > end:
             errors.append(f"{prefix} 行号范围非法")
         source_type = str(evidence.get("source_type", ""))
-        if source_type in {"diff", "code_context"} and (not evidence.get("source_path") or not evidence.get("commit_sha")):
+        if source_type not in SOURCE_TYPES:
+            errors.append(f"{prefix} source_type 非法")
+        source_path = evidence.get("source_path")
+        if source_type in LOCAL_EVIDENCE_TYPES and not source_path:
+            errors.append(f"{prefix} 本地证据必须包含 source_path")
+        if isinstance(source_path, str):
+            path = Path(source_path)
+            if path.is_absolute() or ".." in path.parts:
+                errors.append(f"{prefix} source_path 必须是仓库内相对路径")
+        if source_type in {"diff", "code_context"} and (not source_path or not evidence.get("commit_sha")):
             errors.append(f"{prefix} Diff/代码证据必须包含 source_path 和 commit_sha")
-        if source_type in {"requirement", "diff", "code_context", "file", "pasted_text", "chat"} and not evidence.get("content_hash"):
+        if source_type in {"diff", "code_context"} and not re.fullmatch(COMMIT_SHA_PATTERN, str(evidence.get("commit_sha", ""))):
+            errors.append(f"{prefix} commit_sha 格式非法")
+        if source_type in LOCAL_EVIDENCE_TYPES and not evidence.get("content_hash"):
             errors.append(f"{prefix} 文件或文本证据必须包含 content_hash")
         if source_type == "screenshot" and not evidence.get("source_path"):
             errors.append(f"{prefix} 截图证据必须包含附件或文件标识")
-        if source_type in {"pasted_text", "chat"} and not evidence.get("content_hash"):
-            errors.append(f"{prefix} 粘贴内容必须包含 content_hash")
+        if not re.fullmatch(CAPTURED_AT_PATTERN, str(evidence.get("captured_at", ""))):
+            errors.append(f"{prefix} captured_at 必须使用 yyyy-MM-dd HH:mm:ss")
+        if evidence.get("captured_timezone") not in ALLOWED_TIMEZONES:
+            errors.append(f"{prefix} captured_timezone 必须明确声明")
+        if evidence.get("evidence_status") == "current" and source_type in LOCAL_EVIDENCE_TYPES and not source_path:
+            errors.append(f"{prefix} current 证据必须可定位到真实来源")
         if confirmed and evidence.get("evidence_status") != "current":
             errors.append(f"{prefix} 已过期或需重新确认，不得支撑 confirmed 结论")
     return errors
@@ -582,9 +614,31 @@ def validate_requirement_model(data: dict[str, Any]) -> list[str]:
     confirmation_fact_ids = {
         fact_id for point in confirmations for fact_id in point.get("fact_ids", []) if isinstance(fact_id, str)
     }
+    for point in confirmations:
+        point_id = point.get("confirmation_id")
+        linked = point.get("fact_ids", [])
+        if not linked:
+            errors.append(f"Confirmation {point_id} fact_ids 不能为空")
+        unknown = set(linked) - fact_ids
+        if unknown:
+            errors.append(f"Confirmation {point_id} 引用不存在 Fact: {sorted(unknown)}")
+        if point.get("status") == "resolved":
+            if not point.get("resolution") or not point.get("resolved_at") or not point.get("resolution_evidence_references"):
+                errors.append(f"Confirmation {point_id} resolved 必须提供 resolution、resolution_evidence_references 和 resolved_at")
+            errors.extend(_validate_evidence_references(point.get("resolution_evidence_references"), f"Confirmation {point_id} resolution", True))
+        if point.get("status") == "skipped" and (not point.get("skip_reason") or not point.get("decision_evidence")):
+            errors.append(f"Confirmation {point_id} skipped 必须提供 skip_reason 和 decision_evidence")
+        if point.get("severity") == "blocking" and point.get("status") != "resolved":
+            errors.append(f"Confirmation {point_id} blocking 尚未 resolved")
     for fact_id, category in categories.items():
         if category == "conflicting" and fact_id not in confirmation_fact_ids:
             errors.append(f"冲突事实 {fact_id} 未关联待确认点")
+        if category == "missing" and facts and next((fact for fact in facts if fact.get("fact_id") == fact_id), {}).get("affects_core_expectation"):
+            linked_points = [point for point in confirmations if fact_id in point.get("fact_ids", [])]
+            if not linked_points or not any(point.get("severity") == "blocking" for point in linked_points):
+                errors.append(f"核心缺失事实 {fact_id} 必须关联 blocking Confirmation")
+            if any(point.get("status") == "resolved" for point in linked_points) and not categories.get(fact_id) == "confirmed":
+                errors.append(f"核心缺失事实 {fact_id} resolved 前不得进入确认性验收")
     for criterion in criteria:
         linked = criterion.get("fact_ids", [])
         if not linked:
@@ -669,6 +723,10 @@ def validate_risk_matrix(data: dict[str, Any]) -> list[str]:
             errors.append(f"accepted 风险 {risk.get('risk_id')} 必须提供决策证据")
         if disposition == "blocked" and not risk.get("confirmation_ids"):
             errors.append(f"blocked 风险 {risk.get('risk_id')} 必须关联待确认点")
+        if disposition == "merged" and risk.get("risk_id") in set(risk.get("merged_to", [])):
+            errors.append(f"merged 风险 {risk.get('risk_id')} 不得合并到自身")
+        if disposition == "accepted" and any(not isinstance(item, dict) for item in risk.get("decision_evidence", [])):
+            errors.append(f"accepted 风险 {risk.get('risk_id')} decision_evidence 必须是 Evidence Reference")
         for tc_id in risk.get("testcase_ids", []):
             if not re.fullmatch(TC_PATTERN, str(tc_id)):
                 errors.append(f"风险 {risk.get('risk_id')} 引用非法 TC：{tc_id}")
@@ -746,10 +804,43 @@ def validate_testcase_model(data: dict[str, Any]) -> list[str]:
             errors.append(f"执行实例 {instance_id} 引用不存在 TC")
         if instance.get("branch_id") is not None and instance.get("branch_id") not in branches:
             errors.append(f"执行实例 {instance_id} 引用不存在 branch_id")
+        if instance.get("tc_id") in tc_ids and any(case.get("entry_branches") for case in cases if case.get("tc_id") == instance.get("tc_id")) and not instance.get("branch_id"):
+            errors.append(f"多入口执行实例 {instance_id} 必须填写 branch_id")
         if instance.get("rerun_of") is not None and instance.get("rerun_of") not in instance_ids:
             errors.append(f"执行实例 {instance_id} rerun_of 不存在")
-        if instance.get("execution_status") != "not_run" and not instance.get("execution_evidence"):
+        if instance.get("rerun_of") == instance_id:
+            errors.append(f"执行实例 {instance_id} rerun_of 不得指向自身")
+        if instance.get("execution_status") == "not_run" and any(instance.get(key) is not None and instance.get(key) != [] for key in ("executor", "executed_at", "execution_evidence")):
+            errors.append(f"执行实例 {instance_id} not_run 不得伪造执行信息")
+        if instance.get("execution_status") != "not_run" and not isinstance(instance.get("execution_evidence"), dict):
             errors.append(f"执行实例 {instance_id} 没有实际执行证据，只允许 not_run")
+        evidence = instance.get("execution_evidence")
+        if isinstance(evidence, dict):
+            required = {"evidence_type", "path", "content_hash", "captured_at"}
+            if not required.issubset(evidence):
+                errors.append(f"执行实例 {instance_id} 执行证据字段不完整")
+            if evidence.get("evidence_type") not in {"screenshot", "log", "report", "manual_record"}:
+                errors.append(f"执行实例 {instance_id} evidence_type 非法")
+            if not re.fullmatch(r"^sha256:[0-9a-fA-F]{64}$", str(evidence.get("content_hash", ""))):
+                errors.append(f"执行实例 {instance_id} content_hash 非法")
+            if not re.fullmatch(CAPTURED_AT_PATTERN, str(evidence.get("captured_at", ""))):
+                errors.append(f"执行实例 {instance_id} captured_at 格式非法")
+        if instance.get("execution_status") == "failed" and not instance.get("defect_ids") and not instance.get("failure_description"):
+            errors.append(f"失败执行实例 {instance_id} 必须关联 defect_id 或失败说明")
+        if instance.get("execution_status") == "blocked" and not instance.get("confirmation_ids"):
+            errors.append(f"阻塞执行实例 {instance_id} 必须关联 Confirmation")
+        if instance.get("execution_status") == "skipped" and not instance.get("decision_evidence"):
+            errors.append(f"跳过执行实例 {instance_id} 必须提供决策证据")
+    for instance in instances:
+        seen: set[str] = set()
+        current = instance
+        while current.get("rerun_of"):
+            target = current.get("rerun_of")
+            if target in seen:
+                errors.append(f"执行实例 {instance.get('execution_instance_id')} rerun_of 形成循环")
+                break
+            seen.add(target)
+            current = next((item for item in instances if item.get("execution_instance_id") == target), {})
     return list(dict.fromkeys(errors))
 
 
@@ -855,11 +946,15 @@ def validate_data_validation(data: dict[str, Any]) -> list[str]:
     return list(dict.fromkeys(errors))
 
 
-def validate_validation_sql(data: dict[str, Any]) -> list[str]:
+def validate_validation_sql(data: dict[str, Any], *, risk_ids: set[str] | None = None, tc_ids: set[str] | None = None, fact_ids: set[str] | None = None, confirmed_fact_ids: set[str] | None = None, knowledge_tables: dict[str, dict[str, Any]] | None = None) -> list[str]:
     errors = validate_schema_shape(data, validation_sql_schema("0.0.0"))
     items = data.get("sql_items", []) if isinstance(data.get("sql_items"), list) else []
     errors.extend(_validate_id_items(items, "sql_id", "SQL"))
     for item in items:
+        if risk_ids is not None and not set(item.get("risk_ids", [])) <= risk_ids:
+            errors.append(f"{item.get('sql_id')} 引用不存在 Risk")
+        if tc_ids is not None and not set(item.get("tc_ids", [])) <= tc_ids:
+            errors.append(f"{item.get('sql_id')} 引用不存在 TC")
         if item.get("execution_status") in {"executed", "passed", "failed"} and not item.get("execution_evidence"):
             errors.append(f"{item.get('sql_id')} 未有用户执行结果时不得标记 {item.get('execution_status')}")
         if not item.get("tc_ids"):
@@ -870,6 +965,25 @@ def validate_validation_sql(data: dict[str, Any]) -> list[str]:
         used = set(item.get("tables", [])) | set(item.get("fields", [])) | set(item.get("parameters", [])) | set(item.get("metric_ids", []))
         if used - covered:
             errors.append(f"{item.get('sql_id')} 标识缺少证据：{sorted(used - covered)}")
+        for evidence in item.get("identifier_evidence", []):
+            identifier = evidence.get("identifier")
+            source_type = evidence.get("source_reference_type")
+            source_id = evidence.get("source_reference_id")
+            if source_type == "fact" and (not fact_ids or source_id not in fact_ids or source_id not in (confirmed_fact_ids or set())):
+                errors.append(f"{item.get('sql_id')} identifier {identifier} 的 Fact 证据不存在或未 confirmed")
+            if source_type == "complete_ddl":
+                table_name = identifier.rsplit(".", 2)[0] if evidence.get("identifier_type") == "field" and identifier.count(".") >= 2 else identifier
+                table = next((value for key, value in (knowledge_tables or {}).items() if key == table_name or value.get("full_name") == table_name), None)
+                if not table or table.get("schema_scope") != "complete":
+                    errors.append(f"{item.get('sql_id')} identifier {identifier} 缺少 complete DDL 证据")
+            if evidence.get("identifier_type") == "table" and identifier not in item.get("tables", []):
+                errors.append(f"{item.get('sql_id')} table identifier_type 与 tables 不一致")
+            if evidence.get("identifier_type") == "field" and identifier not in item.get("fields", []):
+                errors.append(f"{item.get('sql_id')} field identifier_type 与 fields 不一致")
+            if evidence.get("identifier_type") == "parameter" and identifier not in item.get("parameters", []):
+                errors.append(f"{item.get('sql_id')} parameter identifier_type 与 parameters 不一致")
+            if evidence.get("identifier_type") == "metric" and identifier not in item.get("metric_ids", []):
+                errors.append(f"{item.get('sql_id')} metric identifier_type 与 metric_ids 不一致")
     return list(dict.fromkeys(errors))
 
 
@@ -908,6 +1022,28 @@ def validate_api_automation(data: dict[str, Any]) -> list[str]:
         statement = str(case.get("validation", "")) + " " + " ".join(data.get("evidence", []))
         if re.search(r"content\.code\s*=\s*0.*content\.msg\s*=\s*OK.*业务数据正确", statement, re.S):
             errors.append("参数健康检查不得宣称业务数据正确")
+        try:
+            validation = json.loads(case.get("validation", ""))
+        except (TypeError, json.JSONDecodeError):
+            validation = None
+        if data.get("assertion_scope") == "parameter_health" and isinstance(validation, dict):
+            checks = validation.get("validate")
+            if not isinstance(checks, list) or len(checks) != 2:
+                errors.append("parameter_health 只允许 content.code 和 content.msg 两项健康检查")
+            else:
+                seen: list[str] = []
+                for check in checks:
+                    path = check.get("check") if isinstance(check, dict) else None
+                    seen.append(path)
+                    expected = check.get("expected") if isinstance(check, dict) else None
+                    if path == "content.code" and expected not in (0, "0"):
+                        errors.append("content.code 健康检查 expected 必须为 0")
+                    elif path == "content.msg" and expected != "OK":
+                        errors.append("content.msg 健康检查 expected 必须为 OK")
+                    elif path not in {"content.code", "content.msg"}:
+                        errors.append("parameter_health 不得增加业务字段断言")
+                if sorted(seen) != ["content.code", "content.msg"]:
+                    errors.append("parameter_health 必须恰好包含 content.code 和 content.msg")
     return list(dict.fromkeys(errors))
 
 
@@ -933,6 +1069,13 @@ def validate_model_links(
     diff_risks = {item.get("risk_id"): item for item in (diff or {}).get("risks", [])}
     defect_ids = {item.get("defect_id") for item in (diff or {}).get("suspected_defects", [])}
     cases = {item.get("tc_id"): item for item in testcase_model.get("cases", [])}
+    for risk_id in set(risks) & set(diff_risks):
+        left, right = risks[risk_id], diff_risks[risk_id]
+        for field in ("change_ids", "test_priority", "business_impact", "regression_scope"):
+            if field in left and field in right and left.get(field) != right.get(field):
+                errors.append(f"Risk {risk_id} 在 Diff 与 Risk Matrix 的 {field} 不一致")
+        if set(left.get("change_ids", [])) != set(right.get("change_ids", [])):
+            errors.append(f"Risk {risk_id} 在 Diff 与 Risk Matrix 的 change_ids 不一致")
     analysis_ids = set(risk_matrix.get("analysis_ids", []))
     for model in (requirement, diff):
         if model and model.get("analysis_id") not in analysis_ids:

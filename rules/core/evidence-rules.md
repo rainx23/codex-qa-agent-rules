@@ -6,6 +6,8 @@
 
 ## Evidence Reference
 
+`source_type` is a closed enum: `user_confirmation`, `requirement`, `zentao_section_3`, `acceptance_criteria`, `formal_change_record`, `openspec`, `markdown`, `screenshot`, `diff`, `code_context`, `api_document`, `sql_definition`, `complete_ddl`, `knowledge_table`, `historical_defect`, `pasted_text`, `chat_snapshot`. Current local evidence must resolve to an existing repository-relative file, preserve its SHA-256, line range and excerpt, and use `yyyy-MM-dd HH:mm:ss` with an explicit capture timezone. Missing or changed sources cannot remain `current`.
+
 事实、变更、影响链、风险、疑似缺陷和验收标准必须使用可追溯的 `evidence_references`，每条至少声明 `source_type`、`source_path`、`line_start`、`line_end`、`commit_sha`、`content_hash`、`excerpt`、`captured_at` 和 `evidence_status`。
 
 - 文件证据尽量定位到真实路径和行号；Diff/代码证据必须包含 Commit、文件和变更位置。

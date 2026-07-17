@@ -12,6 +12,23 @@
 
 ### Fixed
 
+## [2.6.0] - 2026-07-17
+
+### Added
+
+- Evidence Reference 真实来源、路径、哈希、时间和状态门禁。
+- Schema 2.0.0、Missing Fact blocking Confirmation、Pending 草稿产物契约和 Execution Instance 证据契约。
+- DDL 完整消费检查、SQL Identifier 真实来源校验、Risk/Diff 双向一致性校验和 API 健康断言白名单。
+
+### Changed
+
+- 规则版本从 2.5.0 升级到 2.6.0；结构化模型 Schema 从 1.0.0 升级到 2.0.0。
+- SQL author 继续唯一读取 `rules-repository.json.sql_defaults.author`，默认配置仍为 `Rainx`。
+
+### Fixed
+
+- 阻止不存在或失真的 Evidence、Missing Fact、Pending Workbook、DDL nullable 推断、虚假报告 ID 和执行证据绕过正式校验。
+
 ### Removed
 
 ## [2.5.0] - 2026-07-17
@@ -52,7 +69,7 @@
 - 根 README 和 AGENTS 增加目录导航、文档影响判断及版本维护入口。
 - Schema、Manifest 示例和相关 Golden 数据更新为规则版本 2.4.0。
 
-## [2.3.0] - 日期待确认
+## [2.3.0] - 2026-07-10
 
 ### Baseline
 

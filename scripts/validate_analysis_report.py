@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import sys
 import unicodedata
@@ -225,6 +226,8 @@ def validate(
     require_traceability: bool | None = None,
     xmind_md: Path | None = None,
     mode: str = "auto",
+    legacy: bool = False,
+    known_ids: dict[str, set[str]] | None = None,
 ) -> list[str]:
     text = path.read_text(encoding="utf-8-sig")
     _, bodies = _section_map(text)
@@ -262,8 +265,15 @@ def validate(
     trace = _body(bodies, "需求-Diff-测试点追踪矩阵")
     if resolved_mode == MODE_COMBINED and trace:
         errors.extend(_validate_trace_matrix(trace))
-    # Legacy reports without structured Fact IDs remain readable; all model-driven reports use strict line evidence.
-    if re.search(r"\bFACT[A-Z0-9-]*\d+\b", text, re.I):
+    # Schema 2 reports are model-driven and must carry row-level IDs. Legacy is opt-in.
+    model_driven = bool(re.search(r"(?im)\bschema_version\s*[:=]\s*2\.0\.0\b", text))
+    if model_driven and not legacy:
+        errors.extend(_validate_line_evidence(bodies, resolved_mode))
+        if known_ids:
+            for kind, pattern in (("FACT", r"\bFACT[A-Z0-9-]*\d+\b"), ("CHG", r"\bCHG[A-Z0-9-]*\d+\b"), ("RISK", r"\bRISK[A-Z0-9-]*\d+\b"), ("DEF", r"\bDEF[A-Z0-9-]*\d+\b"), ("CONF", r"\bCONF[A-Z0-9-]*\d+\b"), ("TC", r"\bTC\d{3}\b")):
+                for value in sorted(set(re.findall(pattern, text, re.I)) - known_ids.get(kind, set())):
+                    errors.append(f"报告引用不存在的 {kind} ID: {value}")
+    elif re.search(r"\bFACT[A-Z0-9-]*\d+\b", text, re.I):
         errors.extend(_validate_line_evidence(bodies, resolved_mode))
 
     risk_names = ("疑似风险点",) if resolved_mode == MODE_DIFF else ("风险点",)
@@ -307,14 +317,24 @@ def main(argv: list[str] | None = None) -> int:
         help="兼容旧参数：等价于 --mode combined",
     )
     parser.add_argument("--xmind-md", type=Path)
+    parser.add_argument("--legacy", action="store_true", help="显式使用旧报告兼容模式")
+    parser.add_argument("--requirement-model", type=Path)
+    parser.add_argument("--diff-model", type=Path)
+    parser.add_argument("--risk-matrix", type=Path)
+    parser.add_argument("--testcase-model", type=Path)
     args = parser.parse_args(argv)
     failed = 0
     requested_mode = MODE_COMBINED if args.require_traceability else args.mode
+    known_ids = {key: set() for key in ("FACT", "CHG", "RISK", "DEF", "CONF", "TC")}
+    for path, key, collection in ((args.requirement_model, "FACT", "facts"), (args.requirement_model, "CONF", "confirmation_points"), (args.diff_model, "CHG", "change_items"), (args.diff_model, "RISK", "risks"), (args.diff_model, "DEF", "suspected_defects"), (args.risk_matrix, "RISK", "risk_items"), (args.testcase_model, "TC", "cases")):
+        if path and path.is_file():
+            value = json.loads(path.read_text(encoding="utf-8-sig"))
+            known_ids[key].update(item.get({"FACT":"fact_id", "CONF":"confirmation_id", "CHG":"change_id", "RISK":"risk_id", "DEF":"defect_id", "TC":"tc_id"}[key]) for item in value.get(collection, []))
     for path in args.files:
         try:
             text = path.read_text(encoding="utf-8-sig")
             resolved_mode = detect_mode(text, requested_mode)
-            errors = validate(path, xmind_md=args.xmind_md, mode=requested_mode)
+            errors = validate(path, xmind_md=args.xmind_md, mode=requested_mode, legacy=args.legacy, known_ids=known_ids if any(known_ids.values()) else None)
         except (OSError, ValueError) as exc:
             errors = [str(exc)]
             resolved_mode = requested_mode

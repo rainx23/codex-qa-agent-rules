@@ -39,9 +39,15 @@ def _validate_evidence_freshness(models: list[dict | None], root: Path) -> list[
             if not source_path or not expected:
                 continue
             path = Path(source_path)
-            if not path.is_absolute():
-                path = root / path
+            if path.is_absolute() or ".." in path.parts:
+                errors.append(f"证据 {source_path} 路径必须是仓库内相对路径")
+                continue
+            path = (root / path).resolve()
+            if root.resolve() not in path.parents:
+                errors.append(f"证据 {source_path} 路径越出仓库根目录")
+                continue
             if not path.is_file():
+                errors.append(f"证据 {source_path} 文件不存在；current 证据不能静默跳过")
                 continue
             raw = path.read_bytes()
             actual = f"sha256:{hashlib.sha256(raw).hexdigest()}"

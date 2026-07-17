@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$comment": "Generated from scripts/qa_contracts.py; do not edit manually.",
-  "x-rule-version": "2.5.0",
+  "x-rule-version": "2.6.0",
   "title": "Validation SQL Artifact Model",
   "type": "object",
   "additionalProperties": false,
@@ -11,7 +11,7 @@
   ],
   "properties": {
     "schema_version": {
-      "const": "1.0.0"
+      "const": "2.0.0"
     },
     "sql_items": {
       "type": "array",
@@ -168,6 +168,116 @@
                 "source_reference": {
                   "type": "string",
                   "minLength": 1
+                },
+                "source_reference_type": {
+                  "enum": [
+                    "fact",
+                    "complete_ddl",
+                    "knowledge",
+                    "sql_definition",
+                    "user_confirmation"
+                  ]
+                },
+                "source_reference_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "evidence_references": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "source_type",
+                      "source_path",
+                      "line_start",
+                      "line_end",
+                      "commit_sha",
+                      "content_hash",
+                      "excerpt",
+                      "captured_at",
+                      "evidence_status"
+                    ],
+                    "properties": {
+                      "source_type": {
+                        "enum": [
+                          "user_confirmation",
+                          "requirement",
+                          "zentao_section_3",
+                          "openspec",
+                          "markdown",
+                          "screenshot",
+                          "diff",
+                          "code_context",
+                          "acceptance_criteria",
+                          "formal_change_record",
+                          "api_document",
+                          "sql_definition",
+                          "complete_ddl",
+                          "knowledge_table",
+                          "historical_defect",
+                          "pasted_text",
+                          "chat_snapshot"
+                        ]
+                      },
+                      "source_path": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "line_start": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "minimum": 1
+                      },
+                      "line_end": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "minimum": 1
+                      },
+                      "commit_sha": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "pattern": "^[0-9a-fA-F]{7,40}$"
+                      },
+                      "content_hash": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "pattern": "^sha256:[0-9a-fA-F]{64}$"
+                      },
+                      "excerpt": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "captured_at": {
+                        "type": "string",
+                        "minLength": 1,
+                        "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$"
+                      },
+                      "captured_timezone": {
+                        "enum": [
+                          "Asia/Shanghai",
+                          "UTC"
+                        ]
+                      },
+                      "evidence_status": {
+                        "enum": [
+                          "current",
+                          "stale",
+                          "reconfirm_required"
+                        ]
+                      }
+                    }
+                  }
                 },
                 "evidence_state": {
                   "const": "confirmed"

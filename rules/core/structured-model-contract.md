@@ -40,3 +40,4 @@
 - 完整 DDL 使用 `schema_scope=complete` 并保存原始/规范化哈希；原文中明确存在的主键、唯一键、Duplicate/Aggregate Key、分区、分桶、索引、Engine 和 Properties 必须全部稳定提取，否则降级为 `partial` 或 `blocked`。局部字段使用 `partial`，不得覆盖 complete 版本。
 - Data Validation Model 使用 `required`、`optional`、`not_required`、`blocked`；验证方式使用 `sql`、`cross_source_reconciliation`、`mixed`、`not_applicable`、`blocked`。指标准确性默认必须有关联 SQL。
 - Validation SQL 使用全局 `SQLV###`，直接对数使用 `REC###`；它们可被多个 TC 复用，必须与需求、风险和 TC 建立引用关系。知识、SQL 和对数模型不得成为新的 XMind 层级。
+Schema contract version is `2.0.0`; it is distinct from the repository `RULE_VERSION` (`2.6.0`). Models with `schema_version=1.0.0` require the explicit migration script and re-confirmation before validation.
