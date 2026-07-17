@@ -1,12 +1,12 @@
 from __future__ import annotations
-import copy, json, subprocess, sys, unittest
+import copy, json, subprocess, sys, tempfile, unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from qa_contracts import load_json
-from validate_execution_instances import validate_execution_model, summarize_execution_model
+from validate_execution_instances import _sha, validate_execution_model, summarize_execution_model
 
 EXECUTION = ROOT / "tests/fixtures/execution/execution-model-valid.json"
 
@@ -43,5 +43,24 @@ class ExecutionInstanceTests(unittest.TestCase):
         for flag in ("--testcase", "--risk", "--requirement", "--defects"):
             self.assertIn(flag, command)
         self.assertNotIn("--draft", command)
+
+    def test_model_hash_is_stable_across_line_endings(self):
+        with tempfile.TemporaryDirectory() as directory:
+            lf = Path(directory) / "lf.json"
+            crlf = Path(directory) / "crlf.json"
+            cr = Path(directory) / "cr.json"
+            lf.write_bytes(b'{"model_id":"TC-MODEL-MULTI-ENTRY"}\n')
+            crlf.write_bytes(b'{"model_id":"TC-MODEL-MULTI-ENTRY"}\r\n')
+            cr.write_bytes(b'{"model_id":"TC-MODEL-MULTI-ENTRY"}\r')
+            self.assertEqual(_sha(lf), _sha(crlf))
+            self.assertEqual(_sha(lf), _sha(cr))
+
+    def test_model_hash_changes_when_content_changes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            original = Path(directory) / "original.json"
+            changed = Path(directory) / "changed.json"
+            original.write_bytes(b'{"model_id":"TC-MODEL-MULTI-ENTRY"}\n')
+            changed.write_bytes(b'{"model_id":"TC-MODEL-MULTI-ENTRY","changed":true}\n')
+            self.assertNotEqual(_sha(original), _sha(changed))
 
 if __name__ == "__main__": unittest.main()

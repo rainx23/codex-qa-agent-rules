@@ -4,7 +4,7 @@
   "execution_model_id": "EXEC-MODEL-001",
   "testcase_model_id": "TC-MODEL-MULTI-ENTRY",
   "testcase_model_path": "tests/fixtures/models/testcase-model-multi-entry.json",
-  "testcase_model_hash": "sha256:0a96fddc73cb55d003df027b4ce825eefc14b3be1860cd54485b132e75386312",
+  "testcase_model_hash": "sha256:3cde035ca88fa0d208346833be8056f191fcea28dce14ff9a439a40011bcd4b2",
   "validation_status": "passed",
   "branch_count": 3,
   "execution_instance_count": 4,
