@@ -13,8 +13,8 @@ from typing import Any
 from heading_utils import parse_markdown_sections
 from qa_contracts import (
     ALLOWED_TIMEZONES, MODEL_VALIDATORS, RELATIONS, SCHEMA_VERSION, VALIDATION_STATUSES, SQL_EXECUTION_STATUSES,
-    ZERO_HASH, load_json, manifest_schema, read_rule_version, stable_source_hash, valid_generated_at,
-    validate_model_links, validate_risk_matrix, validate_testcase_model,
+    ZERO_HASH, build_model_id_index, load_json, manifest_schema, read_rule_version, stable_source_hash, valid_generated_at,
+    summarize_confirmations, validate_model_links, validate_risk_matrix, validate_testcase_model,
     validate_schema_shape,
 )
 from qa_validation import (
@@ -28,6 +28,7 @@ REQUIRED = {
     "schema_version", "artifact_id", "source_type", "source_id", "source_files", "source_hash_algorithm",
     "source_hash", "rule_version", "generated_at", "generated_timezone", "report_mode", "report_path",
     "analysis_model_paths", "risk_matrix_path", "testcase_model_path", "xmind_md_path", "xmind_path",
+    "draft_report_path", "draft_risk_matrix_path", "draft_testcase_model_path", "draft_xmind_md_path",
     "case_count", "p0_count", "p0_risk_count", "p0_case_count", "pending_count",
     "blocking_pending_count", "nonblocking_pending_count", "suggested_pending_count",
     "validation_status", "relation", "supersedes", "failure_reason", "pending_reason",
@@ -59,12 +60,16 @@ def resolve_safe_path(value: Any, manifest_path: Path, artifact: bool = True) ->
     return resolved, None
 
 
-def _pending_counts(report_text: str) -> tuple[int, int, int, int]:
+def _report_confirmation_summary(
+    report_text: str,
+    requirement_model: dict[str, Any],
+) -> tuple[dict[str, int], list[str]]:
     body = ""
     for section in parse_markdown_sections(report_text):
         if canonical_heading(section.title) == "待确认点":
             body += "\n" + section.body
-    items = []
+    entries: list[tuple[str, str, str, set[str]]] = []
+    errors: list[str] = []
     for line in body.splitlines():
         match = re.match(r"\s*-\s+(.+)", line)
         if not match:
@@ -72,13 +77,53 @@ def _pending_counts(report_text: str) -> tuple[int, int, int, int]:
         item = match.group(1).strip()
         if item in {"无", "无。", "暂无", "暂无。"}:
             continue
-        if re.search(r"已确认|已解决|已完成", item) and not re.search(r"跳过|忽略", item):
+        confirmation_match = re.search(r"\b(CONF-[A-Za-z0-9_.-]+)\b", item)
+        severity_match = re.search(r"\bseverity=(blocking|nonblocking|suggested)\b", item)
+        status_match = re.search(r"\bstatus=(pending|skipped|resolved)\b", item)
+        fact_ids = set(re.findall(r"\bFACT-[A-Za-z0-9_.-]+\b", item))
+        if not confirmation_match or not severity_match or not status_match or not fact_ids:
+            errors.append("报告待确认点必须稳定标记 CONF ID、Fact ID、severity 和 status")
             continue
-        items.append(item)
-    blocking = sum("阻塞类" in item and "非阻塞类" not in item for item in items)
-    nonblocking = sum("非阻塞类" in item for item in items)
-    suggested = sum("建议确认类" in item for item in items)
-    return len(items), blocking, nonblocking, suggested
+        entries.append((confirmation_match.group(1), severity_match.group(1), status_match.group(1), fact_ids))
+    core_fact_ids = {
+        fact.get("fact_id")
+        for fact in requirement_model.get("facts", [])
+        if fact.get("affects_core_expectation") is True and isinstance(fact.get("fact_id"), str)
+    }
+    pending = blocking = nonblocking = suggested = 0
+    seen: set[str] = set()
+    for confirmation_id, severity, status, fact_ids in entries:
+        if confirmation_id in seen:
+            errors.append(f"报告待确认点 CONF ID 重复：{confirmation_id}")
+        seen.add(confirmation_id)
+        skipped_core = status == "skipped" and bool(fact_ids & core_fact_ids)
+        if status == "pending" or skipped_core:
+            pending += 1
+        if severity == "blocking" and (status == "pending" or skipped_core):
+            blocking += 1
+        if severity == "nonblocking" and status == "pending":
+            nonblocking += 1
+        if severity == "suggested" and status == "pending":
+            suggested += 1
+    return {
+        "pending_count": pending,
+        "blocking_pending_count": blocking,
+        "nonblocking_pending_count": nonblocking,
+        "suggested_pending_count": suggested,
+    }, errors
+
+
+def _resolve_draft_path(value: Any, manifest_path: Path, field: str) -> tuple[Path | None, str | None]:
+    path, error = resolve_safe_path(value, manifest_path)
+    if error or path is None:
+        return path, error or f"{field} 路径不能为空"
+    parts = Path(str(value)).parts
+    in_draft_directory = parts[:2] == ("testcases", "drafts") or parts[:3] == ("tests", "fixtures", "drafts")
+    if not in_draft_directory:
+        return None, f"{field} 必须位于 testcases/drafts 或 tests/fixtures/drafts：{value}"
+    if not path.is_file():
+        return None, f"{field} 路径不存在：{value}"
+    return path, None
 
 
 def _artifact_registry(root: Path, current: Path) -> tuple[set[str], dict[str, str | None]]:
@@ -187,14 +232,13 @@ def validate_manifest_data(data: dict[str, Any], manifest_path: Path) -> list[st
         errors.append("没有用户执行结果时，sql_status 不得标记 executed/passed/failed")
     if data.get("p0_count") != data.get("p0_case_count"):
         errors.append("兼容字段 p0_count 必须等于 p0_case_count")
-    pending_sum = sum(data.get(key, 0) for key in ("blocking_pending_count", "nonblocking_pending_count", "suggested_pending_count") if isinstance(data.get(key), int))
-    if data.get("pending_count") != pending_sum:
-        errors.append("pending_count 必须等于三类待确认点数量之和")
     if not data.get("requirement_id") and not data.get("commit_range"):
         errors.append("requirement_id 和 commit_range 至少填写一个")
     errors.extend(_validate_supersedes(data, manifest_path))
 
     status = data.get("validation_status")
+    formal_path_fields = ("report_path", "risk_matrix_path", "testcase_model_path", "xmind_md_path", "xmind_path")
+    draft_path_fields = ("draft_report_path", "draft_risk_matrix_path", "draft_testcase_model_path", "draft_xmind_md_path")
     if data.get("blocking_pending_count", 0) > 0:
         if status != "pending":
             errors.append("blocking_pending_count > 0 时 validation_status 必须为 pending")
@@ -203,21 +247,123 @@ def validate_manifest_data(data: dict[str, Any], manifest_path: Path) -> list[st
     if status == "failed":
         if not data.get("failure_reason"):
             errors.append("failed 状态必须填写 failure_reason")
-        if data.get("xmind_path"):
-            path, path_error = resolve_safe_path(data["xmind_path"], manifest_path)
-            if path_error:
-                errors.append(path_error)
-            elif path is not None and not path.is_file():
-                errors.append("failed 状态不得填写不存在的 Workbook 路径")
+        if data.get("pending_reason") is not None:
+            errors.append("failed 状态 pending_reason 必须为 null")
+        for field in formal_path_fields:
+            if data.get(field) is not None:
+                errors.append(f"failed 状态不得声明正式成功产物：{field} 必须为 null")
+        if data.get("blocking_pending_count", 0) > 0:
+            errors.append("正常 blocking 待确认应使用 pending，不应标记 failed")
         return list(dict.fromkeys(errors))
     if status == "pending":
         if not data.get("pending_reason"):
             errors.append("pending 状态必须填写 pending_reason")
-        if data.get("xmind_path") is not None:
-            errors.append("pending 状态 xmind_path 必须为 null；正式 Workbook 只能在 passed 产物中声明")
+        if data.get("failure_reason") is not None:
+            errors.append("pending 状态 failure_reason 必须为 null")
+        for field in formal_path_fields:
+            if data.get(field) is not None:
+                errors.append(f"pending 状态 {field} 必须为 null；正式产物只能在 passed 中声明")
+        required_drafts = ("draft_report_path", "draft_risk_matrix_path", "draft_testcase_model_path")
+        draft_paths: dict[str, Path] = {}
+        for field in required_drafts:
+            path, path_error = _resolve_draft_path(data.get(field), manifest_path, field)
+            if path_error:
+                errors.append(path_error)
+            elif path is not None:
+                draft_paths[field] = path
+        if data.get("draft_xmind_md_path") is not None:
+            path, path_error = _resolve_draft_path(data.get("draft_xmind_md_path"), manifest_path, "draft_xmind_md_path")
+            if path_error:
+                errors.append(path_error)
+            elif path is not None:
+                draft_paths["draft_xmind_md_path"] = path
+        elif not re.search(r"(?:XMind|Markdown|未生成|不生成|生成前)", str(data.get("pending_reason", "")), re.I):
+            errors.append("draft_xmind_md_path 为 null 时，pending_reason 必须说明未生成原因")
+
+        analysis_paths: list[Path] = []
+        if not isinstance(data.get("analysis_model_paths"), list) or not data["analysis_model_paths"]:
+            errors.append("pending 状态必须至少包含一个 Requirement Analysis Model")
+        else:
+            for value in data["analysis_model_paths"]:
+                path, path_error = resolve_safe_path(value, manifest_path)
+                if path_error:
+                    errors.append(f"analysis_model_paths: {path_error}")
+                elif path is None or not path.is_file():
+                    errors.append(f"结构化分析模型不存在：{value}")
+                else:
+                    analysis_paths.append(path)
+        models, model_errors = _load_analysis_models(analysis_paths)
+        errors.extend(model_errors)
+        requirement_model = next((model for model in models if "facts" in model), None)
+        diff_model = next((model for model in models if "change_items" in model), None)
+        if requirement_model is None:
+            errors.append("pending Requirement 分析必须包含合法 Requirement Analysis Model")
+        if not all(field in draft_paths for field in required_drafts) or requirement_model is None:
+            return list(dict.fromkeys(errors))
+        try:
+            risk_matrix = load_json(draft_paths["draft_risk_matrix_path"])
+            testcase_model = load_json(draft_paths["draft_testcase_model_path"])
+            errors.extend(validate_risk_matrix(risk_matrix))
+            errors.extend(validate_testcase_model(testcase_model))
+            errors.extend(validate_model_links(requirement_model, diff_model, risk_matrix, testcase_model, validation_status="pending"))
+            summary = summarize_confirmations(requirement_model)
+            manifest_summary = {
+                key: data.get(key)
+                for key in (
+                    "pending_count", "blocking_pending_count",
+                    "nonblocking_pending_count", "suggested_pending_count",
+                )
+            }
+            expected_summary = {key: summary[key] for key in manifest_summary}
+            if manifest_summary != expected_summary:
+                errors.append(f"Manifest 待确认数量与 Requirement Model 不一致：Manifest={manifest_summary} model={expected_summary}")
+            report_path = draft_paths["draft_report_path"]
+            report_text = report_path.read_text(encoding="utf-8-sig")
+            report_mode = detect_mode(report_text)
+            if report_mode != data.get("report_mode"):
+                errors.append(f"草稿报告模式 {report_mode} 与 Manifest {data.get('report_mode')} 不一致")
+            for model in models:
+                if model.get("report_mode") != data.get("report_mode"):
+                    errors.append(f"结构化模型 {model.get('analysis_id')} report_mode 与 Manifest 不一致")
+            report_errors = validate_analysis_report(
+                report_path,
+                xmind_md=draft_paths.get("draft_xmind_md_path"),
+                mode=data.get("report_mode"),
+                strict=True,
+                known_ids=build_model_id_index(
+                    requirement_model=requirement_model,
+                    diff_model=diff_model,
+                    risk_model=risk_matrix,
+                    testcase_model=testcase_model,
+                ),
+                validation_status="pending",
+            )
+            errors.extend(f"草稿分析报告复验失败：{error}" for error in report_errors)
+            report_summary, report_summary_errors = _report_confirmation_summary(report_text, requirement_model)
+            errors.extend(report_summary_errors)
+            if report_summary != expected_summary:
+                errors.append(f"草稿报告待确认数量与 Requirement Model 不一致：report={report_summary} model={expected_summary}")
+            risk_p0 = sum(risk.get("test_priority") == "P0" for risk in risk_matrix.get("risk_items", []))
+            case_p0 = sum(case.get("test_priority") == "P0" for case in testcase_model.get("cases", []))
+            if len(testcase_model.get("cases", [])) != data.get("case_count"):
+                errors.append("case_count 与草稿 Testcase Model 不一致")
+            if risk_p0 != data.get("p0_risk_count"):
+                errors.append("p0_risk_count 与草稿 Risk Matrix 不一致")
+            if case_p0 != data.get("p0_case_count"):
+                errors.append("p0_case_count 与草稿 Testcase Model 不一致")
+            if "draft_xmind_md_path" in draft_paths:
+                validate_markdown_file(draft_paths["draft_xmind_md_path"])
+        except (OSError, ValueError, json.JSONDecodeError, ValidationError) as exc:
+            errors.append(f"草稿产物复验失败：{exc}")
         return list(dict.fromkeys(errors))
     if status != "passed" or errors:
         return list(dict.fromkeys(errors))
+
+    if data.get("pending_reason") is not None or data.get("failure_reason") is not None:
+        errors.append("passed 状态 pending_reason 和 failure_reason 必须为 null")
+    for field in draft_path_fields:
+        if data.get(field) is not None:
+            errors.append(f"passed 状态不得使用草稿路径：{field} 必须为 null")
 
     if data.get("source_hash") == ZERO_HASH:
         errors.append("正式 passed Manifest 禁止使用全零 source_hash")
@@ -277,11 +423,24 @@ def validate_manifest_data(data: dict[str, Any], manifest_path: Path) -> list[st
         errors.extend(validate_testcase_model(testcase_model))
         requirement_model = next((model for model in models if "facts" in model), None)
         diff_model = next((model for model in models if "change_items" in model), None)
-        if requirement_model:
-            core_missing = [fact.get("fact_id") for fact in requirement_model.get("facts", []) if fact.get("category") == "missing" and fact.get("affects_core_expectation")]
-            if core_missing:
-                errors.append(f"passed 产物仍包含核心 missing Fact，不得正式交付：{core_missing}")
-        errors.extend(validate_model_links(requirement_model, diff_model, risk_matrix, testcase_model))
+        summary = summarize_confirmations(requirement_model or {})
+        manifest_summary = {
+            key: data.get(key)
+            for key in (
+                "pending_count", "blocking_pending_count",
+                "nonblocking_pending_count", "suggested_pending_count",
+            )
+        }
+        expected_summary = {key: summary[key] for key in manifest_summary}
+        if manifest_summary != expected_summary:
+            errors.append(f"Manifest 待确认数量与 Requirement Model 不一致：Manifest={manifest_summary} model={expected_summary}")
+        if summary["blocking_pending_count"]:
+            errors.append("passed 产物仍包含 unresolved blocking Confirmation")
+        if summary["skipped_core_count"]:
+            errors.append("passed 产物仍包含 skipped 且影响核心预期的 Confirmation")
+        if summary["unresolved_core_fact_count"]:
+            errors.append("passed 产物仍包含核心 missing/conflicting Fact")
+        errors.extend(validate_model_links(requirement_model, diff_model, risk_matrix, testcase_model, validation_status="passed"))
         report_text = paths["report_path"].read_text(encoding="utf-8-sig")
         report_mode = detect_mode(report_text)
         if report_mode != data.get("report_mode"):
@@ -289,18 +448,27 @@ def validate_manifest_data(data: dict[str, Any], manifest_path: Path) -> list[st
         for model in models:
             if model.get("report_mode") != data.get("report_mode"):
                 errors.append(f"结构化模型 {model.get('analysis_id')} report_mode 与 Manifest 不一致")
-        report_errors = validate_analysis_report(paths["report_path"], xmind_md=paths["xmind_md_path"], mode=data["report_mode"])
+        report_errors = validate_analysis_report(
+            paths["report_path"],
+            xmind_md=paths["xmind_md_path"],
+            mode=data["report_mode"],
+            strict=True,
+            known_ids=build_model_id_index(
+                requirement_model=requirement_model,
+                diff_model=diff_model,
+                risk_model=risk_matrix,
+                testcase_model=testcase_model,
+            ),
+            validation_status="passed",
+        )
         errors.extend(f"分析报告复验失败：{error}" for error in report_errors)
         outline = validate_markdown_file(paths["xmind_md_path"])
         trace_errors, _, _ = validate_traceability_mapping(report_text, report_mode, outline, risk_matrix, testcase_model)
         errors.extend(f"追踪复验失败：{error}" for error in trace_errors)
-        total_pending, blocking, nonblocking, suggested = _pending_counts(report_text)
-        actual_pending = (total_pending, blocking, nonblocking, suggested)
-        expected_pending = (data["pending_count"], data["blocking_pending_count"], data["nonblocking_pending_count"], data["suggested_pending_count"])
-        if actual_pending != expected_pending:
-            errors.append(f"待确认点计数不一致：Manifest={expected_pending} report={actual_pending}")
-        if total_pending != blocking + nonblocking + suggested:
-            errors.append("报告存在未分类待确认点；必须明确 blocking/nonblocking/suggested")
+        report_summary, report_summary_errors = _report_confirmation_summary(report_text, requirement_model or {})
+        errors.extend(report_summary_errors)
+        if report_summary != expected_summary:
+            errors.append(f"报告待确认数量与 Requirement Model 不一致：report={report_summary} model={expected_summary}")
         risk_p0 = sum(risk.get("test_priority") == "P0" for risk in risk_matrix.get("risk_items", []))
         p0_case_ids = {
             case.get("tc_id") for case in testcase_model.get("cases", []) if case.get("test_priority") == "P0"

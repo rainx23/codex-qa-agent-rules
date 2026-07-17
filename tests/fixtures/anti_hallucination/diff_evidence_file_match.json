@@ -1,0 +1,1 @@
+{"kind":"diff_evidence","base":"tests/fixtures/models/diff-impact.json","valid":{},"invalid":{"source_path":"tests/fixtures/sources/requirement.md"},"expected_failure":"必须等于 change.file","golden":{"valid":true,"invalid":false}}

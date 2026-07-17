@@ -1,0 +1,23 @@
+{
+  "kind": "pending_manifest_state",
+  "base": "testcases/manifest.example.json",
+  "valid": {
+    "validation_status": "pending",
+    "pending_reason": "核心收益率分母待产品确认，确认前不生成 XMind Markdown。",
+    "report_path": null,
+    "risk_matrix_path": null,
+    "testcase_model_path": null,
+    "xmind_md_path": null,
+    "xmind_path": null,
+    "draft_report_path": "tests/fixtures/drafts/pending-report.md",
+    "draft_risk_matrix_path": "tests/fixtures/drafts/pending-risk.json",
+    "draft_testcase_model_path": "tests/fixtures/drafts/pending-testcase.json",
+    "draft_xmind_md_path": null,
+    "analysis_model_paths": ["tests/fixtures/models/requirement-analysis.json"]
+  },
+  "invalid": {
+    "xmind_path": "testcases/formal-delivery.xmind"
+  },
+  "expected_failure": "xmind_path 必须为 null",
+  "golden": {"valid": true, "invalid": false}
+}

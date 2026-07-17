@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
+import os
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -18,6 +21,7 @@ from qa_contracts import (
 from validate_manifest import validate_manifest_data
 from validate_models import validate_files
 from validate_sql_style import validate_sql
+from validate_evidence import validate_evidence_reference
 
 MODELS = ROOT / "tests/fixtures/models"
 
@@ -25,6 +29,27 @@ MODELS = ROOT / "tests/fixtures/models"
 class AntiHallucinationContractTests(unittest.TestCase):
     def model(self, name: str) -> dict:
         return load_json(MODELS / name)
+
+    def evidence(self, root: Path, *, source_type: str = "requirement", storage_type: str = "file", name: str = "source.md", raw: bytes = b"line one\nobservable value\n") -> dict:
+        path = root / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(raw)
+        path_field = "source_path" if storage_type == "file" else "snapshot_path"
+        return {
+            "source_type": source_type,
+            "storage_type": storage_type,
+            "source_path": name if path_field == "source_path" else None,
+            "snapshot_path": name if path_field == "snapshot_path" else None,
+            "source_record_id": "attachment:SCREEN-001" if source_type == "screenshot" else "chat:CONV-1:MSG-1" if source_type == "user_confirmation" else "REQ-001",
+            "line_start": None if name.endswith(".png") else 1,
+            "line_end": None if name.endswith(".png") else 2,
+            "commit_sha": "def456a" if source_type in {"diff", "code_context"} else None,
+            "content_hash": "sha256:" + hashlib.sha256(raw).hexdigest(),
+            "excerpt": "observable value" if not name.endswith(".png") else "截图直接显示客户编号输入框",
+            "captured_at": "2026-07-17 12:00:00",
+            "captured_timezone": "Asia/Shanghai",
+            "evidence_status": "current",
+        }
 
     def test_confirmed_fact_rejects_inference_low_and_guess(self):
         for mutation in (("source_type", "inference"), ("source_type", "code_context"), ("source_type", "screenshot"), ("confidence", "low"), ("source_reference", "根据名称判断")):
@@ -34,6 +59,153 @@ class AntiHallucinationContractTests(unittest.TestCase):
 
     def test_confirmed_requirement_fact_passes(self):
         self.assertEqual([], validate_requirement_model(self.model("requirement-analysis.json")))
+
+    def test_zentao_current_evidence_requires_real_file_or_snapshot(self):
+        data = self.model("requirement-analysis.json")
+        fact = data["facts"][0]
+        fact["source_type"] = "zentao_section_3"
+        fact["source_reference"] = "REQ-001 第三部分"
+        fact["evidence_references"] = [{
+            "source_type": "zentao_section_3",
+            "source_path": None,
+            "line_start": None,
+            "line_end": None,
+            "commit_sha": None,
+            "content_hash": None,
+            "excerpt": "客户编号采用精确匹配",
+            "captured_at": "2026-07-17 12:00:00",
+            "captured_timezone": "Asia/Shanghai",
+            "evidence_status": "current",
+        }]
+        self.assertTrue(validate_requirement_model(data))
+
+    def test_evidence_path_safety_and_real_file_gate(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            evidence = self.evidence(root)
+            self.assertEqual([], validate_evidence_reference(evidence, root=root, confirmed=True))
+            for value, token in (
+                ("missing.md", "不存在"),
+                (str((root / "source.md").resolve()), "绝对路径"),
+                ("../outside.md", "../"),
+            ):
+                changed = copy.deepcopy(evidence)
+                changed["source_path"] = value
+                self.assertTrue(any(token in error for error in validate_evidence_reference(changed, root=root)), value)
+            changed = copy.deepcopy(evidence)
+            changed["source_path"] = "directory"
+            (root / "directory").mkdir()
+            self.assertTrue(any("必须指向文件" in error for error in validate_evidence_reference(changed, root=root)))
+
+    def test_evidence_symlink_or_junction_cannot_escape_root(self):
+        with tempfile.TemporaryDirectory() as directory, tempfile.TemporaryDirectory() as outside_directory:
+            root = Path(directory)
+            outside = Path(outside_directory)
+            (outside / "source.md").write_text("line one\nobservable value\n", encoding="utf-8")
+            link = root / "outside-link"
+            script = f"New-Item -ItemType Junction -Path '{link}' -Target '{outside}' | Out-Null"
+            completed = subprocess.run(
+                ["powershell", "-NoProfile", "-Command", script],
+                capture_output=True, text=True, check=False,
+            )
+            self.assertEqual(0, completed.returncode, completed.stderr)
+            try:
+                evidence = self.evidence(root)
+                evidence["source_path"] = "outside-link/source.md"
+                self.assertTrue(any("越出仓库" in error for error in validate_evidence_reference(evidence, root=root)))
+            finally:
+                os.rmdir(link)
+
+    def test_current_stale_and_reconfirm_hash_contract(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            evidence = self.evidence(root)
+            self.assertEqual([], validate_evidence_reference(evidence, root=root, confirmed=True))
+            evidence["content_hash"] = "sha256:" + "0" * 64
+            self.assertTrue(any("content_hash 与文件不一致" in error for error in validate_evidence_reference(evidence, root=root)))
+            for status in ("stale", "reconfirm_required"):
+                changed = copy.deepcopy(evidence)
+                changed.update(evidence_status=status, stale_reason="来源内容变化")
+                errors = validate_evidence_reference(changed, root=root, confirmed=True)
+                self.assertTrue(any("不得单独支撑 confirmed" in error for error in errors), status)
+
+    def test_text_line_range_excerpt_and_binary_screenshot(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            evidence = self.evidence(root)
+            for mutation, token in (
+                ({"line_start": 1, "line_end": 99}, "超出文件范围"),
+                ({"line_start": 2, "line_end": 1}, "行号范围非法"),
+                ({"excerpt": "not present"}, "excerpt 不在"),
+                ({"line_start": None, "line_end": None}, "必须同时提供"),
+            ):
+                changed = copy.deepcopy(evidence)
+                changed.update(mutation)
+                self.assertTrue(any(token in error for error in validate_evidence_reference(changed, root=root)), mutation)
+            screenshot = self.evidence(
+                root, source_type="screenshot", storage_type="file", name="screenshot.png",
+                raw=b"\x89PNG\r\n\x1a\nfixture",
+            )
+            self.assertEqual([], validate_evidence_reference(screenshot, root=root, confirmed=True))
+            missing_screenshot = copy.deepcopy(screenshot)
+            missing_screenshot["source_path"] = "missing-screenshot.png"
+            self.assertTrue(validate_evidence_reference(missing_screenshot, root=root))
+            unhashed_screenshot = copy.deepcopy(screenshot)
+            unhashed_screenshot["content_hash"] = None
+            self.assertTrue(validate_evidence_reference(unhashed_screenshot, root=root))
+            screenshot["excerpt"] = "因此可以推断业务处理正确"
+            self.assertTrue(any("不得包含推断" in error for error in validate_evidence_reference(screenshot, root=root)))
+
+    def test_snapshot_sources_require_real_content_and_record_id(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for source_type in ("zentao_section_3", "acceptance_criteria", "formal_change_record"):
+                invalid = self.evidence(root, source_type=source_type)
+                invalid.update(storage_type="snapshot", source_path=None, snapshot_path=None)
+                self.assertTrue(validate_evidence_reference(invalid, root=root), source_type)
+            zentao = self.evidence(root, source_type="zentao_section_3", storage_type="snapshot", name="zentao.md")
+            self.assertEqual([], validate_evidence_reference(zentao, root=root, confirmed=True))
+            confirmation = self.evidence(root, source_type="user_confirmation", storage_type="snapshot", name="chat.md")
+            self.assertEqual([], validate_evidence_reference(confirmation, root=root, confirmed=True))
+            changed_hash = copy.deepcopy(confirmation)
+            changed_hash["content_hash"] = "sha256:" + "0" * 64
+            self.assertTrue(any(
+                "content_hash 与文件不一致" in error
+                for error in validate_evidence_reference(changed_hash, root=root)
+            ))
+            confirmation["snapshot_path"] = None
+            self.assertTrue(validate_evidence_reference(confirmation, root=root))
+
+    def test_fact_source_consistency_and_confirmed_current_gate(self):
+        data = self.model("requirement-analysis.json")
+        data["facts"][0]["evidence_references"][0]["source_type"] = "markdown"
+        self.assertTrue(any("主 source_type" in error for error in validate_requirement_model(data)))
+        data = self.model("requirement-analysis.json")
+        current = data["facts"][0]["evidence_references"][0]
+        stale = copy.deepcopy(current)
+        stale.update(evidence_status="stale", content_hash="sha256:" + "0" * 64, stale_reason="旧版本证据")
+        data["facts"][0]["evidence_references"] = [current, stale]
+        self.assertEqual([], validate_requirement_model(data))
+        data["facts"][0]["evidence_references"] = [stale]
+        self.assertTrue(any("真实且 current" in error for error in validate_requirement_model(data)))
+
+    def test_diff_evidence_matches_change_file_and_commit(self):
+        data = self.model("diff-impact.json")
+        self.assertEqual([], validate_diff_model(data))
+        changed = copy.deepcopy(data)
+        changed["change_items"][0]["evidence_references"][0]["source_path"] = "tests/fixtures/sources/requirement.md"
+        self.assertTrue(any("必须等于 change.file" in error for error in validate_diff_model(changed)))
+        changed = copy.deepcopy(data)
+        changed["changed_files"] = []
+        self.assertTrue(any("不在 changed_files" in error for error in validate_diff_model(changed)))
+        for commit_sha in (None, "not-a-sha"):
+            changed = copy.deepcopy(data)
+            changed["change_items"][0]["evidence_references"][0]["commit_sha"] = commit_sha
+            self.assertTrue(any("commit_sha" in error for error in validate_diff_model(changed)), commit_sha)
+        working_tree = copy.deepcopy(data)
+        working_tree_evidence = working_tree["change_items"][0]["evidence_references"][0]
+        working_tree_evidence.update(commit_sha=None, working_tree_evidence=True)
+        self.assertEqual([], validate_diff_model(working_tree))
 
     def test_incomplete_ddl_is_not_complete_and_partial_keeps_unknowns(self):
         parsed = parse_ddl("create table demo.a (id bigint, ??? unsupported);")["tables"][0]

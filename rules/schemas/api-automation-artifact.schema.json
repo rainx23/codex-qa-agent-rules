@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "API Automation Artifact",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["artifact_type","model_reference","script_path","language","entrypoint","method","url_or_path","parameters","assertion_scope","health_checks","business_assertions","required_environment_variables","validation_status"],
+  "properties": {
+    "artifact_type": {"const":"api_parameter_health"},
+    "model_reference": {"type":"object","additionalProperties":false,"required":["model_id","model_path","model_hash"],"properties":{"model_id":{"type":"string","minLength":1},"model_path":{"type":"string","minLength":1},"model_hash":{"type":"string","pattern":"^sha256:[0-9a-f]{64}$"}}},
+    "script_path":{"type":"string","minLength":1}, "language":{"const":"python"}, "entrypoint":{"type":"string","minLength":1},
+    "method":{"type":"string","minLength":1}, "url_or_path":{"type":"string","minLength":1}, "parameters":{"type":"array","items":{"type":"string"},"uniqueItems":true},
+    "assertion_scope":{"const":"parameter_health"},
+    "health_checks":{"type":"array","minItems":2,"maxItems":2,"items":{"type":"object","additionalProperties":false,"required":["path","operator","expected"],"properties":{"path":{"enum":["content.code","content.msg"]},"operator":{"const":"equals"},"expected":{"type":["integer","string"]}}}},
+    "business_assertions":{"type":"array","maxItems":0}, "required_environment_variables":{"type":"array","items":{"type":"string"},"uniqueItems":true},
+    "validation_status":{"enum":["draft","pending","passed","failed"]}
+  }
+}

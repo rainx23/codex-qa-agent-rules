@@ -1,0 +1,1 @@
+{"kind":"evidence","base":"tests/fixtures/models/requirement-analysis.json","evidence_path":"facts.0.evidence_references.0","valid":{},"invalid":{"content_hash":"sha256:0000000000000000000000000000000000000000000000000000000000000000"},"expected_failure":"content_hash 与文件不一致","golden":{"valid":true,"invalid":false}}

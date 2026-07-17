@@ -36,7 +36,10 @@
         "additionalProperties": false,
         "required": [
           "risk_id",
+          "risk_title",
+          "risk_level",
           "requirement_ids",
+          "fact_ids",
           "change_ids",
           "business_entry",
           "business_entries",
@@ -69,6 +72,15 @@
             "minItems": 0,
             "uniqueItems": true
           },
+          "fact_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
           "change_ids": {
             "type": "array",
             "items": {
@@ -77,6 +89,14 @@
             },
             "minItems": 0,
             "uniqueItems": true
+          },
+          "risk_title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "risk_level": {
+            "type": "string",
+            "minLength": 1
           },
           "business_entry": {
             "type": "string",
@@ -165,12 +185,14 @@
           },
           "disposition_status": {
             "enum": [
+              "active",
               "covered",
               "merged",
               "deferred",
               "accepted",
               "blocked",
-              "not_applicable"
+              "not_applicable",
+              "resolved"
             ]
           },
           "disposition_reason": {
@@ -202,13 +224,17 @@
               "additionalProperties": false,
               "required": [
                 "source_type",
+                "storage_type",
                 "source_path",
+                "snapshot_path",
+                "source_record_id",
                 "line_start",
                 "line_end",
                 "commit_sha",
                 "content_hash",
                 "excerpt",
                 "captured_at",
+                "captured_timezone",
                 "evidence_status"
               ],
               "properties": {
@@ -233,7 +259,25 @@
                     "chat_snapshot"
                   ]
                 },
+                "storage_type": {
+                  "enum": [
+                    "file",
+                    "snapshot"
+                  ]
+                },
                 "source_path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "snapshot_path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "source_record_id": {
                   "type": [
                     "string",
                     "null"
@@ -288,9 +332,626 @@
                     "stale",
                     "reconfirm_required"
                   ]
+                },
+                "stale_reason": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "working_tree_evidence": {
+                  "type": "boolean"
                 }
               }
             }
+          },
+          "merged_into_risk_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "merge_reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "merge_evidence_references": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source_type",
+                "storage_type",
+                "source_path",
+                "snapshot_path",
+                "source_record_id",
+                "line_start",
+                "line_end",
+                "commit_sha",
+                "content_hash",
+                "excerpt",
+                "captured_at",
+                "captured_timezone",
+                "evidence_status"
+              ],
+              "properties": {
+                "source_type": {
+                  "enum": [
+                    "user_confirmation",
+                    "requirement",
+                    "zentao_section_3",
+                    "openspec",
+                    "markdown",
+                    "screenshot",
+                    "diff",
+                    "code_context",
+                    "acceptance_criteria",
+                    "formal_change_record",
+                    "api_document",
+                    "sql_definition",
+                    "complete_ddl",
+                    "knowledge_table",
+                    "historical_defect",
+                    "pasted_text",
+                    "chat_snapshot"
+                  ]
+                },
+                "storage_type": {
+                  "enum": [
+                    "file",
+                    "snapshot"
+                  ]
+                },
+                "source_path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "snapshot_path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "source_record_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "line_start": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1
+                },
+                "line_end": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1
+                },
+                "commit_sha": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^[0-9a-fA-F]{7,40}$"
+                },
+                "content_hash": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^sha256:[0-9a-fA-F]{64}$"
+                },
+                "excerpt": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "captured_at": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$"
+                },
+                "captured_timezone": {
+                  "enum": [
+                    "Asia/Shanghai",
+                    "UTC"
+                  ]
+                },
+                "evidence_status": {
+                  "enum": [
+                    "current",
+                    "stale",
+                    "reconfirm_required"
+                  ]
+                },
+                "stale_reason": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "working_tree_evidence": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "blocked_by_confirmation_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "blocked_reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "defer_reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "defer_until": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "owner": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "decision_evidence_references": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source_type",
+                "storage_type",
+                "source_path",
+                "snapshot_path",
+                "source_record_id",
+                "line_start",
+                "line_end",
+                "commit_sha",
+                "content_hash",
+                "excerpt",
+                "captured_at",
+                "captured_timezone",
+                "evidence_status"
+              ],
+              "properties": {
+                "source_type": {
+                  "enum": [
+                    "user_confirmation",
+                    "requirement",
+                    "zentao_section_3",
+                    "openspec",
+                    "markdown",
+                    "screenshot",
+                    "diff",
+                    "code_context",
+                    "acceptance_criteria",
+                    "formal_change_record",
+                    "api_document",
+                    "sql_definition",
+                    "complete_ddl",
+                    "knowledge_table",
+                    "historical_defect",
+                    "pasted_text",
+                    "chat_snapshot"
+                  ]
+                },
+                "storage_type": {
+                  "enum": [
+                    "file",
+                    "snapshot"
+                  ]
+                },
+                "source_path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "snapshot_path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "source_record_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "line_start": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1
+                },
+                "line_end": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1
+                },
+                "commit_sha": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^[0-9a-fA-F]{7,40}$"
+                },
+                "content_hash": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^sha256:[0-9a-fA-F]{64}$"
+                },
+                "excerpt": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "captured_at": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$"
+                },
+                "captured_timezone": {
+                  "enum": [
+                    "Asia/Shanghai",
+                    "UTC"
+                  ]
+                },
+                "evidence_status": {
+                  "enum": [
+                    "current",
+                    "stale",
+                    "reconfirm_required"
+                  ]
+                },
+                "stale_reason": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "working_tree_evidence": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "acceptance_reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "accepted_by": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "accepted_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "residual_impact": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "not_applicable_reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "scope_evidence_references": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source_type",
+                "storage_type",
+                "source_path",
+                "snapshot_path",
+                "source_record_id",
+                "line_start",
+                "line_end",
+                "commit_sha",
+                "content_hash",
+                "excerpt",
+                "captured_at",
+                "captured_timezone",
+                "evidence_status"
+              ],
+              "properties": {
+                "source_type": {
+                  "enum": [
+                    "user_confirmation",
+                    "requirement",
+                    "zentao_section_3",
+                    "openspec",
+                    "markdown",
+                    "screenshot",
+                    "diff",
+                    "code_context",
+                    "acceptance_criteria",
+                    "formal_change_record",
+                    "api_document",
+                    "sql_definition",
+                    "complete_ddl",
+                    "knowledge_table",
+                    "historical_defect",
+                    "pasted_text",
+                    "chat_snapshot"
+                  ]
+                },
+                "storage_type": {
+                  "enum": [
+                    "file",
+                    "snapshot"
+                  ]
+                },
+                "source_path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "snapshot_path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "source_record_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "line_start": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1
+                },
+                "line_end": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1
+                },
+                "commit_sha": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^[0-9a-fA-F]{7,40}$"
+                },
+                "content_hash": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^sha256:[0-9a-fA-F]{64}$"
+                },
+                "excerpt": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "captured_at": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$"
+                },
+                "captured_timezone": {
+                  "enum": [
+                    "Asia/Shanghai",
+                    "UTC"
+                  ]
+                },
+                "evidence_status": {
+                  "enum": [
+                    "current",
+                    "stale",
+                    "reconfirm_required"
+                  ]
+                },
+                "stale_reason": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "working_tree_evidence": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "resolution": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "resolution_evidence_references": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source_type",
+                "storage_type",
+                "source_path",
+                "snapshot_path",
+                "source_record_id",
+                "line_start",
+                "line_end",
+                "commit_sha",
+                "content_hash",
+                "excerpt",
+                "captured_at",
+                "captured_timezone",
+                "evidence_status"
+              ],
+              "properties": {
+                "source_type": {
+                  "enum": [
+                    "user_confirmation",
+                    "requirement",
+                    "zentao_section_3",
+                    "openspec",
+                    "markdown",
+                    "screenshot",
+                    "diff",
+                    "code_context",
+                    "acceptance_criteria",
+                    "formal_change_record",
+                    "api_document",
+                    "sql_definition",
+                    "complete_ddl",
+                    "knowledge_table",
+                    "historical_defect",
+                    "pasted_text",
+                    "chat_snapshot"
+                  ]
+                },
+                "storage_type": {
+                  "enum": [
+                    "file",
+                    "snapshot"
+                  ]
+                },
+                "source_path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "snapshot_path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "source_record_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "line_start": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1
+                },
+                "line_end": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1
+                },
+                "commit_sha": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^[0-9a-fA-F]{7,40}$"
+                },
+                "content_hash": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^sha256:[0-9a-fA-F]{64}$"
+                },
+                "excerpt": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "captured_at": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$"
+                },
+                "captured_timezone": {
+                  "enum": [
+                    "Asia/Shanghai",
+                    "UTC"
+                  ]
+                },
+                "evidence_status": {
+                  "enum": [
+                    "current",
+                    "stale",
+                    "reconfirm_required"
+                  ]
+                },
+                "stale_reason": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "working_tree_evidence": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "resolved_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "resolution_testcase_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
           },
           "evidence_references": {
             "type": "array",
@@ -299,13 +960,17 @@
               "additionalProperties": false,
               "required": [
                 "source_type",
+                "storage_type",
                 "source_path",
+                "snapshot_path",
+                "source_record_id",
                 "line_start",
                 "line_end",
                 "commit_sha",
                 "content_hash",
                 "excerpt",
                 "captured_at",
+                "captured_timezone",
                 "evidence_status"
               ],
               "properties": {
@@ -330,7 +995,25 @@
                     "chat_snapshot"
                   ]
                 },
+                "storage_type": {
+                  "enum": [
+                    "file",
+                    "snapshot"
+                  ]
+                },
                 "source_path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "snapshot_path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "source_record_id": {
                   "type": [
                     "string",
                     "null"
@@ -385,6 +1068,15 @@
                     "stale",
                     "reconfirm_required"
                   ]
+                },
+                "stale_reason": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "working_tree_evidence": {
+                  "type": "boolean"
                 }
               }
             },

@@ -4,13 +4,14 @@
 from __future__ import annotations
 
 import argparse
-import json
 import re
 import sys
 import unicodedata
 from pathlib import Path
+from typing import Any
 
 from heading_utils import MarkdownSection, heading_key, parse_markdown_sections
+from qa_contracts import build_model_id_index, load_json
 from qa_validation import ValidationError, parse_traceability_records, validate_markdown_file
 
 
@@ -99,6 +100,16 @@ ALLOWED_EVIDENCE = re.compile(
     r"需求原文|用户补充|OpenSpec|截图|Markdown(?: 文件)?|Diff|代码上下文|接口说明|SQL 口径|历史缺陷|推断",
     re.IGNORECASE,
 )
+
+
+STRICT_ID_PATTERNS = {
+    "fact_ids": ("FACT", r"\bFACT-\d{3,}\b"),
+    "confirmation_ids": ("CONF", r"\bCONF-\d{3,}\b"),
+    "change_ids": ("CHG", r"\bCHG-\d{3,}\b"),
+    "risk_ids": ("RISK", r"\bRISK-\d{3,}\b"),
+    "testcase_ids": ("TC", r"\bTC-?\d{3,}\b"),
+    "branch_ids": ("BRANCH", r"\bBRANCH-\d{3,}\b"),
+}
 
 
 def _alias_index() -> dict[str, str]:
@@ -221,17 +232,62 @@ def _validate_line_evidence(bodies: dict[str, list[str]], resolved_mode: str) ->
     return errors
 
 
+def _validate_strict_ids(
+    text: str,
+    bodies: dict[str, list[str]],
+    known_ids: dict[str, Any],
+) -> list[str]:
+    errors: list[str] = []
+    for key, (label, pattern) in STRICT_ID_PATTERNS.items():
+        known = set(known_ids.get(key, set()))
+        for value in sorted(set(re.findall(pattern, text, re.I)) - known):
+            errors.append(f"报告引用不存在的 {label} ID: {value}")
+    malformed_patterns = {
+        "FACT": r"\bFACT(?:\d{3,}|_\d+|-[A-Za-z][\w-]*)\b",
+        "CONF": r"\bCONF(?:\d{3,}|_\d+|-[A-Za-z][\w-]*)\b",
+        "CHG": r"\bCHG(?:\d{3,}|_\d+|-[A-Za-z][\w-]*)\b",
+        "RISK": r"\bRISK(?:\d{3,}|_\d+|-[A-Za-z][\w-]*)\b",
+    }
+    for label, pattern in malformed_patterns.items():
+        for value in sorted(set(re.findall(pattern, text, re.I))):
+            errors.append(f"报告包含格式非法的 {label} ID: {value}")
+    for fact_id in sorted(set(known_ids.get("core_fact_ids", set()))):
+        if fact_id not in text:
+            errors.append(f"报告遗漏核心 Fact: {fact_id}")
+    pending_body = _body(bodies, "待确认点")
+    for confirmation_id in sorted(set(known_ids.get("blocking_confirmation_ids", set()))):
+        if confirmation_id not in pending_body:
+            errors.append(f"报告待确认章节遗漏 blocking Confirmation: {confirmation_id}")
+    risk_body = _body(bodies, "风险点", "疑似风险点")
+    for risk_id in sorted(set(known_ids.get("high_risk_ids", set()))):
+        if risk_id not in risk_body:
+            errors.append(f"报告风险章节遗漏高风险项: {risk_id}")
+    return errors
+
+
 def validate(
     path: Path,
     require_traceability: bool | None = None,
     xmind_md: Path | None = None,
     mode: str = "auto",
     legacy: bool = False,
-    known_ids: dict[str, set[str]] | None = None,
+    known_ids: dict[str, Any] | None = None,
+    strict: bool = True,
+    validation_status: str | None = None,
 ) -> list[str]:
     text = path.read_text(encoding="utf-8-sig")
     _, bodies = _section_map(text)
     errors: list[str] = []
+
+    if legacy and strict:
+        strict = False
+    if strict:
+        if not re.search(r"(?im)^\s*(?:schema[_ ]version)\s*[:=]\s*2\.0\.0\s*$", text):
+            errors.append("strict 报告必须声明 Schema Version: 2.0.0")
+        if not re.search(r"(?im)^\s*(?:rule[_ ]version)\s*[:=]\s*\d+\.\d+\.\d+\s*$", text):
+            errors.append("strict 报告必须声明 Rule Version")
+        if known_ids is None:
+            errors.append("strict 报告必须由调用方提供真实模型 ID 索引")
 
     try:
         resolved_mode = MODE_COMBINED if require_traceability else detect_mode(text, mode)
@@ -266,13 +322,14 @@ def validate(
     if resolved_mode == MODE_COMBINED and trace:
         errors.extend(_validate_trace_matrix(trace))
     # Schema 2 reports are model-driven and must carry row-level IDs. Legacy is opt-in.
-    model_driven = bool(re.search(r"(?im)\bschema_version\s*[:=]\s*2\.0\.0\b", text))
-    if model_driven and not legacy:
+    if strict:
         errors.extend(_validate_line_evidence(bodies, resolved_mode))
-        if known_ids:
+        if False and known_ids:  # retained only to preserve the legacy error wording below
             for kind, pattern in (("FACT", r"\bFACT[A-Z0-9-]*\d+\b"), ("CHG", r"\bCHG[A-Z0-9-]*\d+\b"), ("RISK", r"\bRISK[A-Z0-9-]*\d+\b"), ("DEF", r"\bDEF[A-Z0-9-]*\d+\b"), ("CONF", r"\bCONF[A-Z0-9-]*\d+\b"), ("TC", r"\bTC\d{3}\b")):
                 for value in sorted(set(re.findall(pattern, text, re.I)) - known_ids.get(kind, set())):
                     errors.append(f"报告引用不存在的 {kind} ID: {value}")
+        if known_ids is not None:
+            errors.extend(_validate_strict_ids(text, bodies, known_ids))
     elif re.search(r"\bFACT[A-Z0-9-]*\d+\b", text, re.I):
         errors.extend(_validate_line_evidence(bodies, resolved_mode))
 
@@ -318,23 +375,33 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--xmind-md", type=Path)
     parser.add_argument("--legacy", action="store_true", help="显式使用旧报告兼容模式")
-    parser.add_argument("--requirement-model", type=Path)
-    parser.add_argument("--diff-model", type=Path)
-    parser.add_argument("--risk-matrix", type=Path)
-    parser.add_argument("--testcase-model", type=Path)
+    parser.add_argument("--strict", action="store_true", help="显式启用严格模型驱动校验（默认行为）")
+    parser.add_argument("--requirement", "--requirement-model", dest="requirement_model", type=Path)
+    parser.add_argument("--diff", "--diff-model", dest="diff_model", type=Path)
+    parser.add_argument("--risk", "--risk-matrix", dest="risk_matrix", type=Path)
+    parser.add_argument("--testcase", "--testcase-model", dest="testcase_model", type=Path)
     args = parser.parse_args(argv)
     failed = 0
     requested_mode = MODE_COMBINED if args.require_traceability else args.mode
-    known_ids = {key: set() for key in ("FACT", "CHG", "RISK", "DEF", "CONF", "TC")}
-    for path, key, collection in ((args.requirement_model, "FACT", "facts"), (args.requirement_model, "CONF", "confirmation_points"), (args.diff_model, "CHG", "change_items"), (args.diff_model, "RISK", "risks"), (args.diff_model, "DEF", "suspected_defects"), (args.risk_matrix, "RISK", "risk_items"), (args.testcase_model, "TC", "cases")):
-        if path and path.is_file():
-            value = json.loads(path.read_text(encoding="utf-8-sig"))
-            known_ids[key].update(item.get({"FACT":"fact_id", "CONF":"confirmation_id", "CHG":"change_id", "RISK":"risk_id", "DEF":"defect_id", "TC":"tc_id"}[key]) for item in value.get(collection, []))
+    strict = not args.legacy
+    model_paths = (args.requirement_model, args.diff_model, args.risk_matrix, args.testcase_model)
+    if strict and any(path is None for path in model_paths):
+        parser.error("strict 模式必须同时提供 --requirement、--diff、--risk 和 --testcase")
+    requirement_model = load_json(args.requirement_model) if args.requirement_model else None
+    diff_model = load_json(args.diff_model) if args.diff_model else None
+    risk_model = load_json(args.risk_matrix) if args.risk_matrix else None
+    testcase_model = load_json(args.testcase_model) if args.testcase_model else None
+    known_ids = build_model_id_index(
+        requirement_model=requirement_model,
+        diff_model=diff_model,
+        risk_model=risk_model,
+        testcase_model=testcase_model,
+    )
     for path in args.files:
         try:
             text = path.read_text(encoding="utf-8-sig")
             resolved_mode = detect_mode(text, requested_mode)
-            errors = validate(path, xmind_md=args.xmind_md, mode=requested_mode, legacy=args.legacy, known_ids=known_ids if any(known_ids.values()) else None)
+            errors = validate(path, xmind_md=args.xmind_md, mode=requested_mode, legacy=args.legacy, strict=strict, known_ids=known_ids if strict else None)
         except (OSError, ValueError) as exc:
             errors = [str(exc)]
             resolved_mode = requested_mode

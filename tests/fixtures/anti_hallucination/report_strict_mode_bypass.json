@@ -1,0 +1,1 @@
+{"kind":"fifth_batch_contract","expected_failure":"strict mode cannot be inferred or downgraded","golden":{"validator_rejects_invalid":true}}

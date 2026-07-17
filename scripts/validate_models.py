@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import sys
 from pathlib import Path
 
@@ -12,62 +11,6 @@ from qa_contracts import (
     load_json, validate_diff_model, validate_model_links, validate_requirement_model,
     validate_risk_matrix, validate_testcase_model,
 )
-
-
-REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
-
-
-def _iter_evidence_references(value: object):
-    if isinstance(value, dict):
-        if {"source_type", "content_hash", "evidence_status"}.issubset(value):
-            yield value
-        for item in value.values():
-            yield from _iter_evidence_references(item)
-    elif isinstance(value, list):
-        for item in value:
-            yield from _iter_evidence_references(item)
-
-
-def _validate_evidence_freshness(models: list[dict | None], root: Path) -> list[str]:
-    errors: list[str] = []
-    for model in models:
-        if not model:
-            continue
-        for evidence in _iter_evidence_references(model):
-            source_path = evidence.get("source_path")
-            expected = evidence.get("content_hash")
-            if not source_path or not expected:
-                continue
-            path = Path(source_path)
-            if path.is_absolute() or ".." in path.parts:
-                errors.append(f"证据 {source_path} 路径必须是仓库内相对路径")
-                continue
-            path = (root / path).resolve()
-            if root.resolve() not in path.parents:
-                errors.append(f"证据 {source_path} 路径越出仓库根目录")
-                continue
-            if not path.is_file():
-                errors.append(f"证据 {source_path} 文件不存在；current 证据不能静默跳过")
-                continue
-            raw = path.read_bytes()
-            actual = f"sha256:{hashlib.sha256(raw).hexdigest()}"
-            if actual != expected and evidence.get("evidence_status") == "current":
-                errors.append(
-                    f"证据 {source_path} 内容哈希已变化；必须将 evidence_status 标记为 stale/reconfirm_required，"
-                    "或重新采集证据"
-                )
-            line_start = evidence.get("line_start")
-            line_end = evidence.get("line_end")
-            try:
-                lines = raw.decode("utf-8-sig").splitlines()
-            except UnicodeDecodeError:
-                lines = []
-            if lines and isinstance(line_start, int) and isinstance(line_end, int):
-                if line_end > len(lines):
-                    errors.append(f"证据 {source_path} 行号超出文件范围：{line_start}-{line_end}/{len(lines)}")
-                elif evidence.get("excerpt") not in "\n".join(lines[line_start - 1:line_end]):
-                    errors.append(f"证据 {source_path}:{line_start}-{line_end} 的 excerpt 与原文不一致")
-    return errors
 
 
 def validate_files(requirement: Path | None, diff: Path | None, risk: Path, testcase: Path) -> list[str]:
@@ -90,7 +33,6 @@ def validate_files(requirement: Path | None, diff: Path | None, risk: Path, test
     if modes != {expected_mode}:
         errors.append(f"report_mode 必须为 {expected_mode}，实际为 {sorted(str(item) for item in modes)}")
     errors.extend(validate_model_links(requirement_data, diff_data, risk_data, testcase_data))
-    errors.extend(_validate_evidence_freshness([requirement_data, diff_data, risk_data, testcase_data], REPOSITORY_ROOT))
     return list(dict.fromkeys(errors))
 
 

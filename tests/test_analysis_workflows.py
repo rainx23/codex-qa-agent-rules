@@ -10,7 +10,13 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from heading_utils import normalize_heading
-from validate_analysis_report import detect_mode, validate
+from validate_analysis_report import detect_mode, validate as validate_report
+
+
+def validate(path, **kwargs):
+    """These historical workflow fixtures intentionally exercise explicit legacy mode."""
+
+    return validate_report(path, legacy=True, **kwargs)
 
 REPORTS = ROOT / "tests/fixtures/reports"
 

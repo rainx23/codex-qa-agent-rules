@@ -1,0 +1,7 @@
+{
+  "kind": "ddl_contract",
+  "valid_input": "create table demo.orders (id bigint not null default 0 comment 'id');",
+  "invalid_input": "create table demo.orders (id bigint not null unsupported token);",
+  "expected_failure": "unparsed syntax",
+  "golden": {"values": {"schema_scope": "complete", "fields.0.nullable": false, "fields.0.default": "0", "fields.0.comment": "id", "fields.0.unparsed_fragment": null}}
+}

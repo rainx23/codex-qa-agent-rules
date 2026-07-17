@@ -1,0 +1,7 @@
+{
+  "kind": "ddl_contract",
+  "valid_input": "create table demo.orders (id bigint) engine=olap properties ('replication_num'='1');",
+  "invalid_input": "create table demo.orders (id bigint) engine=olap unknown table option abc;",
+  "expected_failure": "unparsed table tail",
+  "golden": {"values": {"schema_scope": "complete", "engine_properties.engine": "olap", "engine_properties.replication_num": "1", "unparsed_tail": null}}
+}

@@ -22,12 +22,21 @@ class ArtifactGovernanceTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(dir=ROOT / "testcases", prefix=".contract-test-")
         self.directory = Path(self.temp.name)
+        self.pending_temp = tempfile.TemporaryDirectory(dir=ROOT / "tests/fixtures/drafts", prefix="contract-test-")
+        self.pending_directory = Path(self.pending_temp.name)
 
     def tearDown(self):
+        self.pending_temp.cleanup()
         self.temp.cleanup()
 
     def _copy(self, source: Path, name: str) -> Path:
         target = self.directory / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(source.read_text(encoding="utf-8"), encoding="utf-8")
+        return target
+
+    def _copy_pending(self, source: Path, name: str) -> Path:
+        target = self.pending_directory / name
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(source.read_text(encoding="utf-8"), encoding="utf-8")
         return target
@@ -44,6 +53,7 @@ class ArtifactGovernanceTests(unittest.TestCase):
         risk = self._copy(ROOT / "tests/fixtures/models/risk-coverage-matrix.json", "risk-coverage-matrix.json")
         testcase = self._copy(ROOT / "tests/fixtures/models/testcase-model.json", "testcase-model.json")
         workbook = self.directory / "case_workbook.xmind"
+        workbook.unlink(missing_ok=True)
         convert_file(markdown, workbook)
         source_files = [self._relative(source)]
         data = {
@@ -67,6 +77,10 @@ class ArtifactGovernanceTests(unittest.TestCase):
             "testcase_model_path": self._relative(testcase),
             "xmind_md_path": self._relative(markdown),
             "xmind_path": self._relative(workbook),
+            "draft_report_path": None,
+            "draft_risk_matrix_path": None,
+            "draft_testcase_model_path": None,
+            "draft_xmind_md_path": None,
             "case_count": 2,
             "p0_count": 1,
             "p0_risk_count": 1,
@@ -85,11 +99,58 @@ class ArtifactGovernanceTests(unittest.TestCase):
         manifest.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
         return manifest, data
 
+    def make_pending_manifest(self) -> tuple[Path, dict, Path, Path]:
+        report = self._copy_pending(ROOT / "tests/fixtures/reports/combined_consistent.md", "pending-report.md")
+        report.write_text(
+            report.read_text(encoding="utf-8").replace(
+                "- 无。",
+                "- [CONF-001][FACT-003] severity=blocking status=pending：请确认收益率分母。",
+            ),
+            encoding="utf-8",
+        )
+        requirement = self._copy_pending(ROOT / "tests/fixtures/models/requirement-analysis.json", "requirement-analysis.json")
+        requirement_data = json.loads(requirement.read_text(encoding="utf-8"))
+        missing = copy.deepcopy(requirement_data["facts"][0])
+        missing.update(
+            fact_id="FACT-003", category="missing", statement="收益率分母尚未确认",
+            handling="等待产品确认",
+        )
+        requirement_data["facts"].append(missing)
+        requirement_data["confirmation_points"] = [{
+            "confirmation_id": "CONF-001", "severity": "blocking",
+            "statement": "请确认收益率分母", "fact_ids": ["FACT-003"], "status": "pending",
+        }]
+        requirement.write_text(json.dumps(requirement_data, ensure_ascii=False, indent=2), encoding="utf-8")
+        diff = self._copy_pending(ROOT / "tests/fixtures/models/diff-impact.json", "diff-impact.json")
+        risk = self._copy_pending(ROOT / "tests/fixtures/models/risk-coverage-matrix.json", "pending-risk.json")
+        testcase = self._copy_pending(ROOT / "tests/fixtures/models/testcase-model.json", "pending-testcase.json")
+        data = {
+            "schema_version": "2.0.0", "artifact_id": "QA-PENDING-001",
+            "source_type": "unit", "source_id": "REQ-1", "source_files": [],
+            "source_snapshot_path": None, "source_hash_algorithm": "sha256",
+            "source_hash": "sha256:" + "0" * 64, "requirement_id": "REQ-1", "commit_range": None,
+            "rule_version": read_rule_version(ROOT), "generated_at": "2026-07-17 12:00:00",
+            "generated_timezone": "Asia/Shanghai", "report_mode": "combined",
+            "report_path": None,
+            "analysis_model_paths": [self._relative(requirement), self._relative(diff)],
+            "risk_matrix_path": None, "testcase_model_path": None, "xmind_md_path": None, "xmind_path": None,
+            "draft_report_path": self._relative(report), "draft_risk_matrix_path": self._relative(risk),
+            "draft_testcase_model_path": self._relative(testcase), "draft_xmind_md_path": None,
+            "case_count": 2, "p0_count": 1, "p0_risk_count": 1, "p0_case_count": 1,
+            "pending_count": 1, "blocking_pending_count": 1,
+            "nonblocking_pending_count": 0, "suggested_pending_count": 0,
+            "validation_status": "pending", "relation": "新增", "supersedes": None,
+            "failure_reason": None, "pending_reason": "核心收益率分母待产品确认，确认前不生成 XMind Markdown。",
+        }
+        manifest = self.directory / "pending-manifest.json"
+        manifest.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+        return manifest, data, requirement, report
+
     def errors_for(self, manifest: Path, data: dict) -> list[str]:
         manifest.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
         return validate_manifest_file(manifest)[1]
 
-    def test_manifest_example_is_valid_pending(self):
+    def test_manifest_example_is_valid_passed(self):
         _, errors = validate_manifest_file(ROOT / "testcases/manifest.example.json")
         self.assertEqual([], errors)
 
@@ -148,15 +209,98 @@ class ArtifactGovernanceTests(unittest.TestCase):
         changed["case_count"] = 3
         self.assertTrue(any("case_count" in error for error in self.errors_for(manifest, changed)))
 
-    def test_failed_requires_reason_pending_allows_missing_workbook(self):
-        example = json.loads((ROOT / "testcases/manifest.example.json").read_text(encoding="utf-8"))
-        manifest = self.directory / "state-manifest.json"
-        failed = copy.deepcopy(example)
+    def test_pending_manifest_validates_drafts_without_workbook(self):
+        manifest, _, _, _ = self.make_pending_manifest()
+        self.assertEqual([], validate_manifest_file(manifest)[1])
+
+    def test_pending_rejects_formal_paths_and_missing_reason(self):
+        manifest, data, _, _ = self.make_pending_manifest()
+        changed = copy.deepcopy(data)
+        changed["xmind_path"] = "testcases/formal.xmind"
+        self.assertTrue(any("xmind_path 必须为 null" in error for error in self.errors_for(manifest, changed)))
+        changed = copy.deepcopy(data)
+        changed["pending_reason"] = None
+        self.assertTrue(any("pending_reason" in error for error in self.errors_for(manifest, changed)))
+
+    def test_pending_rejects_missing_absolute_and_parent_draft_paths(self):
+        manifest, data, _, _ = self.make_pending_manifest()
+        for value, token in (
+            ("tests/fixtures/drafts/not-found.md", "路径不存在"),
+            (str((ROOT / "tests/fixtures/drafts/not-found.md").resolve()), "绝对路径"),
+            ("tests/fixtures/drafts/../outside.md", "../"),
+        ):
+            changed = copy.deepcopy(data)
+            changed["draft_report_path"] = value
+            self.assertTrue(any(token in error for error in self.errors_for(manifest, changed)), value)
+
+    def test_pending_rejects_invalid_requirement_and_count_mismatch(self):
+        manifest, data, requirement, _ = self.make_pending_manifest()
+        invalid = json.loads(requirement.read_text(encoding="utf-8"))
+        invalid["confirmation_points"] = []
+        requirement.write_text(json.dumps(invalid, ensure_ascii=False, indent=2), encoding="utf-8")
+        self.assertTrue(any("核心缺失事实" in error for error in self.errors_for(manifest, data)))
+        manifest, data, _, _ = self.make_pending_manifest()
+        data["pending_count"] = 2
+        self.assertTrue(any("Requirement Model 不一致" in error for error in self.errors_for(manifest, data)))
+
+    def test_pending_rejects_report_confirmation_count_mismatch(self):
+        manifest, data, _, report = self.make_pending_manifest()
+        report.write_text(
+            report.read_text(encoding="utf-8").replace(
+                "- [CONF-001][FACT-003] severity=blocking status=pending：请确认收益率分母。",
+                "- 无。",
+            ),
+            encoding="utf-8",
+        )
+        self.assertTrue(any("草稿报告待确认数量" in error for error in self.errors_for(manifest, data)))
+
+    def test_passed_rejects_unresolved_skipped_and_missing_core_states(self):
+        for state, token in (("pending", "unresolved blocking"), ("skipped", "skipped"), ("resolved", "missing/conflicting")):
+            manifest, data = self.make_passed_manifest()
+            requirement = ROOT / data["analysis_model_paths"][0]
+            requirement_data = json.loads(requirement.read_text(encoding="utf-8"))
+            missing = copy.deepcopy(requirement_data["facts"][0])
+            missing.update(fact_id="FACT-003", category="missing", handling="等待确认")
+            requirement_data["facts"].append(missing)
+            point = {
+                "confirmation_id": "CONF-001", "severity": "blocking", "statement": "确认核心口径",
+                "fact_ids": ["FACT-003"], "status": state,
+            }
+            if state == "skipped":
+                point.update(skip_reason="本轮跳过", decision_evidence=copy.deepcopy(missing["evidence_references"]))
+            if state == "resolved":
+                point.update(
+                    resolution="已确认", resolution_evidence_references=copy.deepcopy(missing["evidence_references"]),
+                    resolved_at="2026-07-17 12:00:00",
+                )
+            requirement_data["confirmation_points"] = [point]
+            requirement.write_text(json.dumps(requirement_data, ensure_ascii=False, indent=2), encoding="utf-8")
+            self.assertTrue(any(token in error for error in self.errors_for(manifest, data)), state)
+
+    def test_passed_allows_resolved_confirmation_with_updated_fact(self):
+        manifest, data = self.make_passed_manifest()
+        requirement = ROOT / data["analysis_model_paths"][0]
+        requirement_data = json.loads(requirement.read_text(encoding="utf-8"))
+        confirmed = copy.deepcopy(requirement_data["facts"][0])
+        confirmed.update(fact_id="FACT-003", statement="收益率分母为期初资产")
+        confirmed["affects_core_expectation"] = False
+        requirement_data["facts"].append(confirmed)
+        requirement_data["confirmation_points"] = [{
+            "confirmation_id": "CONF-001", "severity": "blocking", "statement": "确认收益率分母",
+            "fact_ids": ["FACT-003"], "status": "resolved", "resolution": "分母为期初资产",
+            "resolution_evidence_references": copy.deepcopy(confirmed["evidence_references"]),
+            "resolved_at": "2026-07-17 12:00:00",
+        }]
+        requirement.write_text(json.dumps(requirement_data, ensure_ascii=False, indent=2), encoding="utf-8")
+        self.assertEqual([], self.errors_for(manifest, data))
+
+    def test_failed_requires_reason_and_cannot_replace_normal_pending(self):
+        manifest, data, _, _ = self.make_pending_manifest()
+        failed = copy.deepcopy(data)
         failed.update(validation_status="failed", failure_reason=None, pending_reason=None)
         self.assertTrue(any("failure_reason" in error for error in self.errors_for(manifest, failed)))
-        pending = copy.deepcopy(example)
-        pending["xmind_path"] = None
-        self.assertEqual([], self.errors_for(manifest, pending))
+        failed["failure_reason"] = "等待业务确认"
+        self.assertTrue(any("应使用 pending" in error for error in self.errors_for(manifest, failed)))
 
     def test_passed_zero_hash_fails(self):
         manifest, data = self.make_passed_manifest()

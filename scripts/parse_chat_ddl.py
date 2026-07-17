@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Parse pasted DDL without connecting to or executing any database."""
+"""Parse pasted DDL conservatively without connecting to a database."""
 
 from __future__ import annotations
 
@@ -13,9 +13,24 @@ from typing import Any
 
 
 CREATE_RE = re.compile(r"(?is)\bcreate\s+table\b")
-TABLE_NAME_RE = re.compile(r"(?is)\bcreate\s+table\s+(?:if\s+not\s+exists\s+)?(?P<name>(?:`[^`]+`|\"[^\"]+\"|[\w.]+))")
-FIELD_RE = re.compile(r"^\s*(?P<name>`[^`]+`|\"[^\"]+\"|[A-Za-z_][\w$]*)\s+(?P<type>[A-Za-z][\w]*(?:\s*\([^)]*\))?)", re.I)
-SENSITIVE_RE = re.compile(r"(?i)(?:password|passwd|token|jdbc|private[_ -]?key|secret)\s*[:=]")
+TABLE_NAME_RE = re.compile(
+    r"(?is)\bcreate\s+table\s+(?:if\s+not\s+exists\s+)?"
+    r"(?P<name>(?:`[^`]+`|\"[^\"]+\"|[\w.]+))"
+)
+SENSITIVE_RE = re.compile(
+    r"(?i)(?:(?:password|passwd|token|jdbc|private[_ -]?key|secret)\s*[:=]|"
+    r"-----BEGIN [^-]*PRIVATE KEY-----)"
+)
+NAME_RE = re.compile(r"(?:`(?:``|[^`])+`|\"(?:\"\"|[^\"])+\"|[A-Za-z_][\w$]*)")
+TYPE_NAME_RE = re.compile(r"[A-Za-z][\w]*")
+TABLE_CONSTRAINT_PREFIXES = (
+    "PRIMARY KEY", "UNIQUE KEY", "DUPLICATE KEY", "AGGREGATE KEY", "FOREIGN KEY",
+    "CHECK", "CONSTRAINT", "UNIQUE INDEX", "INDEX", "KEY",
+)
+TAIL_STARTERS = (
+    "engine", "duplicate key", "aggregate key", "unique key", "partition by",
+    "distributed by", "order by", "properties", "comment",
+)
 
 
 def _sha256(text: str) -> str:
@@ -31,59 +46,510 @@ def normalize_ddl(text: str) -> str:
     return re.sub(r"\s*([(),])\s*", r"\1", compact)
 
 
+def _scan_quoted(text: str, start: int) -> tuple[int | None, str | None]:
+    quote = text[start]
+    position = start + 1
+    value: list[str] = []
+    while position < len(text):
+        char = text[position]
+        if char == quote:
+            if position + 1 < len(text) and text[position + 1] == quote:
+                value.append(quote)
+                position += 2
+                continue
+            return position + 1, "".join(value)
+        if char == "\\" and position + 1 < len(text):
+            value.append(text[position + 1])
+            position += 2
+            continue
+        value.append(char)
+        position += 1
+    return None, None
+
+
+def _scan_balanced(text: str, start: int, opener: str = "(", closer: str = ")") -> int | None:
+    if start >= len(text) or text[start] != opener:
+        return None
+    depth = 0
+    position = start
+    while position < len(text):
+        char = text[position]
+        if char in "'\"`":
+            end, _ = _scan_quoted(text, position)
+            if end is None:
+                return None
+            position = end
+            continue
+        if char == opener:
+            depth += 1
+        elif char == closer:
+            depth -= 1
+            if depth == 0:
+                return position + 1
+        position += 1
+    return None
+
+
+def _keyword_at(text: str, position: int, keyword: str) -> int | None:
+    pattern = keyword.replace(" ", r"\s+")
+    match = re.match(rf"(?is){pattern}(?![\w$])", text[position:])
+    return position + match.end() if match else None
+
+
+def _scan_until_keyword(text: str, start: int, keywords: tuple[str, ...]) -> int:
+    round_depth = 0
+    angle_depth = 0
+    position = start
+    while position < len(text):
+        char = text[position]
+        if char in "'\"`":
+            end, _ = _scan_quoted(text, position)
+            if end is None:
+                return len(text)
+            position = end
+            continue
+        if char == "(":
+            round_depth += 1
+        elif char == ")":
+            round_depth = max(0, round_depth - 1)
+        elif char == "<":
+            angle_depth += 1
+        elif char == ">":
+            angle_depth = max(0, angle_depth - 1)
+        if round_depth == 0 and angle_depth == 0:
+            if any(_keyword_at(text, position, keyword) is not None for keyword in keywords):
+                return position
+        position += 1
+    return len(text)
+
+
 def split_create_tables(text: str) -> list[str]:
     statements: list[str] = []
     matches = list(CREATE_RE.finditer(text))
     for index, match in enumerate(matches):
-        start = match.start()
-        end_limit = matches[index + 1].start() if index + 1 < len(matches) else len(text)
-        candidate = text[start:end_limit]
-        depth = 0
-        quote: str | None = None
-        end = len(candidate)
-        for position, char in enumerate(candidate):
-            if quote:
-                if char == quote and (position == 0 or candidate[position - 1] != "\\"):
-                    quote = None
-                continue
-            if char in "'\"`":
-                quote = char
-            elif char == "(":
-                depth += 1
-            elif char == ")":
-                depth = max(depth - 1, 0)
-                if depth == 0:
-                    tail = candidate[position + 1:]
-                    semicolon = tail.find(";")
-                    end = position + 1 + semicolon + 1 if semicolon >= 0 else position + 1
-                    break
+        limit = matches[index + 1].start() if index + 1 < len(matches) else len(text)
+        candidate = text[match.start():limit]
+        body_open = candidate.find("(")
+        if body_open < 0:
+            statements.append(candidate.strip())
+            continue
+        body_close = _scan_balanced(candidate, body_open)
+        if body_close is None:
+            statements.append(candidate.strip())
+            continue
+        semicolon = candidate.find(";", body_close)
+        end = semicolon + 1 if semicolon >= 0 else len(candidate)
         statement = candidate[:end].strip()
         if statement:
             statements.append(statement)
     return statements
 
 
-def _split_top_level(body: str) -> list[str]:
+def _split_top_level(body: str) -> tuple[list[str], bool]:
     items: list[str] = []
     start = 0
-    depth = 0
-    quote: str | None = None
-    for position, char in enumerate(body):
-        if quote:
-            if char == quote and (position == 0 or body[position - 1] != "\\"):
-                quote = None
-            continue
+    round_depth = 0
+    angle_depth = 0
+    position = 0
+    while position < len(body):
+        char = body[position]
         if char in "'\"`":
-            quote = char
-        elif char == "(":
-            depth += 1
+            end, _ = _scan_quoted(body, position)
+            if end is None:
+                return [body.strip()] if body.strip() else [], False
+            position = end
+            continue
+        if char == "(":
+            round_depth += 1
         elif char == ")":
-            depth = max(0, depth - 1)
-        elif char == "," and depth == 0:
-            items.append(body[start:position].strip())
+            round_depth -= 1
+            if round_depth < 0:
+                return items, False
+        elif char == "<" and round_depth == 0:
+            angle_depth += 1
+        elif char == ">" and round_depth == 0 and angle_depth > 0:
+            angle_depth -= 1
+        elif char == "," and round_depth == 0 and angle_depth == 0:
+            item = body[start:position].strip()
+            if item:
+                items.append(item)
             start = position + 1
-    items.append(body[start:].strip())
-    return [item for item in items if item]
+        position += 1
+    item = body[start:].strip()
+    if item:
+        items.append(item)
+    return items, round_depth == 0 and angle_depth == 0
+
+
+def _scan_type(fragment: str, position: int) -> tuple[str | None, int, str | None]:
+    match = TYPE_NAME_RE.match(fragment, position)
+    if not match:
+        return None, position, "missing field type"
+    position = match.end()
+    round_depth = 0
+    angle_depth = 0
+    while position < len(fragment):
+        char = fragment[position]
+        if char in "'\"`":
+            return None, position, "quoted text is not valid in a field type"
+        if char == "(":
+            round_depth += 1
+        elif char == ")":
+            if round_depth == 0:
+                break
+            round_depth -= 1
+        elif char == "<":
+            angle_depth += 1
+        elif char == ">":
+            if angle_depth == 0:
+                return None, position, "unbalanced type angle bracket"
+            angle_depth -= 1
+        elif char.isspace() and round_depth == 0 and angle_depth == 0:
+            break
+        position += 1
+    if round_depth or angle_depth:
+        return None, position, "unclosed field type"
+    return fragment[match.start():position].strip(), position, None
+
+
+def _scan_default(text: str, position: int) -> tuple[int | None, str | None, str | None]:
+    while position < len(text) and text[position].isspace():
+        position += 1
+    if position >= len(text):
+        return None, None, "DEFAULT has no expression"
+    if text[position] in "'\"":
+        end, value = _scan_quoted(text, position)
+        return (end, value, None) if end is not None else (None, None, "unclosed DEFAULT string")
+    if text[position] == "(":
+        end = _scan_balanced(text, position)
+        return (end, text[position:end], None) if end is not None else (None, None, "unclosed DEFAULT expression")
+    number = re.match(r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?![\w.])", text[position:])
+    if number:
+        end = position + number.end()
+        return end, text[position:end], None
+    word = re.match(r"(?i)(?:null|true|false|current_timestamp|now)(?![\w$])", text[position:])
+    if word:
+        end = position + word.end()
+        if end < len(text) and text[end] == "(":
+            call_end = _scan_balanced(text, end)
+            if call_end is None:
+                return None, None, "unclosed DEFAULT function call"
+            end = call_end
+        return end, text[position:end], None
+    return None, None, "unsupported DEFAULT expression"
+
+
+def parse_field_fragment(
+    fragment: str,
+    ordinal: int,
+    *,
+    full_name: str,
+) -> tuple[dict[str, Any] | None, list[str]]:
+    """Parse one field and prove that its type and constraints were fully consumed."""
+
+    raw = fragment.strip().rstrip(",").strip()
+    warnings: list[str] = []
+    name_match = NAME_RE.match(raw)
+    if not name_match:
+        return None, [f"table {full_name}: cannot parse field fragment: {raw[:80]}"]
+    name = name_match.group(0).strip("`\"").replace("``", "`").replace('""', '"')
+    position = name_match.end()
+    while position < len(raw) and raw[position].isspace():
+        position += 1
+    type_name, position, type_error = _scan_type(raw, position)
+    if type_error or not type_name:
+        return None, [f"table {full_name} field {name}: {type_error or 'missing field type'}"]
+
+    parsed_tokens = [f"name:{name}", f"type:{type_name}"]
+    nullable: bool | None = None
+    nullable_seen: list[bool] = []
+    default_value: str | None = None
+    default_state = "unknown"
+    comment: str | None = None
+    generated: bool | None = False
+    generated_expression: str | None = None
+    generated_type: str | None = None
+    auto_increment: bool | None = False
+    inline_constraints: list[str] = []
+
+    while True:
+        while position < len(raw) and raw[position].isspace():
+            position += 1
+        if position >= len(raw):
+            break
+        before = position
+        end = _keyword_at(raw, position, "not null")
+        if end is not None:
+            nullable_seen.append(False)
+            parsed_tokens.append("not null")
+            position = end
+        else:
+            end = _keyword_at(raw, position, "null")
+            if end is not None:
+                nullable_seen.append(True)
+                parsed_tokens.append("null")
+                position = end
+            else:
+                end = _keyword_at(raw, position, "default")
+                if end is not None:
+                    value_end, value, error = _scan_default(raw, end)
+                    if error or value_end is None:
+                        warnings.append(f"table {full_name} field {name}: {error}")
+                        break
+                    default_state = "known_null" if value is not None and value.casefold() == "null" else "known_value"
+                    default_value = None if default_state == "known_null" else value
+                    parsed_tokens.append(f"default:{raw[end:value_end].strip()}")
+                    position = value_end
+                else:
+                    end = _keyword_at(raw, position, "comment")
+                    if end is not None:
+                        while end < len(raw) and raw[end].isspace():
+                            end += 1
+                        if end >= len(raw) or raw[end] not in "'\"":
+                            warnings.append(f"table {full_name} field {name}: COMMENT requires a quoted value")
+                            break
+                        value_end, value = _scan_quoted(raw, end)
+                        if value_end is None:
+                            warnings.append(f"table {full_name} field {name}: unclosed COMMENT string")
+                            break
+                        comment = value
+                        parsed_tokens.append(f"comment:{raw[end:value_end]}")
+                        position = value_end
+                    else:
+                        generated_end = _keyword_at(raw, position, "generated")
+                        bare_as = False
+                        if generated_end is None:
+                            generated_end = _keyword_at(raw, position, "as")
+                            bare_as = generated_end is not None
+                        if generated_end is not None:
+                            cursor = generated_end
+                            mode = "as"
+                            if not bare_as:
+                                while cursor < len(raw) and raw[cursor].isspace():
+                                    cursor += 1
+                                always_end = _keyword_at(raw, cursor, "always")
+                                if always_end is not None:
+                                    cursor = always_end
+                                    mode = "always"
+                                while cursor < len(raw) and raw[cursor].isspace():
+                                    cursor += 1
+                                as_end = _keyword_at(raw, cursor, "as")
+                                if as_end is None:
+                                    warnings.append(f"table {full_name} field {name}: GENERATED requires AS")
+                                    break
+                                cursor = as_end
+                                if mode != "always":
+                                    mode = "generated"
+                            while cursor < len(raw) and raw[cursor].isspace():
+                                cursor += 1
+                            expression_end = _scan_balanced(raw, cursor)
+                            if expression_end is None:
+                                warnings.append(f"table {full_name} field {name}: generated expression is not closed")
+                                generated = None
+                                break
+                            generated = True
+                            generated_expression = raw[cursor + 1:expression_end - 1]
+                            generated_type = mode
+                            parsed_tokens.append(f"generated:{raw[position:expression_end]}")
+                            position = expression_end
+                        else:
+                            end = _keyword_at(raw, position, "auto_increment")
+                            if end is not None:
+                                auto_increment = True
+                                parsed_tokens.append("auto_increment")
+                                position = end
+                            else:
+                                matched_constraint = None
+                                for token in ("primary key", "unique key", "unique", "key"):
+                                    end = _keyword_at(raw, position, token)
+                                    if end is not None:
+                                        matched_constraint = token
+                                        break
+                                if matched_constraint is not None and end is not None:
+                                    inline_constraints.append(matched_constraint)
+                                    parsed_tokens.append(matched_constraint)
+                                    position = end
+                                else:
+                                    break
+        if position <= before:
+            warnings.append(f"table {full_name} field {name}: parser made no progress")
+            break
+
+    if nullable_seen:
+        nullable = nullable_seen[0]
+        if any(value != nullable for value in nullable_seen[1:]):
+            warnings.append(f"table {full_name} field {name}: conflicting NULL and NOT NULL constraints")
+    evidence_fields = ["name", "type"]
+    if nullable_seen:
+        evidence_fields.append("nullable")
+    if default_state != "unknown":
+        evidence_fields.append("default")
+    if comment is not None:
+        evidence_fields.append("comment")
+    if generated is True:
+        evidence_fields.append("generated")
+    unknown_fields = [item for item in ("nullable", "default", "comment") if item not in evidence_fields]
+    remainder = raw[position:].strip() or None
+    if remainder:
+        warnings.append(f"table {full_name} field {name}: unparsed syntax: {remainder[:80]}")
+    field = {
+        "name": name,
+        "type": type_name,
+        "nullable": nullable,
+        "default": default_value,
+        "default_state": default_state,
+        "comment": comment,
+        "ordinal": ordinal,
+        "evidence_fields": evidence_fields,
+        "unknown_fields": unknown_fields,
+        "raw_fragment": raw,
+        "parsed_tokens": parsed_tokens,
+        "unparsed_fragment": remainder,
+        "generated": generated,
+        "generated_expression": generated_expression,
+        "generated_type": generated_type,
+        "auto_increment": auto_increment,
+        "inline_constraints": inline_constraints,
+    }
+    return field, warnings
+
+
+def _parse_properties(raw: str) -> tuple[dict[str, str], bool]:
+    items, balanced = _split_top_level(raw)
+    if not balanced:
+        return {}, False
+    result: dict[str, str] = {}
+    for item in items:
+        match = re.fullmatch(
+            r"\s*(?:'((?:''|[^'])*)'|\"((?:\"\"|[^\"])*)\"|([\w.-]+))\s*=\s*"
+            r"(?:'((?:''|[^'])*)'|\"((?:\"\"|[^\"])*)\"|([^\s,]+))\s*",
+            item,
+        )
+        if not match:
+            return result, False
+        groups = match.groups()
+        key = next(value for value in groups[:3] if value is not None)
+        value = next(value for value in groups[3:] if value is not None)
+        result[key.replace("''", "'").replace('""', '"')] = value.replace("''", "'").replace('""', '"')
+    return result, True
+
+
+def parse_table_tail(
+    tail: str,
+    *,
+    full_name: str,
+) -> tuple[list[str], list[str], list[str], dict[str, str], list[str], str | None, list[str]]:
+    raw_tail = tail.strip()
+    if raw_tail.endswith(";"):
+        raw_tail = raw_tail[:-1].rstrip()
+    keys: list[str] = []
+    partitions: list[str] = []
+    indexes: list[str] = []
+    engine_properties: dict[str, str] = {}
+    parsed: list[str] = []
+    warnings: list[str] = []
+    position = 0
+    while True:
+        while position < len(raw_tail) and raw_tail[position].isspace():
+            position += 1
+        if position >= len(raw_tail):
+            break
+        before = position
+        engine_end = _keyword_at(raw_tail, position, "engine")
+        if engine_end is not None:
+            cursor = engine_end
+            while cursor < len(raw_tail) and raw_tail[cursor].isspace():
+                cursor += 1
+            if cursor >= len(raw_tail) or raw_tail[cursor] != "=":
+                warnings.append(f"table {full_name}: Engine is missing '='")
+                break
+            cursor += 1
+            while cursor < len(raw_tail) and raw_tail[cursor].isspace():
+                cursor += 1
+            value = re.match(r"[A-Za-z_][\w.-]*", raw_tail[cursor:])
+            if not value:
+                warnings.append(f"table {full_name}: Engine has no value")
+                break
+            if value.group(0).casefold() in {starter.split()[0] for starter in TAIL_STARTERS}:
+                warnings.append(f"table {full_name}: Engine has no value")
+                break
+            position = cursor + value.end()
+            engine_properties["engine"] = value.group(0)
+            parsed.append(raw_tail[before:position])
+        else:
+            key_kind = next((kind for kind in ("duplicate key", "aggregate key", "unique key") if _keyword_at(raw_tail, position, kind) is not None), None)
+            if key_kind:
+                cursor = _keyword_at(raw_tail, position, key_kind)
+                assert cursor is not None
+                while cursor < len(raw_tail) and raw_tail[cursor].isspace():
+                    cursor += 1
+                end = _scan_balanced(raw_tail, cursor)
+                if end is None:
+                    warnings.append(f"table {full_name}: {key_kind.upper()} is not closed")
+                    break
+                token = raw_tail[position:end].strip()
+                keys.append(token)
+                parsed.append(token)
+                position = end
+            else:
+                matched_clause = next((kind for kind in ("partition by", "distributed by", "order by") if _keyword_at(raw_tail, position, kind) is not None), None)
+                if matched_clause:
+                    end = _scan_until_keyword(raw_tail, _keyword_at(raw_tail, position, matched_clause) or position, TAIL_STARTERS)
+                    token = raw_tail[position:end].strip()
+                    if not token:
+                        warnings.append(f"table {full_name}: empty {matched_clause.upper()} clause")
+                        break
+                    if matched_clause == "partition by":
+                        partitions.append(token[len("partition by"):].strip())
+                    else:
+                        indexes.append(token)
+                    parsed.append(token)
+                    position = end
+                else:
+                    properties_end = _keyword_at(raw_tail, position, "properties")
+                    if properties_end is not None:
+                        cursor = properties_end
+                        while cursor < len(raw_tail) and raw_tail[cursor].isspace():
+                            cursor += 1
+                        end = _scan_balanced(raw_tail, cursor)
+                        if end is None:
+                            warnings.append(f"table {full_name}: Properties is not closed")
+                            break
+                        values, valid = _parse_properties(raw_tail[cursor + 1:end - 1])
+                        if not valid:
+                            warnings.append(f"table {full_name}: Properties contains an unsupported item")
+                            break
+                        engine_properties.update(values)
+                        parsed.append(raw_tail[position:end].strip())
+                        position = end
+                    else:
+                        comment_end = _keyword_at(raw_tail, position, "comment")
+                        if comment_end is not None:
+                            cursor = comment_end
+                            while cursor < len(raw_tail) and raw_tail[cursor].isspace():
+                                cursor += 1
+                            if cursor < len(raw_tail) and raw_tail[cursor] == "=":
+                                cursor += 1
+                                while cursor < len(raw_tail) and raw_tail[cursor].isspace():
+                                    cursor += 1
+                            if cursor >= len(raw_tail) or raw_tail[cursor] not in "'\"":
+                                warnings.append(f"table {full_name}: table COMMENT requires a quoted value")
+                                break
+                            end, _ = _scan_quoted(raw_tail, cursor)
+                            if end is None:
+                                warnings.append(f"table {full_name}: table COMMENT is not closed")
+                                break
+                            parsed.append(raw_tail[position:end].strip())
+                            position = end
+                        else:
+                            break
+        if position <= before:
+            warnings.append(f"table {full_name}: tail parser made no progress")
+            break
+    unparsed = raw_tail[position:].strip() or None
+    if unparsed:
+        warnings.append(f"table {full_name}: unparsed table tail: {unparsed[:80]}")
+    return keys, partitions, indexes, engine_properties, parsed, unparsed, warnings
 
 
 def detect_dialect(ddl: str) -> str:
@@ -95,128 +561,102 @@ def detect_dialect(ddl: str) -> str:
     return "mysql-compatible"
 
 
+def _blocked_table(full_name: str, statement: str, warning: str) -> dict[str, Any]:
+    parts = full_name.split(".")
+    raw = statement.strip()
+    normalized = normalize_ddl(raw)
+    return {
+        "table_id": full_name.replace(".", "_"), "domain": "unknown",
+        "database": parts[-2] if len(parts) > 1 else "", "table_name": parts[-1],
+        "full_name": full_name, "dialect": detect_dialect(raw), "schema_scope": "blocked",
+        "current_ddl_path": None, "raw_ddl": raw, "normalized_ddl": normalized,
+        "raw_hash": _sha256(raw), "normalized_hash": _sha256(normalized), "fields": [],
+        "keys": [], "partitions": [], "indexes": [], "engine_properties": {},
+        "status": "candidate", "source_type": "chat_ddl", "source_requirement_ids": [],
+        "last_verified_at": None, "parse_warnings": [warning], "applicability_scope": None,
+        "raw_tail": "", "parsed_tail_tokens": [], "unparsed_tail": None,
+    }
+
+
 def parse_statement(statement: str, index: int = 1) -> tuple[dict[str, Any] | None, list[str]]:
     warnings: list[str] = []
     name_match = TABLE_NAME_RE.search(statement)
     if not name_match:
-        return None, [f"第 {index} 条 CREATE TABLE 无法稳定识别表名"]
+        return None, [f"CREATE TABLE #{index}: cannot identify table name"]
     full_name = name_match.group("name").replace("`", "").replace('"', "")
     parts = full_name.split(".")
     database = parts[-2] if len(parts) > 1 else ""
     table_name = parts[-1]
     open_paren = statement.find("(", name_match.end())
     if open_paren < 0:
-        return None, [f"表 {full_name} 缺少字段定义括号；仅保留原文，不虚构字段"]
-    depth = 0
-    close_paren = -1
-    quote: str | None = None
-    for position in range(open_paren, len(statement)):
-        char = statement[position]
-        if quote:
-            if char == quote and statement[position - 1] != "\\":
-                quote = None
-            continue
-        if char in "'\"`":
-            quote = char
-        elif char == "(":
-            depth += 1
-        elif char == ")":
-            depth -= 1
-            if depth == 0:
-                close_paren = position
-                break
-    if close_paren < 0:
-        return None, [f"表 {full_name} 字段定义无法闭合；仅保留原文，不虚构字段"]
+        warning = f"table {full_name}: missing field-definition parentheses"
+        return _blocked_table(full_name, statement, warning), [warning]
+    close_after = _scan_balanced(statement, open_paren)
+    if close_after is None:
+        warning = f"table {full_name}: field-definition parentheses are not closed"
+        return _blocked_table(full_name, statement, warning), [warning]
+    close_paren = close_after - 1
     body = statement[open_paren + 1:close_paren]
+    items, body_balanced = _split_top_level(body)
+    if not body_balanced:
+        warning = f"table {full_name}: field or type delimiters are not closed"
+        return _blocked_table(full_name, statement, warning), [warning]
+
     fields: list[dict[str, Any]] = []
     keys: list[str] = []
-    partitions: list[str] = []
     indexes: list[str] = []
-    for item in _split_top_level(body):
-        stripped = item.strip()
-        upper = stripped.upper()
-        if upper.startswith(("PRIMARY KEY", "UNIQUE KEY", "DUPLICATE KEY", "AGGREGATE KEY", "FOREIGN KEY", "CHECK ", "CONSTRAINT")):
-            keys.append(stripped)
+    for item in items:
+        upper = item.lstrip().upper()
+        constraint = next((prefix for prefix in TABLE_CONSTRAINT_PREFIXES if upper == prefix or upper.startswith(prefix + " ") or upper.startswith(prefix + "(")), None)
+        if constraint:
+            if constraint in {"UNIQUE INDEX", "INDEX", "KEY"}:
+                indexes.append(item.strip())
+            else:
+                keys.append(item.strip())
             continue
-        if upper.startswith(("UNIQUE INDEX", "INDEX ", "KEY ")):
-            indexes.append(stripped)
-            continue
-        match = FIELD_RE.match(stripped)
-        if not match:
-            warnings.append(f"表 {full_name} 无法稳定解析片段：{stripped[:80]}")
-            continue
-        name = match.group("name").strip("`\"")
-        type_name = match.group("type").strip()
-        default_match = re.search(r"(?is)\bdefault\s+([^\s,]+)", stripped)
-        comment_match = re.search(r"(?is)\bcomment\s+'((?:''|[^'])*)'", stripped)
-        constraint_text = re.sub(r"(?is)\bdefault\s+(?:'[^']*(?:''[^']*)*'|[^\s,]+)", " ", stripped)
-        constraint_text = re.sub(r"(?is)\bcomment\s+'(?:''|[^'])*'", " ", constraint_text)
-        constraint_text = re.sub(r"(?is)\bgenerated\s+(?:always\s+)?as\s*\(.*?\)", " ", constraint_text)
-        nullable_known = bool(re.search(r"(?i)(?:\bnot\s+null\b|(?<!\bdefault\s)\bnull\b)", constraint_text))
-        default_value = default_match.group(1) if default_match else None
-        default_state = "known_null" if default_value and default_value.casefold() == "null" else "known_value" if default_match else "unknown"
-        evidence_fields = ["name", "type"] + (["nullable"] if nullable_known else []) + (["default"] if default_match else []) + (["comment"] if comment_match else [])
-        unknown_fields = [field for field in ("nullable", "default", "comment") if field not in evidence_fields]
-        fields.append({
-            "name": name,
-            "type": type_name,
-            "nullable": (not bool(re.search(r"(?i)\bnot\s+null\b", stripped))) if nullable_known else None,
-            "default": default_value,
-            "default_state": default_state,
-            "comment": comment_match.group(1).replace("''", "'") if comment_match else None,
-            "ordinal": len(fields) + 1,
-            "evidence_fields": evidence_fields,
-            "unknown_fields": unknown_fields,
-            "raw_fragment": stripped,
-            "parsed_tokens": [name, type_name] + (["nullable"] if nullable_known else []) + (["default"] if default_match else []) + (["comment"] if comment_match else []),
-            "unparsed_fragment": None,
-        })
-        known_end = match.end()
-        remainder = stripped[known_end:].strip().rstrip(",")
-        remainder = re.sub(r"(?is)^(?:not\s+null|null|default\s+(?:'[^']*'|[^\s,]+)|comment\s+'(?:''|[^'])*'|generated\s+(?:always\s+)?as\s*\(.*?\))\s*", "", remainder).strip()
-        if remainder:
-            fields[-1]["unparsed_fragment"] = remainder
-            warnings.append(f"表 {full_name} 字段 {name} 含未识别语法: {remainder[:80]}")
-    tail = statement[close_paren + 1:]
-    partition_match = re.search(r"(?is)\bpartition\s+by\s+(.+?)(?=\border\s+by\b|\bdistributed\s+by\b|\bproperties\b|$)", tail)
-    if partition_match:
-        partitions.append(re.sub(r"\s+", " ", partition_match.group(1)).strip())
-    for match in re.finditer(r"(?is)\b(?:order\s+by|distributed\s+by)\s+(.+?)(?=\bproperties\b|$)", tail):
-        indexes.append(re.sub(r"\s+", " ", match.group(0)).strip())
-    for match in re.finditer(r"(?is)\b(?:duplicate|aggregate|unique)\s+key\s*\([^)]*\)", tail):
-        keys.append(re.sub(r"\s+", " ", match.group(0)).strip())
-    engine_match = re.search(r"(?is)\bengine\s*=\s*([\w]+)", tail)
-    properties_match = re.search(r"(?is)\bproperties\s*\((.*?)\)", tail)
-    engine_properties: dict[str, str] = {}
-    if engine_match:
-        engine_properties["engine"] = engine_match.group(1)
-    if properties_match:
-        for key, value in re.findall(r"['\"]?([\w-]+)['\"]?\s*=\s*['\"]?([^,'\"]+)['\"]?", properties_match.group(1)):
-            engine_properties[key] = value.strip()
-    raw = statement.strip()
-    structure_checks = (
-        (r"(?i)\bprimary\s+key\b", "主键", bool(keys)),
-        (r"(?i)\bunique\s+key\b", "唯一键", any("UNIQUE KEY" in item.upper() for item in keys)),
-        (r"(?i)\bduplicate\s+key\b", "Duplicate Key", any("DUPLICATE KEY" in item.upper() for item in keys)),
-        (r"(?i)\baggregate\s+key\b", "Aggregate Key", any("AGGREGATE KEY" in item.upper() for item in keys)),
-        (r"(?i)\bpartition\s+by\b", "分区", bool(partitions)),
-        (r"(?i)\bdistributed\s+by\b", "分桶", any("DISTRIBUTED BY" in item.upper() for item in indexes)),
-        (r"(?i)\b(?:unique\s+)?index\s+\w+", "索引", bool(indexes)),
-        (r"(?i)\bengine\s*=", "Engine", "engine" in engine_properties),
-        (r"(?i)\bproperties\s*\(", "Properties", bool(properties_match) and len(engine_properties) > int("engine" in engine_properties)),
+        field, item_warnings = parse_field_fragment(item, len(fields) + 1, full_name=full_name)
+        warnings.extend(item_warnings)
+        if field is not None:
+            fields.append(field)
+
+    raw_tail = statement[close_after:].strip()
+    tail_keys, partitions, tail_indexes, engine_properties, parsed_tail_tokens, unparsed_tail, tail_warnings = parse_table_tail(
+        raw_tail, full_name=full_name
     )
-    for pattern, label, parsed in structure_checks:
-        if re.search(pattern, raw) and not parsed:
-            warnings.append(f"表 {full_name} 包含 {label}，但未能稳定提取")
+    warnings.extend(tail_warnings)
+    keys.extend(tail_keys)
+    indexes.extend(tail_indexes)
+    raw = statement.strip()
     normalized = normalize_ddl(raw)
+    all_fields_consumed = bool(fields) and all(field["unparsed_fragment"] is None for field in fields)
+    schema_scope = "complete" if all_fields_consumed and unparsed_tail is None and not warnings else "partial" if fields else "blocked"
     model = {
-        "table_id": full_name.replace(".", "_"), "domain": "unknown", "database": database,
-        "table_name": table_name, "full_name": full_name, "dialect": detect_dialect(raw),
-        "schema_scope": "complete" if fields and not warnings else "partial" if fields else "blocked", "current_ddl_path": None,
-        "raw_ddl": raw, "normalized_ddl": normalized, "raw_hash": _sha256(raw), "normalized_hash": _sha256(normalized),
-        "fields": fields, "keys": keys, "partitions": partitions, "indexes": indexes, "engine_properties": engine_properties,
-        "status": "candidate", "source_type": "chat_ddl", "source_requirement_ids": [], "last_verified_at": None,
-        "parse_warnings": warnings, "applicability_scope": None,
+        "table_id": full_name.replace(".", "_"),
+        "domain": "unknown",
+        "database": database,
+        "table_name": table_name,
+        "full_name": full_name,
+        "dialect": detect_dialect(raw),
+        "schema_scope": schema_scope,
+        "current_ddl_path": None,
+        "raw_ddl": raw,
+        "normalized_ddl": normalized,
+        "raw_hash": _sha256(raw),
+        "normalized_hash": _sha256(normalized),
+        "fields": fields,
+        "keys": keys,
+        "partitions": partitions,
+        "indexes": indexes,
+        "engine_properties": engine_properties,
+        "status": "candidate",
+        "source_type": "chat_ddl",
+        "source_requirement_ids": [],
+        "last_verified_at": None,
+        "parse_warnings": warnings,
+        "applicability_scope": None,
+        "raw_tail": raw_tail[:-1].rstrip() if raw_tail.endswith(";") else raw_tail,
+        "parsed_tail_tokens": parsed_tail_tokens,
+        "unparsed_tail": unparsed_tail,
     }
     return model, warnings
 
@@ -225,10 +665,10 @@ def parse_ddl(text: str) -> dict[str, Any]:
     input_raw_hash = _sha256(text)
     input_normalized_hash = _sha256(normalize_ddl(text))
     if SENSITIVE_RE.search(text):
-        return {"tables": [], "warnings": ["输入疑似包含敏感凭据标识，已拒绝解析并且不会保存原文"], "sensitive": True, "input_raw_hash": input_raw_hash, "input_normalized_hash": input_normalized_hash}
+        return {"tables": [], "warnings": ["input contains a possible sensitive credential marker"], "sensitive": True, "input_raw_hash": input_raw_hash, "input_normalized_hash": input_normalized_hash}
     statements = split_create_tables(text)
     if not statements:
-        return {"tables": [], "warnings": ["未识别到 CREATE TABLE；未生成表结构事实"], "sensitive": False, "input_raw_hash": input_raw_hash, "input_normalized_hash": input_normalized_hash}
+        return {"tables": [], "warnings": ["no CREATE TABLE statement was identified"], "sensitive": False, "input_raw_hash": input_raw_hash, "input_normalized_hash": input_normalized_hash}
     tables: list[dict[str, Any]] = []
     warnings: list[str] = []
     for index, statement in enumerate(statements, 1):
@@ -240,39 +680,68 @@ def parse_ddl(text: str) -> dict[str, Any]:
 
 
 def parse_partial_fields(text: str, full_name: str, domain: str = "unknown") -> dict[str, Any]:
-    """Convert explicitly supplied fields into a partial, non-persisted table model."""
+    """Parse explicitly supplied fields with the shared parser; scope always remains partial."""
 
+    input_raw_hash = _sha256(text)
+    input_normalized_hash = _sha256(normalize_ddl(text))
+    if SENSITIVE_RE.search(text):
+        return {"tables": [], "warnings": ["input contains a possible sensitive credential marker"], "sensitive": True, "input_raw_hash": input_raw_hash, "input_normalized_hash": input_normalized_hash}
     parts = full_name.split(".")
     database = parts[-2] if len(parts) > 1 else ""
     table_name = parts[-1]
     fields: list[dict[str, Any]] = []
+    warnings: list[str] = []
     for line in text.splitlines():
-        match = FIELD_RE.match(line.strip().rstrip(",;"))
-        if not match:
-            continue
-        fields.append({"name": match.group("name").strip("`\""), "type": match.group("type").strip(), "nullable": None, "default": None, "default_state": "unknown", "comment": None, "ordinal": len(fields) + 1, "evidence_fields": ["name", "type"], "unknown_fields": ["nullable", "default", "comment"], "raw_fragment": line.strip(), "parsed_tokens": [match.group("name").strip("`\""), match.group("type").strip()], "unparsed_fragment": None})
-    item_warnings = [] if fields else ["未识别到明确字段；未补齐整表结构"]
-    return {"tables": [{"table_id": full_name.replace(".", "_"), "domain": domain, "database": database, "table_name": table_name, "full_name": full_name, "dialect": "unspecified", "schema_scope": "partial" if fields else "blocked", "current_ddl_path": None, "raw_hash": _sha256(text), "normalized_hash": _sha256(normalize_ddl(text)), "fields": fields, "keys": [], "partitions": [], "indexes": [], "engine_properties": {}, "status": "candidate", "source_type": "chat_partial_fields", "source_requirement_ids": [], "last_verified_at": None, "parse_warnings": item_warnings, "applicability_scope": f"仅限用户明确提供的 {len(fields)} 个字段" if fields else None}], "warnings": item_warnings, "sensitive": bool(SENSITIVE_RE.search(text)), "input_raw_hash": _sha256(text), "input_normalized_hash": _sha256(normalize_ddl(text))}
+        fragments, balanced = _split_top_level(line.strip().rstrip(";"))
+        if not balanced:
+            warnings.append(f"partial fields contain unclosed delimiters: {line[:80]}")
+        for fragment in fragments:
+            field, item_warnings = parse_field_fragment(fragment, len(fields) + 1, full_name=full_name)
+            warnings.extend(item_warnings)
+            if field is not None:
+                fields.append(field)
+    if not fields:
+        warnings.append("no reliable field was identified")
+    table = {
+        "table_id": full_name.replace(".", "_"), "domain": domain, "database": database,
+        "table_name": table_name, "full_name": full_name, "dialect": "unspecified",
+        "schema_scope": "partial" if fields else "blocked", "current_ddl_path": None,
+        "raw_ddl": None, "normalized_ddl": None, "raw_hash": input_raw_hash,
+        "normalized_hash": input_normalized_hash, "fields": fields, "keys": [], "partitions": [],
+        "indexes": [], "engine_properties": {}, "status": "candidate", "source_type": "chat_partial_fields",
+        "source_requirement_ids": [], "last_verified_at": None, "parse_warnings": warnings,
+        "applicability_scope": f"limited to {len(fields)} explicitly supplied fields" if fields else None,
+        "raw_tail": "", "parsed_tail_tokens": [], "unparsed_tail": None,
+    }
+    return {"tables": [table], "warnings": warnings, "sensitive": False, "input_raw_hash": input_raw_hash, "input_normalized_hash": input_normalized_hash}
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="解析粘贴的 CREATE TABLE DDL；只解析，不连接或执行数据库")
-    parser.add_argument("input", nargs="?", help="DDL 文本文件；省略时读取 stdin")
+    parser = argparse.ArgumentParser(description="Parse CREATE TABLE DDL without database access or execution")
+    parser.add_argument("input", nargs="?", help="UTF-8 DDL file; reads stdin when omitted")
+    parser.add_argument("--partial", type=Path, help="UTF-8 file containing partial field definitions")
     parser.add_argument("-o", "--output", type=Path)
-    parser.add_argument("--table", help="仅提供少量字段时指定 database.table")
+    parser.add_argument("--table", help="database.table for --partial mode")
     parser.add_argument("--domain", default="unknown")
     args = parser.parse_args(argv)
-    text = Path(args.input).read_text(encoding="utf-8-sig") if args.input else sys.stdin.read()
-    result = parse_ddl(text)
-    if not result["tables"] and args.table and not result.get("sensitive"):
+    if args.partial and args.input:
+        parser.error("DDL input and --partial cannot be supplied together")
+    if args.partial and not args.table:
+        parser.error("--partial requires --table")
+    if args.partial:
+        text = args.partial.read_text(encoding="utf-8-sig")
         result = parse_partial_fields(text, args.table, args.domain)
+    else:
+        text = Path(args.input).read_text(encoding="utf-8-sig") if args.input else sys.stdin.read()
+        result = parse_ddl(text)
     rendered = json.dumps(result, ensure_ascii=False, indent=2) + "\n"
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(rendered, encoding="utf-8")
     else:
         print(rendered, end="")
-    return 1 if result.get("sensitive") else 0
+    parse_succeeded = bool(result.get("tables")) and any(table.get("schema_scope") != "blocked" for table in result["tables"])
+    return 0 if parse_succeeded and not result.get("sensitive") else 1
 
 
 if __name__ == "__main__":

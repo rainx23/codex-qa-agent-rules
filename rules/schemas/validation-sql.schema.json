@@ -149,7 +149,12 @@
               "required": [
                 "identifier",
                 "identifier_type",
-                "source_reference",
+                "qualified_identifier",
+                "scope_table",
+                "usage_type",
+                "source_reference_type",
+                "source_reference_id",
+                "evidence_references",
                 "evidence_state"
               ],
               "properties": {
@@ -160,10 +165,27 @@
                 "identifier_type": {
                   "enum": [
                     "table",
-                    "field",
+                    "column",
+                    "function",
+                    "enum_value",
                     "parameter",
-                    "metric"
+                    "join_key",
+                    "filter_value"
                   ]
+                },
+                "qualified_identifier": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "scope_table": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "usage_type": {
+                  "type": "string",
+                  "minLength": 1
                 },
                 "source_reference": {
                   "type": "string",
@@ -171,10 +193,14 @@
                 },
                 "source_reference_type": {
                   "enum": [
-                    "fact",
+                    "knowledge_table",
+                    "knowledge_table_field",
                     "complete_ddl",
-                    "knowledge",
-                    "sql_definition",
+                    "fact",
+                    "change",
+                    "formal_document",
+                    "code_context",
+                    "builtin_sql",
                     "user_confirmation"
                   ]
                 },
@@ -189,13 +215,17 @@
                     "additionalProperties": false,
                     "required": [
                       "source_type",
+                      "storage_type",
                       "source_path",
+                      "snapshot_path",
+                      "source_record_id",
                       "line_start",
                       "line_end",
                       "commit_sha",
                       "content_hash",
                       "excerpt",
                       "captured_at",
+                      "captured_timezone",
                       "evidence_status"
                     ],
                     "properties": {
@@ -220,7 +250,25 @@
                           "chat_snapshot"
                         ]
                       },
+                      "storage_type": {
+                        "enum": [
+                          "file",
+                          "snapshot"
+                        ]
+                      },
                       "source_path": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "snapshot_path": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "source_record_id": {
                         "type": [
                           "string",
                           "null"
@@ -275,9 +323,19 @@
                           "stale",
                           "reconfirm_required"
                         ]
+                      },
+                      "stale_reason": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "working_tree_evidence": {
+                        "type": "boolean"
                       }
                     }
-                  }
+                  },
+                  "minItems": 1
                 },
                 "evidence_state": {
                   "const": "confirmed"

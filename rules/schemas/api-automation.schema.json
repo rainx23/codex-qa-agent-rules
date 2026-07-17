@@ -7,6 +7,12 @@
   "additionalProperties": false,
   "required": [
     "schema_version",
+    "model_id",
+    "method",
+    "url_or_path",
+    "required_environment_variables",
+    "validation",
+    "business_assertions",
     "mode",
     "automation_action",
     "automation_required",
@@ -29,6 +35,75 @@
   "properties": {
     "schema_version": {
       "const": "2.0.0"
+    },
+    "model_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "method": {
+      "type": "string",
+      "minLength": 1
+    },
+    "url_or_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "required_environment_variables": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assertion_scope",
+        "checks"
+      ],
+      "properties": {
+        "assertion_scope": {
+          "const": "parameter_health"
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "path",
+              "operator",
+              "expected"
+            ],
+            "properties": {
+              "path": {
+                "enum": [
+                  "content.code",
+                  "content.msg"
+                ]
+              },
+              "operator": {
+                "const": "equals"
+              },
+              "expected": {
+                "type": [
+                  "integer",
+                  "string"
+                ]
+              }
+            }
+          },
+          "minItems": 2,
+          "maxItems": 2
+        }
+      }
+    },
+    "business_assertions": {
+      "type": "array",
+      "maxItems": 0
     },
     "mode": {
       "enum": [

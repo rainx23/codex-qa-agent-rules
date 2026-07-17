@@ -1,4 +1,4 @@
-// Fixture source for traceable diff evidence.
+// TEST FIXTURE ONLY: source for traceable diff evidence.
 // 02
 // 03
 // 04

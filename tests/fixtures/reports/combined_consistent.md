@@ -22,6 +22,9 @@
 
 ## 风险点
 
+Schema Version: 2.0.0
+Rule Version: 2.6.0
+
 - [RISK-001][FACT-001][CHG-001] 风险等级：P0，客户编号条件可能丢失。
 - [RISK-002][FACT-002][CHG-002] 风险等级：P1，翻页可能丢失查询状态。
 

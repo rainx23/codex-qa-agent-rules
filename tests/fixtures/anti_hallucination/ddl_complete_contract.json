@@ -1,0 +1,7 @@
+{
+  "kind": "ddl_schema",
+  "valid_input": "create table demo.orders (id bigint not null);",
+  "invalid": {"remove": "fields.0.raw_fragment"},
+  "expected_failure": "raw_fragment",
+  "golden": {"valid": true, "invalid": false}
+}

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Schema Migration Report",
+  "type": "object",
+  "required": ["migration_report_version", "migration_id", "from_schema_version", "to_schema_version", "status", "model_type", "source_path", "destination_path", "source_hash", "destination_hash", "destination_written", "changes", "unknown_fields", "reconfirm_required", "dropped_fields", "validation_results", "warnings", "errors"],
+  "properties": {
+    "migration_report_version": {"const": "1.0.0"},
+    "migration_id": {"type": "string", "pattern": "^MIG-"},
+    "from_schema_version": {"const": "1.0.0"},
+    "to_schema_version": {"const": "2.0.0"},
+    "status": {"enum": ["passed", "pending", "failed", "unchanged"]},
+    "model_type": {"type": "string"},
+    "source_path": {"type": "string"},
+    "destination_path": {"type": "string"},
+    "source_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "destination_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "destination_written": {"type": "boolean"},
+    "changes": {"type": "array", "items": {"type": "object", "required": ["json_path", "action", "reason", "requires_confirmation"], "properties": {"action": {"enum": ["copied", "renamed", "transformed", "defaulted", "unknown", "reconfirm_required", "dropped", "error"]}}}},
+    "unknown_fields": {"type": "array"},
+    "reconfirm_required": {"type": "array"},
+    "dropped_fields": {"type": "array"},
+    "validation_results": {"type": "array"},
+    "warnings": {"type": "array"},
+    "errors": {"type": "array"},
+    "files": {"type": "array"}
+  }
+}

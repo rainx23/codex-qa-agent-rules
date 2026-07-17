@@ -1,0 +1,1 @@
+{"kind":"fifth_batch_contract","expected_failure":"migration contract violation: migration_version_only","golden":{"validator_rejects_invalid":true}}

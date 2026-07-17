@@ -1,0 +1,7 @@
+{
+  "schema_version": "1.0.0",
+  "model_type": "requirement_analysis",
+  "model_id": "REQ-BUNDLE-001",
+  "rule_version": "2.0.0",
+  "requirements": [{"fact_id": "FACT-001", "text": "已由 EVID-001 证明的需求", "evidence_references": ["EVID-001"]}]
+}

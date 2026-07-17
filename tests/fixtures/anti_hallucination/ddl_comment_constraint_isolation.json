@@ -1,0 +1,7 @@
+{
+  "kind": "ddl_contract",
+  "valid_input": "create table demo.orders (remark varchar(100) null comment 'not null default null');",
+  "invalid_input": "create table demo.orders (remark varchar(100) comment 'not closed);",
+  "expected_failure": "not closed",
+  "golden": {"values": {"schema_scope": "complete", "fields.0.nullable": true, "fields.0.comment": "not null default null", "fields.0.unparsed_fragment": null}}
+}

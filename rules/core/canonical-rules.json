@@ -1,0 +1,32 @@
+{
+  "schema_version": "2.0.0",
+  "authority": {
+    "zentao_priority": "rules/profiles/zentao.md",
+    "contract_values": "rules/core/canonical-rules.json",
+    "implementation_values": "scripts/qa_contracts.py"
+  },
+  "zentao_evidence_priority": [
+    "用户本轮明确确认",
+    "第三部分产品实现方案",
+    "明确验收标准",
+    "正式变更记录",
+    "正式接口/字段/数据口径",
+    "第二部分补充",
+    "第一部分背景",
+    "截图",
+    "当前代码"
+  ],
+  "evidence_status": ["current", "stale", "reconfirm_required"],
+  "confirmation_severity": ["blocking", "nonblocking", "suggested"],
+  "confirmation_status": ["pending", "skipped", "resolved"],
+  "risk_disposition": ["active", "covered", "merged", "deferred", "accepted", "blocked", "not_applicable", "resolved"],
+  "api_health": {
+    "assertion_scope": "parameter_health",
+    "checks": ["content.code = 0", "content.msg = OK"]
+  },
+  "sql_identifier_type": ["table", "column", "function", "enum_value", "parameter", "join_key", "filter_value"],
+  "sql_identifier_source_type": ["knowledge_table", "knowledge_table_field", "complete_ddl", "fact", "change", "formal_document", "code_context", "builtin_sql", "user_confirmation"],
+  "execution_status": ["not_run", "passed", "failed", "blocked", "skipped"],
+  "execution_run_type": ["initial", "rerun"],
+  "manifest_validation_status": ["passed", "failed", "pending"]
+}

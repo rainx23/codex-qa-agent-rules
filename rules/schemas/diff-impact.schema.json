@@ -154,13 +154,17 @@
               "additionalProperties": false,
               "required": [
                 "source_type",
+                "storage_type",
                 "source_path",
+                "snapshot_path",
+                "source_record_id",
                 "line_start",
                 "line_end",
                 "commit_sha",
                 "content_hash",
                 "excerpt",
                 "captured_at",
+                "captured_timezone",
                 "evidence_status"
               ],
               "properties": {
@@ -185,7 +189,25 @@
                     "chat_snapshot"
                   ]
                 },
+                "storage_type": {
+                  "enum": [
+                    "file",
+                    "snapshot"
+                  ]
+                },
                 "source_path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "snapshot_path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "source_record_id": {
                   "type": [
                     "string",
                     "null"
@@ -240,6 +262,15 @@
                     "stale",
                     "reconfirm_required"
                   ]
+                },
+                "stale_reason": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "working_tree_evidence": {
+                  "type": "boolean"
                 }
               }
             },
@@ -351,13 +382,17 @@
               "additionalProperties": false,
               "required": [
                 "source_type",
+                "storage_type",
                 "source_path",
+                "snapshot_path",
+                "source_record_id",
                 "line_start",
                 "line_end",
                 "commit_sha",
                 "content_hash",
                 "excerpt",
                 "captured_at",
+                "captured_timezone",
                 "evidence_status"
               ],
               "properties": {
@@ -382,7 +417,25 @@
                     "chat_snapshot"
                   ]
                 },
+                "storage_type": {
+                  "enum": [
+                    "file",
+                    "snapshot"
+                  ]
+                },
                 "source_path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "snapshot_path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "source_record_id": {
                   "type": [
                     "string",
                     "null"
@@ -437,6 +490,15 @@
                     "stale",
                     "reconfirm_required"
                   ]
+                },
+                "stale_reason": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "working_tree_evidence": {
+                  "type": "boolean"
                 }
               }
             },
@@ -588,13 +650,17 @@
               "additionalProperties": false,
               "required": [
                 "source_type",
+                "storage_type",
                 "source_path",
+                "snapshot_path",
+                "source_record_id",
                 "line_start",
                 "line_end",
                 "commit_sha",
                 "content_hash",
                 "excerpt",
                 "captured_at",
+                "captured_timezone",
                 "evidence_status"
               ],
               "properties": {
@@ -619,7 +685,25 @@
                     "chat_snapshot"
                   ]
                 },
+                "storage_type": {
+                  "enum": [
+                    "file",
+                    "snapshot"
+                  ]
+                },
                 "source_path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "snapshot_path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "source_record_id": {
                   "type": [
                     "string",
                     "null"
@@ -674,6 +758,15 @@
                     "stale",
                     "reconfirm_required"
                   ]
+                },
+                "stale_reason": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "working_tree_evidence": {
+                  "type": "boolean"
                 }
               }
             },
@@ -690,12 +783,17 @@
         "required": [
           "risk_id",
           "statement",
+          "risk_title",
+          "core_assertion",
+          "risk_level",
           "change_ids",
           "requirement_fact_ids",
+          "fact_ids",
           "evidence_state",
           "business_impact",
           "test_priority",
           "regression_scope",
+          "disposition_status",
           "handling",
           "evidence_references"
         ],
@@ -725,6 +823,39 @@
             },
             "minItems": 0,
             "uniqueItems": true
+          },
+          "fact_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "risk_title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "core_assertion": {
+            "type": "string",
+            "minLength": 1
+          },
+          "risk_level": {
+            "type": "string",
+            "minLength": 1
+          },
+          "disposition_status": {
+            "enum": [
+              "active",
+              "covered",
+              "merged",
+              "deferred",
+              "accepted",
+              "blocked",
+              "not_applicable",
+              "resolved"
+            ]
           },
           "evidence_state": {
             "enum": [
@@ -766,13 +897,17 @@
               "additionalProperties": false,
               "required": [
                 "source_type",
+                "storage_type",
                 "source_path",
+                "snapshot_path",
+                "source_record_id",
                 "line_start",
                 "line_end",
                 "commit_sha",
                 "content_hash",
                 "excerpt",
                 "captured_at",
+                "captured_timezone",
                 "evidence_status"
               ],
               "properties": {
@@ -797,7 +932,25 @@
                     "chat_snapshot"
                   ]
                 },
+                "storage_type": {
+                  "enum": [
+                    "file",
+                    "snapshot"
+                  ]
+                },
                 "source_path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "snapshot_path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "source_record_id": {
                   "type": [
                     "string",
                     "null"
@@ -852,6 +1005,15 @@
                     "stale",
                     "reconfirm_required"
                   ]
+                },
+                "stale_reason": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "working_tree_evidence": {
+                  "type": "boolean"
                 }
               }
             },

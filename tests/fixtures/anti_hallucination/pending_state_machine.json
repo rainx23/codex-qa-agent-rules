@@ -1,0 +1,15 @@
+{
+  "kind": "confirmation_summary",
+  "base": "tests/fixtures/models/requirement-analysis.json",
+  "valid": {"source": "Requirement Model confirmation_points"},
+  "invalid": {"source": "Markdown keyword count"},
+  "expected_failure": "不得使用 Markdown 代替模型统计",
+  "golden": {
+    "pending_count": 4,
+    "blocking_pending_count": 2,
+    "nonblocking_pending_count": 1,
+    "suggested_pending_count": 1,
+    "skipped_core_count": 1,
+    "unresolved_core_fact_count": 1
+  }
+}

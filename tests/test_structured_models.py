@@ -11,7 +11,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from qa_contracts import (
     load_json, validate_diff_model, validate_requirement_model, validate_risk_matrix,
-    validate_model_links, validate_testcase_model,
+    validate_model_links, validate_testcase_model, summarize_confirmations,
 )
 from validate_models import validate_files
 
@@ -23,11 +23,96 @@ class StructuredModelTests(unittest.TestCase):
     def load(self, name: str) -> dict:
         return load_json(MODELS / name)
 
+    def pending_requirement(self) -> dict:
+        data = self.load("requirement-analysis.json")
+        missing = copy.deepcopy(data["facts"][0])
+        missing.update(
+            fact_id="FACT-003",
+            category="missing",
+            statement="收益率分母尚未确认",
+            handling="等待产品确认",
+        )
+        data["facts"].append(missing)
+        data["confirmation_points"] = [{
+            "confirmation_id": "CONF-001",
+            "severity": "blocking",
+            "statement": "请确认收益率分母",
+            "fact_ids": ["FACT-003"],
+            "status": "pending",
+        }]
+        return data
+
+    def resolution_evidence(self) -> list[dict]:
+        return copy.deepcopy(self.load("requirement-analysis.json")["facts"][0]["evidence_references"])
+
     def test_valid_models(self):
         self.assertEqual([], validate_requirement_model(self.load("requirement-analysis.json")))
         self.assertEqual([], validate_diff_model(self.load("diff-impact.json")))
         self.assertEqual([], validate_risk_matrix(self.load("risk-coverage-matrix.json")))
         self.assertEqual([], validate_testcase_model(self.load("testcase-model.json")))
+
+    def test_core_missing_with_blocking_pending_is_structurally_valid(self):
+        data = self.pending_requirement()
+        self.assertEqual([], validate_requirement_model(data))
+
+    def test_core_missing_without_blocking_confirmation_fails(self):
+        data = self.pending_requirement()
+        data["confirmation_points"] = []
+        self.assertTrue(any("核心缺失事实" in error and "blocking" in error for error in validate_requirement_model(data)))
+
+    def test_resolved_confirmation_requires_updated_fact_and_complete_evidence(self):
+        data = self.pending_requirement()
+        data["facts"][-1].update(category="confirmed", handling=None)
+        data["confirmation_points"][0].update(
+            status="resolved",
+            resolution="产品确认分母为期初资产",
+            resolution_evidence_references=self.resolution_evidence(),
+            resolved_at="2026-07-17 12:00:00",
+        )
+        self.assertEqual([], validate_requirement_model(data))
+        data["facts"][-1].update(category="missing", handling="等待产品确认")
+        self.assertTrue(any("仍为 missing/conflicting" in error for error in validate_requirement_model(data)))
+
+    def test_skipped_confirmation_requires_decision_and_keeps_core_pending(self):
+        data = self.pending_requirement()
+        point = data["confirmation_points"][0]
+        point["status"] = "skipped"
+        self.assertTrue(any("skip_reason" in error for error in validate_requirement_model(data)))
+        point["skip_reason"] = "用户决定本轮不确认"
+        self.assertTrue(any("decision_evidence" in error for error in validate_requirement_model(data)))
+        point["decision_evidence"] = self.resolution_evidence()
+        self.assertEqual([], validate_requirement_model(data))
+        summary = summarize_confirmations(data)
+        self.assertEqual(1, summary["skipped_core_count"])
+        self.assertEqual(1, summary["blocking_pending_count"])
+
+    def test_confirmation_ids_and_fact_references_are_real_and_unique(self):
+        data = self.pending_requirement()
+        data["confirmation_points"][0]["fact_ids"] = ["FACT-UNKNOWN"]
+        self.assertTrue(any("引用不存在 Fact" in error for error in validate_requirement_model(data)))
+        data = self.pending_requirement()
+        duplicate = copy.deepcopy(data["confirmation_points"][0])
+        duplicate["fact_ids"] = ["FACT-001"]
+        data["confirmation_points"].append(duplicate)
+        self.assertTrue(any("confirmation_id 重复" in error for error in validate_requirement_model(data)))
+
+    def test_confirmation_summary_uses_model_states(self):
+        data = self.pending_requirement()
+        evidence = self.resolution_evidence()
+        data["confirmation_points"].extend([
+            {"confirmation_id": "CONF-002", "severity": "nonblocking", "statement": "确认次要边界", "fact_ids": ["FACT-001"], "status": "pending"},
+            {"confirmation_id": "CONF-003", "severity": "suggested", "statement": "确认展示文案", "fact_ids": ["FACT-002"], "status": "pending"},
+            {"confirmation_id": "CONF-004", "severity": "blocking", "statement": "已确认主规则", "fact_ids": ["FACT-001"], "status": "resolved", "resolution": "沿用需求原文", "resolution_evidence_references": evidence, "resolved_at": "2026-07-17 12:00:00"},
+            {"confirmation_id": "CONF-005", "severity": "blocking", "statement": "本轮跳过核心口径", "fact_ids": ["FACT-003"], "status": "skipped", "skip_reason": "等待下一版本", "decision_evidence": copy.deepcopy(evidence)},
+        ])
+        self.assertEqual({
+            "pending_count": 4,
+            "blocking_pending_count": 2,
+            "nonblocking_pending_count": 1,
+            "suggested_pending_count": 1,
+            "skipped_core_count": 1,
+            "unresolved_core_fact_count": 1,
+        }, summarize_confirmations(data))
 
     def test_changed_evidence_hash_requires_stale_or_reconfirmation(self):
         requirement = self.load("requirement-analysis.json")
@@ -41,8 +126,10 @@ class StructuredModelTests(unittest.TestCase):
                 MODELS / "risk-coverage-matrix.json",
                 MODELS / "testcase-model.json",
             )
-            self.assertTrue(any("evidence_status" in error and "哈希已变化" in error for error in errors))
+            self.assertTrue(any("current Evidence content_hash" in error for error in errors))
             requirement["facts"][0]["evidence_references"][0]["evidence_status"] = "reconfirm_required"
+            requirement["facts"][0]["evidence_references"][0]["stale_reason"] = "来源内容已变化，等待重新确认"
+            requirement["facts"][0]["category"] = "inferred"
             temporary.write_text(json.dumps(requirement, ensure_ascii=False), encoding="utf-8")
             errors = validate_files(
                 temporary,
@@ -50,7 +137,7 @@ class StructuredModelTests(unittest.TestCase):
                 MODELS / "risk-coverage-matrix.json",
                 MODELS / "testcase-model.json",
             )
-            self.assertFalse(any("哈希已变化" in error for error in errors))
+            self.assertFalse(any("current Evidence content_hash" in error for error in errors))
         finally:
             temporary.unlink(missing_ok=True)
 

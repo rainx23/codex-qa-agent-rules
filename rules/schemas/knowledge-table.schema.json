@@ -24,7 +24,11 @@
     "status",
     "source_type",
     "source_requirement_ids",
-    "last_verified_at"
+    "last_verified_at",
+    "parse_warnings",
+    "raw_tail",
+    "parsed_tail_tokens",
+    "unparsed_tail"
   ],
   "properties": {
     "table_id": {
@@ -100,7 +104,15 @@
           "comment",
           "ordinal",
           "evidence_fields",
-          "unknown_fields"
+          "unknown_fields",
+          "raw_fragment",
+          "parsed_tokens",
+          "unparsed_fragment",
+          "generated",
+          "generated_expression",
+          "generated_type",
+          "auto_increment",
+          "inline_constraints"
         ],
         "properties": {
           "name": {
@@ -176,6 +188,39 @@
               "string",
               "null"
             ]
+          },
+          "generated": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "generated_expression": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "generated_type": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "auto_increment": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "inline_constraints": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
           }
         }
       }
@@ -267,6 +312,24 @@
       "uniqueItems": true
     },
     "applicability_scope": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "raw_tail": {
+      "type": "string"
+    },
+    "parsed_tail_tokens": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "unparsed_tail": {
       "type": [
         "string",
         "null"

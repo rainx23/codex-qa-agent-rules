@@ -1,0 +1,7 @@
+{
+  "kind": "ddl_contract",
+  "valid_input": "create table demo.orders (amount decimal(18,2), tax decimal(18,2), total decimal(18,2) generated always as (round(amount + tax, 2)));",
+  "invalid_input": "create table demo.orders (amount decimal(18,2), total decimal(18,2) generated always as (amount + tax);",
+  "expected_failure": "not closed",
+  "golden": {"values": {"schema_scope": "complete", "fields.2.generated": true, "fields.2.generated_expression": "round(amount + tax, 2)", "fields.2.generated_type": "always", "fields.2.unparsed_fragment": null}}
+}

@@ -20,7 +20,15 @@ Manifest 至少记录：
 - pending_count 及 blocking/nonblocking/suggested 三类分项。
 - validation_status、relation、supersedes、failure_reason 和 pending_reason。
 
-来源组合哈希必须复算，正式 passed 产物禁止全零哈希。所有产物路径必须是仓库内相对路径，禁止绝对路径和 `..` 越界。计数不得为负，三类待确认数之和必须等于 pending_count，P0 用例数不得超过用例总数。relation 只允许新增、补充、替代、废弃；替代和废弃必须填写存在且不形成循环的 supersedes。passed 状态要求报告、四类结构化模型、Markdown 和 Workbook 全部存在并交叉复验；failed 状态必须填写 failure_reason 且不得伪造 Workbook；pending 状态必须填写 pending_reason，允许最终产物路径为空。
+来源组合哈希必须复算，正式 passed 产物禁止全零哈希。所有产物路径必须是仓库内相对路径，禁止绝对路径和 `..` 越界。计数不得为负，Manifest 的待确认数量以 Requirement Model 的 Confirmation Summary 为唯一主来源，并与报告交叉验证。relation 只允许新增、补充、替代、废弃；替代和废弃必须填写存在且不形成循环的 supersedes。
+
+### Manifest 状态职责
+
+- `pending` 表示业务确认尚未完成，不表示模型可以无效。必须填写 `pending_reason`，正式 `report_path`、`risk_matrix_path`、`testcase_model_path`、`xmind_md_path`、`xmind_path` 必须为 null；Requirement 分析必须通过 `draft_report_path`、`draft_risk_matrix_path`、`draft_testcase_model_path` 和至少一个 Requirement `analysis_model_paths` 完整复验草稿。`draft_xmind_md_path` 可为 null，但 `pending_reason` 必须说明未生成原因。
+- `passed` 表示正式产物完成。必须使用正式路径并完整复验报告、模型、Markdown 和 Workbook；`blocking_pending_count`、`skipped_core_count`、`unresolved_core_fact_count` 必须均为 0，且不得存在核心 missing/conflicting Fact。
+- `failed` 表示模型结构、Schema、路径、哈希、文件或校验过程无效。必须填写 `failure_reason`，不得声明正式成功产物。正常等待业务确认必须使用 pending，不得使用 failed。
+
+所有 `draft_*` 路径必须真实存在、位于仓库内 `testcases/drafts/` 或 `tests/fixtures/drafts/`，禁止绝对路径、`..` 和越界。Pending 不要求正式 Workbook、正式索引或执行结果，但不得提前返回并跳过草稿模型、报告、数量、版本、哈希格式和路径安全校验。
 
 ## 流程
 

@@ -1,0 +1,6 @@
+{
+  "schema_version": "1.0.0",
+  "model_type": "requirement_analysis",
+  "requirements": ["收益率分母使用持仓成本"],
+  "legacy_custom": "legacy"
+}

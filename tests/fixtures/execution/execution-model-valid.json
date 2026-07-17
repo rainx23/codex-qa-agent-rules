@@ -1,0 +1,17 @@
+{
+  "schema_version": "2.0.0",
+  "rule_version": "2.6.0",
+  "execution_model_id": "EXEC-MODEL-001",
+  "testcase_model_id": "TC-MODEL-MULTI-ENTRY",
+  "testcase_model_path": "tests/fixtures/models/testcase-model-multi-entry.json",
+  "testcase_model_hash": "sha256:0a96fddc73cb55d003df027b4ce825eefc14b3be1860cd54485b132e75386312",
+  "validation_status": "passed",
+  "branch_count": 3,
+  "execution_instance_count": 4,
+  "execution_instances": [
+    {"execution_instance_id":"EXEC-001","testcase_id":"TC001","branch_id":"TC001-B01","run_type":"initial","run_sequence":1,"status":"passed","executed_at":"2026-07-17 12:00:00","executor":"qa-user","actual_result":"Using customer-001 returned only the matching customer record and matched the branch expectation.","evidence_references":[{"source_path":"tests/fixtures/sources/execution-TC001-B01.log","content_hash":"sha256:f9cbb7fa4f68ad2726d4e334d7170e7101f6cf19fd4a9ef695a274333c73339a","evidence_status":"current","source_record_id":"execution:EXEC-001:TC001:TC001-B01"}],"defect_ids":[],"confirmation_ids":[],"rerun_of_execution_instance_id":null,"notes":null},
+    {"execution_instance_id":"EXEC-002","testcase_id":"TC001","branch_id":"TC001-B02","run_type":"initial","run_sequence":1,"status":"failed","executed_at":"2026-07-17 12:05:00","executor":"qa-user","actual_result":"Using page-2 lost the active filter state, which differed from the expected preserved filter behavior.","evidence_references":[{"source_path":"tests/fixtures/sources/execution-TC001-B02-failed.log","content_hash":"sha256:af15f3761391817c0fb51555cee6f820133441e8f6daa4dc292c007d0d9fa853","evidence_status":"current","source_record_id":"execution:EXEC-002:TC001:TC001-B02"}],"defect_ids":["BUG-001"],"confirmation_ids":[],"rerun_of_execution_instance_id":null,"failure_classification":"confirmed_defect","notes":null},
+    {"execution_instance_id":"EXEC-003","testcase_id":"TC001","branch_id":"TC001-B02","run_type":"rerun","run_sequence":2,"status":"passed","executed_at":"2026-07-17 13:00:00","executor":"qa-user","actual_result":"Using page-2 after the fix preserved filter and sort state and matched the expected branch behavior.","evidence_references":[{"source_path":"tests/fixtures/sources/execution-TC001-B02-rerun.log","content_hash":"sha256:87fecd9bcc4ad86fd7ad1b4016b17f4ea9750a3ab0eaaaadb220381b6e4c5542","evidence_status":"current","source_record_id":"execution:EXEC-003:TC001:TC001-B02"}],"defect_ids":[],"confirmation_ids":[],"rerun_of_execution_instance_id":"EXEC-002","notes":"Rerun after BUG-001 fix"},
+    {"execution_instance_id":"EXEC-004","testcase_id":"TC001","branch_id":"TC001-B03","run_type":"initial","run_sequence":1,"status":"passed","executed_at":"2026-07-17 12:10:00","executor":"qa-user","actual_result":"Using return-navigation restored the active filter state and matched the expected branch behavior.","evidence_references":[{"source_path":"tests/fixtures/sources/execution-TC001-B03.log","content_hash":"sha256:8b43d50d48879ac7b5dfac10970befa83ac19ca6f675c80a0ff61df4993d511b","evidence_status":"current","source_record_id":"execution:EXEC-004:TC001:TC001-B03"}],"defect_ids":[],"confirmation_ids":[],"rerun_of_execution_instance_id":null,"notes":null}
+  ]
+}

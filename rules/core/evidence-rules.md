@@ -6,14 +6,36 @@
 
 ## Evidence Reference
 
-`source_type` is a closed enum: `user_confirmation`, `requirement`, `zentao_section_3`, `acceptance_criteria`, `formal_change_record`, `openspec`, `markdown`, `screenshot`, `diff`, `code_context`, `api_document`, `sql_definition`, `complete_ddl`, `knowledge_table`, `historical_defect`, `pasted_text`, `chat_snapshot`. Current local evidence must resolve to an existing repository-relative file, preserve its SHA-256, line range and excerpt, and use `yyyy-MM-dd HH:mm:ss` with an explicit capture timezone. Missing or changed sources cannot remain `current`.
+`source_type` is a closed enum: `user_confirmation`, `requirement`, `zentao_section_3`, `acceptance_criteria`, `formal_change_record`, `openspec`, `markdown`, `screenshot`, `diff`, `code_context`, `api_document`, `sql_definition`, `complete_ddl`, `knowledge_table`, `historical_defect`, `pasted_text`, `chat_snapshot`. 每条 Evidence 必须显式声明 `storage_type=file|snapshot`，不得再从 `source_type` 猜测存储方式。
 
-事实、变更、影响链、风险、疑似缺陷和验收标准必须使用可追溯的 `evidence_references`，每条至少声明 `source_type`、`source_path`、`line_start`、`line_end`、`commit_sha`、`content_hash`、`excerpt`、`captured_at` 和 `evidence_status`。
+事实、变更、影响链、风险、疑似缺陷和验收标准必须使用可追溯的 `evidence_references`。每条必须完整包含 `source_type`、`storage_type`、`source_path`、`snapshot_path`、`source_record_id`、`line_start`、`line_end`、`commit_sha`、`content_hash`、`excerpt`、`captured_at`、`captured_timezone` 和 `evidence_status`；允许为 null 的字段仍必须出现，并由 storage type 决定其合法性。
 
-- 文件证据尽量定位到真实路径和行号；Diff/代码证据必须包含 Commit、文件和变更位置。
-- 截图必须包含附件或文件标识；粘贴内容必须保存快照或 SHA-256 内容哈希。
+### File Evidence
+
+`file` 适用于仓库内真实文件。必须填写仓库内相对 `source_path`，`snapshot_path=null`，并复验文件存在性、SHA-256、文本行号和 excerpt。requirement、openspec、markdown、diff、code_context、api_document、sql_definition、complete_ddl 和 knowledge_table 只允许 file。diff/code_context 还必须提供合法 commit SHA；仅当明确 `working_tree_evidence=true` 时允许 commit_sha 为 null。
+
+### Snapshot Evidence
+
+`snapshot` 适用于 user_confirmation、pasted_text、chat_snapshot，以及已保存快照的 zentao_section_3、acceptance_criteria、formal_change_record、screenshot、historical_defect。必须填写仓库内相对 `snapshot_path` 和稳定 `source_record_id`，`source_path=null`；内容哈希对应 snapshot 文件。user_confirmation、pasted_text、chat_snapshot 只允许 snapshot。禅道第三部分、验收标准、正式变更记录、截图和历史缺陷可以使用真实 file 或 snapshot，但不得只有记录 ID 或描述。
+
+截图必须指向真实文件或快照并具有内容哈希和稳定附件 ID；二进制截图允许空行号，但 excerpt 只能描述直接可观察内容，不得包含推断。用户确认必须保存聊天快照，粘贴文本必须保存原始文本快照，chat_snapshot 必须保存相关消息上下文而非助手总结。
+
+- UTF-8 文本证据必须定位到真实行号；Diff/代码证据必须包含 Commit、文件和变更位置。
+- current 哈希必须与真实文件一致；stale 或 reconfirm_required 不得支撑 confirmed Fact，并必须说明重新确认原因。
+- confirmed Fact 至少需要一条通过全部真实性校验且状态为 current 的 Evidence；其他 Evidence 即使不承担 confirmed 支撑，也必须结构合法。
+- Fact 顶层 source_type 必须与至少一条 Evidence source_type 一致。
+- Change Evidence 必须为 diff/code_context，路径等于 change.file 且位于 changed_files。
 - “需求原文”“代码上下文”“截图”等泛化文字不能单独构成完整证据定位。
 - 当可访问的来源文件内容与已记录哈希不一致时，`current` 校验失败；旧证据必须标记为 `stale` 或 `reconfirm_required`，或重新采集。
+
+## DDL 解析证据完整性
+
+- 完整 DDL 与局部字段必须复用同一个字段片段解析器；字段名和完整类型识别后，从左到右循环消费约束 Token。
+- 每个字段必须保留 `raw_fragment`、非空 `parsed_tokens` 和 `unparsed_fragment`。未知语法不得删除；必须原样进入 `unparsed_fragment` 并使表降级为 `partial`。
+- `nullable` 只由显式 `NULL` 或 `NOT NULL` 决定。`DEFAULT NULL` 只产生 `default_state=known_null`，Comment 或 Default 字符串内的关键字不参与约束判断。
+- Generated Column 必须保存 `generated`、`generated_expression` 与 `generated_type`；表达式使用括号深度和引号状态扫描，不得用非贪婪正则截断。
+- 表定义尾部必须保留 `raw_tail`、`parsed_tail_tokens` 与 `unparsed_tail`。Engine、Key、Partition、Distributed、Order、Properties 和 Comment 从左到右消费，任何未知尾部均使表降级为 `partial`。
+- `schema_scope=complete` 只允许所有字段与表尾完全消费、所有表级约束均已归属且 `parse_warnings=[]` 的结果。无法闭合字段括号、没有可靠字段或敏感输入属于 `blocked`。
 
 ## 约束
 

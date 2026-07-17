@@ -24,7 +24,7 @@
 
 列名和顺序固定为：`序号, 用例名称, method, url, body类型, body, headers, 校验, 优先级, 接口code`。method 小写，URL 完整，body/headers/校验为紧凑合法 JSON，body 变量使用 `$name`。新建用例名为 `AUTO-模块-页面路径-接口功能-接口名称`；维护保留原名。
 
-公司平台自动处理鉴权；只保留用户、已有用例或代码明确提供的 Header，不新增 Authorization、Cookie、token 或身份 Header。健康检查固定为 `content.code` 等于整数 `0`、`content.msg` 等于字符串 `OK`，除非用户提供其他成功协议。
+公司平台自动处理鉴权；只保留用户、已有用例或代码明确提供的 Header，不新增 Authorization、Cookie、token 或身份 Header。健康检查固定为 `content.code` 等于整数 `0`、`content.msg` 等于字符串 `OK`。本仓库当前固定协议不支持自定义；接口不符合该协议时必须标记为不适用或 pending。
 
 ## 输出与门禁
 

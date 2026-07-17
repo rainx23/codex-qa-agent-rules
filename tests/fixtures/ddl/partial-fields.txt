@@ -1,0 +1,3 @@
+id bigint not null default 0 comment 'primary key',
+tags array<varchar(20)>,
+total_amount decimal(18, 2) generated as (round(amount + tax, 2))

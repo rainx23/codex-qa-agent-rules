@@ -9,24 +9,230 @@
   "head_commit": "def456a",
   "working_tree_state": "clean",
   "changed_files": [
-    {"path": "src/customer-query.java", "status": "M", "change_category": "business", "business_relevance": true, "generated_file": false, "formatting_only": false}
+    {
+      "path": "tests/fixtures/sources/customer-query.java",
+      "status": "M",
+      "change_category": "business",
+      "business_relevance": true,
+      "generated_file": false,
+      "formatting_only": false
+    }
   ],
   "change_items": [
-    {"change_id": "CHG-001", "file": "src/customer-query.java", "symbol_or_location": "queryCustomers", "change_type": "logic", "summary": "客户编号条件传递到数据访问层", "evidence_reference": "diff:hunk-1", "evidence_references": [{"source_type":"diff","source_path":"src/customer-query.java","line_start":10,"line_end":20,"commit_sha":"def456a","content_hash":"sha256:043d06c78e9a1a79c3e1ad8eef10b264f7d4616f1b2b1a8e9bd0bd069663a99a","excerpt":"客户编号条件传递到数据访问层","captured_at":"2026-07-17 00:00:00","captured_timezone":"Asia/Shanghai","evidence_status":"current"}], "affected_contracts": ["客户查询"], "direct_callers": ["CustomerController"], "indirect_callers": [], "existing_tests": ["CustomerQueryTest"]},
-    {"change_id": "CHG-002", "file": "src/customer-query.java", "symbol_or_location": "queryCustomers", "change_type": "state", "summary": "分页请求保留筛选和排序字段", "evidence_reference": "diff:hunk-2", "evidence_references": [{"source_type":"diff","source_path":"src/customer-query.java","line_start":21,"line_end":30,"commit_sha":"def456a","content_hash":"sha256:043d06c78e9a1a79c3e1ad8eef10b264f7d4616f1b2b1a8e9bd0bd069663a99a","excerpt":"分页请求保留筛选和排序字段","captured_at":"2026-07-17 00:00:00","captured_timezone":"Asia/Shanghai","evidence_status":"current"}], "affected_contracts": ["分页查询"], "direct_callers": ["CustomerController"], "indirect_callers": [], "existing_tests": ["CustomerQueryTest"]}
+    {
+      "change_id": "CHG-001",
+      "file": "tests/fixtures/sources/customer-query.java",
+      "symbol_or_location": "queryCustomers",
+      "change_type": "logic",
+      "summary": "客户编号条件传递到数据访问层",
+      "evidence_reference": "diff:hunk-1",
+      "evidence_references": [
+        {
+          "source_type": "diff",
+          "source_path": "tests/fixtures/sources/customer-query.java",
+          "line_start": 10,
+          "line_end": 20,
+          "commit_sha": "def456a",
+          "content_hash": "sha256:16abc48ef065e1194e2e99946fbf648d329b2cc0e16c5a9cf9e83afef2880935",
+          "excerpt": "客户编号条件传递到数据访问层",
+          "captured_at": "2026-07-17 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "file",
+          "snapshot_path": null,
+          "source_record_id": "commit:def456a"
+        }
+      ],
+      "affected_contracts": [
+        "客户查询"
+      ],
+      "direct_callers": [
+        "CustomerController"
+      ],
+      "indirect_callers": [],
+      "existing_tests": [
+        "CustomerQueryTest"
+      ]
+    },
+    {
+      "change_id": "CHG-002",
+      "file": "tests/fixtures/sources/customer-query.java",
+      "symbol_or_location": "queryCustomers",
+      "change_type": "state",
+      "summary": "分页请求保留筛选和排序字段",
+      "evidence_reference": "diff:hunk-2",
+      "evidence_references": [
+        {
+          "source_type": "diff",
+          "source_path": "tests/fixtures/sources/customer-query.java",
+          "line_start": 21,
+          "line_end": 30,
+          "commit_sha": "def456a",
+          "content_hash": "sha256:16abc48ef065e1194e2e99946fbf648d329b2cc0e16c5a9cf9e83afef2880935",
+          "excerpt": "分页请求保留筛选和排序字段",
+          "captured_at": "2026-07-17 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "file",
+          "snapshot_path": null,
+          "source_record_id": "commit:def456a"
+        }
+      ],
+      "affected_contracts": [
+        "分页查询"
+      ],
+      "direct_callers": [
+        "CustomerController"
+      ],
+      "indirect_callers": [],
+      "existing_tests": [
+        "CustomerQueryTest"
+      ]
+    }
   ],
   "impact_chains": [
-    {"chain_id":"CHAIN-001","change_ids":["CHG-001"],"source_component":"CustomerController","affected_component":"data access","propagation_path":["CustomerController","queryCustomers","data access"],"affected_contracts":["客户查询"],"impact_type":"logic","evidence_references":[{"source_type":"diff","source_path":"src/customer-query.java","line_start":10,"line_end":20,"commit_sha":"def456a","content_hash":"sha256:043d06c78e9a1a79c3e1ad8eef10b264f7d4616f1b2b1a8e9bd0bd069663a99a","excerpt":"客户编号条件传递到数据访问层","captured_at":"2026-07-17 00:00:00","captured_timezone":"Asia/Shanghai","evidence_status":"current"}],"confidence":"high"}
+    {
+      "chain_id": "CHAIN-001",
+      "change_ids": [
+        "CHG-001"
+      ],
+      "source_component": "CustomerController",
+      "affected_component": "data access",
+      "propagation_path": [
+        "CustomerController",
+        "queryCustomers",
+        "data access"
+      ],
+      "affected_contracts": [
+        "客户查询"
+      ],
+      "impact_type": "logic",
+      "evidence_references": [
+        {
+          "source_type": "diff",
+          "source_path": "tests/fixtures/sources/customer-query.java",
+          "line_start": 10,
+          "line_end": 20,
+          "commit_sha": "def456a",
+          "content_hash": "sha256:16abc48ef065e1194e2e99946fbf648d329b2cc0e16c5a9cf9e83afef2880935",
+          "excerpt": "客户编号条件传递到数据访问层",
+          "captured_at": "2026-07-17 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "file",
+          "snapshot_path": null,
+          "source_record_id": "commit:def456a"
+        }
+      ],
+      "confidence": "high"
+    }
   ],
   "coverage_results": [
-    {"requirement_id": "REQ-POINT-001", "change_ids": ["CHG-001"], "coverage_status": "已覆盖", "evidence_state": "已确认", "risk_ids": ["RISK-001"]},
-    {"requirement_id": "REQ-POINT-002", "change_ids": ["CHG-002"], "coverage_status": "已覆盖", "evidence_state": "已确认", "risk_ids": ["RISK-002"]}
+    {
+      "requirement_id": "REQ-POINT-001",
+      "change_ids": [
+        "CHG-001"
+      ],
+      "coverage_status": "已覆盖",
+      "evidence_state": "已确认",
+      "risk_ids": [
+        "RISK-001"
+      ]
+    },
+    {
+      "requirement_id": "REQ-POINT-002",
+      "change_ids": [
+        "CHG-002"
+      ],
+      "coverage_status": "已覆盖",
+      "evidence_state": "已确认",
+      "risk_ids": [
+        "RISK-002"
+      ]
+    }
   ],
   "suspected_defects": [],
   "risks": [
-    {"risk_id":"RISK-001","statement":"客户编号条件可能丢失","change_ids":["CHG-001"],"requirement_fact_ids":["FACT-001"],"evidence_state":"已确认","business_impact":"critical","test_priority":"P0","regression_scope":"核心回归","handling":"由 TC001 覆盖","evidence_references":[{"source_type":"diff","source_path":"src/customer-query.java","line_start":10,"line_end":20,"commit_sha":"def456a","content_hash":"sha256:043d06c78e9a1a79c3e1ad8eef10b264f7d4616f1b2b1a8e9bd0bd069663a99a","excerpt":"客户编号条件传递到数据访问层","captured_at":"2026-07-17 00:00:00","captured_timezone":"Asia/Shanghai","evidence_status":"current"}]},
-    {"risk_id":"RISK-002","statement":"翻页可能丢失查询状态","change_ids":["CHG-002"],"requirement_fact_ids":["FACT-002"],"evidence_state":"已确认","business_impact":"high","test_priority":"P1","regression_scope":"关联回归","handling":"由 TC002 覆盖","evidence_references":[{"source_type":"diff","source_path":"src/customer-query.java","line_start":21,"line_end":30,"commit_sha":"def456a","content_hash":"sha256:043d06c78e9a1a79c3e1ad8eef10b264f7d4616f1b2b1a8e9bd0bd069663a99a","excerpt":"分页请求保留筛选和排序字段","captured_at":"2026-07-17 00:00:00","captured_timezone":"Asia/Shanghai","evidence_status":"current"}]}
+    {
+      "risk_id": "RISK-001",
+      "risk_title": "客户编号过滤条件丢失",
+      "risk_level": "critical",
+      "core_assertion": "返回集合只包含目标客户",
+      "fact_ids": ["FACT-001"],
+      "disposition_status": "covered",
+      "statement": "客户编号条件可能丢失",
+      "change_ids": [
+        "CHG-001"
+      ],
+      "requirement_fact_ids": [
+        "FACT-001"
+      ],
+      "evidence_state": "已确认",
+      "business_impact": "critical",
+      "test_priority": "P0",
+      "regression_scope": "核心回归",
+      "handling": "由 TC001 覆盖",
+      "evidence_references": [
+        {
+          "source_type": "diff",
+          "source_path": "tests/fixtures/sources/customer-query.java",
+          "line_start": 10,
+          "line_end": 20,
+          "commit_sha": "def456a",
+          "content_hash": "sha256:16abc48ef065e1194e2e99946fbf648d329b2cc0e16c5a9cf9e83afef2880935",
+          "excerpt": "客户编号条件传递到数据访问层",
+          "captured_at": "2026-07-17 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "file",
+          "snapshot_path": null,
+          "source_record_id": "commit:def456a"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-002",
+      "risk_title": "分页查询状态丢失",
+      "risk_level": "high",
+      "core_assertion": "请求保留筛选和排序字段",
+      "fact_ids": ["FACT-002"],
+      "disposition_status": "covered",
+      "statement": "翻页可能丢失查询状态",
+      "change_ids": [
+        "CHG-002"
+      ],
+      "requirement_fact_ids": [
+        "FACT-002"
+      ],
+      "evidence_state": "已确认",
+      "business_impact": "high",
+      "test_priority": "P1",
+      "regression_scope": "关联回归",
+      "handling": "由 TC002 覆盖",
+      "evidence_references": [
+        {
+          "source_type": "diff",
+          "source_path": "tests/fixtures/sources/customer-query.java",
+          "line_start": 21,
+          "line_end": 30,
+          "commit_sha": "def456a",
+          "content_hash": "sha256:16abc48ef065e1194e2e99946fbf648d329b2cc0e16c5a9cf9e83afef2880935",
+          "excerpt": "分页请求保留筛选和排序字段",
+          "captured_at": "2026-07-17 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "file",
+          "snapshot_path": null,
+          "source_record_id": "commit:def456a"
+        }
+      ]
+    }
   ],
-  "regression_scope": ["核心回归", "关联回归"],
-  "matched_profiles": ["api"]
+  "regression_scope": [
+    "核心回归",
+    "关联回归"
+  ],
+  "matched_profiles": [
+    "api"
+  ]
 }

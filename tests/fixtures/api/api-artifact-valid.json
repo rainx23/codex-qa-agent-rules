@@ -1,0 +1,22 @@
+{
+  "artifact_type": "api_parameter_health",
+  "model_reference": {
+    "model_id": "API-AUTO-001",
+    "model_path": "tests/fixtures/models/api-automation-valid.json",
+    "model_hash": "sha256:5a8fc217862971090cade5442b9159a6c767b84831c14a15e3664ca0793539e0"
+  },
+  "script_path": "tests/fixtures/api/api-script-valid.py",
+  "language": "python",
+  "entrypoint": "validate_response",
+  "method": "post",
+  "url_or_path": "https://example.invalid/api/waybill/list",
+  "parameters": ["isAnalysis"],
+  "assertion_scope": "parameter_health",
+  "health_checks": [
+    {"path":"content.code","operator":"equals","expected":0},
+    {"path":"content.msg","operator":"equals","expected":"OK"}
+  ],
+  "business_assertions": [],
+  "required_environment_variables": ["API_BASE_URL", "API_TOKEN"],
+  "validation_status": "passed"
+}

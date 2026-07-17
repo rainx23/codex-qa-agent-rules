@@ -1,0 +1,10 @@
+{
+  "defects": [{
+    "defect_id": "BUG-001",
+    "title": "Pagination loses filter state",
+    "status": "open",
+    "testcase_ids": ["TC001"],
+    "branch_ids": ["TC001-B02"],
+    "evidence_references": [{"source_path":"tests/fixtures/sources/execution-TC001-B02-failed.log","content_hash":"sha256:af15f3761391817c0fb51555cee6f820133441e8f6daa4dc292c007d0d9fa853","evidence_status":"current","source_record_id":"execution:EXEC-002:TC001:TC001-B02"}]
+  }]
+}

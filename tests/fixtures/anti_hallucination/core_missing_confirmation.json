@@ -1,0 +1,8 @@
+{
+  "kind": "requirement_state",
+  "base": "tests/fixtures/models/requirement-analysis.json",
+  "valid": {"core_fact_status": "missing", "confirmation_status": "pending"},
+  "invalid": {"remove_blocking_confirmation": true},
+  "expected_failure": "核心缺失事实",
+  "golden": {"valid": true, "invalid": false}
+}

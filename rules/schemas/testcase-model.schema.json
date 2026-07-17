@@ -14,6 +14,10 @@
     "schema_version": {
       "const": "2.0.0"
     },
+    "model_id": {
+      "type": "string",
+      "minLength": 1
+    },
     "root_title": {
       "type": "string",
       "minLength": 1
