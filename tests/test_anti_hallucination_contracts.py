@@ -107,20 +107,41 @@ class AntiHallucinationContractTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory, tempfile.TemporaryDirectory() as outside_directory:
             root = Path(directory)
             outside = Path(outside_directory)
-            (outside / "source.md").write_text("line one\nobservable value\n", encoding="utf-8")
-            link = root / "outside-link"
-            script = f"New-Item -ItemType Junction -Path '{link}' -Target '{outside}' | Out-Null"
-            completed = subprocess.run(
-                ["powershell", "-NoProfile", "-Command", script],
-                capture_output=True, text=True, check=False,
+            (outside / "source.md").write_text(
+                "line one\nobservable value\n",
+                encoding="utf-8",
             )
-            self.assertEqual(0, completed.returncode, completed.stderr)
+            link = root / "outside-link"
+
+            if os.name == "nt":
+                script = (
+                    f"New-Item -ItemType Junction "
+                    f"-Path '{link}' -Target '{outside}' | Out-Null"
+                )
+                completed = subprocess.run(
+                    ["powershell", "-NoProfile", "-Command", script],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                self.assertEqual(0, completed.returncode, completed.stderr)
+            else:
+                link.symlink_to(outside, target_is_directory=True)
+
             try:
                 evidence = self.evidence(root)
                 evidence["source_path"] = "outside-link/source.md"
-                self.assertTrue(any("越出仓库" in error for error in validate_evidence_reference(evidence, root=root)))
+                self.assertTrue(
+                    any(
+                        "越出仓库" in error
+                        for error in validate_evidence_reference(evidence, root=root)
+                    )
+                )
             finally:
-                os.rmdir(link)
+                if os.name == "nt":
+                    os.rmdir(link)
+                else:
+                    link.unlink()
 
     def test_current_stale_and_reconfirm_hash_contract(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -268,7 +289,7 @@ class AntiHallucinationContractTests(unittest.TestCase):
         self.assertEqual([], validate_sql(sql, True, ROOT / "rules-repository.json")[0])
         with tempfile.TemporaryDirectory() as temp:
             config = Path(temp) / "rules-repository.json"
-            config.write_text(json.dumps({"sql_defaults": {"author": "Other", "timezone": "Asia/Shanghai", "dialect": "starrocks"}}), encoding="utf-8")
+            config.write_text(json.dumps({"sql_defaults": {"author": "ootOther", "timezone": "Asia/Shanghai", "dialect": "starrocks"}}), encoding="utf-8")
             self.assertTrue(validate_sql(sql, True, config)[0])
             self.assertEqual([], validate_sql(sql.replace("author: Rainx", "author: Other"), True, config)[0])
 
