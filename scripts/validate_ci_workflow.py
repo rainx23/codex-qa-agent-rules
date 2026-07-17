@@ -14,6 +14,7 @@ REQUIRED_COMMANDS = (
     "python scripts/generate_schemas.py --check",
     "python scripts/validate_schemas.py",
     "python scripts/validate_rule_version.py",
+    "python scripts/validate_repository_docs.py",
     "python scripts/validate_repository_mode.py",
     "python scripts/validate_knowledge.py qa-knowledge/examples",
     "python scripts/build_knowledge_index.py qa-knowledge/examples --check",

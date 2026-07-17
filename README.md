@@ -1,5 +1,22 @@
 # Codex QA Agent Rules
 
+## 目录导航
+
+- [Skills](skills/README.md)：按任务类型执行的 QA 工作流。
+- [Rules](rules/README.md)：核心规则、业务 Profile 与生成 Schema 的正式入口。
+- [核心规则](rules/core/README.md)：跨场景的正式规则与仓库治理约束。
+- [业务 Profiles](rules/profiles/README.md)：按业务场景补充的专项规则。
+- [Schema 契约](rules/schemas/README.md)：由可执行契约生成的 JSON Schema。
+- [Scripts](scripts/README.md)：离线生成、转换、索引和静态校验工具。
+- [Tests](tests/README.md)：规则、脚本和契约的自动化测试。
+- [Testcases](testcases/README.md)：可追踪的测试产物与 Manifest。
+- [Codex 文档](docs/codex/README.md)：使用说明和发布检查清单。
+- [QA Knowledge](qa-knowledge/README.md)：脱敏、可复用的业务知识示例。
+
+## 版本与变更历史
+
+当前版本只读取根目录 [RULE_VERSION](RULE_VERSION)。完整历史统一维护在 [CHANGELOG.md](CHANGELOG.md)；README 不单独维护版本号或复制完整版本历史。
+
 [![QA Rules Validation](https://github.com/rainx23/codex-qa-agent-rules/actions/workflows/qa-rules-validation.yml/badge.svg)](https://github.com/rainx23/codex-qa-agent-rules/actions/workflows/qa-rules-validation.yml)
 
 `codex-qa-agent-rules` 是一套面向软件测试工作的 Codex QA 规则与 Skills 框架。它把需求分析、Diff 影响分析、风险识别、测试用例设计、XMind 产物生成、自动质量校验和测试产物治理串成一条可复用工作流。
@@ -442,17 +459,20 @@ codex-qa-agent-rules/
 ├── AGENTS.md
 ├── README.md
 ├── RULE_VERSION
+├── CHANGELOG.md
 ├── rules-repository.json
 ├── .github/workflows/
-├── skills/
+├── skills/README.md
 ├── rules/
-│   ├── core/
-│   ├── profiles/
-│   └── schemas/
-├── scripts/
-├── tests/
-├── testcases/
-└── docs/codex/
+│   ├── README.md
+│   ├── core/README.md
+│   ├── profiles/README.md
+│   └── schemas/README.md
+├── scripts/README.md
+├── tests/README.md
+├── testcases/README.md
+├── docs/codex/README.md
+└── qa-knowledge/README.md
 ```
 
 ## 推荐阅读顺序
@@ -490,6 +510,8 @@ codex-qa-agent-rules/
 当前外层业务项目和模板仓库并存时，同名规则文件必须同步；历史索引内容可以按项目实际产物保留差异。
 
 ## 如何扩展框架
+
+新增一级功能目录时必须新增该目录 README；新增复杂二级模块时评估是否需要 README。修改目录职责或主要入口时，必须同步更新受影响目录 README，并按 [仓库目录与版本历史治理规则](rules/core/repository-documentation-rules.md) 判断是否更新根 README、CHANGELOG 和 RULE_VERSION。
 
 ### 新增 Profile
 

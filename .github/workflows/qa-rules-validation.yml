@@ -5,6 +5,7 @@ on:
     paths:
       - "AGENTS.md"
       - "README.md"
+      - "CHANGELOG.md"
       - "RULE_VERSION"
       - "rules-repository.json"
       - "skills/**"
@@ -23,6 +24,7 @@ on:
     paths:
       - "AGENTS.md"
       - "README.md"
+      - "CHANGELOG.md"
       - "RULE_VERSION"
       - "rules-repository.json"
       - "skills/**"
@@ -63,6 +65,7 @@ jobs:
         run: |
           python scripts/validate_schemas.py
           python scripts/validate_rule_version.py
+          python scripts/validate_repository_docs.py
       - name: Validate repository mode
         run: python scripts/validate_repository_mode.py
       - name: Validate knowledge, data validation and SQL artifacts
