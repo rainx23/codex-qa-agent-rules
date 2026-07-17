@@ -12,7 +12,7 @@
 - [Testcases](testcases/README.md)：可追踪的测试产物与 Manifest。
 - [Codex 文档](docs/codex/README.md)：使用说明和发布检查清单。
 - [QA Knowledge](qa-knowledge/README.md)：脱敏、可复用的业务知识示例。
-
+ 
 ## 版本与变更历史
 
 当前版本只读取根目录 [RULE_VERSION](RULE_VERSION)。完整历史统一维护在 [CHANGELOG.md](CHANGELOG.md)；README 不单独维护版本号或复制完整版本历史。
