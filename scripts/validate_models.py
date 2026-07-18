@@ -9,7 +9,7 @@ from pathlib import Path
 
 from qa_contracts import (
     load_json, validate_diff_model, validate_model_links, validate_requirement_model,
-    validate_risk_matrix, validate_testcase_model,
+    validate_risk_matrix, validate_testcase_model, summarize_confirmations,
 )
 from validate_evidence import evidence_precision_warnings
 
@@ -42,7 +42,12 @@ def validate_files(requirement: Path | None, diff: Path | None, risk: Path, test
     expected_mode = "combined" if requirement_data and diff_data else "requirement" if requirement_data else "diff"
     if modes != {expected_mode}:
         errors.append(f"report_mode 必须为 {expected_mode}，实际为 {sorted(str(item) for item in modes)}")
-    errors.extend(validate_model_links(requirement_data, diff_data, risk_data, testcase_data))
+    inferred_status = None
+    if requirement_data and summarize_confirmations(requirement_data)["blocking_pending_count"] > 0:
+        inferred_status = "pending"
+    errors.extend(validate_model_links(
+        requirement_data, diff_data, risk_data, testcase_data, validation_status=inferred_status
+    ))
     return list(dict.fromkeys(errors))
 
 

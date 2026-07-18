@@ -406,6 +406,18 @@
                 "observable_result": {
                   "type": "string",
                   "minLength": 1
+                },
+                "branch_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "step_index": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "expected_index": {
+                  "type": "integer",
+                  "minimum": 1
                 }
               }
             },

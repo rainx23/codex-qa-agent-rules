@@ -995,6 +995,7 @@
       "additionalProperties": false,
       "required": [
         "dimensions",
+        "combination_generation",
         "required_combinations",
         "excluded_combinations",
         "coverage_summary"
@@ -1031,6 +1032,82 @@
             }
           },
           "minItems": 2
+        },
+        "combination_generation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mode",
+            "groups"
+          ],
+          "properties": {
+            "mode": {
+              "const": "grouped_cross_product"
+            },
+            "groups": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "group_id",
+                  "fixed_values",
+                  "variable_dimensions",
+                  "expected_combination_count"
+                ],
+                "properties": {
+                  "group_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fixed_values": {
+                    "type": "object"
+                  },
+                  "variable_dimensions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "dimension_id",
+                        "values"
+                      ],
+                      "properties": {
+                        "dimension_id": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "values": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "minItems": 1,
+                          "uniqueItems": true
+                        }
+                      }
+                    },
+                    "minItems": 1
+                  },
+                  "expected_combination_count": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "constraints": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "minItems": 0,
+                    "uniqueItems": true
+                  }
+                }
+              },
+              "minItems": 1
+            }
+          }
         },
         "required_combinations": {
           "type": "array",

@@ -57,5 +57,6 @@ pending/failed Manifest 不要求登记为“已校验”正式行；passed Mani
 ## 历史产物兼容
 
 - 新规则校验失败只表示历史产物不符合当前规范，不推翻原业务周期的测试结论。
+- 当前规则版本的替代产物因真实 blocking Confirmation 保持 pending 时，旧 passed 产物仍按其历史规则版本复验并保留索引；pending 替代本身必须通过草稿、证据、Confirmation 和 Manifest 校验，但不得冒充当前 passed 正式产物。
 - 禁止覆盖旧报告、Markdown 或 Workbook；实际迁移必须生成版本化新产物，并以 `relation=替代`、`supersedes` 和索引记录建立关系。
 - 本批工程化改造不具备重新确认历史需求事实和补齐结构化追踪模型的证据，因此不改生产历史产物。`tests/fixtures/legacy` 使用真实旧版 Markdown 的固定哈希副本演示迁移：保留原副本，合并重复场景，改写模糊预期，校验 P0 业务覆盖，并在临时目录转换和复验 Workbook。该测试 Fixture 不冒充正式业务 Manifest 或索引迁移记录。

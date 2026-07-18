@@ -4,16 +4,17 @@
   "report_mode": "requirement",
   "source_type": "user_confirmation",
   "source_ids": [
+    "CHAT-CLEARANCE-PERMISSION-20260718",
     "CHAT-CLEARANCE-PERMISSION-20260718-V2"
   ],
-  "analysis_scope": "\u6a21\u62df\u4ea4\u6613\u548c\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97\u6743\u9650\u6761\u4ef6\u77e9\u9635\u4e0e\u884c\u4e3a\u8986\u76d6",
-  "business_goal": "\u6309\u6743\u9650\u5173\u7cfb\u4e0e\u76ee\u6807\u7ec4\u5408\u9694\u79bb\u80a1\u7968\u53ef\u89c1\u6027\uff0c\u5e76\u5408\u5e76\u540c\u89c4\u5219\u591a\u5165\u53e3\u7528\u4f8b",
-  "acceptance_basis": "\u7528\u6237\u672c\u8f6e\u8865\u5145\u786e\u8ba4\u7684\u591a\u5165\u53e3\u5408\u5e76\u3001\u666e\u901a\u6743\u9650 5\u00d74\u3001\u6307\u5b9a\u7528\u6237\u591a\u503c\u3001\u884c\u4e3a\u8986\u76d6\u3001AND/OR \u4e0e\u56de\u5f52\u89c4\u5219",
+  "analysis_scope": "模拟交易和正式交易清仓股弹窗权限条件矩阵与行为覆盖",
+  "business_goal": "按权限关系与目标组合隔离股票可见性，并合并同规则多入口用例",
+  "acceptance_basis": "用户本轮补充确认的多入口合并、普通权限 5×4、指定用户多值、行为覆盖、AND/OR 与回归规则",
   "facts": [
     {
       "fact_id": "FACT-001",
       "category": "confirmed",
-      "statement": "\u6a21\u62df\u4ea4\u6613\u548c\u6b63\u5f0f\u4ea4\u6613\u540c\u89c4\u5219\u65f6\u5408\u5e76\u4e3a\u540c\u4e00 TC \u7684\u4e24\u4e2a\u5e73\u7ea7\u5165\u53e3\u5206\u652f",
+      "statement": "模拟交易和正式交易同规则时合并为同一 TC 的两个平级入口分支",
       "source_type": "user_confirmation",
       "source_reference": "CHAT-CLEARANCE-PERMISSION-20260718-V2",
       "confidence": "high",
@@ -30,7 +31,7 @@
           "line_end": 1,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u6a21\u62df\u4ea4\u6613\u548c\u6b63\u5f0f\u4ea4\u6613\u7684\u6838\u5fc3\u89c4\u5219\u3001\u64cd\u4f5c\u548c\u9884\u671f\u4e00\u81f4\u65f6\uff0c\u5408\u5e76\u4e3a\u540c\u4e00\u4e2a TC\uff0c\u5e76\u4f7f\u7528\u4e24\u4e2a\u5e73\u7ea7\u5165\u53e3\u5206\u652f\u8986\u76d6\u3002",
+          "excerpt": "模拟交易和正式交易的核心规则、操作和预期一致时，合并为同一个 TC，并使用两个平级入口分支覆盖。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -40,7 +41,7 @@
     {
       "fact_id": "FACT-002",
       "category": "confirmed",
-      "statement": "\u666e\u901a\u5efa\u4ed3\u4eba\u548c\u8ddf\u8fdb\u4eba\u7684\u76ee\u6807\u8303\u56f4\u4e3a\u81ea\u5df1\u3001\u6240\u6709\u4e0b\u7ea7\u3001\u76f4\u5c5e\u4e0a\u7ea7\u3001\u76f4\u5c5e\u4e0b\u7ea7",
+      "statement": "普通建仓人和跟进人的目标范围为自己、所有下级、直属上级、直属下级",
       "source_type": "user_confirmation",
       "source_reference": "CHAT-CLEARANCE-PERMISSION-20260718-V2",
       "confidence": "high",
@@ -57,7 +58,7 @@
           "line_end": 2,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u666e\u901a\u5efa\u4ed3\u4eba\u548c\u666e\u901a\u8ddf\u8fdb\u4eba\u7684\u76ee\u6807\u8303\u56f4\u5305\u62ec\uff1a\u81ea\u5df1\u3001\u6240\u6709\u4e0b\u7ea7\u3001\u76f4\u5c5e\u4e0a\u7ea7\u3001\u76f4\u5c5e\u4e0b\u7ea7\u3002",
+          "excerpt": "普通建仓人和普通跟进人的目标范围包括：自己、所有下级、直属上级、直属下级。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -67,7 +68,7 @@
     {
       "fact_id": "FACT-003",
       "category": "confirmed",
-      "statement": "\u666e\u901a\u5efa\u4ed3\u4eba role_type\u2208{10,20} \u5e76\u652f\u6301\u4e94\u79cd\u660e\u786e\u5173\u7cfb",
+      "statement": "普通建仓人 role_type∈{10,20} 并支持五种明确关系",
       "source_type": "user_confirmation",
       "source_reference": "CHAT-CLEARANCE-PERMISSION-20260718-V2",
       "confidence": "high",
@@ -84,7 +85,7 @@
           "line_end": 3,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u666e\u901a\u5efa\u4ed3\u4eba\u53d6 role_type\u2208{10,20}\uff0c\u5173\u7cfb\u5305\u62ec\u7b49\u4e8e\u3001\u4e0d\u7b49\u4e8e\u3001\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\u3001\u5b8c\u5168\u5305\u542b\u4e8e\u3002",
+          "excerpt": "普通建仓人取 role_type∈{10,20}，关系包括等于、不等于、包含于、不包含、完全包含于。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -94,7 +95,7 @@
     {
       "fact_id": "FACT-004",
       "category": "confirmed",
-      "statement": "\u666e\u901a\u8ddf\u8fdb\u4eba role_type=30 \u5e76\u652f\u6301\u4e94\u79cd\u660e\u786e\u5173\u7cfb",
+      "statement": "普通跟进人 role_type=30 并支持五种明确关系",
       "source_type": "user_confirmation",
       "source_reference": "CHAT-CLEARANCE-PERMISSION-20260718-V2",
       "confidence": "high",
@@ -111,7 +112,7 @@
           "line_end": 4,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u666e\u901a\u8ddf\u8fdb\u4eba\u53d6 role_type=30\uff0c\u5173\u7cfb\u5305\u62ec\u7b49\u4e8e\u3001\u4e0d\u7b49\u4e8e\u3001\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\u3001\u5b8c\u5168\u5305\u542b\u4e8e\u3002",
+          "excerpt": "普通跟进人取 role_type=30，关系包括等于、不等于、包含于、不包含、完全包含于。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -121,7 +122,7 @@
     {
       "fact_id": "FACT-005",
       "category": "confirmed",
-      "statement": "\u4e24\u7c7b\u6307\u5b9a\u7528\u6237\u6743\u9650\u652f\u6301\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\u548c\u8ffd\u52a0\u591a\u4e2a\u7528\u6237",
+      "statement": "两类指定用户权限支持包含于、不包含和追加多个用户",
       "source_type": "user_confirmation",
       "source_reference": "CHAT-CLEARANCE-PERMISSION-20260718-V2",
       "confidence": "high",
@@ -138,7 +139,7 @@
           "line_end": 5,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u5efa\u4ed3\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09\u548c\u8ddf\u8fdb\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09\u7684\u5173\u7cfb\u5305\u62ec\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\uff0c\u5e76\u652f\u6301\u8ffd\u52a0\u591a\u4e2a\u7528\u6237\u3002",
+          "excerpt": "建仓人（指定用户）和跟进人（指定用户）的关系包括包含于、不包含，并支持追加多个用户。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -148,7 +149,7 @@
     {
       "fact_id": "FACT-006",
       "category": "confirmed",
-      "statement": "\u6bcf\u4e2a\u660e\u786e\u5173\u7cfb\u4e0e\u76ee\u6807\u7ec4\u5408\u5fc5\u987b\u8fdb\u5165\u884c\u4e3a\u6d4b\u8bd5\uff0c\u914d\u7f6e\u5b58\u5728\u6027\u4e0d\u80fd\u66ff\u4ee3\u884c\u4e3a\u8986\u76d6",
+      "statement": "每个明确关系与目标组合必须进入行为测试，配置存在性不能替代行为覆盖",
       "source_type": "user_confirmation",
       "source_reference": "CHAT-CLEARANCE-PERMISSION-20260718-V2",
       "confidence": "high",
@@ -165,7 +166,7 @@
           "line_end": 6,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u5efa\u4ed3\u4eba=\u81ea\u5df1\u3001\u5efa\u4ed3\u4eba\u2260\u76f4\u5c5e\u4e0a\u7ea7\u7b49\u5177\u4f53\u5173\u7cfb\u4e0e\u76ee\u6807\u7ec4\u5408\u5fc5\u987b\u8fdb\u5165\u884c\u4e3a\u6d4b\u8bd5\u573a\u666f\u3002",
+          "excerpt": "建仓人=自己、建仓人≠直属上级等具体关系与目标组合必须进入行为测试场景。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -175,7 +176,7 @@
     {
       "fact_id": "FACT-007",
       "category": "confirmed",
-      "statement": "\u6743\u9650\u547d\u4e2d\u80a1\u7968\u53ef\u89c1\u3001\u672a\u547d\u4e2d\u80a1\u7968\u4e0d\u53ef\u89c1\uff0c\u6c47\u603b\u884c\u53ea\u7edf\u8ba1\u53ef\u89c1\u80a1\u7968",
+      "statement": "权限命中股票可见、未命中股票不可见，汇总行只统计可见股票",
       "source_type": "user_confirmation",
       "source_reference": "CHAT-CLEARANCE-PERMISSION-20260718-V2",
       "confidence": "high",
@@ -192,7 +193,7 @@
           "line_end": 8,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u7528\u6237\u4ec5\u770b\u5230\u6743\u9650\u547d\u4e2d\u7684\u80a1\u7968\u884c\uff0c\u672a\u547d\u4e2d\u80a1\u7968\u884c\u4e0d\u53ef\u89c1\uff0c\u6c47\u603b\u884c\u53ea\u7edf\u8ba1\u53ef\u89c1\u80a1\u7968\u3002",
+          "excerpt": "用户仅看到权限命中的股票行，未命中股票行不可见，汇总行只统计可见股票。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -202,7 +203,7 @@
     {
       "fact_id": "FACT-008",
       "category": "confirmed",
-      "statement": "\u6e05\u4ed3\u4e0e\u6e05\u540e\u91cd\u5efa\u7b56\u7565\u6bb5\u72ec\u7acb\u63a7\u6743",
+      "statement": "清仓与清后重建策略段独立控权",
       "source_type": "user_confirmation",
       "source_reference": "CHAT-CLEARANCE-PERMISSION-20260718-V2",
       "confidence": "high",
@@ -219,7 +220,7 @@
           "line_end": 9,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u6e05\u4ed3\u7b56\u7565\u548c\u6e05\u540e\u91cd\u5efa\u7b56\u7565\u6bb5\u72ec\u7acb\u63a7\u6743\u3002",
+          "excerpt": "清仓策略和清后重建策略段独立控权。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -229,7 +230,7 @@
     {
       "fact_id": "FACT-009",
       "category": "confirmed",
-      "statement": "\u65b0\u65e7\u6743\u9650\u652f\u6301 AND/OR \u7ec4\u5408\u4e14\u539f\u6709\u6743\u9650\u4fdd\u7559",
+      "statement": "新旧权限支持 AND/OR 组合且原有权限保留",
       "source_type": "user_confirmation",
       "source_reference": "CHAT-CLEARANCE-PERMISSION-20260718-V2",
       "confidence": "high",
@@ -246,7 +247,7 @@
           "line_end": 10,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u591a\u4e2a\u65b0\u65e7\u6743\u9650\u6761\u4ef6\u652f\u6301 AND \u548c OR \u8fde\u63a5\uff0c\u539f\u6709\u6743\u9650\u4fdd\u7559\u3002",
+          "excerpt": "多个新旧权限条件支持 AND 和 OR 连接，原有权限保留。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -256,7 +257,7 @@
     {
       "fact_id": "FACT-010",
       "category": "confirmed",
-      "statement": "\u53ef\u7528\u8d44\u91d1\u5f39\u7a97\u4e0d\u53d7\u6e05\u4ed3\u80a1\u6743\u9650\u53d8\u66f4\u5f71\u54cd",
+      "statement": "可用资金弹窗不受清仓股权限变更影响",
       "source_type": "user_confirmation",
       "source_reference": "CHAT-CLEARANCE-PERMISSION-20260718-V2",
       "confidence": "high",
@@ -273,7 +274,7 @@
           "line_end": 11,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u53ef\u7528\u8d44\u91d1\u5f39\u7a97\u4e0d\u53d7\u672c\u6b21\u6e05\u4ed3\u80a1\u6743\u9650\u53d8\u66f4\u5f71\u54cd\u3002",
+          "excerpt": "可用资金弹窗不受本次清仓股权限变更影响。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -283,7 +284,7 @@
     {
       "fact_id": "FACT-011",
       "category": "confirmed",
-      "statement": "\u6307\u5b9a\u7528\u6237\u8986\u76d6\u5355\u7528\u6237\u3001\u591a\u7528\u6237\u3001\u4e00\u4e2a\u547d\u4e2d\u548c\u5168\u90e8\u4e0d\u547d\u4e2d",
+      "statement": "指定用户覆盖单用户、多用户、一个命中和全部不命中",
       "source_type": "user_confirmation",
       "source_reference": "CHAT-CLEARANCE-PERMISSION-20260718-V2",
       "confidence": "high",
@@ -300,7 +301,7 @@
           "line_end": 12,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u6307\u5b9a\u7528\u6237\u573a\u666f\u8986\u76d6\u5355\u4e2a\u7528\u6237\u3001\u8ffd\u52a0\u591a\u4e2a\u7528\u6237\u3001\u5176\u4e2d\u4e00\u4e2a\u7528\u6237\u547d\u4e2d\u548c\u6240\u6709\u7528\u6237\u5747\u4e0d\u547d\u4e2d\u3002",
+          "excerpt": "指定用户场景覆盖单个用户、追加多个用户、其中一个用户命中和所有用户均不命中。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -310,7 +311,7 @@
     {
       "fact_id": "FACT-012",
       "category": "confirmed",
-      "statement": "\u91cd\u590d\u7528\u6237\u76f8\u5173\u884c\u4e3a\u4e0d\u5728\u672c\u8f6e\u9a8c\u6536\u8303\u56f4",
+      "statement": "重复用户相关行为不在本轮验收范围",
       "source_type": "user_confirmation",
       "source_reference": "CHAT-CLEARANCE-PERMISSION-20260718-V2",
       "confidence": "high",
@@ -327,33 +328,7 @@
           "line_end": 13,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u4e0d\u5f97\u6269\u5199\u91cd\u590d\u7528\u6237\u81ea\u52a8\u53bb\u91cd\u3001\u91cd\u590d\u7528\u6237\u4e0d\u53ef\u9009\u62e9\u3001\u91cd\u590d\u7528\u6237\u63d0\u793a\u6216\u5220\u9664\u7528\u6237\u540e\u7684\u4fdd\u5b58\u89c4\u5219\u3002",
-          "captured_at": "2026-07-18 20:18:36",
-          "captured_timezone": "Asia/Shanghai",
-          "evidence_status": "current"
-        }
-      ]
-    }
-  ],
-  "confirmation_points": [],
-  "risks": [
-    {
-      "risk_id": "RISK-001",
-      "statement": "\u65e0\u6743\u9650\u80a1\u7968\u884c\u6cc4\u9732",
-      "test_priority": "P0",
-      "evidence_state": "\u5df2\u786e\u8ba4",
-      "evidence_references": [
-        {
-          "source_type": "user_confirmation",
-          "storage_type": "snapshot",
-          "source_path": null,
-          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
-          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
-          "line_start": 8,
-          "line_end": 8,
-          "commit_sha": null,
-          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u7528\u6237\u4ec5\u770b\u5230\u6743\u9650\u547d\u4e2d\u7684\u80a1\u7968\u884c\uff0c\u672a\u547d\u4e2d\u80a1\u7968\u884c\u4e0d\u53ef\u89c1\uff0c\u6c47\u603b\u884c\u53ea\u7edf\u8ba1\u53ef\u89c1\u80a1\u7968\u3002",
+          "excerpt": "不得扩写重复用户自动去重、重复用户不可选择、重复用户提示或删除用户后的保存规则。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -361,344 +336,41 @@
       ]
     },
     {
-      "risk_id": "RISK-002",
-      "statement": "\u6c47\u603b\u884c\u5305\u542b\u65e0\u6743\u9650\u6570\u636e",
-      "test_priority": "P0",
-      "evidence_state": "\u5df2\u786e\u8ba4",
+      "fact_id": "FACT-013",
+      "category": "confirmed",
+      "statement": "包含于表示多个角色或人员中任一满足时命中；完全包含于表示全部满足时命中",
+      "source_type": "pasted_text",
+      "source_reference": "CHAT-CLEARANCE-PERMISSION-20260718",
+      "confidence": "high",
+      "affects_core_expectation": true,
+      "handling": null,
       "evidence_references": [
         {
-          "source_type": "user_confirmation",
-          "storage_type": "snapshot",
+          "source_type": "pasted_text",
           "source_path": null,
-          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
-          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
-          "line_start": 8,
-          "line_end": 8,
-          "commit_sha": null,
-          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u7528\u6237\u4ec5\u770b\u5230\u6743\u9650\u547d\u4e2d\u7684\u80a1\u7968\u884c\uff0c\u672a\u547d\u4e2d\u80a1\u7968\u884c\u4e0d\u53ef\u89c1\uff0c\u6c47\u603b\u884c\u53ea\u7edf\u8ba1\u53ef\u89c1\u80a1\u7968\u3002",
-          "captured_at": "2026-07-18 20:18:36",
-          "captured_timezone": "Asia/Shanghai",
-          "evidence_status": "current"
-        }
-      ]
-    },
-    {
-      "risk_id": "RISK-003",
-      "statement": "\u6e05\u4ed3\u4e0e\u6e05\u540e\u91cd\u5efa\u7b56\u7565\u4e32\u6743",
-      "test_priority": "P0",
-      "evidence_state": "\u5df2\u786e\u8ba4",
-      "evidence_references": [
-        {
-          "source_type": "user_confirmation",
-          "storage_type": "snapshot",
-          "source_path": null,
-          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
-          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
-          "line_start": 9,
-          "line_end": 9,
-          "commit_sha": null,
-          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u6e05\u4ed3\u7b56\u7565\u548c\u6e05\u540e\u91cd\u5efa\u7b56\u7565\u6bb5\u72ec\u7acb\u63a7\u6743\u3002",
-          "captured_at": "2026-07-18 20:18:36",
-          "captured_timezone": "Asia/Shanghai",
-          "evidence_status": "current"
-        }
-      ]
-    },
-    {
-      "risk_id": "RISK-004",
-      "statement": "role_type=10/20/30 \u6620\u5c04\u9519\u8bef",
-      "test_priority": "P0",
-      "evidence_state": "\u5df2\u786e\u8ba4",
-      "evidence_references": [
-        {
-          "source_type": "user_confirmation",
-          "storage_type": "snapshot",
-          "source_path": null,
-          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
-          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
-          "line_start": 3,
-          "line_end": 3,
-          "commit_sha": null,
-          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u666e\u901a\u5efa\u4ed3\u4eba\u53d6 role_type\u2208{10,20}\uff0c\u5173\u7cfb\u5305\u62ec\u7b49\u4e8e\u3001\u4e0d\u7b49\u4e8e\u3001\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\u3001\u5b8c\u5168\u5305\u542b\u4e8e\u3002",
-          "captured_at": "2026-07-18 20:18:36",
-          "captured_timezone": "Asia/Shanghai",
-          "evidence_status": "current"
-        },
-        {
-          "source_type": "user_confirmation",
-          "storage_type": "snapshot",
-          "source_path": null,
-          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
-          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
-          "line_start": 4,
-          "line_end": 4,
-          "commit_sha": null,
-          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u666e\u901a\u8ddf\u8fdb\u4eba\u53d6 role_type=30\uff0c\u5173\u7cfb\u5305\u62ec\u7b49\u4e8e\u3001\u4e0d\u7b49\u4e8e\u3001\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\u3001\u5b8c\u5168\u5305\u542b\u4e8e\u3002",
-          "captured_at": "2026-07-18 20:18:36",
-          "captured_timezone": "Asia/Shanghai",
-          "evidence_status": "current"
-        }
-      ]
-    },
-    {
-      "risk_id": "RISK-005",
-      "statement": "\u7b49\u4e8e\u6216\u4e0d\u7b49\u4e8e\u5173\u7cfb\u65b9\u5411\u53d6\u53cd",
-      "test_priority": "P0",
-      "evidence_state": "\u5df2\u786e\u8ba4",
-      "evidence_references": [
-        {
-          "source_type": "user_confirmation",
-          "storage_type": "snapshot",
-          "source_path": null,
-          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
-          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
-          "line_start": 2,
-          "line_end": 2,
-          "commit_sha": null,
-          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u666e\u901a\u5efa\u4ed3\u4eba\u548c\u666e\u901a\u8ddf\u8fdb\u4eba\u7684\u76ee\u6807\u8303\u56f4\u5305\u62ec\uff1a\u81ea\u5df1\u3001\u6240\u6709\u4e0b\u7ea7\u3001\u76f4\u5c5e\u4e0a\u7ea7\u3001\u76f4\u5c5e\u4e0b\u7ea7\u3002",
-          "captured_at": "2026-07-18 20:18:36",
-          "captured_timezone": "Asia/Shanghai",
-          "evidence_status": "current"
-        },
-        {
-          "source_type": "user_confirmation",
-          "storage_type": "snapshot",
-          "source_path": null,
-          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
-          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
-          "line_start": 3,
-          "line_end": 3,
-          "commit_sha": null,
-          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u666e\u901a\u5efa\u4ed3\u4eba\u53d6 role_type\u2208{10,20}\uff0c\u5173\u7cfb\u5305\u62ec\u7b49\u4e8e\u3001\u4e0d\u7b49\u4e8e\u3001\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\u3001\u5b8c\u5168\u5305\u542b\u4e8e\u3002",
-          "captured_at": "2026-07-18 20:18:36",
-          "captured_timezone": "Asia/Shanghai",
-          "evidence_status": "current"
-        },
-        {
-          "source_type": "user_confirmation",
-          "storage_type": "snapshot",
-          "source_path": null,
-          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
-          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
-          "line_start": 4,
-          "line_end": 4,
-          "commit_sha": null,
-          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u666e\u901a\u8ddf\u8fdb\u4eba\u53d6 role_type=30\uff0c\u5173\u7cfb\u5305\u62ec\u7b49\u4e8e\u3001\u4e0d\u7b49\u4e8e\u3001\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\u3001\u5b8c\u5168\u5305\u542b\u4e8e\u3002",
-          "captured_at": "2026-07-18 20:18:36",
-          "captured_timezone": "Asia/Shanghai",
-          "evidence_status": "current"
-        }
-      ]
-    },
-    {
-      "risk_id": "RISK-006",
-      "statement": "\u5305\u542b\u4e8e\u4efb\u4e00\u547d\u4e2d\u5224\u65ad\u9519\u8bef",
-      "test_priority": "P0",
-      "evidence_state": "\u5df2\u786e\u8ba4",
-      "evidence_references": [
-        {
-          "source_type": "user_confirmation",
-          "storage_type": "snapshot",
-          "source_path": null,
-          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
-          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
-          "line_start": 3,
-          "line_end": 3,
-          "commit_sha": null,
-          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u666e\u901a\u5efa\u4ed3\u4eba\u53d6 role_type\u2208{10,20}\uff0c\u5173\u7cfb\u5305\u62ec\u7b49\u4e8e\u3001\u4e0d\u7b49\u4e8e\u3001\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\u3001\u5b8c\u5168\u5305\u542b\u4e8e\u3002",
-          "captured_at": "2026-07-18 20:18:36",
-          "captured_timezone": "Asia/Shanghai",
-          "evidence_status": "current"
-        },
-        {
-          "source_type": "user_confirmation",
-          "storage_type": "snapshot",
-          "source_path": null,
-          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
-          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
-          "line_start": 4,
-          "line_end": 4,
-          "commit_sha": null,
-          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u666e\u901a\u8ddf\u8fdb\u4eba\u53d6 role_type=30\uff0c\u5173\u7cfb\u5305\u62ec\u7b49\u4e8e\u3001\u4e0d\u7b49\u4e8e\u3001\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\u3001\u5b8c\u5168\u5305\u542b\u4e8e\u3002",
-          "captured_at": "2026-07-18 20:18:36",
-          "captured_timezone": "Asia/Shanghai",
-          "evidence_status": "current"
-        },
-        {
-          "source_type": "user_confirmation",
-          "storage_type": "snapshot",
-          "source_path": null,
-          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
-          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
-          "line_start": 8,
-          "line_end": 8,
-          "commit_sha": null,
-          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u7528\u6237\u4ec5\u770b\u5230\u6743\u9650\u547d\u4e2d\u7684\u80a1\u7968\u884c\uff0c\u672a\u547d\u4e2d\u80a1\u7968\u884c\u4e0d\u53ef\u89c1\uff0c\u6c47\u603b\u884c\u53ea\u7edf\u8ba1\u53ef\u89c1\u80a1\u7968\u3002",
-          "captured_at": "2026-07-18 20:18:36",
-          "captured_timezone": "Asia/Shanghai",
-          "evidence_status": "current"
-        }
-      ]
-    },
-    {
-      "risk_id": "RISK-007",
-      "statement": "\u4e0d\u5305\u542b\u5173\u7cfb\u53cd\u5411\u5224\u65ad\u9519\u8bef",
-      "test_priority": "P0",
-      "evidence_state": "\u5df2\u786e\u8ba4",
-      "evidence_references": [
-        {
-          "source_type": "user_confirmation",
-          "storage_type": "snapshot",
-          "source_path": null,
-          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
-          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
-          "line_start": 3,
-          "line_end": 3,
-          "commit_sha": null,
-          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u666e\u901a\u5efa\u4ed3\u4eba\u53d6 role_type\u2208{10,20}\uff0c\u5173\u7cfb\u5305\u62ec\u7b49\u4e8e\u3001\u4e0d\u7b49\u4e8e\u3001\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\u3001\u5b8c\u5168\u5305\u542b\u4e8e\u3002",
-          "captured_at": "2026-07-18 20:18:36",
-          "captured_timezone": "Asia/Shanghai",
-          "evidence_status": "current"
-        },
-        {
-          "source_type": "user_confirmation",
-          "storage_type": "snapshot",
-          "source_path": null,
-          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
-          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
-          "line_start": 4,
-          "line_end": 4,
-          "commit_sha": null,
-          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u666e\u901a\u8ddf\u8fdb\u4eba\u53d6 role_type=30\uff0c\u5173\u7cfb\u5305\u62ec\u7b49\u4e8e\u3001\u4e0d\u7b49\u4e8e\u3001\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\u3001\u5b8c\u5168\u5305\u542b\u4e8e\u3002",
-          "captured_at": "2026-07-18 20:18:36",
-          "captured_timezone": "Asia/Shanghai",
-          "evidence_status": "current"
-        },
-        {
-          "source_type": "user_confirmation",
-          "storage_type": "snapshot",
-          "source_path": null,
-          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
-          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
-          "line_start": 8,
-          "line_end": 8,
-          "commit_sha": null,
-          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u7528\u6237\u4ec5\u770b\u5230\u6743\u9650\u547d\u4e2d\u7684\u80a1\u7968\u884c\uff0c\u672a\u547d\u4e2d\u80a1\u7968\u884c\u4e0d\u53ef\u89c1\uff0c\u6c47\u603b\u884c\u53ea\u7edf\u8ba1\u53ef\u89c1\u80a1\u7968\u3002",
-          "captured_at": "2026-07-18 20:18:36",
-          "captured_timezone": "Asia/Shanghai",
-          "evidence_status": "current"
-        }
-      ]
-    },
-    {
-      "risk_id": "RISK-008",
-      "statement": "\u5b8c\u5168\u5305\u542b\u4e8e\u5168\u90e8\u547d\u4e2d\u5224\u65ad\u9519\u8bef",
-      "test_priority": "P0",
-      "evidence_state": "\u5df2\u786e\u8ba4",
-      "evidence_references": [
-        {
-          "source_type": "user_confirmation",
-          "storage_type": "snapshot",
-          "source_path": null,
-          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
-          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
-          "line_start": 3,
-          "line_end": 3,
-          "commit_sha": null,
-          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u666e\u901a\u5efa\u4ed3\u4eba\u53d6 role_type\u2208{10,20}\uff0c\u5173\u7cfb\u5305\u62ec\u7b49\u4e8e\u3001\u4e0d\u7b49\u4e8e\u3001\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\u3001\u5b8c\u5168\u5305\u542b\u4e8e\u3002",
-          "captured_at": "2026-07-18 20:18:36",
-          "captured_timezone": "Asia/Shanghai",
-          "evidence_status": "current"
-        },
-        {
-          "source_type": "user_confirmation",
-          "storage_type": "snapshot",
-          "source_path": null,
-          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
-          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
-          "line_start": 4,
-          "line_end": 4,
-          "commit_sha": null,
-          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u666e\u901a\u8ddf\u8fdb\u4eba\u53d6 role_type=30\uff0c\u5173\u7cfb\u5305\u62ec\u7b49\u4e8e\u3001\u4e0d\u7b49\u4e8e\u3001\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\u3001\u5b8c\u5168\u5305\u542b\u4e8e\u3002",
-          "captured_at": "2026-07-18 20:18:36",
-          "captured_timezone": "Asia/Shanghai",
-          "evidence_status": "current"
-        },
-        {
-          "source_type": "user_confirmation",
-          "storage_type": "snapshot",
-          "source_path": null,
-          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
-          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
-          "line_start": 8,
-          "line_end": 8,
-          "commit_sha": null,
-          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u7528\u6237\u4ec5\u770b\u5230\u6743\u9650\u547d\u4e2d\u7684\u80a1\u7968\u884c\uff0c\u672a\u547d\u4e2d\u80a1\u7968\u884c\u4e0d\u53ef\u89c1\uff0c\u6c47\u603b\u884c\u53ea\u7edf\u8ba1\u53ef\u89c1\u80a1\u7968\u3002",
-          "captured_at": "2026-07-18 20:18:36",
-          "captured_timezone": "Asia/Shanghai",
-          "evidence_status": "current"
-        }
-      ]
-    },
-    {
-      "risk_id": "RISK-009",
-      "statement": "\u76ee\u6807\u8303\u56f4\u89e3\u6790\u9519\u8bef",
-      "test_priority": "P0",
-      "evidence_state": "\u5df2\u786e\u8ba4",
-      "evidence_references": [
-        {
-          "source_type": "user_confirmation",
-          "storage_type": "snapshot",
-          "source_path": null,
-          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
-          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
-          "line_start": 2,
-          "line_end": 2,
-          "commit_sha": null,
-          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u666e\u901a\u5efa\u4ed3\u4eba\u548c\u666e\u901a\u8ddf\u8fdb\u4eba\u7684\u76ee\u6807\u8303\u56f4\u5305\u62ec\uff1a\u81ea\u5df1\u3001\u6240\u6709\u4e0b\u7ea7\u3001\u76f4\u5c5e\u4e0a\u7ea7\u3001\u76f4\u5c5e\u4e0b\u7ea7\u3002",
-          "captured_at": "2026-07-18 20:18:36",
-          "captured_timezone": "Asia/Shanghai",
-          "evidence_status": "current"
-        },
-        {
-          "source_type": "user_confirmation",
-          "storage_type": "snapshot",
-          "source_path": null,
-          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
-          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
           "line_start": 6,
           "line_end": 6,
           "commit_sha": null,
-          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u5efa\u4ed3\u4eba=\u81ea\u5df1\u3001\u5efa\u4ed3\u4eba\u2260\u76f4\u5c5e\u4e0a\u7ea7\u7b49\u5177\u4f53\u5173\u7cfb\u4e0e\u76ee\u6807\u7ec4\u5408\u5fc5\u987b\u8fdb\u5165\u884c\u4e3a\u6d4b\u8bd5\u573a\u666f\u3002",
-          "captured_at": "2026-07-18 20:18:36",
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "确认：包含于表示多个数据任一满足；完全包含于表示多个数据全部满足。一个批次存在多个 role_type 时按配置的权限条件判断。",
+          "captured_at": "2026-07-18 16:32:18",
           "captured_timezone": "Asia/Shanghai",
-          "evidence_status": "current"
+          "evidence_status": "current",
+          "storage_type": "snapshot"
         }
       ]
     },
     {
-      "risk_id": "RISK-010",
-      "statement": "\u6307\u5b9a\u7528\u6237\u591a\u503c\u96c6\u5408\u5224\u65ad\u9519\u8bef",
-      "test_priority": "P0",
-      "evidence_state": "\u5df2\u786e\u8ba4",
+      "fact_id": "FACT-014",
+      "category": "missing",
+      "statement": "普通人员及指定用户“不包含”在单用户命中、单用户不命中、多用户部分命中和全部不命中时的确定可见性缺少明确证据",
+      "source_type": "user_confirmation",
+      "source_reference": "CHAT-CLEARANCE-PERMISSION-20260718-V2",
+      "confidence": "low",
+      "affects_core_expectation": true,
+      "handling": "等待用户确认反向集合真值表后再生成确定性 Oracle 和正式 Workbook",
       "evidence_references": [
         {
           "source_type": "user_confirmation",
@@ -710,7 +382,7 @@
           "line_end": 5,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u5efa\u4ed3\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09\u548c\u8ddf\u8fdb\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09\u7684\u5173\u7cfb\u5305\u62ec\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\uff0c\u5e76\u652f\u6301\u8ffd\u52a0\u591a\u4e2a\u7528\u6237\u3002",
+          "excerpt": "建仓人（指定用户）和跟进人（指定用户）的关系包括包含于、不包含，并支持追加多个用户。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -725,18 +397,36 @@
           "line_end": 12,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u6307\u5b9a\u7528\u6237\u573a\u666f\u8986\u76d6\u5355\u4e2a\u7528\u6237\u3001\u8ffd\u52a0\u591a\u4e2a\u7528\u6237\u3001\u5176\u4e2d\u4e00\u4e2a\u7528\u6237\u547d\u4e2d\u548c\u6240\u6709\u7528\u6237\u5747\u4e0d\u547d\u4e2d\u3002",
+          "excerpt": "指定用户场景覆盖单个用户、追加多个用户、其中一个用户命中和所有用户均不命中。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
         }
       ]
-    },
+    }
+  ],
+  "confirmation_points": [
     {
-      "risk_id": "RISK-011",
-      "statement": "AND \u6216 OR \u7ec4\u5408\u5224\u65ad\u9519\u8bef",
+      "confirmation_id": "CONF-001",
+      "severity": "blocking",
+      "statement": "请确认“不包含”在单用户命中、单用户不命中、多用户部分命中和多用户全部不命中时分别应可见还是不可见；是否对普通人员与指定用户使用同一反向集合规则",
+      "fact_ids": [
+        "FACT-014"
+      ],
+      "status": "pending",
+      "resolution": null,
+      "resolution_evidence_references": [],
+      "resolved_at": null,
+      "skip_reason": null,
+      "decision_evidence": []
+    }
+  ],
+  "risks": [
+    {
+      "risk_id": "RISK-001",
+      "statement": "无权限股票行泄露",
       "test_priority": "P0",
-      "evidence_state": "\u5df2\u786e\u8ba4",
+      "evidence_state": "已确认",
       "evidence_references": [
         {
           "source_type": "user_confirmation",
@@ -744,11 +434,11 @@
           "source_path": null,
           "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
           "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
-          "line_start": 10,
-          "line_end": 10,
+          "line_start": 8,
+          "line_end": 8,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u591a\u4e2a\u65b0\u65e7\u6743\u9650\u6761\u4ef6\u652f\u6301 AND \u548c OR \u8fde\u63a5\uff0c\u539f\u6709\u6743\u9650\u4fdd\u7559\u3002",
+          "excerpt": "用户仅看到权限命中的股票行，未命中股票行不可见，汇总行只统计可见股票。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -756,10 +446,10 @@
       ]
     },
     {
-      "risk_id": "RISK-012",
-      "statement": "\u539f\u6709\u6743\u9650\u88ab\u65b0\u589e\u6743\u9650\u8986\u76d6",
-      "test_priority": "P1",
-      "evidence_state": "\u5df2\u786e\u8ba4",
+      "risk_id": "RISK-002",
+      "statement": "汇总行包含无权限数据",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
       "evidence_references": [
         {
           "source_type": "user_confirmation",
@@ -767,11 +457,11 @@
           "source_path": null,
           "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
           "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
-          "line_start": 10,
-          "line_end": 10,
+          "line_start": 8,
+          "line_end": 8,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u591a\u4e2a\u65b0\u65e7\u6743\u9650\u6761\u4ef6\u652f\u6301 AND \u548c OR \u8fde\u63a5\uff0c\u539f\u6709\u6743\u9650\u4fdd\u7559\u3002",
+          "excerpt": "用户仅看到权限命中的股票行，未命中股票行不可见，汇总行只统计可见股票。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -779,10 +469,10 @@
       ]
     },
     {
-      "risk_id": "RISK-013",
-      "statement": "\u53ef\u7528\u8d44\u91d1\u5f39\u7a97\u56de\u5f52\u53d7\u635f",
-      "test_priority": "P1",
-      "evidence_state": "\u5df2\u786e\u8ba4",
+      "risk_id": "RISK-003",
+      "statement": "清仓与清后重建策略串权",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
       "evidence_references": [
         {
           "source_type": "user_confirmation",
@@ -790,11 +480,11 @@
           "source_path": null,
           "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
           "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
-          "line_start": 11,
-          "line_end": 11,
+          "line_start": 9,
+          "line_end": 9,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u53ef\u7528\u8d44\u91d1\u5f39\u7a97\u4e0d\u53d7\u672c\u6b21\u6e05\u4ed3\u80a1\u6743\u9650\u53d8\u66f4\u5f71\u54cd\u3002",
+          "excerpt": "清仓策略和清后重建策略段独立控权。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -802,10 +492,10 @@
       ]
     },
     {
-      "risk_id": "RISK-014",
-      "statement": "\u6743\u9650\u7c7b\u578b\u3001\u5173\u7cfb\u6216\u76ee\u6807\u914d\u7f6e\u9879\u7f3a\u5931",
-      "test_priority": "P1",
-      "evidence_state": "\u5df2\u786e\u8ba4",
+      "risk_id": "RISK-004",
+      "statement": "role_type=10/20/30 映射错误",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
       "evidence_references": [
         {
           "source_type": "user_confirmation",
@@ -817,7 +507,7 @@
           "line_end": 3,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u666e\u901a\u5efa\u4ed3\u4eba\u53d6 role_type\u2208{10,20}\uff0c\u5173\u7cfb\u5305\u62ec\u7b49\u4e8e\u3001\u4e0d\u7b49\u4e8e\u3001\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\u3001\u5b8c\u5168\u5305\u542b\u4e8e\u3002",
+          "excerpt": "普通建仓人取 role_type∈{10,20}，关系包括等于、不等于、包含于、不包含、完全包含于。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -832,7 +522,402 @@
           "line_end": 4,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u666e\u901a\u8ddf\u8fdb\u4eba\u53d6 role_type=30\uff0c\u5173\u7cfb\u5305\u62ec\u7b49\u4e8e\u3001\u4e0d\u7b49\u4e8e\u3001\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\u3001\u5b8c\u5168\u5305\u542b\u4e8e\u3002",
+          "excerpt": "普通跟进人取 role_type=30，关系包括等于、不等于、包含于、不包含、完全包含于。",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-005",
+      "statement": "等于或不等于关系方向取反",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "evidence_references": [
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 2,
+          "line_end": 2,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "普通建仓人和普通跟进人的目标范围包括：自己、所有下级、直属上级、直属下级。",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 3,
+          "line_end": 3,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "普通建仓人取 role_type∈{10,20}，关系包括等于、不等于、包含于、不包含、完全包含于。",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 4,
+          "line_end": 4,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "普通跟进人取 role_type=30，关系包括等于、不等于、包含于、不包含、完全包含于。",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-006",
+      "statement": "包含于任一命中判断错误",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "evidence_references": [
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 3,
+          "line_end": 3,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "普通建仓人取 role_type∈{10,20}，关系包括等于、不等于、包含于、不包含、完全包含于。",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 4,
+          "line_end": 4,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "普通跟进人取 role_type=30，关系包括等于、不等于、包含于、不包含、完全包含于。",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 8,
+          "line_end": 8,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "用户仅看到权限命中的股票行，未命中股票行不可见，汇总行只统计可见股票。",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-007",
+      "statement": "不包含关系反向判断错误",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "evidence_references": [
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 3,
+          "line_end": 3,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "普通建仓人取 role_type∈{10,20}，关系包括等于、不等于、包含于、不包含、完全包含于。",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 4,
+          "line_end": 4,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "普通跟进人取 role_type=30，关系包括等于、不等于、包含于、不包含、完全包含于。",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 8,
+          "line_end": 8,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "用户仅看到权限命中的股票行，未命中股票行不可见，汇总行只统计可见股票。",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-008",
+      "statement": "完全包含于全部命中判断错误",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "evidence_references": [
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 3,
+          "line_end": 3,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "普通建仓人取 role_type∈{10,20}，关系包括等于、不等于、包含于、不包含、完全包含于。",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 4,
+          "line_end": 4,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "普通跟进人取 role_type=30，关系包括等于、不等于、包含于、不包含、完全包含于。",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 8,
+          "line_end": 8,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "用户仅看到权限命中的股票行，未命中股票行不可见，汇总行只统计可见股票。",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-009",
+      "statement": "目标范围解析错误",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "evidence_references": [
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 2,
+          "line_end": 2,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "普通建仓人和普通跟进人的目标范围包括：自己、所有下级、直属上级、直属下级。",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 6,
+          "line_end": 6,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "建仓人=自己、建仓人≠直属上级等具体关系与目标组合必须进入行为测试场景。",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-010",
+      "statement": "指定用户多值集合判断错误",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "evidence_references": [
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 5,
+          "line_end": 5,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "建仓人（指定用户）和跟进人（指定用户）的关系包括包含于、不包含，并支持追加多个用户。",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 12,
+          "line_end": 12,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "指定用户场景覆盖单个用户、追加多个用户、其中一个用户命中和所有用户均不命中。",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-011",
+      "statement": "AND 或 OR 组合判断错误",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "evidence_references": [
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 10,
+          "line_end": 10,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "多个新旧权限条件支持 AND 和 OR 连接，原有权限保留。",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-012",
+      "statement": "原有权限被新增权限覆盖",
+      "test_priority": "P1",
+      "evidence_state": "已确认",
+      "evidence_references": [
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 10,
+          "line_end": 10,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "多个新旧权限条件支持 AND 和 OR 连接，原有权限保留。",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-013",
+      "statement": "可用资金弹窗回归受损",
+      "test_priority": "P1",
+      "evidence_state": "已确认",
+      "evidence_references": [
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 11,
+          "line_end": 11,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "可用资金弹窗不受本次清仓股权限变更影响。",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-014",
+      "statement": "权限类型、关系或目标配置项缺失",
+      "test_priority": "P1",
+      "evidence_state": "已确认",
+      "evidence_references": [
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 3,
+          "line_end": 3,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "普通建仓人取 role_type∈{10,20}，关系包括等于、不等于、包含于、不包含、完全包含于。",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 4,
+          "line_end": 4,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "普通跟进人取 role_type=30，关系包括等于、不等于、包含于、不包含、完全包含于。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -847,7 +932,45 @@
           "line_end": 5,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u5efa\u4ed3\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09\u548c\u8ddf\u8fdb\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09\u7684\u5173\u7cfb\u5305\u62ec\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\uff0c\u5e76\u652f\u6301\u8ffd\u52a0\u591a\u4e2a\u7528\u6237\u3002",
+          "excerpt": "建仓人（指定用户）和跟进人（指定用户）的关系包括包含于、不包含，并支持追加多个用户。",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-015",
+      "statement": "“不包含”关系真值表未确认会导致可见性 Oracle 被错误推断",
+      "test_priority": "P0",
+      "evidence_state": "待确认",
+      "evidence_references": [
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 5,
+          "line_end": 5,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "建仓人（指定用户）和跟进人（指定用户）的关系包括包含于、不包含，并支持追加多个用户。",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 12,
+          "line_end": 12,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "指定用户场景覆盖单个用户、追加多个用户、其中一个用户命中和所有用户均不命中。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -858,7 +981,7 @@
   "acceptance_criteria": [
     {
       "criterion_id": "REQ001",
-      "statement": "\u6a21\u62df\u4e0e\u6b63\u5f0f\u5165\u53e3\u540c\u89c4\u5219\u65f6\u5408\u5e76\u4e3a\u5e73\u7ea7\u5165\u53e3\u5206\u652f",
+      "statement": "模拟与正式入口同规则时合并为平级入口分支",
       "fact_ids": [
         "FACT-001"
       ],
@@ -878,7 +1001,7 @@
           "line_end": 1,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u6a21\u62df\u4ea4\u6613\u548c\u6b63\u5f0f\u4ea4\u6613\u7684\u6838\u5fc3\u89c4\u5219\u3001\u64cd\u4f5c\u548c\u9884\u671f\u4e00\u81f4\u65f6\uff0c\u5408\u5e76\u4e3a\u540c\u4e00\u4e2a TC\uff0c\u5e76\u4f7f\u7528\u4e24\u4e2a\u5e73\u7ea7\u5165\u53e3\u5206\u652f\u8986\u76d6\u3002",
+          "excerpt": "模拟交易和正式交易的核心规则、操作和预期一致时，合并为同一个 TC，并使用两个平级入口分支覆盖。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -887,7 +1010,7 @@
     },
     {
       "criterion_id": "REQ002",
-      "statement": "\u666e\u901a\u5efa\u4ed3\u4eba\u4e94\u79cd\u5173\u7cfb\u4e0e\u56db\u79cd\u76ee\u6807\u8303\u56f4\u5168\u90e8\u5f62\u6210\u884c\u4e3a\u8986\u76d6",
+      "statement": "普通建仓人五种关系与四种目标范围全部形成行为覆盖",
       "fact_ids": [
         "FACT-002",
         "FACT-003",
@@ -914,7 +1037,7 @@
           "line_end": 2,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u666e\u901a\u5efa\u4ed3\u4eba\u548c\u666e\u901a\u8ddf\u8fdb\u4eba\u7684\u76ee\u6807\u8303\u56f4\u5305\u62ec\uff1a\u81ea\u5df1\u3001\u6240\u6709\u4e0b\u7ea7\u3001\u76f4\u5c5e\u4e0a\u7ea7\u3001\u76f4\u5c5e\u4e0b\u7ea7\u3002",
+          "excerpt": "普通建仓人和普通跟进人的目标范围包括：自己、所有下级、直属上级、直属下级。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -929,7 +1052,7 @@
           "line_end": 3,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u666e\u901a\u5efa\u4ed3\u4eba\u53d6 role_type\u2208{10,20}\uff0c\u5173\u7cfb\u5305\u62ec\u7b49\u4e8e\u3001\u4e0d\u7b49\u4e8e\u3001\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\u3001\u5b8c\u5168\u5305\u542b\u4e8e\u3002",
+          "excerpt": "普通建仓人取 role_type∈{10,20}，关系包括等于、不等于、包含于、不包含、完全包含于。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -944,7 +1067,7 @@
           "line_end": 6,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u5efa\u4ed3\u4eba=\u81ea\u5df1\u3001\u5efa\u4ed3\u4eba\u2260\u76f4\u5c5e\u4e0a\u7ea7\u7b49\u5177\u4f53\u5173\u7cfb\u4e0e\u76ee\u6807\u7ec4\u5408\u5fc5\u987b\u8fdb\u5165\u884c\u4e3a\u6d4b\u8bd5\u573a\u666f\u3002",
+          "excerpt": "建仓人=自己、建仓人≠直属上级等具体关系与目标组合必须进入行为测试场景。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -959,7 +1082,7 @@
           "line_end": 8,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u7528\u6237\u4ec5\u770b\u5230\u6743\u9650\u547d\u4e2d\u7684\u80a1\u7968\u884c\uff0c\u672a\u547d\u4e2d\u80a1\u7968\u884c\u4e0d\u53ef\u89c1\uff0c\u6c47\u603b\u884c\u53ea\u7edf\u8ba1\u53ef\u89c1\u80a1\u7968\u3002",
+          "excerpt": "用户仅看到权限命中的股票行，未命中股票行不可见，汇总行只统计可见股票。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -968,7 +1091,7 @@
     },
     {
       "criterion_id": "REQ003",
-      "statement": "\u666e\u901a\u8ddf\u8fdb\u4eba\u4e94\u79cd\u5173\u7cfb\u4e0e\u56db\u79cd\u76ee\u6807\u8303\u56f4\u5168\u90e8\u5f62\u6210\u884c\u4e3a\u8986\u76d6",
+      "statement": "普通跟进人五种关系与四种目标范围全部形成行为覆盖",
       "fact_ids": [
         "FACT-002",
         "FACT-004",
@@ -995,7 +1118,7 @@
           "line_end": 2,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u666e\u901a\u5efa\u4ed3\u4eba\u548c\u666e\u901a\u8ddf\u8fdb\u4eba\u7684\u76ee\u6807\u8303\u56f4\u5305\u62ec\uff1a\u81ea\u5df1\u3001\u6240\u6709\u4e0b\u7ea7\u3001\u76f4\u5c5e\u4e0a\u7ea7\u3001\u76f4\u5c5e\u4e0b\u7ea7\u3002",
+          "excerpt": "普通建仓人和普通跟进人的目标范围包括：自己、所有下级、直属上级、直属下级。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -1010,7 +1133,7 @@
           "line_end": 4,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u666e\u901a\u8ddf\u8fdb\u4eba\u53d6 role_type=30\uff0c\u5173\u7cfb\u5305\u62ec\u7b49\u4e8e\u3001\u4e0d\u7b49\u4e8e\u3001\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\u3001\u5b8c\u5168\u5305\u542b\u4e8e\u3002",
+          "excerpt": "普通跟进人取 role_type=30，关系包括等于、不等于、包含于、不包含、完全包含于。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -1025,7 +1148,7 @@
           "line_end": 6,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u5efa\u4ed3\u4eba=\u81ea\u5df1\u3001\u5efa\u4ed3\u4eba\u2260\u76f4\u5c5e\u4e0a\u7ea7\u7b49\u5177\u4f53\u5173\u7cfb\u4e0e\u76ee\u6807\u7ec4\u5408\u5fc5\u987b\u8fdb\u5165\u884c\u4e3a\u6d4b\u8bd5\u573a\u666f\u3002",
+          "excerpt": "建仓人=自己、建仓人≠直属上级等具体关系与目标组合必须进入行为测试场景。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -1040,7 +1163,7 @@
           "line_end": 8,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u7528\u6237\u4ec5\u770b\u5230\u6743\u9650\u547d\u4e2d\u7684\u80a1\u7968\u884c\uff0c\u672a\u547d\u4e2d\u80a1\u7968\u884c\u4e0d\u53ef\u89c1\uff0c\u6c47\u603b\u884c\u53ea\u7edf\u8ba1\u53ef\u89c1\u80a1\u7968\u3002",
+          "excerpt": "用户仅看到权限命中的股票行，未命中股票行不可见，汇总行只统计可见股票。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -1049,7 +1172,7 @@
     },
     {
       "criterion_id": "REQ004",
-      "statement": "\u4e24\u7c7b\u6307\u5b9a\u7528\u6237\u6743\u9650\u8986\u76d6\u5355\u7528\u6237\u3001\u591a\u7528\u6237\u3001\u547d\u4e2d\u4e0e\u5168\u90e8\u4e0d\u547d\u4e2d",
+      "statement": "两类指定用户权限覆盖单用户、多用户、命中与全部不命中",
       "fact_ids": [
         "FACT-005",
         "FACT-011"
@@ -1069,7 +1192,7 @@
           "line_end": 5,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u5efa\u4ed3\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09\u548c\u8ddf\u8fdb\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09\u7684\u5173\u7cfb\u5305\u62ec\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\uff0c\u5e76\u652f\u6301\u8ffd\u52a0\u591a\u4e2a\u7528\u6237\u3002",
+          "excerpt": "建仓人（指定用户）和跟进人（指定用户）的关系包括包含于、不包含，并支持追加多个用户。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -1084,7 +1207,7 @@
           "line_end": 12,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u6307\u5b9a\u7528\u6237\u573a\u666f\u8986\u76d6\u5355\u4e2a\u7528\u6237\u3001\u8ffd\u52a0\u591a\u4e2a\u7528\u6237\u3001\u5176\u4e2d\u4e00\u4e2a\u7528\u6237\u547d\u4e2d\u548c\u6240\u6709\u7528\u6237\u5747\u4e0d\u547d\u4e2d\u3002",
+          "excerpt": "指定用户场景覆盖单个用户、追加多个用户、其中一个用户命中和所有用户均不命中。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -1093,7 +1216,7 @@
     },
     {
       "criterion_id": "REQ005",
-      "statement": "\u80a1\u7968\u884c\u4e0e\u6c47\u603b\u884c\u4f7f\u7528\u540c\u4e00\u6743\u9650\u53ef\u89c1\u96c6\u5408",
+      "statement": "股票行与汇总行使用同一权限可见集合",
       "fact_ids": [
         "FACT-007"
       ],
@@ -1112,7 +1235,7 @@
           "line_end": 8,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u7528\u6237\u4ec5\u770b\u5230\u6743\u9650\u547d\u4e2d\u7684\u80a1\u7968\u884c\uff0c\u672a\u547d\u4e2d\u80a1\u7968\u884c\u4e0d\u53ef\u89c1\uff0c\u6c47\u603b\u884c\u53ea\u7edf\u8ba1\u53ef\u89c1\u80a1\u7968\u3002",
+          "excerpt": "用户仅看到权限命中的股票行，未命中股票行不可见，汇总行只统计可见股票。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -1121,7 +1244,7 @@
     },
     {
       "criterion_id": "REQ006",
-      "statement": "\u6e05\u4ed3\u4e0e\u6e05\u540e\u91cd\u5efa\u7b56\u7565\u6bb5\u72ec\u7acb\u63a7\u6743",
+      "statement": "清仓与清后重建策略段独立控权",
       "fact_ids": [
         "FACT-008"
       ],
@@ -1139,7 +1262,7 @@
           "line_end": 9,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u6e05\u4ed3\u7b56\u7565\u548c\u6e05\u540e\u91cd\u5efa\u7b56\u7565\u6bb5\u72ec\u7acb\u63a7\u6743\u3002",
+          "excerpt": "清仓策略和清后重建策略段独立控权。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -1148,7 +1271,7 @@
     },
     {
       "criterion_id": "REQ007",
-      "statement": "\u65b0\u65e7\u6743\u9650 AND/OR \u7ec4\u5408\u4e14\u539f\u6709\u6743\u9650\u4fdd\u7559",
+      "statement": "新旧权限 AND/OR 组合且原有权限保留",
       "fact_ids": [
         "FACT-009"
       ],
@@ -1167,7 +1290,7 @@
           "line_end": 10,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u591a\u4e2a\u65b0\u65e7\u6743\u9650\u6761\u4ef6\u652f\u6301 AND \u548c OR \u8fde\u63a5\uff0c\u539f\u6709\u6743\u9650\u4fdd\u7559\u3002",
+          "excerpt": "多个新旧权限条件支持 AND 和 OR 连接，原有权限保留。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -1176,7 +1299,7 @@
     },
     {
       "criterion_id": "REQ008",
-      "statement": "\u53ef\u7528\u8d44\u91d1\u5f39\u7a97\u57fa\u7ebf\u5b57\u6bb5\u96c6\u5408\u4e0e\u5b57\u6bb5\u503c\u4e0d\u53d8",
+      "statement": "可用资金弹窗基线字段集合与字段值不变",
       "fact_ids": [
         "FACT-010"
       ],
@@ -1194,7 +1317,7 @@
           "line_end": 11,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u53ef\u7528\u8d44\u91d1\u5f39\u7a97\u4e0d\u53d7\u672c\u6b21\u6e05\u4ed3\u80a1\u6743\u9650\u53d8\u66f4\u5f71\u54cd\u3002",
+          "excerpt": "可用资金弹窗不受本次清仓股权限变更影响。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -1203,7 +1326,7 @@
     },
     {
       "criterion_id": "REQ009",
-      "statement": "\u4e0d\u6269\u5199\u672a\u786e\u8ba4\u7684\u91cd\u590d\u7528\u6237\u884c\u4e3a",
+      "statement": "不扩写未确认的重复用户行为",
       "fact_ids": [
         "FACT-012"
       ],
@@ -1219,7 +1342,7 @@
           "line_end": 13,
           "commit_sha": null,
           "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
-          "excerpt": "\u4e0d\u5f97\u6269\u5199\u91cd\u590d\u7528\u6237\u81ea\u52a8\u53bb\u91cd\u3001\u91cd\u590d\u7528\u6237\u4e0d\u53ef\u9009\u62e9\u3001\u91cd\u590d\u7528\u6237\u63d0\u793a\u6216\u5220\u9664\u7528\u6237\u540e\u7684\u4fdd\u5b58\u89c4\u5219\u3002",
+          "excerpt": "不得扩写重复用户自动去重、重复用户不可选择、重复用户提示或删除用户后的保存规则。",
           "captured_at": "2026-07-18 20:18:36",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
@@ -1228,89 +1351,89 @@
     }
   ],
   "regression_scope": [
-    "\u6838\u5fc3\u56de\u5f52",
-    "\u5173\u8054\u56de\u5f52",
-    "\u5192\u70df\u56de\u5f52"
+    "核心回归",
+    "关联回归",
+    "冒烟回归"
   ],
   "matched_profiles": [],
   "data_validation_required": "blocked",
-  "data_validation_reason": "\u6743\u9650\u8fc7\u6ee4\u3001\u6c47\u603b\u7edf\u8ba1\u548c\u89d2\u8272\u96c6\u5408\u5224\u65ad\u6d89\u53ca\u4e1a\u52a1\u6570\u636e\uff0c\u4f46\u7f3a\u5c11\u5b8c\u6574 DDL\u3001\u67e5\u8be2 SQL \u548c\u63a5\u53e3\u5951\u7ea6",
+  "data_validation_reason": "权限过滤、汇总统计和角色集合判断涉及业务数据，但缺少完整 DDL、查询 SQL 和接口契约",
   "recommended_validation_method": "blocked",
   "sql_generation_status": "blocked",
   "validation_missing_information": [
-    "\u5b8c\u6574 DDL",
-    "\u5b9e\u9645\u67e5\u8be2 SQL \u6216\u63a5\u53e3\u5951\u7ea6",
-    "\u53ef\u6267\u884c\u6d4b\u8bd5\u6570\u636e"
+    "完整 DDL",
+    "实际查询 SQL 或接口契约",
+    "可执行测试数据"
   ],
   "condition_matrix_required": true,
   "condition_matrix": {
     "dimensions": [
       {
         "dimension_id": "business_entry",
-        "dimension_name": "\u4e1a\u52a1\u5165\u53e3",
+        "dimension_name": "业务入口",
         "values": [
-          "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97"
+          "模拟交易清仓股弹窗",
+          "正式交易清仓股弹窗"
         ]
       },
       {
         "dimension_id": "permission_type",
-        "dimension_name": "\u6743\u9650\u7c7b\u578b",
+        "dimension_name": "权限类型",
         "values": [
-          "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "\u666e\u901a\u8ddf\u8fdb\u4eba",
-          "\u5efa\u4ed3\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
-          "\u8ddf\u8fdb\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09"
+          "普通建仓人",
+          "普通跟进人",
+          "建仓人（指定用户）",
+          "跟进人（指定用户）"
         ]
       },
       {
         "dimension_id": "role_type_scope",
-        "dimension_name": "\u89d2\u8272\u7c7b\u578b",
+        "dimension_name": "角色类型",
         "values": [
-          "role_type\u2208{10,20}",
+          "role_type∈{10,20}",
           "role_type=30"
         ]
       },
       {
         "dimension_id": "relation",
-        "dimension_name": "\u5173\u7cfb\u7c7b\u578b",
+        "dimension_name": "关系类型",
         "values": [
-          "\u7b49\u4e8e",
-          "\u4e0d\u7b49\u4e8e",
-          "\u5305\u542b\u4e8e",
-          "\u4e0d\u5305\u542b",
-          "\u5b8c\u5168\u5305\u542b\u4e8e"
+          "等于",
+          "不等于",
+          "包含于",
+          "不包含",
+          "完全包含于"
         ]
       },
       {
         "dimension_id": "target_scope",
-        "dimension_name": "\u76ee\u6807\u8303\u56f4",
+        "dimension_name": "目标范围",
         "values": [
-          "\u81ea\u5df1",
-          "\u6240\u6709\u4e0b\u7ea7",
-          "\u76f4\u5c5e\u4e0a\u7ea7",
-          "\u76f4\u5c5e\u4e0b\u7ea7",
-          "\u6307\u5b9a\u7528\u6237\u96c6\u5408"
+          "自己",
+          "所有下级",
+          "直属上级",
+          "直属下级",
+          "指定用户集合"
         ]
       },
       {
         "dimension_id": "expected_match_state",
-        "dimension_name": "\u547d\u4e2d\u72b6\u6001",
+        "dimension_name": "命中状态",
         "values": [
-          "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "\u5355\u7528\u6237\u547d\u4e2d",
-          "\u5355\u7528\u6237\u4e0d\u547d\u4e2d",
-          "\u591a\u7528\u6237\u4e00\u4e2a\u547d\u4e2d",
-          "\u591a\u7528\u6237\u5168\u90e8\u4e0d\u547d\u4e2d"
+          "命中与不命中",
+          "单用户命中",
+          "单用户不命中",
+          "多用户一个命中",
+          "多用户全部不命中"
         ]
       },
       {
         "dimension_id": "data_shape",
-        "dimension_name": "\u6570\u636e\u5f62\u6001",
+        "dimension_name": "数据形态",
         "values": [
-          "\u666e\u901a\u4eba\u5458",
-          "\u5355\u7528\u6237",
-          "\u591a\u7528\u6237"
+          "普通人员",
+          "单用户",
+          "多用户"
         ]
       }
     ],
@@ -1318,13 +1441,13 @@
       {
         "combination_id": "COMBO-001",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u7b49\u4e8e",
-          "target_scope": "\u81ea\u5df1",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "等于",
+          "target_scope": "自己",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC006"
@@ -1333,13 +1456,13 @@
       {
         "combination_id": "COMBO-002",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u7b49\u4e8e",
-          "target_scope": "\u81ea\u5df1",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "等于",
+          "target_scope": "自己",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC006"
@@ -1348,13 +1471,13 @@
       {
         "combination_id": "COMBO-003",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u7b49\u4e8e",
-          "target_scope": "\u6240\u6709\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "等于",
+          "target_scope": "所有下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC006"
@@ -1363,13 +1486,13 @@
       {
         "combination_id": "COMBO-004",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u7b49\u4e8e",
-          "target_scope": "\u6240\u6709\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "等于",
+          "target_scope": "所有下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC006"
@@ -1378,13 +1501,13 @@
       {
         "combination_id": "COMBO-005",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u7b49\u4e8e",
-          "target_scope": "\u76f4\u5c5e\u4e0a\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "等于",
+          "target_scope": "直属上级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC006"
@@ -1393,13 +1516,13 @@
       {
         "combination_id": "COMBO-006",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u7b49\u4e8e",
-          "target_scope": "\u76f4\u5c5e\u4e0a\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "等于",
+          "target_scope": "直属上级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC006"
@@ -1408,13 +1531,13 @@
       {
         "combination_id": "COMBO-007",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u7b49\u4e8e",
-          "target_scope": "\u76f4\u5c5e\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "等于",
+          "target_scope": "直属下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC006"
@@ -1423,13 +1546,13 @@
       {
         "combination_id": "COMBO-008",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u7b49\u4e8e",
-          "target_scope": "\u76f4\u5c5e\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "等于",
+          "target_scope": "直属下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC006"
@@ -1438,13 +1561,13 @@
       {
         "combination_id": "COMBO-009",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u4e0d\u7b49\u4e8e",
-          "target_scope": "\u81ea\u5df1",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "不等于",
+          "target_scope": "自己",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC007"
@@ -1453,13 +1576,13 @@
       {
         "combination_id": "COMBO-010",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u4e0d\u7b49\u4e8e",
-          "target_scope": "\u81ea\u5df1",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "不等于",
+          "target_scope": "自己",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC007"
@@ -1468,13 +1591,13 @@
       {
         "combination_id": "COMBO-011",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u4e0d\u7b49\u4e8e",
-          "target_scope": "\u6240\u6709\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "不等于",
+          "target_scope": "所有下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC007"
@@ -1483,13 +1606,13 @@
       {
         "combination_id": "COMBO-012",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u4e0d\u7b49\u4e8e",
-          "target_scope": "\u6240\u6709\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "不等于",
+          "target_scope": "所有下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC007"
@@ -1498,13 +1621,13 @@
       {
         "combination_id": "COMBO-013",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u4e0d\u7b49\u4e8e",
-          "target_scope": "\u76f4\u5c5e\u4e0a\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "不等于",
+          "target_scope": "直属上级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC007"
@@ -1513,13 +1636,13 @@
       {
         "combination_id": "COMBO-014",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u4e0d\u7b49\u4e8e",
-          "target_scope": "\u76f4\u5c5e\u4e0a\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "不等于",
+          "target_scope": "直属上级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC007"
@@ -1528,13 +1651,13 @@
       {
         "combination_id": "COMBO-015",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u4e0d\u7b49\u4e8e",
-          "target_scope": "\u76f4\u5c5e\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "不等于",
+          "target_scope": "直属下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC007"
@@ -1543,13 +1666,13 @@
       {
         "combination_id": "COMBO-016",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u4e0d\u7b49\u4e8e",
-          "target_scope": "\u76f4\u5c5e\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "不等于",
+          "target_scope": "直属下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC007"
@@ -1558,13 +1681,13 @@
       {
         "combination_id": "COMBO-017",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u5305\u542b\u4e8e",
-          "target_scope": "\u81ea\u5df1",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "包含于",
+          "target_scope": "自己",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC008"
@@ -1573,13 +1696,13 @@
       {
         "combination_id": "COMBO-018",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u5305\u542b\u4e8e",
-          "target_scope": "\u81ea\u5df1",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "包含于",
+          "target_scope": "自己",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC008"
@@ -1588,13 +1711,13 @@
       {
         "combination_id": "COMBO-019",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u5305\u542b\u4e8e",
-          "target_scope": "\u6240\u6709\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "包含于",
+          "target_scope": "所有下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC008"
@@ -1603,13 +1726,13 @@
       {
         "combination_id": "COMBO-020",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u5305\u542b\u4e8e",
-          "target_scope": "\u6240\u6709\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "包含于",
+          "target_scope": "所有下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC008"
@@ -1618,13 +1741,13 @@
       {
         "combination_id": "COMBO-021",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u5305\u542b\u4e8e",
-          "target_scope": "\u76f4\u5c5e\u4e0a\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "包含于",
+          "target_scope": "直属上级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC008"
@@ -1633,13 +1756,13 @@
       {
         "combination_id": "COMBO-022",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u5305\u542b\u4e8e",
-          "target_scope": "\u76f4\u5c5e\u4e0a\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "包含于",
+          "target_scope": "直属上级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC008"
@@ -1648,13 +1771,13 @@
       {
         "combination_id": "COMBO-023",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u5305\u542b\u4e8e",
-          "target_scope": "\u76f4\u5c5e\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "包含于",
+          "target_scope": "直属下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC008"
@@ -1663,13 +1786,13 @@
       {
         "combination_id": "COMBO-024",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u5305\u542b\u4e8e",
-          "target_scope": "\u76f4\u5c5e\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "包含于",
+          "target_scope": "直属下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC008"
@@ -1678,13 +1801,13 @@
       {
         "combination_id": "COMBO-025",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u4e0d\u5305\u542b",
-          "target_scope": "\u81ea\u5df1",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "不包含",
+          "target_scope": "自己",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC009"
@@ -1693,13 +1816,13 @@
       {
         "combination_id": "COMBO-026",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u4e0d\u5305\u542b",
-          "target_scope": "\u81ea\u5df1",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "不包含",
+          "target_scope": "自己",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC009"
@@ -1708,13 +1831,13 @@
       {
         "combination_id": "COMBO-027",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u4e0d\u5305\u542b",
-          "target_scope": "\u6240\u6709\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "不包含",
+          "target_scope": "所有下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC009"
@@ -1723,13 +1846,13 @@
       {
         "combination_id": "COMBO-028",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u4e0d\u5305\u542b",
-          "target_scope": "\u6240\u6709\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "不包含",
+          "target_scope": "所有下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC009"
@@ -1738,13 +1861,13 @@
       {
         "combination_id": "COMBO-029",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u4e0d\u5305\u542b",
-          "target_scope": "\u76f4\u5c5e\u4e0a\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "不包含",
+          "target_scope": "直属上级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC009"
@@ -1753,13 +1876,13 @@
       {
         "combination_id": "COMBO-030",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u4e0d\u5305\u542b",
-          "target_scope": "\u76f4\u5c5e\u4e0a\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "不包含",
+          "target_scope": "直属上级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC009"
@@ -1768,13 +1891,13 @@
       {
         "combination_id": "COMBO-031",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u4e0d\u5305\u542b",
-          "target_scope": "\u76f4\u5c5e\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "不包含",
+          "target_scope": "直属下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC009"
@@ -1783,13 +1906,13 @@
       {
         "combination_id": "COMBO-032",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u4e0d\u5305\u542b",
-          "target_scope": "\u76f4\u5c5e\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "不包含",
+          "target_scope": "直属下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC009"
@@ -1798,13 +1921,13 @@
       {
         "combination_id": "COMBO-033",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u5b8c\u5168\u5305\u542b\u4e8e",
-          "target_scope": "\u81ea\u5df1",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "完全包含于",
+          "target_scope": "自己",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC010"
@@ -1813,13 +1936,13 @@
       {
         "combination_id": "COMBO-034",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u5b8c\u5168\u5305\u542b\u4e8e",
-          "target_scope": "\u81ea\u5df1",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "完全包含于",
+          "target_scope": "自己",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC010"
@@ -1828,13 +1951,13 @@
       {
         "combination_id": "COMBO-035",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u5b8c\u5168\u5305\u542b\u4e8e",
-          "target_scope": "\u6240\u6709\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "完全包含于",
+          "target_scope": "所有下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC010"
@@ -1843,13 +1966,13 @@
       {
         "combination_id": "COMBO-036",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u5b8c\u5168\u5305\u542b\u4e8e",
-          "target_scope": "\u6240\u6709\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "完全包含于",
+          "target_scope": "所有下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC010"
@@ -1858,13 +1981,13 @@
       {
         "combination_id": "COMBO-037",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u5b8c\u5168\u5305\u542b\u4e8e",
-          "target_scope": "\u76f4\u5c5e\u4e0a\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "完全包含于",
+          "target_scope": "直属上级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC010"
@@ -1873,13 +1996,13 @@
       {
         "combination_id": "COMBO-038",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u5b8c\u5168\u5305\u542b\u4e8e",
-          "target_scope": "\u76f4\u5c5e\u4e0a\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "完全包含于",
+          "target_scope": "直属上级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC010"
@@ -1888,13 +2011,13 @@
       {
         "combination_id": "COMBO-039",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u5b8c\u5168\u5305\u542b\u4e8e",
-          "target_scope": "\u76f4\u5c5e\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "完全包含于",
+          "target_scope": "直属下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC010"
@@ -1903,13 +2026,13 @@
       {
         "combination_id": "COMBO-040",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u5efa\u4ed3\u4eba",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u5b8c\u5168\u5305\u542b\u4e8e",
-          "target_scope": "\u76f4\u5c5e\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通建仓人",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "完全包含于",
+          "target_scope": "直属下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC010"
@@ -1918,13 +2041,13 @@
       {
         "combination_id": "COMBO-041",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u7b49\u4e8e",
-          "target_scope": "\u81ea\u5df1",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "等于",
+          "target_scope": "自己",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC011"
@@ -1933,13 +2056,13 @@
       {
         "combination_id": "COMBO-042",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u7b49\u4e8e",
-          "target_scope": "\u81ea\u5df1",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "等于",
+          "target_scope": "自己",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC011"
@@ -1948,13 +2071,13 @@
       {
         "combination_id": "COMBO-043",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u7b49\u4e8e",
-          "target_scope": "\u6240\u6709\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "等于",
+          "target_scope": "所有下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC011"
@@ -1963,13 +2086,13 @@
       {
         "combination_id": "COMBO-044",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u7b49\u4e8e",
-          "target_scope": "\u6240\u6709\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "等于",
+          "target_scope": "所有下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC011"
@@ -1978,13 +2101,13 @@
       {
         "combination_id": "COMBO-045",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u7b49\u4e8e",
-          "target_scope": "\u76f4\u5c5e\u4e0a\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "等于",
+          "target_scope": "直属上级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC011"
@@ -1993,13 +2116,13 @@
       {
         "combination_id": "COMBO-046",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u7b49\u4e8e",
-          "target_scope": "\u76f4\u5c5e\u4e0a\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "等于",
+          "target_scope": "直属上级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC011"
@@ -2008,13 +2131,13 @@
       {
         "combination_id": "COMBO-047",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u7b49\u4e8e",
-          "target_scope": "\u76f4\u5c5e\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "等于",
+          "target_scope": "直属下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC011"
@@ -2023,13 +2146,13 @@
       {
         "combination_id": "COMBO-048",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u7b49\u4e8e",
-          "target_scope": "\u76f4\u5c5e\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "等于",
+          "target_scope": "直属下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC011"
@@ -2038,13 +2161,13 @@
       {
         "combination_id": "COMBO-049",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u4e0d\u7b49\u4e8e",
-          "target_scope": "\u81ea\u5df1",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "不等于",
+          "target_scope": "自己",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC012"
@@ -2053,13 +2176,13 @@
       {
         "combination_id": "COMBO-050",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u4e0d\u7b49\u4e8e",
-          "target_scope": "\u81ea\u5df1",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "不等于",
+          "target_scope": "自己",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC012"
@@ -2068,13 +2191,13 @@
       {
         "combination_id": "COMBO-051",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u4e0d\u7b49\u4e8e",
-          "target_scope": "\u6240\u6709\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "不等于",
+          "target_scope": "所有下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC012"
@@ -2083,13 +2206,13 @@
       {
         "combination_id": "COMBO-052",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u4e0d\u7b49\u4e8e",
-          "target_scope": "\u6240\u6709\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "不等于",
+          "target_scope": "所有下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC012"
@@ -2098,13 +2221,13 @@
       {
         "combination_id": "COMBO-053",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u4e0d\u7b49\u4e8e",
-          "target_scope": "\u76f4\u5c5e\u4e0a\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "不等于",
+          "target_scope": "直属上级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC012"
@@ -2113,13 +2236,13 @@
       {
         "combination_id": "COMBO-054",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u4e0d\u7b49\u4e8e",
-          "target_scope": "\u76f4\u5c5e\u4e0a\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "不等于",
+          "target_scope": "直属上级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC012"
@@ -2128,13 +2251,13 @@
       {
         "combination_id": "COMBO-055",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u4e0d\u7b49\u4e8e",
-          "target_scope": "\u76f4\u5c5e\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "不等于",
+          "target_scope": "直属下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC012"
@@ -2143,13 +2266,13 @@
       {
         "combination_id": "COMBO-056",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u4e0d\u7b49\u4e8e",
-          "target_scope": "\u76f4\u5c5e\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "不等于",
+          "target_scope": "直属下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC012"
@@ -2158,13 +2281,13 @@
       {
         "combination_id": "COMBO-057",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u5305\u542b\u4e8e",
-          "target_scope": "\u81ea\u5df1",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "包含于",
+          "target_scope": "自己",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC013"
@@ -2173,13 +2296,13 @@
       {
         "combination_id": "COMBO-058",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u5305\u542b\u4e8e",
-          "target_scope": "\u81ea\u5df1",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "包含于",
+          "target_scope": "自己",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC013"
@@ -2188,13 +2311,13 @@
       {
         "combination_id": "COMBO-059",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u5305\u542b\u4e8e",
-          "target_scope": "\u6240\u6709\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "包含于",
+          "target_scope": "所有下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC013"
@@ -2203,13 +2326,13 @@
       {
         "combination_id": "COMBO-060",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u5305\u542b\u4e8e",
-          "target_scope": "\u6240\u6709\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "包含于",
+          "target_scope": "所有下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC013"
@@ -2218,13 +2341,13 @@
       {
         "combination_id": "COMBO-061",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u5305\u542b\u4e8e",
-          "target_scope": "\u76f4\u5c5e\u4e0a\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "包含于",
+          "target_scope": "直属上级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC013"
@@ -2233,13 +2356,13 @@
       {
         "combination_id": "COMBO-062",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u5305\u542b\u4e8e",
-          "target_scope": "\u76f4\u5c5e\u4e0a\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "包含于",
+          "target_scope": "直属上级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC013"
@@ -2248,13 +2371,13 @@
       {
         "combination_id": "COMBO-063",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u5305\u542b\u4e8e",
-          "target_scope": "\u76f4\u5c5e\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "包含于",
+          "target_scope": "直属下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC013"
@@ -2263,13 +2386,13 @@
       {
         "combination_id": "COMBO-064",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u5305\u542b\u4e8e",
-          "target_scope": "\u76f4\u5c5e\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "包含于",
+          "target_scope": "直属下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC013"
@@ -2278,13 +2401,13 @@
       {
         "combination_id": "COMBO-065",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u4e0d\u5305\u542b",
-          "target_scope": "\u81ea\u5df1",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "不包含",
+          "target_scope": "自己",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC014"
@@ -2293,13 +2416,13 @@
       {
         "combination_id": "COMBO-066",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u4e0d\u5305\u542b",
-          "target_scope": "\u81ea\u5df1",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "不包含",
+          "target_scope": "自己",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC014"
@@ -2308,13 +2431,13 @@
       {
         "combination_id": "COMBO-067",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u4e0d\u5305\u542b",
-          "target_scope": "\u6240\u6709\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "不包含",
+          "target_scope": "所有下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC014"
@@ -2323,13 +2446,13 @@
       {
         "combination_id": "COMBO-068",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u4e0d\u5305\u542b",
-          "target_scope": "\u6240\u6709\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "不包含",
+          "target_scope": "所有下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC014"
@@ -2338,13 +2461,13 @@
       {
         "combination_id": "COMBO-069",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u4e0d\u5305\u542b",
-          "target_scope": "\u76f4\u5c5e\u4e0a\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "不包含",
+          "target_scope": "直属上级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC014"
@@ -2353,13 +2476,13 @@
       {
         "combination_id": "COMBO-070",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u4e0d\u5305\u542b",
-          "target_scope": "\u76f4\u5c5e\u4e0a\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "不包含",
+          "target_scope": "直属上级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC014"
@@ -2368,13 +2491,13 @@
       {
         "combination_id": "COMBO-071",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u4e0d\u5305\u542b",
-          "target_scope": "\u76f4\u5c5e\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "不包含",
+          "target_scope": "直属下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC014"
@@ -2383,13 +2506,13 @@
       {
         "combination_id": "COMBO-072",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u4e0d\u5305\u542b",
-          "target_scope": "\u76f4\u5c5e\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "不包含",
+          "target_scope": "直属下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC014"
@@ -2398,13 +2521,13 @@
       {
         "combination_id": "COMBO-073",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u5b8c\u5168\u5305\u542b\u4e8e",
-          "target_scope": "\u81ea\u5df1",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "完全包含于",
+          "target_scope": "自己",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC015"
@@ -2413,13 +2536,13 @@
       {
         "combination_id": "COMBO-074",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u5b8c\u5168\u5305\u542b\u4e8e",
-          "target_scope": "\u81ea\u5df1",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "完全包含于",
+          "target_scope": "自己",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC015"
@@ -2428,13 +2551,13 @@
       {
         "combination_id": "COMBO-075",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u5b8c\u5168\u5305\u542b\u4e8e",
-          "target_scope": "\u6240\u6709\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "完全包含于",
+          "target_scope": "所有下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC015"
@@ -2443,13 +2566,13 @@
       {
         "combination_id": "COMBO-076",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u5b8c\u5168\u5305\u542b\u4e8e",
-          "target_scope": "\u6240\u6709\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "完全包含于",
+          "target_scope": "所有下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC015"
@@ -2458,13 +2581,13 @@
       {
         "combination_id": "COMBO-077",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u5b8c\u5168\u5305\u542b\u4e8e",
-          "target_scope": "\u76f4\u5c5e\u4e0a\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "完全包含于",
+          "target_scope": "直属上级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC015"
@@ -2473,13 +2596,13 @@
       {
         "combination_id": "COMBO-078",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u5b8c\u5168\u5305\u542b\u4e8e",
-          "target_scope": "\u76f4\u5c5e\u4e0a\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "完全包含于",
+          "target_scope": "直属上级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC015"
@@ -2488,13 +2611,13 @@
       {
         "combination_id": "COMBO-079",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u5b8c\u5168\u5305\u542b\u4e8e",
-          "target_scope": "\u76f4\u5c5e\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "完全包含于",
+          "target_scope": "直属下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC015"
@@ -2503,13 +2626,13 @@
       {
         "combination_id": "COMBO-080",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u666e\u901a\u8ddf\u8fdb\u4eba",
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "普通跟进人",
           "role_type_scope": "role_type=30",
-          "relation": "\u5b8c\u5168\u5305\u542b\u4e8e",
-          "target_scope": "\u76f4\u5c5e\u4e0b\u7ea7",
-          "expected_match_state": "\u547d\u4e2d\u4e0e\u4e0d\u547d\u4e2d",
-          "data_shape": "\u666e\u901a\u4eba\u5458"
+          "relation": "完全包含于",
+          "target_scope": "直属下级",
+          "expected_match_state": "命中与不命中",
+          "data_shape": "普通人员"
         },
         "covered_by_tc_ids": [
           "TC015"
@@ -2518,13 +2641,13 @@
       {
         "combination_id": "COMBO-081",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u5efa\u4ed3\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u5305\u542b\u4e8e",
-          "target_scope": "\u6307\u5b9a\u7528\u6237\u96c6\u5408",
-          "expected_match_state": "\u5355\u7528\u6237\u547d\u4e2d",
-          "data_shape": "\u5355\u7528\u6237"
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "建仓人（指定用户）",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "包含于",
+          "target_scope": "指定用户集合",
+          "expected_match_state": "单用户命中",
+          "data_shape": "单用户"
         },
         "covered_by_tc_ids": [
           "TC016"
@@ -2533,13 +2656,13 @@
       {
         "combination_id": "COMBO-082",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u5efa\u4ed3\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u5305\u542b\u4e8e",
-          "target_scope": "\u6307\u5b9a\u7528\u6237\u96c6\u5408",
-          "expected_match_state": "\u5355\u7528\u6237\u547d\u4e2d",
-          "data_shape": "\u5355\u7528\u6237"
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "建仓人（指定用户）",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "包含于",
+          "target_scope": "指定用户集合",
+          "expected_match_state": "单用户命中",
+          "data_shape": "单用户"
         },
         "covered_by_tc_ids": [
           "TC016"
@@ -2548,13 +2671,13 @@
       {
         "combination_id": "COMBO-083",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u5efa\u4ed3\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u5305\u542b\u4e8e",
-          "target_scope": "\u6307\u5b9a\u7528\u6237\u96c6\u5408",
-          "expected_match_state": "\u5355\u7528\u6237\u4e0d\u547d\u4e2d",
-          "data_shape": "\u5355\u7528\u6237"
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "建仓人（指定用户）",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "包含于",
+          "target_scope": "指定用户集合",
+          "expected_match_state": "单用户不命中",
+          "data_shape": "单用户"
         },
         "covered_by_tc_ids": [
           "TC016"
@@ -2563,13 +2686,13 @@
       {
         "combination_id": "COMBO-084",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u5efa\u4ed3\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u5305\u542b\u4e8e",
-          "target_scope": "\u6307\u5b9a\u7528\u6237\u96c6\u5408",
-          "expected_match_state": "\u5355\u7528\u6237\u4e0d\u547d\u4e2d",
-          "data_shape": "\u5355\u7528\u6237"
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "建仓人（指定用户）",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "包含于",
+          "target_scope": "指定用户集合",
+          "expected_match_state": "单用户不命中",
+          "data_shape": "单用户"
         },
         "covered_by_tc_ids": [
           "TC016"
@@ -2578,13 +2701,13 @@
       {
         "combination_id": "COMBO-085",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u5efa\u4ed3\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u5305\u542b\u4e8e",
-          "target_scope": "\u6307\u5b9a\u7528\u6237\u96c6\u5408",
-          "expected_match_state": "\u591a\u7528\u6237\u4e00\u4e2a\u547d\u4e2d",
-          "data_shape": "\u591a\u7528\u6237"
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "建仓人（指定用户）",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "包含于",
+          "target_scope": "指定用户集合",
+          "expected_match_state": "多用户一个命中",
+          "data_shape": "多用户"
         },
         "covered_by_tc_ids": [
           "TC016"
@@ -2593,13 +2716,13 @@
       {
         "combination_id": "COMBO-086",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u5efa\u4ed3\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u5305\u542b\u4e8e",
-          "target_scope": "\u6307\u5b9a\u7528\u6237\u96c6\u5408",
-          "expected_match_state": "\u591a\u7528\u6237\u4e00\u4e2a\u547d\u4e2d",
-          "data_shape": "\u591a\u7528\u6237"
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "建仓人（指定用户）",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "包含于",
+          "target_scope": "指定用户集合",
+          "expected_match_state": "多用户一个命中",
+          "data_shape": "多用户"
         },
         "covered_by_tc_ids": [
           "TC016"
@@ -2608,13 +2731,13 @@
       {
         "combination_id": "COMBO-087",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u5efa\u4ed3\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u5305\u542b\u4e8e",
-          "target_scope": "\u6307\u5b9a\u7528\u6237\u96c6\u5408",
-          "expected_match_state": "\u591a\u7528\u6237\u5168\u90e8\u4e0d\u547d\u4e2d",
-          "data_shape": "\u591a\u7528\u6237"
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "建仓人（指定用户）",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "包含于",
+          "target_scope": "指定用户集合",
+          "expected_match_state": "多用户全部不命中",
+          "data_shape": "多用户"
         },
         "covered_by_tc_ids": [
           "TC016"
@@ -2623,13 +2746,13 @@
       {
         "combination_id": "COMBO-088",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u5efa\u4ed3\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u5305\u542b\u4e8e",
-          "target_scope": "\u6307\u5b9a\u7528\u6237\u96c6\u5408",
-          "expected_match_state": "\u591a\u7528\u6237\u5168\u90e8\u4e0d\u547d\u4e2d",
-          "data_shape": "\u591a\u7528\u6237"
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "建仓人（指定用户）",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "包含于",
+          "target_scope": "指定用户集合",
+          "expected_match_state": "多用户全部不命中",
+          "data_shape": "多用户"
         },
         "covered_by_tc_ids": [
           "TC016"
@@ -2638,13 +2761,13 @@
       {
         "combination_id": "COMBO-089",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u5efa\u4ed3\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u4e0d\u5305\u542b",
-          "target_scope": "\u6307\u5b9a\u7528\u6237\u96c6\u5408",
-          "expected_match_state": "\u5355\u7528\u6237\u547d\u4e2d",
-          "data_shape": "\u5355\u7528\u6237"
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "建仓人（指定用户）",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "不包含",
+          "target_scope": "指定用户集合",
+          "expected_match_state": "单用户命中",
+          "data_shape": "单用户"
         },
         "covered_by_tc_ids": [
           "TC017"
@@ -2653,13 +2776,13 @@
       {
         "combination_id": "COMBO-090",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u5efa\u4ed3\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u4e0d\u5305\u542b",
-          "target_scope": "\u6307\u5b9a\u7528\u6237\u96c6\u5408",
-          "expected_match_state": "\u5355\u7528\u6237\u547d\u4e2d",
-          "data_shape": "\u5355\u7528\u6237"
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "建仓人（指定用户）",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "不包含",
+          "target_scope": "指定用户集合",
+          "expected_match_state": "单用户命中",
+          "data_shape": "单用户"
         },
         "covered_by_tc_ids": [
           "TC017"
@@ -2668,13 +2791,13 @@
       {
         "combination_id": "COMBO-091",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u5efa\u4ed3\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u4e0d\u5305\u542b",
-          "target_scope": "\u6307\u5b9a\u7528\u6237\u96c6\u5408",
-          "expected_match_state": "\u5355\u7528\u6237\u4e0d\u547d\u4e2d",
-          "data_shape": "\u5355\u7528\u6237"
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "建仓人（指定用户）",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "不包含",
+          "target_scope": "指定用户集合",
+          "expected_match_state": "单用户不命中",
+          "data_shape": "单用户"
         },
         "covered_by_tc_ids": [
           "TC017"
@@ -2683,13 +2806,13 @@
       {
         "combination_id": "COMBO-092",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u5efa\u4ed3\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u4e0d\u5305\u542b",
-          "target_scope": "\u6307\u5b9a\u7528\u6237\u96c6\u5408",
-          "expected_match_state": "\u5355\u7528\u6237\u4e0d\u547d\u4e2d",
-          "data_shape": "\u5355\u7528\u6237"
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "建仓人（指定用户）",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "不包含",
+          "target_scope": "指定用户集合",
+          "expected_match_state": "单用户不命中",
+          "data_shape": "单用户"
         },
         "covered_by_tc_ids": [
           "TC017"
@@ -2698,13 +2821,13 @@
       {
         "combination_id": "COMBO-093",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u5efa\u4ed3\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u4e0d\u5305\u542b",
-          "target_scope": "\u6307\u5b9a\u7528\u6237\u96c6\u5408",
-          "expected_match_state": "\u591a\u7528\u6237\u4e00\u4e2a\u547d\u4e2d",
-          "data_shape": "\u591a\u7528\u6237"
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "建仓人（指定用户）",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "不包含",
+          "target_scope": "指定用户集合",
+          "expected_match_state": "多用户一个命中",
+          "data_shape": "多用户"
         },
         "covered_by_tc_ids": [
           "TC017"
@@ -2713,13 +2836,13 @@
       {
         "combination_id": "COMBO-094",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u5efa\u4ed3\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u4e0d\u5305\u542b",
-          "target_scope": "\u6307\u5b9a\u7528\u6237\u96c6\u5408",
-          "expected_match_state": "\u591a\u7528\u6237\u4e00\u4e2a\u547d\u4e2d",
-          "data_shape": "\u591a\u7528\u6237"
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "建仓人（指定用户）",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "不包含",
+          "target_scope": "指定用户集合",
+          "expected_match_state": "多用户一个命中",
+          "data_shape": "多用户"
         },
         "covered_by_tc_ids": [
           "TC017"
@@ -2728,13 +2851,13 @@
       {
         "combination_id": "COMBO-095",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u5efa\u4ed3\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u4e0d\u5305\u542b",
-          "target_scope": "\u6307\u5b9a\u7528\u6237\u96c6\u5408",
-          "expected_match_state": "\u591a\u7528\u6237\u5168\u90e8\u4e0d\u547d\u4e2d",
-          "data_shape": "\u591a\u7528\u6237"
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "建仓人（指定用户）",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "不包含",
+          "target_scope": "指定用户集合",
+          "expected_match_state": "多用户全部不命中",
+          "data_shape": "多用户"
         },
         "covered_by_tc_ids": [
           "TC017"
@@ -2743,13 +2866,13 @@
       {
         "combination_id": "COMBO-096",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u5efa\u4ed3\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
-          "role_type_scope": "role_type\u2208{10,20}",
-          "relation": "\u4e0d\u5305\u542b",
-          "target_scope": "\u6307\u5b9a\u7528\u6237\u96c6\u5408",
-          "expected_match_state": "\u591a\u7528\u6237\u5168\u90e8\u4e0d\u547d\u4e2d",
-          "data_shape": "\u591a\u7528\u6237"
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "建仓人（指定用户）",
+          "role_type_scope": "role_type∈{10,20}",
+          "relation": "不包含",
+          "target_scope": "指定用户集合",
+          "expected_match_state": "多用户全部不命中",
+          "data_shape": "多用户"
         },
         "covered_by_tc_ids": [
           "TC017"
@@ -2758,13 +2881,13 @@
       {
         "combination_id": "COMBO-097",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u8ddf\u8fdb\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "跟进人（指定用户）",
           "role_type_scope": "role_type=30",
-          "relation": "\u5305\u542b\u4e8e",
-          "target_scope": "\u6307\u5b9a\u7528\u6237\u96c6\u5408",
-          "expected_match_state": "\u5355\u7528\u6237\u547d\u4e2d",
-          "data_shape": "\u5355\u7528\u6237"
+          "relation": "包含于",
+          "target_scope": "指定用户集合",
+          "expected_match_state": "单用户命中",
+          "data_shape": "单用户"
         },
         "covered_by_tc_ids": [
           "TC018"
@@ -2773,13 +2896,13 @@
       {
         "combination_id": "COMBO-098",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u8ddf\u8fdb\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "跟进人（指定用户）",
           "role_type_scope": "role_type=30",
-          "relation": "\u5305\u542b\u4e8e",
-          "target_scope": "\u6307\u5b9a\u7528\u6237\u96c6\u5408",
-          "expected_match_state": "\u5355\u7528\u6237\u547d\u4e2d",
-          "data_shape": "\u5355\u7528\u6237"
+          "relation": "包含于",
+          "target_scope": "指定用户集合",
+          "expected_match_state": "单用户命中",
+          "data_shape": "单用户"
         },
         "covered_by_tc_ids": [
           "TC018"
@@ -2788,13 +2911,13 @@
       {
         "combination_id": "COMBO-099",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u8ddf\u8fdb\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "跟进人（指定用户）",
           "role_type_scope": "role_type=30",
-          "relation": "\u5305\u542b\u4e8e",
-          "target_scope": "\u6307\u5b9a\u7528\u6237\u96c6\u5408",
-          "expected_match_state": "\u5355\u7528\u6237\u4e0d\u547d\u4e2d",
-          "data_shape": "\u5355\u7528\u6237"
+          "relation": "包含于",
+          "target_scope": "指定用户集合",
+          "expected_match_state": "单用户不命中",
+          "data_shape": "单用户"
         },
         "covered_by_tc_ids": [
           "TC018"
@@ -2803,13 +2926,13 @@
       {
         "combination_id": "COMBO-100",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u8ddf\u8fdb\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "跟进人（指定用户）",
           "role_type_scope": "role_type=30",
-          "relation": "\u5305\u542b\u4e8e",
-          "target_scope": "\u6307\u5b9a\u7528\u6237\u96c6\u5408",
-          "expected_match_state": "\u5355\u7528\u6237\u4e0d\u547d\u4e2d",
-          "data_shape": "\u5355\u7528\u6237"
+          "relation": "包含于",
+          "target_scope": "指定用户集合",
+          "expected_match_state": "单用户不命中",
+          "data_shape": "单用户"
         },
         "covered_by_tc_ids": [
           "TC018"
@@ -2818,13 +2941,13 @@
       {
         "combination_id": "COMBO-101",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u8ddf\u8fdb\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "跟进人（指定用户）",
           "role_type_scope": "role_type=30",
-          "relation": "\u5305\u542b\u4e8e",
-          "target_scope": "\u6307\u5b9a\u7528\u6237\u96c6\u5408",
-          "expected_match_state": "\u591a\u7528\u6237\u4e00\u4e2a\u547d\u4e2d",
-          "data_shape": "\u591a\u7528\u6237"
+          "relation": "包含于",
+          "target_scope": "指定用户集合",
+          "expected_match_state": "多用户一个命中",
+          "data_shape": "多用户"
         },
         "covered_by_tc_ids": [
           "TC018"
@@ -2833,13 +2956,13 @@
       {
         "combination_id": "COMBO-102",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u8ddf\u8fdb\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "跟进人（指定用户）",
           "role_type_scope": "role_type=30",
-          "relation": "\u5305\u542b\u4e8e",
-          "target_scope": "\u6307\u5b9a\u7528\u6237\u96c6\u5408",
-          "expected_match_state": "\u591a\u7528\u6237\u4e00\u4e2a\u547d\u4e2d",
-          "data_shape": "\u591a\u7528\u6237"
+          "relation": "包含于",
+          "target_scope": "指定用户集合",
+          "expected_match_state": "多用户一个命中",
+          "data_shape": "多用户"
         },
         "covered_by_tc_ids": [
           "TC018"
@@ -2848,13 +2971,13 @@
       {
         "combination_id": "COMBO-103",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u8ddf\u8fdb\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "跟进人（指定用户）",
           "role_type_scope": "role_type=30",
-          "relation": "\u5305\u542b\u4e8e",
-          "target_scope": "\u6307\u5b9a\u7528\u6237\u96c6\u5408",
-          "expected_match_state": "\u591a\u7528\u6237\u5168\u90e8\u4e0d\u547d\u4e2d",
-          "data_shape": "\u591a\u7528\u6237"
+          "relation": "包含于",
+          "target_scope": "指定用户集合",
+          "expected_match_state": "多用户全部不命中",
+          "data_shape": "多用户"
         },
         "covered_by_tc_ids": [
           "TC018"
@@ -2863,13 +2986,13 @@
       {
         "combination_id": "COMBO-104",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u8ddf\u8fdb\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "跟进人（指定用户）",
           "role_type_scope": "role_type=30",
-          "relation": "\u5305\u542b\u4e8e",
-          "target_scope": "\u6307\u5b9a\u7528\u6237\u96c6\u5408",
-          "expected_match_state": "\u591a\u7528\u6237\u5168\u90e8\u4e0d\u547d\u4e2d",
-          "data_shape": "\u591a\u7528\u6237"
+          "relation": "包含于",
+          "target_scope": "指定用户集合",
+          "expected_match_state": "多用户全部不命中",
+          "data_shape": "多用户"
         },
         "covered_by_tc_ids": [
           "TC018"
@@ -2878,13 +3001,13 @@
       {
         "combination_id": "COMBO-105",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u8ddf\u8fdb\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "跟进人（指定用户）",
           "role_type_scope": "role_type=30",
-          "relation": "\u4e0d\u5305\u542b",
-          "target_scope": "\u6307\u5b9a\u7528\u6237\u96c6\u5408",
-          "expected_match_state": "\u5355\u7528\u6237\u547d\u4e2d",
-          "data_shape": "\u5355\u7528\u6237"
+          "relation": "不包含",
+          "target_scope": "指定用户集合",
+          "expected_match_state": "单用户命中",
+          "data_shape": "单用户"
         },
         "covered_by_tc_ids": [
           "TC019"
@@ -2893,13 +3016,13 @@
       {
         "combination_id": "COMBO-106",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u8ddf\u8fdb\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "跟进人（指定用户）",
           "role_type_scope": "role_type=30",
-          "relation": "\u4e0d\u5305\u542b",
-          "target_scope": "\u6307\u5b9a\u7528\u6237\u96c6\u5408",
-          "expected_match_state": "\u5355\u7528\u6237\u547d\u4e2d",
-          "data_shape": "\u5355\u7528\u6237"
+          "relation": "不包含",
+          "target_scope": "指定用户集合",
+          "expected_match_state": "单用户命中",
+          "data_shape": "单用户"
         },
         "covered_by_tc_ids": [
           "TC019"
@@ -2908,13 +3031,13 @@
       {
         "combination_id": "COMBO-107",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u8ddf\u8fdb\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "跟进人（指定用户）",
           "role_type_scope": "role_type=30",
-          "relation": "\u4e0d\u5305\u542b",
-          "target_scope": "\u6307\u5b9a\u7528\u6237\u96c6\u5408",
-          "expected_match_state": "\u5355\u7528\u6237\u4e0d\u547d\u4e2d",
-          "data_shape": "\u5355\u7528\u6237"
+          "relation": "不包含",
+          "target_scope": "指定用户集合",
+          "expected_match_state": "单用户不命中",
+          "data_shape": "单用户"
         },
         "covered_by_tc_ids": [
           "TC019"
@@ -2923,13 +3046,13 @@
       {
         "combination_id": "COMBO-108",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u8ddf\u8fdb\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "跟进人（指定用户）",
           "role_type_scope": "role_type=30",
-          "relation": "\u4e0d\u5305\u542b",
-          "target_scope": "\u6307\u5b9a\u7528\u6237\u96c6\u5408",
-          "expected_match_state": "\u5355\u7528\u6237\u4e0d\u547d\u4e2d",
-          "data_shape": "\u5355\u7528\u6237"
+          "relation": "不包含",
+          "target_scope": "指定用户集合",
+          "expected_match_state": "单用户不命中",
+          "data_shape": "单用户"
         },
         "covered_by_tc_ids": [
           "TC019"
@@ -2938,13 +3061,13 @@
       {
         "combination_id": "COMBO-109",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u8ddf\u8fdb\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "跟进人（指定用户）",
           "role_type_scope": "role_type=30",
-          "relation": "\u4e0d\u5305\u542b",
-          "target_scope": "\u6307\u5b9a\u7528\u6237\u96c6\u5408",
-          "expected_match_state": "\u591a\u7528\u6237\u4e00\u4e2a\u547d\u4e2d",
-          "data_shape": "\u591a\u7528\u6237"
+          "relation": "不包含",
+          "target_scope": "指定用户集合",
+          "expected_match_state": "多用户一个命中",
+          "data_shape": "多用户"
         },
         "covered_by_tc_ids": [
           "TC019"
@@ -2953,13 +3076,13 @@
       {
         "combination_id": "COMBO-110",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u8ddf\u8fdb\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "跟进人（指定用户）",
           "role_type_scope": "role_type=30",
-          "relation": "\u4e0d\u5305\u542b",
-          "target_scope": "\u6307\u5b9a\u7528\u6237\u96c6\u5408",
-          "expected_match_state": "\u591a\u7528\u6237\u4e00\u4e2a\u547d\u4e2d",
-          "data_shape": "\u591a\u7528\u6237"
+          "relation": "不包含",
+          "target_scope": "指定用户集合",
+          "expected_match_state": "多用户一个命中",
+          "data_shape": "多用户"
         },
         "covered_by_tc_ids": [
           "TC019"
@@ -2968,13 +3091,13 @@
       {
         "combination_id": "COMBO-111",
         "dimension_values": {
-          "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u8ddf\u8fdb\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
+          "business_entry": "模拟交易清仓股弹窗",
+          "permission_type": "跟进人（指定用户）",
           "role_type_scope": "role_type=30",
-          "relation": "\u4e0d\u5305\u542b",
-          "target_scope": "\u6307\u5b9a\u7528\u6237\u96c6\u5408",
-          "expected_match_state": "\u591a\u7528\u6237\u5168\u90e8\u4e0d\u547d\u4e2d",
-          "data_shape": "\u591a\u7528\u6237"
+          "relation": "不包含",
+          "target_scope": "指定用户集合",
+          "expected_match_state": "多用户全部不命中",
+          "data_shape": "多用户"
         },
         "covered_by_tc_ids": [
           "TC019"
@@ -2983,13 +3106,13 @@
       {
         "combination_id": "COMBO-112",
         "dimension_values": {
-          "business_entry": "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
-          "permission_type": "\u8ddf\u8fdb\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09",
+          "business_entry": "正式交易清仓股弹窗",
+          "permission_type": "跟进人（指定用户）",
           "role_type_scope": "role_type=30",
-          "relation": "\u4e0d\u5305\u542b",
-          "target_scope": "\u6307\u5b9a\u7528\u6237\u96c6\u5408",
-          "expected_match_state": "\u591a\u7528\u6237\u5168\u90e8\u4e0d\u547d\u4e2d",
-          "data_shape": "\u591a\u7528\u6237"
+          "relation": "不包含",
+          "target_scope": "指定用户集合",
+          "expected_match_state": "多用户全部不命中",
+          "data_shape": "多用户"
         },
         "covered_by_tc_ids": [
           "TC019"
@@ -3001,7 +3124,757 @@
       "required_combination_count": 112,
       "covered_combination_count": 112,
       "excluded_combination_count": 0
+    },
+    "combination_generation": {
+      "mode": "grouped_cross_product",
+      "groups": [
+        {
+          "group_id": "ordinary_builder_1",
+          "fixed_values": {
+            "permission_type": "普通建仓人",
+            "role_type_scope": "role_type∈{10,20}",
+            "relation": "等于",
+            "expected_match_state": "命中与不命中",
+            "data_shape": "普通人员"
+          },
+          "variable_dimensions": [
+            {
+              "dimension_id": "business_entry",
+              "values": [
+                "模拟交易清仓股弹窗",
+                "正式交易清仓股弹窗"
+              ]
+            },
+            {
+              "dimension_id": "target_scope",
+              "values": [
+                "自己",
+                "所有下级",
+                "直属上级",
+                "直属下级"
+              ]
+            }
+          ],
+          "expected_combination_count": 8,
+          "constraints": [
+            "permission_type=普通建仓人",
+            "relation=等于"
+          ]
+        },
+        {
+          "group_id": "ordinary_builder_2",
+          "fixed_values": {
+            "permission_type": "普通建仓人",
+            "role_type_scope": "role_type∈{10,20}",
+            "relation": "不等于",
+            "expected_match_state": "命中与不命中",
+            "data_shape": "普通人员"
+          },
+          "variable_dimensions": [
+            {
+              "dimension_id": "business_entry",
+              "values": [
+                "模拟交易清仓股弹窗",
+                "正式交易清仓股弹窗"
+              ]
+            },
+            {
+              "dimension_id": "target_scope",
+              "values": [
+                "自己",
+                "所有下级",
+                "直属上级",
+                "直属下级"
+              ]
+            }
+          ],
+          "expected_combination_count": 8,
+          "constraints": [
+            "permission_type=普通建仓人",
+            "relation=不等于"
+          ]
+        },
+        {
+          "group_id": "ordinary_builder_3",
+          "fixed_values": {
+            "permission_type": "普通建仓人",
+            "role_type_scope": "role_type∈{10,20}",
+            "relation": "包含于",
+            "expected_match_state": "命中与不命中",
+            "data_shape": "普通人员"
+          },
+          "variable_dimensions": [
+            {
+              "dimension_id": "business_entry",
+              "values": [
+                "模拟交易清仓股弹窗",
+                "正式交易清仓股弹窗"
+              ]
+            },
+            {
+              "dimension_id": "target_scope",
+              "values": [
+                "自己",
+                "所有下级",
+                "直属上级",
+                "直属下级"
+              ]
+            }
+          ],
+          "expected_combination_count": 8,
+          "constraints": [
+            "permission_type=普通建仓人",
+            "relation=包含于"
+          ]
+        },
+        {
+          "group_id": "ordinary_builder_4",
+          "fixed_values": {
+            "permission_type": "普通建仓人",
+            "role_type_scope": "role_type∈{10,20}",
+            "relation": "不包含",
+            "expected_match_state": "命中与不命中",
+            "data_shape": "普通人员"
+          },
+          "variable_dimensions": [
+            {
+              "dimension_id": "business_entry",
+              "values": [
+                "模拟交易清仓股弹窗",
+                "正式交易清仓股弹窗"
+              ]
+            },
+            {
+              "dimension_id": "target_scope",
+              "values": [
+                "自己",
+                "所有下级",
+                "直属上级",
+                "直属下级"
+              ]
+            }
+          ],
+          "expected_combination_count": 8,
+          "constraints": [
+            "permission_type=普通建仓人",
+            "relation=不包含"
+          ]
+        },
+        {
+          "group_id": "ordinary_builder_5",
+          "fixed_values": {
+            "permission_type": "普通建仓人",
+            "role_type_scope": "role_type∈{10,20}",
+            "relation": "完全包含于",
+            "expected_match_state": "命中与不命中",
+            "data_shape": "普通人员"
+          },
+          "variable_dimensions": [
+            {
+              "dimension_id": "business_entry",
+              "values": [
+                "模拟交易清仓股弹窗",
+                "正式交易清仓股弹窗"
+              ]
+            },
+            {
+              "dimension_id": "target_scope",
+              "values": [
+                "自己",
+                "所有下级",
+                "直属上级",
+                "直属下级"
+              ]
+            }
+          ],
+          "expected_combination_count": 8,
+          "constraints": [
+            "permission_type=普通建仓人",
+            "relation=完全包含于"
+          ]
+        },
+        {
+          "group_id": "ordinary_follower_1",
+          "fixed_values": {
+            "permission_type": "普通跟进人",
+            "role_type_scope": "role_type=30",
+            "relation": "等于",
+            "expected_match_state": "命中与不命中",
+            "data_shape": "普通人员"
+          },
+          "variable_dimensions": [
+            {
+              "dimension_id": "business_entry",
+              "values": [
+                "模拟交易清仓股弹窗",
+                "正式交易清仓股弹窗"
+              ]
+            },
+            {
+              "dimension_id": "target_scope",
+              "values": [
+                "自己",
+                "所有下级",
+                "直属上级",
+                "直属下级"
+              ]
+            }
+          ],
+          "expected_combination_count": 8,
+          "constraints": [
+            "permission_type=普通跟进人",
+            "relation=等于"
+          ]
+        },
+        {
+          "group_id": "ordinary_follower_2",
+          "fixed_values": {
+            "permission_type": "普通跟进人",
+            "role_type_scope": "role_type=30",
+            "relation": "不等于",
+            "expected_match_state": "命中与不命中",
+            "data_shape": "普通人员"
+          },
+          "variable_dimensions": [
+            {
+              "dimension_id": "business_entry",
+              "values": [
+                "模拟交易清仓股弹窗",
+                "正式交易清仓股弹窗"
+              ]
+            },
+            {
+              "dimension_id": "target_scope",
+              "values": [
+                "自己",
+                "所有下级",
+                "直属上级",
+                "直属下级"
+              ]
+            }
+          ],
+          "expected_combination_count": 8,
+          "constraints": [
+            "permission_type=普通跟进人",
+            "relation=不等于"
+          ]
+        },
+        {
+          "group_id": "ordinary_follower_3",
+          "fixed_values": {
+            "permission_type": "普通跟进人",
+            "role_type_scope": "role_type=30",
+            "relation": "包含于",
+            "expected_match_state": "命中与不命中",
+            "data_shape": "普通人员"
+          },
+          "variable_dimensions": [
+            {
+              "dimension_id": "business_entry",
+              "values": [
+                "模拟交易清仓股弹窗",
+                "正式交易清仓股弹窗"
+              ]
+            },
+            {
+              "dimension_id": "target_scope",
+              "values": [
+                "自己",
+                "所有下级",
+                "直属上级",
+                "直属下级"
+              ]
+            }
+          ],
+          "expected_combination_count": 8,
+          "constraints": [
+            "permission_type=普通跟进人",
+            "relation=包含于"
+          ]
+        },
+        {
+          "group_id": "ordinary_follower_4",
+          "fixed_values": {
+            "permission_type": "普通跟进人",
+            "role_type_scope": "role_type=30",
+            "relation": "不包含",
+            "expected_match_state": "命中与不命中",
+            "data_shape": "普通人员"
+          },
+          "variable_dimensions": [
+            {
+              "dimension_id": "business_entry",
+              "values": [
+                "模拟交易清仓股弹窗",
+                "正式交易清仓股弹窗"
+              ]
+            },
+            {
+              "dimension_id": "target_scope",
+              "values": [
+                "自己",
+                "所有下级",
+                "直属上级",
+                "直属下级"
+              ]
+            }
+          ],
+          "expected_combination_count": 8,
+          "constraints": [
+            "permission_type=普通跟进人",
+            "relation=不包含"
+          ]
+        },
+        {
+          "group_id": "ordinary_follower_5",
+          "fixed_values": {
+            "permission_type": "普通跟进人",
+            "role_type_scope": "role_type=30",
+            "relation": "完全包含于",
+            "expected_match_state": "命中与不命中",
+            "data_shape": "普通人员"
+          },
+          "variable_dimensions": [
+            {
+              "dimension_id": "business_entry",
+              "values": [
+                "模拟交易清仓股弹窗",
+                "正式交易清仓股弹窗"
+              ]
+            },
+            {
+              "dimension_id": "target_scope",
+              "values": [
+                "自己",
+                "所有下级",
+                "直属上级",
+                "直属下级"
+              ]
+            }
+          ],
+          "expected_combination_count": 8,
+          "constraints": [
+            "permission_type=普通跟进人",
+            "relation=完全包含于"
+          ]
+        },
+        {
+          "group_id": "specified_builder_include_1",
+          "fixed_values": {
+            "permission_type": "建仓人（指定用户）",
+            "role_type_scope": "role_type∈{10,20}",
+            "relation": "包含于",
+            "target_scope": "指定用户集合",
+            "expected_match_state": "单用户命中",
+            "data_shape": "单用户"
+          },
+          "variable_dimensions": [
+            {
+              "dimension_id": "business_entry",
+              "values": [
+                "模拟交易清仓股弹窗",
+                "正式交易清仓股弹窗"
+              ]
+            }
+          ],
+          "expected_combination_count": 2,
+          "constraints": [
+            "permission_type=建仓人（指定用户）",
+            "relation=包含于",
+            "state=单用户命中"
+          ]
+        },
+        {
+          "group_id": "specified_builder_include_2",
+          "fixed_values": {
+            "permission_type": "建仓人（指定用户）",
+            "role_type_scope": "role_type∈{10,20}",
+            "relation": "包含于",
+            "target_scope": "指定用户集合",
+            "expected_match_state": "单用户不命中",
+            "data_shape": "单用户"
+          },
+          "variable_dimensions": [
+            {
+              "dimension_id": "business_entry",
+              "values": [
+                "模拟交易清仓股弹窗",
+                "正式交易清仓股弹窗"
+              ]
+            }
+          ],
+          "expected_combination_count": 2,
+          "constraints": [
+            "permission_type=建仓人（指定用户）",
+            "relation=包含于",
+            "state=单用户不命中"
+          ]
+        },
+        {
+          "group_id": "specified_builder_include_3",
+          "fixed_values": {
+            "permission_type": "建仓人（指定用户）",
+            "role_type_scope": "role_type∈{10,20}",
+            "relation": "包含于",
+            "target_scope": "指定用户集合",
+            "expected_match_state": "多用户一个命中",
+            "data_shape": "多用户"
+          },
+          "variable_dimensions": [
+            {
+              "dimension_id": "business_entry",
+              "values": [
+                "模拟交易清仓股弹窗",
+                "正式交易清仓股弹窗"
+              ]
+            }
+          ],
+          "expected_combination_count": 2,
+          "constraints": [
+            "permission_type=建仓人（指定用户）",
+            "relation=包含于",
+            "state=多用户一个命中"
+          ]
+        },
+        {
+          "group_id": "specified_builder_include_4",
+          "fixed_values": {
+            "permission_type": "建仓人（指定用户）",
+            "role_type_scope": "role_type∈{10,20}",
+            "relation": "包含于",
+            "target_scope": "指定用户集合",
+            "expected_match_state": "多用户全部不命中",
+            "data_shape": "多用户"
+          },
+          "variable_dimensions": [
+            {
+              "dimension_id": "business_entry",
+              "values": [
+                "模拟交易清仓股弹窗",
+                "正式交易清仓股弹窗"
+              ]
+            }
+          ],
+          "expected_combination_count": 2,
+          "constraints": [
+            "permission_type=建仓人（指定用户）",
+            "relation=包含于",
+            "state=多用户全部不命中"
+          ]
+        },
+        {
+          "group_id": "specified_builder_exclude_1",
+          "fixed_values": {
+            "permission_type": "建仓人（指定用户）",
+            "role_type_scope": "role_type∈{10,20}",
+            "relation": "不包含",
+            "target_scope": "指定用户集合",
+            "expected_match_state": "单用户命中",
+            "data_shape": "单用户"
+          },
+          "variable_dimensions": [
+            {
+              "dimension_id": "business_entry",
+              "values": [
+                "模拟交易清仓股弹窗",
+                "正式交易清仓股弹窗"
+              ]
+            }
+          ],
+          "expected_combination_count": 2,
+          "constraints": [
+            "permission_type=建仓人（指定用户）",
+            "relation=不包含",
+            "state=单用户命中"
+          ]
+        },
+        {
+          "group_id": "specified_builder_exclude_2",
+          "fixed_values": {
+            "permission_type": "建仓人（指定用户）",
+            "role_type_scope": "role_type∈{10,20}",
+            "relation": "不包含",
+            "target_scope": "指定用户集合",
+            "expected_match_state": "单用户不命中",
+            "data_shape": "单用户"
+          },
+          "variable_dimensions": [
+            {
+              "dimension_id": "business_entry",
+              "values": [
+                "模拟交易清仓股弹窗",
+                "正式交易清仓股弹窗"
+              ]
+            }
+          ],
+          "expected_combination_count": 2,
+          "constraints": [
+            "permission_type=建仓人（指定用户）",
+            "relation=不包含",
+            "state=单用户不命中"
+          ]
+        },
+        {
+          "group_id": "specified_builder_exclude_3",
+          "fixed_values": {
+            "permission_type": "建仓人（指定用户）",
+            "role_type_scope": "role_type∈{10,20}",
+            "relation": "不包含",
+            "target_scope": "指定用户集合",
+            "expected_match_state": "多用户一个命中",
+            "data_shape": "多用户"
+          },
+          "variable_dimensions": [
+            {
+              "dimension_id": "business_entry",
+              "values": [
+                "模拟交易清仓股弹窗",
+                "正式交易清仓股弹窗"
+              ]
+            }
+          ],
+          "expected_combination_count": 2,
+          "constraints": [
+            "permission_type=建仓人（指定用户）",
+            "relation=不包含",
+            "state=多用户一个命中"
+          ]
+        },
+        {
+          "group_id": "specified_builder_exclude_4",
+          "fixed_values": {
+            "permission_type": "建仓人（指定用户）",
+            "role_type_scope": "role_type∈{10,20}",
+            "relation": "不包含",
+            "target_scope": "指定用户集合",
+            "expected_match_state": "多用户全部不命中",
+            "data_shape": "多用户"
+          },
+          "variable_dimensions": [
+            {
+              "dimension_id": "business_entry",
+              "values": [
+                "模拟交易清仓股弹窗",
+                "正式交易清仓股弹窗"
+              ]
+            }
+          ],
+          "expected_combination_count": 2,
+          "constraints": [
+            "permission_type=建仓人（指定用户）",
+            "relation=不包含",
+            "state=多用户全部不命中"
+          ]
+        },
+        {
+          "group_id": "specified_follower_include_1",
+          "fixed_values": {
+            "permission_type": "跟进人（指定用户）",
+            "role_type_scope": "role_type=30",
+            "relation": "包含于",
+            "target_scope": "指定用户集合",
+            "expected_match_state": "单用户命中",
+            "data_shape": "单用户"
+          },
+          "variable_dimensions": [
+            {
+              "dimension_id": "business_entry",
+              "values": [
+                "模拟交易清仓股弹窗",
+                "正式交易清仓股弹窗"
+              ]
+            }
+          ],
+          "expected_combination_count": 2,
+          "constraints": [
+            "permission_type=跟进人（指定用户）",
+            "relation=包含于",
+            "state=单用户命中"
+          ]
+        },
+        {
+          "group_id": "specified_follower_include_2",
+          "fixed_values": {
+            "permission_type": "跟进人（指定用户）",
+            "role_type_scope": "role_type=30",
+            "relation": "包含于",
+            "target_scope": "指定用户集合",
+            "expected_match_state": "单用户不命中",
+            "data_shape": "单用户"
+          },
+          "variable_dimensions": [
+            {
+              "dimension_id": "business_entry",
+              "values": [
+                "模拟交易清仓股弹窗",
+                "正式交易清仓股弹窗"
+              ]
+            }
+          ],
+          "expected_combination_count": 2,
+          "constraints": [
+            "permission_type=跟进人（指定用户）",
+            "relation=包含于",
+            "state=单用户不命中"
+          ]
+        },
+        {
+          "group_id": "specified_follower_include_3",
+          "fixed_values": {
+            "permission_type": "跟进人（指定用户）",
+            "role_type_scope": "role_type=30",
+            "relation": "包含于",
+            "target_scope": "指定用户集合",
+            "expected_match_state": "多用户一个命中",
+            "data_shape": "多用户"
+          },
+          "variable_dimensions": [
+            {
+              "dimension_id": "business_entry",
+              "values": [
+                "模拟交易清仓股弹窗",
+                "正式交易清仓股弹窗"
+              ]
+            }
+          ],
+          "expected_combination_count": 2,
+          "constraints": [
+            "permission_type=跟进人（指定用户）",
+            "relation=包含于",
+            "state=多用户一个命中"
+          ]
+        },
+        {
+          "group_id": "specified_follower_include_4",
+          "fixed_values": {
+            "permission_type": "跟进人（指定用户）",
+            "role_type_scope": "role_type=30",
+            "relation": "包含于",
+            "target_scope": "指定用户集合",
+            "expected_match_state": "多用户全部不命中",
+            "data_shape": "多用户"
+          },
+          "variable_dimensions": [
+            {
+              "dimension_id": "business_entry",
+              "values": [
+                "模拟交易清仓股弹窗",
+                "正式交易清仓股弹窗"
+              ]
+            }
+          ],
+          "expected_combination_count": 2,
+          "constraints": [
+            "permission_type=跟进人（指定用户）",
+            "relation=包含于",
+            "state=多用户全部不命中"
+          ]
+        },
+        {
+          "group_id": "specified_follower_exclude_1",
+          "fixed_values": {
+            "permission_type": "跟进人（指定用户）",
+            "role_type_scope": "role_type=30",
+            "relation": "不包含",
+            "target_scope": "指定用户集合",
+            "expected_match_state": "单用户命中",
+            "data_shape": "单用户"
+          },
+          "variable_dimensions": [
+            {
+              "dimension_id": "business_entry",
+              "values": [
+                "模拟交易清仓股弹窗",
+                "正式交易清仓股弹窗"
+              ]
+            }
+          ],
+          "expected_combination_count": 2,
+          "constraints": [
+            "permission_type=跟进人（指定用户）",
+            "relation=不包含",
+            "state=单用户命中"
+          ]
+        },
+        {
+          "group_id": "specified_follower_exclude_2",
+          "fixed_values": {
+            "permission_type": "跟进人（指定用户）",
+            "role_type_scope": "role_type=30",
+            "relation": "不包含",
+            "target_scope": "指定用户集合",
+            "expected_match_state": "单用户不命中",
+            "data_shape": "单用户"
+          },
+          "variable_dimensions": [
+            {
+              "dimension_id": "business_entry",
+              "values": [
+                "模拟交易清仓股弹窗",
+                "正式交易清仓股弹窗"
+              ]
+            }
+          ],
+          "expected_combination_count": 2,
+          "constraints": [
+            "permission_type=跟进人（指定用户）",
+            "relation=不包含",
+            "state=单用户不命中"
+          ]
+        },
+        {
+          "group_id": "specified_follower_exclude_3",
+          "fixed_values": {
+            "permission_type": "跟进人（指定用户）",
+            "role_type_scope": "role_type=30",
+            "relation": "不包含",
+            "target_scope": "指定用户集合",
+            "expected_match_state": "多用户一个命中",
+            "data_shape": "多用户"
+          },
+          "variable_dimensions": [
+            {
+              "dimension_id": "business_entry",
+              "values": [
+                "模拟交易清仓股弹窗",
+                "正式交易清仓股弹窗"
+              ]
+            }
+          ],
+          "expected_combination_count": 2,
+          "constraints": [
+            "permission_type=跟进人（指定用户）",
+            "relation=不包含",
+            "state=多用户一个命中"
+          ]
+        },
+        {
+          "group_id": "specified_follower_exclude_4",
+          "fixed_values": {
+            "permission_type": "跟进人（指定用户）",
+            "role_type_scope": "role_type=30",
+            "relation": "不包含",
+            "target_scope": "指定用户集合",
+            "expected_match_state": "多用户全部不命中",
+            "data_shape": "多用户"
+          },
+          "variable_dimensions": [
+            {
+              "dimension_id": "business_entry",
+              "values": [
+                "模拟交易清仓股弹窗",
+                "正式交易清仓股弹窗"
+              ]
+            }
+          ],
+          "expected_combination_count": 2,
+          "constraints": [
+            "permission_type=跟进人（指定用户）",
+            "relation=不包含",
+            "state=多用户全部不命中"
+          ]
+        }
+      ]
     }
   }
 }
-

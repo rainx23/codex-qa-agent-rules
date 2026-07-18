@@ -12,7 +12,7 @@ description: 用于校验 QA 分析报告、XMind Markdown、XMind Workbook、Ma
 ## 执行流程
 
 1. 读取 `../../rules/core/analysis-report-contract.md`，识别显式或自动报告模式；需要时使用对应 `--mode` 运行 `../../scripts/validate_analysis_report.py`。校验模式章节、证据、疑似缺陷依据、P0 映射和联合追踪。
-2. 运行 `../../scripts/validate_schemas.py`，在渲染产物前校验 Requirement/Diff Model、Risk Coverage Matrix 和 Testcase Model。
+2. 运行 `../../scripts/validate_schemas.py`，在渲染产物前校验 Requirement/Diff Model、Risk Coverage Matrix 和 Testcase Model；condition matrix 必须由 grouped cross product 复算 expected set，并复验每个行为组合的 branch/step/expected 定位。
 3. 使用 `../../scripts/validate_xmind_md.py` 校验根节点、固定层级、维度、三位编号、语法、重复项、断言、未知规则泄漏和多入口规则。确认分组/直连多入口均有至少两个平级分支，分支步骤与预期完整，不含混合直连步骤、虚构入口或“分别打开/依次进入多个入口”等拼接表达。
 4. 使用 `../../scripts/validate_traceability.py` 校验报告、风险矩阵、用例模型与 XMind Markdown 的行级追踪；每个模型和 XMind TC 都必须有明确风险映射。
 5. 运行 `../../scripts/md_to_xmind.py` 后重新读取 `content.json`、`metadata.json` 和 `manifest.json`，递归比较 Markdown 与 Workbook 的完整树：根标题、每个节点标题、子节点数量、顺序和父子层级；首个差异必须报告路径、类型及双方值。保留根节点、TC 数量、分支顺序和节点总数摘要。统计 TC 节点而不是 `entry_branches`；同时比较用例模型与 XMind 的维度、公共入口/模块、测试点、步骤、预期和分支内容。

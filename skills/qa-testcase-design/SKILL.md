@@ -24,7 +24,7 @@ description: 用于基于证据设计 QA 测试点和最小有效 XMind Markdown
 2. 先建立并校验 `../../rules/schemas/risk-coverage-matrix.schema.json` 约束的 Risk Coverage Matrix，不得从原始需求文本直接跳到用例。
    - Risk Evidence 只能从关联 Fact/Acceptance Criteria 派生；confirmed TC 的 Risk 与 Fact 链必须全部 confirmed/current。字段结构证据不得扩写为业务行为预期。
 3. 根据证据选择等价类、边界、决策表、状态流转、用户路径、Pairwise 或风险驱动等技术。
-   - Requirement Model 存在条件矩阵时，先逐项消费 required combination；每项必须生成行为型 `condition_coverage`，明确命中/不命中数据和可观察结果。配置选项存在性只作为独立结构/容量覆盖。
+   - Requirement Model 存在条件矩阵时，先复验 grouped cross product 生成集合，再逐项消费 required combination；每项必须生成行为型 `condition_coverage`，明确命中/不命中数据、可观察结果以及真实 `branch_id`、`step_index`、`expected_index`。配置选项存在性只作为独立结构/容量覆盖；blocking 未解决时保留草稿定位但不得伪造行为 Oracle。
 4. 每个可独立诊断的风险原则上设计一个用例。仅当核心规则、触发条件、操作、数据来源/口径、断言、风险和保护上下文等价时合并；正式/模拟数据源、权限、数据类型、异常路径或不同 P0 风险会改变定位时必须拆分。同一规则覆盖多个真实入口时，只有上述维度完全一致才能保留一个 TC，并将每个入口渲染为独立平级分支；入口差异导致数据源、权限、预期、异常路径、风险或失败定位不同则拆分 TC。
    - 使用不含纯入口名称的 `core_deduplication_key` 做确定性合并判断；模拟/正式仅入口不同必须合并。允许拆分时必须让真实差异进入核心去重因子，并记录拆分依据。
 5. 每个保留的 TC 都必须映射需求、Diff 或历史缺陷，并具有独立失败诊断。

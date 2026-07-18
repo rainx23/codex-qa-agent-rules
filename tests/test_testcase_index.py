@@ -22,10 +22,11 @@ class TestcaseIndexTests(unittest.TestCase):
         shutil.copy2(ROOT / "RULE_VERSION", self.root / "RULE_VERSION")
         shutil.copy2(ROOT / "AGENTS.md", self.root / "AGENTS.md")
         self.testcases = self.root / "testcases"
-        self.directory = self.testcases / "clearance-permission-20260718-v2"
-        shutil.copytree(ROOT / "testcases/clearance-permission-20260718-v2", self.directory)
+        self.directory = self.testcases / "clearance-permission-20260718"
+        shutil.copytree(ROOT / "testcases/clearance-permission-20260718", self.directory)
         self.manifest = self.directory / "manifest.json"
         manifest_data = json.loads(self.manifest.read_text(encoding="utf-8"))
+        manifest_data["rule_version"] = (self.root / "RULE_VERSION").read_text(encoding="utf-8").strip()
         manifest_data["relation"] = "新增"
         manifest_data["supersedes"] = None
         self.manifest.write_text(
@@ -85,9 +86,9 @@ class TestcaseIndexTests(unittest.TestCase):
 
     def test_note_counts_and_artifact_id_must_match_manifest(self):
         for token, replacement in (
-            ("artifact_id=QA-CLEARANCE-PERMISSION-20260718-V2", "artifact_id=WRONG"),
-            ("cases=23", "cases=99"), ("P0_risks=11", "P0_risks=99"),
-            ("P0_cases=20", "P0_cases=99"), ("pending=0", "pending=99"),
+            ("artifact_id=QA-CLEARANCE-PERMISSION-20260718", "artifact_id=WRONG"),
+            ("cases=14", "cases=99"), ("P0_risks=5", "P0_risks=99"),
+            ("P0_cases=7", "P0_cases=99"), ("pending=0", "pending=99"),
         ):
             with self.subTest(token=token):
                 self.write_index(self.row().replace(token, replacement))
@@ -123,8 +124,8 @@ class TestcaseIndexTests(unittest.TestCase):
 
     def test_windows_and_posix_manifest_paths_compare_equally(self):
         row = self.row().replace(
-            "testcases/clearance-permission-20260718-v2/manifest.json",
-            r"testcases\clearance-permission-20260718-v2\manifest.json",
+            "testcases/clearance-permission-20260718/manifest.json",
+            r"testcases\clearance-permission-20260718\manifest.json",
         )
         self.write_index(row)
         self.assertEqual([], validate_index(self.index))
@@ -142,7 +143,7 @@ class TestcaseIndexTests(unittest.TestCase):
 
     def test_cells_preserves_windows_paths_and_only_unescapes_markdown_tokens(self):
         row = (
-            r"| value | testcases\clearance-permission-20260718-v2\manifest.json "
+            r"| value | testcases\clearance-permission-20260718\manifest.json "
             r"| escaped\|pipe | doubled\\slash |"
         )
 
@@ -150,7 +151,7 @@ class TestcaseIndexTests(unittest.TestCase):
 
         self.assertEqual("value", cells[0])
         self.assertEqual(
-            r"testcases\clearance-permission-20260718-v2\manifest.json",
+            r"testcases\clearance-permission-20260718\manifest.json",
             cells[1],
         )
         self.assertEqual("escaped|pipe", cells[2])

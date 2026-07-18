@@ -7,6 +7,7 @@ import json
 import hashlib
 import re
 from datetime import datetime
+from itertools import product
 from pathlib import Path
 from typing import Any, Callable
 
@@ -320,10 +321,31 @@ def requirement_schema(version: str) -> dict[str, Any]:
             "exclusion_reason": _string(),
         },
     )
+    variable_dimension = _object(
+        ["dimension_id", "values"],
+        {"dimension_id": _string(), "values": _strings(1)},
+    )
+    combination_group = _object(
+        ["group_id", "fixed_values", "variable_dimensions", "expected_combination_count"],
+        {
+            "group_id": _string(), "fixed_values": {"type": "object"},
+            "variable_dimensions": {"type": "array", "items": variable_dimension, "minItems": 1},
+            "expected_combination_count": {"type": "integer", "minimum": 1},
+            "constraints": _strings(),
+        },
+    )
+    combination_generation = _object(
+        ["mode", "groups"],
+        {
+            "mode": {"const": "grouped_cross_product"},
+            "groups": {"type": "array", "items": combination_group, "minItems": 1},
+        },
+    )
     condition_matrix = _object(
-        ["dimensions", "required_combinations", "excluded_combinations", "coverage_summary"],
+        ["dimensions", "combination_generation", "required_combinations", "excluded_combinations", "coverage_summary"],
         {
             "dimensions": {"type": "array", "items": condition_dimension, "minItems": 2},
+            "combination_generation": combination_generation,
             "required_combinations": {"type": "array", "items": required_combination},
             "excluded_combinations": {"type": "array", "items": excluded_combination},
             "coverage_summary": {"type": "object"},
@@ -641,6 +663,8 @@ def testcase_schema(version: str) -> dict[str, Any]:
             "combination_id": _string(), "coverage_type": {"enum": list(CONDITION_COVERAGE_TYPES)},
             "dimension_values": {"type": "object"}, "expected_match_state": _string(),
             "observable_result": _string(),
+            "branch_id": _string(), "step_index": {"type": "integer", "minimum": 1},
+            "expected_index": {"type": "integer", "minimum": 1},
         },
     )
     core_deduplication_factors = _object(
@@ -919,6 +943,82 @@ def summarize_confirmations(requirement_model: dict[str, Any]) -> dict[str, int]
     }
 
 
+def _condition_key(values: Any) -> str | None:
+    if not isinstance(values, dict) or not all(isinstance(key, str) for key in values):
+        return None
+    return json.dumps(values, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+
+
+def _generate_expected_condition_combinations(
+    condition_matrix: dict[str, Any],
+    dimension_ids: set[str],
+    dimension_values: dict[str, set[str]],
+) -> tuple[dict[str, dict[str, Any]], list[str]]:
+    generation = condition_matrix.get("combination_generation")
+    if not isinstance(generation, dict):
+        return {}, ["CONDITION_MATRIX_REQUIRED: condition_matrix_required=true 时必须提供 combination_generation"]
+    if generation.get("mode") != "grouped_cross_product":
+        return {}, ["CONDITION_MATRIX_REQUIRED: combination_generation.mode 必须为 grouped_cross_product"]
+    groups = generation.get("groups", []) if isinstance(generation.get("groups"), list) else []
+    _, group_errors = _unique_ids(groups, "group_id")
+    errors = [f"CONDITION_MATRIX_REQUIRED: {item}" for item in group_errors]
+    generated: dict[str, dict[str, Any]] = {}
+    for group in groups:
+        group_id = group.get("group_id")
+        fixed = group.get("fixed_values") if isinstance(group.get("fixed_values"), dict) else {}
+        variables = group.get("variable_dimensions") if isinstance(group.get("variable_dimensions"), list) else []
+        variable_ids = [item.get("dimension_id") for item in variables if isinstance(item, dict)]
+        if len(variable_ids) != len(set(variable_ids)):
+            errors.append(f"CONDITION_MATRIX_REQUIRED: group {group_id} variable_dimensions 重复")
+        declared_ids = set(fixed) | set(variable_ids)
+        if declared_ids != dimension_ids:
+            errors.append(
+                f"CONDITION_MATRIX_REQUIRED: group {group_id} 必须用 fixed_values + variable_dimensions 完整覆盖全部维度"
+            )
+            continue
+        if set(fixed) & set(variable_ids):
+            errors.append(f"CONDITION_MATRIX_REQUIRED: group {group_id} 固定维度与可变维度重复")
+            continue
+        invalid_group = False
+        for dimension_id, value in fixed.items():
+            if not isinstance(value, str) or value not in dimension_values.get(dimension_id, set()):
+                errors.append(
+                    f"CONDITION_MATRIX_REQUIRED: group {group_id} fixed_values.{dimension_id} 枚举值非法：{value}"
+                )
+                invalid_group = True
+        variable_values: list[list[str]] = []
+        for variable in variables:
+            dimension_id = variable.get("dimension_id")
+            values = variable.get("values", []) if isinstance(variable.get("values"), list) else []
+            if not values or any(value not in dimension_values.get(dimension_id, set()) for value in values):
+                errors.append(
+                    f"CONDITION_MATRIX_REQUIRED: group {group_id} variable_dimensions.{dimension_id} 包含非法或空枚举"
+                )
+                invalid_group = True
+            variable_values.append(values)
+        if invalid_group:
+            continue
+        generated_count = 1
+        for values in variable_values:
+            generated_count *= len(values)
+        if group.get("expected_combination_count") != generated_count:
+            errors.append(
+                f"CONDITION_GENERATION_COUNT_MISMATCH: group {group_id} expected_combination_count="
+                f"{group.get('expected_combination_count')} 与生成数量 {generated_count} 不一致"
+            )
+        for selected in product(*variable_values):
+            values = dict(fixed)
+            values.update(dict(zip(variable_ids, selected)))
+            key = _condition_key(values)
+            if key in generated:
+                errors.append(
+                    f"CONDITION_COMBINATION_DUPLICATED: group {group_id} 与其他分组生成相同组合 {key}"
+                )
+            elif key is not None:
+                generated[key] = values
+    return generated, errors
+
+
 def validate_requirement_model(data: dict[str, Any], *, evidence_root: Path | None = None) -> list[str]:
     errors = validate_schema_shape(data, requirement_schema("0.0.0"))
     condition_matrix = data.get("condition_matrix")
@@ -937,7 +1037,12 @@ def validate_requirement_model(data: dict[str, Any], *, evidence_root: Path | No
         combination_ids, combination_errors = _unique_ids([*required, *excluded], "combination_id")
         errors.extend(f"CONDITION_MATRIX_REQUIRED: {item}" for item in combination_errors)
         used_values = {dimension_id: set() for dimension_id in dimension_ids}
-        for combination in [*required, *excluded]:
+        required_keys: dict[str, str] = {}
+        excluded_keys: dict[str, str] = {}
+        for collection_name, combination in [
+            *(("required", item) for item in required),
+            *(("excluded", item) for item in excluded),
+        ]:
             combination_id = combination.get("combination_id")
             values = combination.get("dimension_values")
             if not isinstance(values, dict) or set(values) != dimension_ids:
@@ -952,6 +1057,29 @@ def validate_requirement_model(data: dict[str, Any], *, evidence_root: Path | No
                     )
                 else:
                     used_values[dimension_id].add(value)
+            key = _condition_key(values)
+            if key is not None:
+                target = required_keys if collection_name == "required" else excluded_keys
+                if key in target:
+                    errors.append(
+                        f"CONDITION_COMBINATION_DUPLICATED: {combination_id} 与 {target[key]} 的 dimension_values 重复"
+                    )
+                else:
+                    target[key] = str(combination_id)
+        for key in sorted(set(required_keys) & set(excluded_keys)):
+            errors.append(
+                f"CONDITION_COMBINATION_DUPLICATED: {required_keys[key]} 同时出现在 required 和 excluded：{key}"
+            )
+        expected, generation_errors = _generate_expected_condition_combinations(
+            condition_matrix, dimension_ids, dimension_values
+        )
+        errors.extend(generation_errors)
+        actual_keys = set(required_keys) | set(excluded_keys)
+        for key in sorted(set(expected) - actual_keys):
+            errors.append(f"REQUIRED_COMBINATION_UNCOVERED: grouped_cross_product 缺少组合 {key}")
+        for key in sorted(actual_keys - set(expected)):
+            combination_id = required_keys.get(key) or excluded_keys.get(key)
+            errors.append(f"UNEXPECTED_CONDITION_COMBINATION: {combination_id} 不在 grouped_cross_product 生成集合：{key}")
         for dimension_id, values in dimension_values.items():
             for value in sorted(values - used_values.get(dimension_id, set())):
                 errors.append(
@@ -1847,6 +1975,7 @@ def validate_model_links(
             for item in required_combinations if isinstance(item, dict)
         }
         coverage_by_id: dict[str, list[tuple[str, dict[str, Any]]]] = {}
+        behavior_locations: dict[tuple[str, str, int], str] = {}
         for tc_id, case in cases.items():
             for coverage in case.get("condition_coverage", []):
                 if isinstance(coverage, dict) and isinstance(coverage.get("combination_id"), str):
@@ -1864,6 +1993,8 @@ def validate_model_links(
             ]
             behavior = [item for item in linked if item[1].get("coverage_type") == "behavior"]
             if not behavior:
+                if validation_status == "pending":
+                    continue
                 if linked and all(item[1].get("coverage_type") == "configuration" for item in linked):
                     errors.append(
                         f"CONFIG_EXISTENCE_IS_NOT_BEHAVIOR_COVERAGE: {combination_id} 只有配置存在性覆盖"
@@ -1878,11 +2009,118 @@ def validate_model_links(
                 errors.append(
                     f"REQUIRED_COMBINATION_UNCOVERED: {combination_id} condition_coverage 与矩阵维度值不一致"
                 )
+            if (requirement or {}).get("condition_matrix_required") is True:
+                for tc_id, coverage in behavior:
+                    case = cases[tc_id]
+                    branch_id = coverage.get("branch_id")
+                    step_index = coverage.get("step_index")
+                    expected_index = coverage.get("expected_index")
+                    branch = next(
+                        (item for item in case.get("entry_branches", []) if item.get("branch_id") == branch_id),
+                        None,
+                    )
+                    if branch is None:
+                        errors.append(
+                            f"CONDITION_COVERAGE_BRANCH_MISMATCH: {combination_id} 引用不存在 branch_id：{branch_id}"
+                        )
+                        continue
+                    business_entry = (coverage.get("dimension_values") or {}).get("business_entry")
+                    if business_entry and branch.get("entry_name") != business_entry:
+                        errors.append(
+                            f"CONDITION_COVERAGE_BRANCH_MISMATCH: {combination_id} 的 business_entry={business_entry} "
+                            f"与 {branch_id} 的 entry_name={branch.get('entry_name')} 不一致"
+                        )
+                    steps = branch.get("steps", [])
+                    expected_results = branch.get("expected_results", [])
+                    if len(steps) != len(expected_results):
+                        errors.append(
+                            f"CONDITION_COVERAGE_STEP_REFERENCE_INVALID: {tc_id}.{branch_id} steps 与 expected_results 必须一一对应"
+                        )
+                    if (
+                        not isinstance(step_index, int) or isinstance(step_index, bool)
+                        or not 1 <= step_index <= len(steps)
+                        or not isinstance(expected_index, int) or isinstance(expected_index, bool)
+                        or not 1 <= expected_index <= len(expected_results)
+                        or step_index != expected_index
+                    ):
+                        errors.append(
+                            f"CONDITION_COVERAGE_STEP_REFERENCE_INVALID: {combination_id} 的 step_index/expected_index 非法"
+                        )
+                        continue
+                    if coverage.get("observable_result") != expected_results[expected_index - 1]:
+                        errors.append(
+                            f"CONDITION_COVERAGE_STEP_REFERENCE_INVALID: {combination_id} observable_result "
+                            f"必须等于所引用 expected_results[{expected_index}]"
+                        )
+                    location = (tc_id, str(branch_id), step_index)
+                    prior = behavior_locations.get(location)
+                    if prior and prior != combination_id:
+                        errors.append(
+                            f"CONDITION_COVERAGE_NOT_INDEPENDENT: {prior} 与 {combination_id} 全部指向 "
+                            f"{tc_id}.{branch_id}.step[{step_index}]"
+                        )
+                    else:
+                        behavior_locations[location] = str(combination_id)
         unknown_coverage = set(coverage_by_id) - set(required_by_id)
         if unknown_coverage:
             errors.append(
                 f"REQUIRED_COMBINATION_UNCOVERED: testcase 引用不存在 required combination：{sorted(unknown_coverage)}"
             )
+        behavior_coverages = [
+            coverage for entries in coverage_by_id.values() for _, coverage in entries
+            if coverage.get("coverage_type") == "behavior"
+        ]
+        relation_oracles: dict[tuple[str, str, str], dict[str, str]] = {}
+        for coverage in behavior_coverages:
+            values = coverage.get("dimension_values", {})
+            relation = values.get("relation")
+            if relation not in {"包含于", "不包含"}:
+                continue
+            comparison_key = (
+                str(values.get("permission_type")), str(values.get("business_entry")),
+                str(values.get("expected_match_state")),
+            )
+            relation_oracles.setdefault(comparison_key, {})[str(relation)] = str(coverage.get("observable_result"))
+        for comparison_key, oracles in relation_oracles.items():
+            if len(oracles) == 2 and oracles.get("包含于") == oracles.get("不包含"):
+                errors.append(
+                    f"RELATION_ORACLE_NOT_DISTINCT: {comparison_key} 的包含于与不包含使用相同 Oracle"
+                )
+        relation_scenarios: dict[tuple[str, str], set[str]] = {}
+        for coverage in behavior_coverages:
+            values = coverage.get("dimension_values", {})
+            key = (str(values.get("permission_type")), str(values.get("relation")))
+            relation_scenarios.setdefault(key, set()).add(
+                f"{values.get('expected_match_state', '')} {coverage.get('expected_match_state', '')} {coverage.get('observable_result', '')}"
+            )
+        for (permission_type, relation), scenario_texts in relation_scenarios.items():
+            combined = " ".join(sorted(scenario_texts))
+            missing_markers: list[str] = []
+            if relation == "包含于":
+                if not any(marker in combined for marker in ("任一满足", "任一角色", "一个命中", "至少一个命中")):
+                    missing_markers.append("任一满足")
+                if not any(marker in combined for marker in ("全部不满足", "全部不命中", "所有角色均不属于")):
+                    missing_markers.append("全部不满足")
+            if relation == "完全包含于":
+                for label, markers in (
+                    ("全部满足", ("全部满足", "全部命中", "全部角色均属于")),
+                    ("部分满足", ("部分满足", "部分命中", "只有部分")),
+                    ("全部不满足", ("全部不满足", "全部不命中", "所有角色均不属于")),
+                ):
+                    if not any(marker in combined for marker in markers):
+                        missing_markers.append(label)
+            if "指定用户" in permission_type:
+                for label, markers in (
+                    ("单用户命中", ("单用户命中",)), ("单用户不命中", ("单用户不命中",)),
+                    ("多用户一个命中", ("多用户一个命中", "多用户至少一个命中")),
+                    ("多用户全部不命中", ("多用户全部不命中",)),
+                ):
+                    if not any(marker in combined for marker in markers):
+                        missing_markers.append(label)
+            if missing_markers and validation_status != "pending":
+                errors.append(
+                    f"RELATION_SCENARIO_INCOMPLETE: {permission_type}/{relation} 缺少 {sorted(set(missing_markers))}"
+                )
     return list(dict.fromkeys(errors))
 
 

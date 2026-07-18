@@ -166,10 +166,18 @@ def _is_superseded_by_current_rule(
         except (OSError, ValueError, json.JSONDecodeError):
             continue
         if (
-            candidate.get("validation_status") == "passed"
+            candidate.get("validation_status") in {"passed", "pending"}
             and candidate.get("relation") == "替代"
             and candidate.get("supersedes") == artifact_id
             and candidate.get("rule_version") == current_rule_version
+            and (
+                candidate.get("validation_status") == "passed"
+                or (
+                    isinstance(candidate.get("pending_reason"), str)
+                    and bool(candidate.get("pending_reason").strip())
+                    and int(candidate.get("blocking_pending_count", 0)) > 0
+                )
+            )
         ):
             return True
     return False
