@@ -42,6 +42,8 @@ Manifest 至少记录：
 6. 运行 `scripts/validate_testcase_index.py testcases/index.md`，确认每个 `testcases/**/manifest.json` 下的 passed Manifest 按 artifact_id 和 Manifest 路径唯一登记，且正式路径真实存在。
 7. 记录新增、补充、替代或废弃关系。
 
+CI 和发布前校验统一调用 `scripts/validate_formal_artifacts.py` 扫描 `testcases/**/manifest.json`，跳过 `testcases/drafts/`，并对每个 `validation_status=passed` 的 Manifest 复用完整 Manifest、Requirement/Risk/Testcase Model、XMind Markdown、Workbook 树和索引校验。不得为每个业务目录追加硬编码校验命令。
+
 任一步失败都不得宣称完整产物完成。失败时保留可用的 Markdown 和报告，不伪造 Workbook 路径。
 
 原始任务同时要求需求分析和测试用例时，缺少 Requirement Analysis Model、Risk Coverage Matrix、Testcase Model、XMind Markdown、Workbook 或 Manifest 任一项均不得宣称完整交付；正式索引只能在 passed Manifest 全链路复验后更新。

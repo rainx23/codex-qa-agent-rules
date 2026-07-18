@@ -25,6 +25,7 @@ REQUIRED_COMMANDS = (
     "python -m unittest discover -s tests -p test_anti_hallucination_fixtures.py -v",
     "python -m unittest discover -s tests -v",
     "python scripts/validate_manifest.py testcases/manifest.example.json",
+    "python scripts/validate_formal_artifacts.py",
     "python scripts/repair_text_encoding.py testcases/index.md --check",
     "git diff --exit-code",
 )

@@ -36,7 +36,7 @@
 
        python scripts/validate_manifest.py testcases/manifest.example.json
        python scripts/repair_text_encoding.py testcases/index.md --check
-       python scripts/validate_testcase_index.py testcases/index.md
+       python scripts/validate_formal_artifacts.py
 
 6. 三种分析报告模式：
 

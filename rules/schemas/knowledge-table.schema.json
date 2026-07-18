@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$comment": "Generated from scripts/qa_contracts.py; do not edit manually.",
-  "x-rule-version": "2.10.0",
+  "x-rule-version": "2.11.0",
   "title": "Knowledge Table Model",
   "type": "object",
   "additionalProperties": false,

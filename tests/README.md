@@ -39,6 +39,7 @@
 - 产物治理兼容测试覆盖文本换行/BOM Hash、二进制 Hash、完整 Manifest/index 一致性及 Workbook 完整树复验。
 - 回归测试覆盖 blocking Confirmation 解决后的 Fact/计数迁移、原始任务自动续跑契约、正式产物完整性，以及 XMind 无损语义精简、符号、截断和逻辑优先级行为。
 - 回归测试覆盖 `validation_status=passed + sql_status=blocked`、证据精度与索引全量覆盖；这些规则均使用通用 Fixture，不绑定特定业务样例。
+- 条件矩阵、配置存在性/行为分离、多入口核心去重和正式产物统一扫描分别由对应 `test_condition_matrix_*`、`test_entry_branch_*` 与 `test_formal_artifact_scan.py` 覆盖。
 - Golden 变化必须经过人工确认，测试运行时不得自动创建或覆盖 Golden，也不为不同操作系统或 Python 版本维护不同副本。
 - Fixture 和 Golden 只服务测试，不作为业务历史版本说明。
 

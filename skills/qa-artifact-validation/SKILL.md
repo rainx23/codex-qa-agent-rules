@@ -20,6 +20,7 @@ description: 用于校验 QA 分析报告、XMind Markdown、XMind Workbook、Ma
 7. 仅在 Manifest 校验通过后运行 `../../scripts/build_testcase_index.py`，随后必须运行 `../../scripts/validate_testcase_index.py testcases/index.md`；它对每个正式 passed Manifest 复用完整 Manifest 校验，并逐字段核对索引行和备注。确认 artifact id 与 Manifest 路径均唯一、正式文件存在、passed 无漏登，且 pending/failed 没有冒充“已校验”。
 8. 运行语法、Schema 生成检查、规则版本检查、全量测试、Skill 校验、仓库模式校验和 CI 静态检查。
    - 先运行 `python -m unittest discover -s tests -p test_anti_hallucination_fixtures.py -v`，确保八类独立反幻觉夹具通过，再运行全量测试。
+   - 正式产物使用 `scripts/validate_formal_artifacts.py` 统一扫描 `testcases/**/manifest.json`，跳过 drafts，并对每个 passed Manifest 复用 Manifest、模型、Markdown、Workbook 与索引完整校验；CI 不硬编码具体业务目录。
 9. 任一必需检查失败时标记校验失败，并停止“完整交付”的结论。
 10. 产物存在时运行 `validate_knowledge.py`、`build_knowledge_index.py --check`、`validate_data_validation.py`、`validate_sql_style.py --strict` 和 `validate_sql_artifact.py`。确认 SQL 只读，且只有在用户提供执行证据时才标记为已执行/通过/失败。
 11. 接口自动化产物存在时，运行 `../../scripts/validate_api_automation_artifacts.py --excel <case.xlsx> --parameters <parameter.txt> --model <api-automation.json>`；固定表头、JSON、健康校验、变量和参数维度任一失败都阻止交付。

@@ -1,0 +1,1032 @@
+{
+  "schema_version": "2.0.0",
+  "matrix_id": "RISK-MATRIX-CLEARANCE-PERMISSION-20260718-V2",
+  "analysis_ids": [
+    "AN-CLEARANCE-PERMISSION-20260718-V2"
+  ],
+  "risk_items": [
+    {
+      "risk_id": "RISK-001",
+      "risk_title": "\u65e0\u6743\u9650\u6570\u636e\u6cc4\u9732",
+      "risk_level": "critical",
+      "requirement_ids": [
+        "REQ001",
+        "REQ005"
+      ],
+      "fact_ids": [
+        "FACT-007"
+      ],
+      "change_ids": [],
+      "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
+      "business_entries": [
+        "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
+        "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97"
+      ],
+      "business_object": "\u6e05\u4ed3\u80a1\u5f39\u7a97\u80a1\u7968\u884c\u3001\u6c47\u603b\u884c\u6216\u7b56\u7565\u6bb5",
+      "conditions": [
+        "\u6743\u9650\u914d\u7f6e\u5b8c\u6210",
+        "\u5b58\u5728\u547d\u4e2d\u548c\u4e0d\u547d\u4e2d\u6d4b\u8bd5\u6570\u636e"
+      ],
+      "data_shapes": [
+        "\u547d\u4e2d\u6570\u636e",
+        "\u4e0d\u547d\u4e2d\u6570\u636e"
+      ],
+      "core_action": "\u914d\u7f6e\u6743\u9650\u540e\u4ece\u771f\u5b9e\u4e1a\u52a1\u5165\u53e3\u67e5\u8be2",
+      "core_assertion": "\u65e0\u6743\u9650\u6570\u636e\u6cc4\u9732\u65f6\u53ef\u7531\u5bf9\u5e94 TC \u7684\u53ef\u89c1\u96c6\u5408\u3001\u6c47\u603b\u96c6\u5408\u6216\u5b57\u6bb5\u57fa\u7ebf\u5dee\u5f02\u786e\u5b9a\u5b9a\u4f4d",
+      "business_impact": "critical",
+      "test_priority": "P0",
+      "evidence_state": "\u5df2\u786e\u8ba4",
+      "regression_scope": "\u6838\u5fc3\u56de\u5f52",
+      "merge_key": "\u6e05\u4ed3\u80a1\u6743\u9650|unauthorized data disclosure",
+      "testcase_ids": [
+        "TC001"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "\u7531\u72ec\u7acb\u53ef\u8bca\u65ad\u884c\u4e3a\u7528\u4f8b\u8986\u76d6",
+      "evidence_references": [
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 8,
+          "line_end": 8,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "\u7528\u6237\u4ec5\u770b\u5230\u6743\u9650\u547d\u4e2d\u7684\u80a1\u7968\u884c\uff0c\u672a\u547d\u4e2d\u80a1\u7968\u884c\u4e0d\u53ef\u89c1\uff0c\u6c47\u603b\u884c\u53ea\u7edf\u8ba1\u53ef\u89c1\u80a1\u7968\u3002",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-002",
+      "risk_title": "\u6c47\u603b\u884c\u5305\u542b\u65e0\u6743\u9650\u6570\u636e",
+      "risk_level": "critical",
+      "requirement_ids": [
+        "REQ001",
+        "REQ005"
+      ],
+      "fact_ids": [
+        "FACT-007"
+      ],
+      "change_ids": [],
+      "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
+      "business_entries": [
+        "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
+        "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97"
+      ],
+      "business_object": "\u6e05\u4ed3\u80a1\u5f39\u7a97\u80a1\u7968\u884c\u3001\u6c47\u603b\u884c\u6216\u7b56\u7565\u6bb5",
+      "conditions": [
+        "\u6743\u9650\u914d\u7f6e\u5b8c\u6210",
+        "\u5b58\u5728\u547d\u4e2d\u548c\u4e0d\u547d\u4e2d\u6d4b\u8bd5\u6570\u636e"
+      ],
+      "data_shapes": [
+        "\u547d\u4e2d\u6570\u636e",
+        "\u4e0d\u547d\u4e2d\u6570\u636e"
+      ],
+      "core_action": "\u914d\u7f6e\u6743\u9650\u540e\u4ece\u771f\u5b9e\u4e1a\u52a1\u5165\u53e3\u67e5\u8be2",
+      "core_assertion": "\u6c47\u603b\u884c\u5305\u542b\u65e0\u6743\u9650\u6570\u636e\u65f6\u53ef\u7531\u5bf9\u5e94 TC \u7684\u53ef\u89c1\u96c6\u5408\u3001\u6c47\u603b\u96c6\u5408\u6216\u5b57\u6bb5\u57fa\u7ebf\u5dee\u5f02\u786e\u5b9a\u5b9a\u4f4d",
+      "business_impact": "critical",
+      "test_priority": "P0",
+      "evidence_state": "\u5df2\u786e\u8ba4",
+      "regression_scope": "\u6838\u5fc3\u56de\u5f52",
+      "merge_key": "\u6e05\u4ed3\u80a1\u6743\u9650|summary includes unauthorized rows",
+      "testcase_ids": [
+        "TC003"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "\u7531\u72ec\u7acb\u53ef\u8bca\u65ad\u884c\u4e3a\u7528\u4f8b\u8986\u76d6",
+      "evidence_references": [
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 8,
+          "line_end": 8,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "\u7528\u6237\u4ec5\u770b\u5230\u6743\u9650\u547d\u4e2d\u7684\u80a1\u7968\u884c\uff0c\u672a\u547d\u4e2d\u80a1\u7968\u884c\u4e0d\u53ef\u89c1\uff0c\u6c47\u603b\u884c\u53ea\u7edf\u8ba1\u53ef\u89c1\u80a1\u7968\u3002",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-003",
+      "risk_title": "\u6e05\u4ed3\u4e0e\u6e05\u540e\u91cd\u5efa\u7b56\u7565\u4e32\u6743",
+      "risk_level": "critical",
+      "requirement_ids": [
+        "REQ001",
+        "REQ006"
+      ],
+      "fact_ids": [
+        "FACT-008"
+      ],
+      "change_ids": [],
+      "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
+      "business_entries": [
+        "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
+        "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97"
+      ],
+      "business_object": "\u6e05\u4ed3\u80a1\u5f39\u7a97\u80a1\u7968\u884c\u3001\u6c47\u603b\u884c\u6216\u7b56\u7565\u6bb5",
+      "conditions": [
+        "\u6743\u9650\u914d\u7f6e\u5b8c\u6210",
+        "\u5b58\u5728\u547d\u4e2d\u548c\u4e0d\u547d\u4e2d\u6d4b\u8bd5\u6570\u636e"
+      ],
+      "data_shapes": [
+        "\u547d\u4e2d\u6570\u636e",
+        "\u4e0d\u547d\u4e2d\u6570\u636e"
+      ],
+      "core_action": "\u914d\u7f6e\u6743\u9650\u540e\u4ece\u771f\u5b9e\u4e1a\u52a1\u5165\u53e3\u67e5\u8be2",
+      "core_assertion": "\u6e05\u4ed3\u4e0e\u6e05\u540e\u91cd\u5efa\u7b56\u7565\u4e32\u6743\u65f6\u53ef\u7531\u5bf9\u5e94 TC \u7684\u53ef\u89c1\u96c6\u5408\u3001\u6c47\u603b\u96c6\u5408\u6216\u5b57\u6bb5\u57fa\u7ebf\u5dee\u5f02\u786e\u5b9a\u5b9a\u4f4d",
+      "business_impact": "critical",
+      "test_priority": "P0",
+      "evidence_state": "\u5df2\u786e\u8ba4",
+      "regression_scope": "\u6838\u5fc3\u56de\u5f52",
+      "merge_key": "\u6e05\u4ed3\u80a1\u6743\u9650|strategy segment permission crossover",
+      "testcase_ids": [
+        "TC002"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "\u7531\u72ec\u7acb\u53ef\u8bca\u65ad\u884c\u4e3a\u7528\u4f8b\u8986\u76d6",
+      "evidence_references": [
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 9,
+          "line_end": 9,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "\u6e05\u4ed3\u7b56\u7565\u548c\u6e05\u540e\u91cd\u5efa\u7b56\u7565\u6bb5\u72ec\u7acb\u63a7\u6743\u3002",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-004",
+      "risk_title": "role_type \u6620\u5c04\u9519\u8bef",
+      "risk_level": "critical",
+      "requirement_ids": [
+        "REQ002",
+        "REQ003"
+      ],
+      "fact_ids": [
+        "FACT-003",
+        "FACT-004"
+      ],
+      "change_ids": [],
+      "business_entry": "\u6e05\u4ed3\u80a1\u5f39\u7a97\u6743\u9650\u914d\u7f6e",
+      "business_entries": [
+        "\u6e05\u4ed3\u80a1\u5f39\u7a97\u6743\u9650\u914d\u7f6e",
+        "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
+        "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97"
+      ],
+      "business_object": "\u6e05\u4ed3\u80a1\u5f39\u7a97\u80a1\u7968\u884c\u3001\u6c47\u603b\u884c\u6216\u7b56\u7565\u6bb5",
+      "conditions": [
+        "\u6743\u9650\u914d\u7f6e\u5b8c\u6210",
+        "\u5b58\u5728\u547d\u4e2d\u548c\u4e0d\u547d\u4e2d\u6d4b\u8bd5\u6570\u636e"
+      ],
+      "data_shapes": [
+        "\u547d\u4e2d\u6570\u636e",
+        "\u4e0d\u547d\u4e2d\u6570\u636e"
+      ],
+      "core_action": "\u914d\u7f6e\u6743\u9650\u540e\u4ece\u771f\u5b9e\u4e1a\u52a1\u5165\u53e3\u67e5\u8be2",
+      "core_assertion": "role_type \u6620\u5c04\u9519\u8bef\u65f6\u53ef\u7531\u5bf9\u5e94 TC \u7684\u53ef\u89c1\u96c6\u5408\u3001\u6c47\u603b\u96c6\u5408\u6216\u5b57\u6bb5\u57fa\u7ebf\u5dee\u5f02\u786e\u5b9a\u5b9a\u4f4d",
+      "business_impact": "critical",
+      "test_priority": "P0",
+      "evidence_state": "\u5df2\u786e\u8ba4",
+      "regression_scope": "\u6838\u5fc3\u56de\u5f52",
+      "merge_key": "\u6e05\u4ed3\u80a1\u6743\u9650|role type mapping mismatch",
+      "testcase_ids": [
+        "TC004"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "\u7531\u72ec\u7acb\u53ef\u8bca\u65ad\u884c\u4e3a\u7528\u4f8b\u8986\u76d6",
+      "evidence_references": [
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 3,
+          "line_end": 3,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "\u666e\u901a\u5efa\u4ed3\u4eba\u53d6 role_type\u2208{10,20}\uff0c\u5173\u7cfb\u5305\u62ec\u7b49\u4e8e\u3001\u4e0d\u7b49\u4e8e\u3001\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\u3001\u5b8c\u5168\u5305\u542b\u4e8e\u3002",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 4,
+          "line_end": 4,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "\u666e\u901a\u8ddf\u8fdb\u4eba\u53d6 role_type=30\uff0c\u5173\u7cfb\u5305\u62ec\u7b49\u4e8e\u3001\u4e0d\u7b49\u4e8e\u3001\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\u3001\u5b8c\u5168\u5305\u542b\u4e8e\u3002",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-005",
+      "risk_title": "\u7b49\u4e8e\u6216\u4e0d\u7b49\u4e8e\u5173\u7cfb\u65b9\u5411\u53d6\u53cd",
+      "risk_level": "critical",
+      "requirement_ids": [
+        "REQ002",
+        "REQ003",
+        "REQ005"
+      ],
+      "fact_ids": [
+        "FACT-002",
+        "FACT-003",
+        "FACT-004"
+      ],
+      "change_ids": [],
+      "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
+      "business_entries": [
+        "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
+        "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97"
+      ],
+      "business_object": "\u6e05\u4ed3\u80a1\u5f39\u7a97\u80a1\u7968\u884c\u3001\u6c47\u603b\u884c\u6216\u7b56\u7565\u6bb5",
+      "conditions": [
+        "\u6743\u9650\u914d\u7f6e\u5b8c\u6210",
+        "\u5b58\u5728\u547d\u4e2d\u548c\u4e0d\u547d\u4e2d\u6d4b\u8bd5\u6570\u636e"
+      ],
+      "data_shapes": [
+        "\u547d\u4e2d\u6570\u636e",
+        "\u4e0d\u547d\u4e2d\u6570\u636e"
+      ],
+      "core_action": "\u914d\u7f6e\u6743\u9650\u540e\u4ece\u771f\u5b9e\u4e1a\u52a1\u5165\u53e3\u67e5\u8be2",
+      "core_assertion": "\u7b49\u4e8e\u6216\u4e0d\u7b49\u4e8e\u5173\u7cfb\u65b9\u5411\u53d6\u53cd\u65f6\u53ef\u7531\u5bf9\u5e94 TC \u7684\u53ef\u89c1\u96c6\u5408\u3001\u6c47\u603b\u96c6\u5408\u6216\u5b57\u6bb5\u57fa\u7ebf\u5dee\u5f02\u786e\u5b9a\u5b9a\u4f4d",
+      "business_impact": "critical",
+      "test_priority": "P0",
+      "evidence_state": "\u5df2\u786e\u8ba4",
+      "regression_scope": "\u6838\u5fc3\u56de\u5f52",
+      "merge_key": "\u6e05\u4ed3\u80a1\u6743\u9650|equality direction reversed",
+      "testcase_ids": [
+        "TC006",
+        "TC007",
+        "TC011",
+        "TC012"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "\u7531\u72ec\u7acb\u53ef\u8bca\u65ad\u884c\u4e3a\u7528\u4f8b\u8986\u76d6",
+      "evidence_references": [
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 2,
+          "line_end": 2,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "\u666e\u901a\u5efa\u4ed3\u4eba\u548c\u666e\u901a\u8ddf\u8fdb\u4eba\u7684\u76ee\u6807\u8303\u56f4\u5305\u62ec\uff1a\u81ea\u5df1\u3001\u6240\u6709\u4e0b\u7ea7\u3001\u76f4\u5c5e\u4e0a\u7ea7\u3001\u76f4\u5c5e\u4e0b\u7ea7\u3002",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 3,
+          "line_end": 3,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "\u666e\u901a\u5efa\u4ed3\u4eba\u53d6 role_type\u2208{10,20}\uff0c\u5173\u7cfb\u5305\u62ec\u7b49\u4e8e\u3001\u4e0d\u7b49\u4e8e\u3001\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\u3001\u5b8c\u5168\u5305\u542b\u4e8e\u3002",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 4,
+          "line_end": 4,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "\u666e\u901a\u8ddf\u8fdb\u4eba\u53d6 role_type=30\uff0c\u5173\u7cfb\u5305\u62ec\u7b49\u4e8e\u3001\u4e0d\u7b49\u4e8e\u3001\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\u3001\u5b8c\u5168\u5305\u542b\u4e8e\u3002",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-006",
+      "risk_title": "\u5305\u542b\u4e8e\u4efb\u4e00\u547d\u4e2d\u5224\u65ad\u9519\u8bef",
+      "risk_level": "critical",
+      "requirement_ids": [
+        "REQ002",
+        "REQ003",
+        "REQ005"
+      ],
+      "fact_ids": [
+        "FACT-003",
+        "FACT-004",
+        "FACT-007"
+      ],
+      "change_ids": [],
+      "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
+      "business_entries": [
+        "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
+        "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97"
+      ],
+      "business_object": "\u6e05\u4ed3\u80a1\u5f39\u7a97\u80a1\u7968\u884c\u3001\u6c47\u603b\u884c\u6216\u7b56\u7565\u6bb5",
+      "conditions": [
+        "\u6743\u9650\u914d\u7f6e\u5b8c\u6210",
+        "\u5b58\u5728\u547d\u4e2d\u548c\u4e0d\u547d\u4e2d\u6d4b\u8bd5\u6570\u636e"
+      ],
+      "data_shapes": [
+        "\u547d\u4e2d\u6570\u636e",
+        "\u4e0d\u547d\u4e2d\u6570\u636e"
+      ],
+      "core_action": "\u914d\u7f6e\u6743\u9650\u540e\u4ece\u771f\u5b9e\u4e1a\u52a1\u5165\u53e3\u67e5\u8be2",
+      "core_assertion": "\u5305\u542b\u4e8e\u4efb\u4e00\u547d\u4e2d\u5224\u65ad\u9519\u8bef\u65f6\u53ef\u7531\u5bf9\u5e94 TC \u7684\u53ef\u89c1\u96c6\u5408\u3001\u6c47\u603b\u96c6\u5408\u6216\u5b57\u6bb5\u57fa\u7ebf\u5dee\u5f02\u786e\u5b9a\u5b9a\u4f4d",
+      "business_impact": "critical",
+      "test_priority": "P0",
+      "evidence_state": "\u5df2\u786e\u8ba4",
+      "regression_scope": "\u6838\u5fc3\u56de\u5f52",
+      "merge_key": "\u6e05\u4ed3\u80a1\u6743\u9650|contains any match error",
+      "testcase_ids": [
+        "TC008",
+        "TC013"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "\u7531\u72ec\u7acb\u53ef\u8bca\u65ad\u884c\u4e3a\u7528\u4f8b\u8986\u76d6",
+      "evidence_references": [
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 3,
+          "line_end": 3,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "\u666e\u901a\u5efa\u4ed3\u4eba\u53d6 role_type\u2208{10,20}\uff0c\u5173\u7cfb\u5305\u62ec\u7b49\u4e8e\u3001\u4e0d\u7b49\u4e8e\u3001\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\u3001\u5b8c\u5168\u5305\u542b\u4e8e\u3002",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 4,
+          "line_end": 4,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "\u666e\u901a\u8ddf\u8fdb\u4eba\u53d6 role_type=30\uff0c\u5173\u7cfb\u5305\u62ec\u7b49\u4e8e\u3001\u4e0d\u7b49\u4e8e\u3001\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\u3001\u5b8c\u5168\u5305\u542b\u4e8e\u3002",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 8,
+          "line_end": 8,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "\u7528\u6237\u4ec5\u770b\u5230\u6743\u9650\u547d\u4e2d\u7684\u80a1\u7968\u884c\uff0c\u672a\u547d\u4e2d\u80a1\u7968\u884c\u4e0d\u53ef\u89c1\uff0c\u6c47\u603b\u884c\u53ea\u7edf\u8ba1\u53ef\u89c1\u80a1\u7968\u3002",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-007",
+      "risk_title": "\u4e0d\u5305\u542b\u5173\u7cfb\u53cd\u5411\u5224\u65ad\u9519\u8bef",
+      "risk_level": "critical",
+      "requirement_ids": [
+        "REQ002",
+        "REQ003",
+        "REQ005"
+      ],
+      "fact_ids": [
+        "FACT-003",
+        "FACT-004",
+        "FACT-007"
+      ],
+      "change_ids": [],
+      "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
+      "business_entries": [
+        "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
+        "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97"
+      ],
+      "business_object": "\u6e05\u4ed3\u80a1\u5f39\u7a97\u80a1\u7968\u884c\u3001\u6c47\u603b\u884c\u6216\u7b56\u7565\u6bb5",
+      "conditions": [
+        "\u6743\u9650\u914d\u7f6e\u5b8c\u6210",
+        "\u5b58\u5728\u547d\u4e2d\u548c\u4e0d\u547d\u4e2d\u6d4b\u8bd5\u6570\u636e"
+      ],
+      "data_shapes": [
+        "\u547d\u4e2d\u6570\u636e",
+        "\u4e0d\u547d\u4e2d\u6570\u636e"
+      ],
+      "core_action": "\u914d\u7f6e\u6743\u9650\u540e\u4ece\u771f\u5b9e\u4e1a\u52a1\u5165\u53e3\u67e5\u8be2",
+      "core_assertion": "\u4e0d\u5305\u542b\u5173\u7cfb\u53cd\u5411\u5224\u65ad\u9519\u8bef\u65f6\u53ef\u7531\u5bf9\u5e94 TC \u7684\u53ef\u89c1\u96c6\u5408\u3001\u6c47\u603b\u96c6\u5408\u6216\u5b57\u6bb5\u57fa\u7ebf\u5dee\u5f02\u786e\u5b9a\u5b9a\u4f4d",
+      "business_impact": "critical",
+      "test_priority": "P0",
+      "evidence_state": "\u5df2\u786e\u8ba4",
+      "regression_scope": "\u6838\u5fc3\u56de\u5f52",
+      "merge_key": "\u6e05\u4ed3\u80a1\u6743\u9650|not contains reverse error",
+      "testcase_ids": [
+        "TC009",
+        "TC014"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "\u7531\u72ec\u7acb\u53ef\u8bca\u65ad\u884c\u4e3a\u7528\u4f8b\u8986\u76d6",
+      "evidence_references": [
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 3,
+          "line_end": 3,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "\u666e\u901a\u5efa\u4ed3\u4eba\u53d6 role_type\u2208{10,20}\uff0c\u5173\u7cfb\u5305\u62ec\u7b49\u4e8e\u3001\u4e0d\u7b49\u4e8e\u3001\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\u3001\u5b8c\u5168\u5305\u542b\u4e8e\u3002",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 4,
+          "line_end": 4,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "\u666e\u901a\u8ddf\u8fdb\u4eba\u53d6 role_type=30\uff0c\u5173\u7cfb\u5305\u62ec\u7b49\u4e8e\u3001\u4e0d\u7b49\u4e8e\u3001\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\u3001\u5b8c\u5168\u5305\u542b\u4e8e\u3002",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 8,
+          "line_end": 8,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "\u7528\u6237\u4ec5\u770b\u5230\u6743\u9650\u547d\u4e2d\u7684\u80a1\u7968\u884c\uff0c\u672a\u547d\u4e2d\u80a1\u7968\u884c\u4e0d\u53ef\u89c1\uff0c\u6c47\u603b\u884c\u53ea\u7edf\u8ba1\u53ef\u89c1\u80a1\u7968\u3002",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-008",
+      "risk_title": "\u5b8c\u5168\u5305\u542b\u4e8e\u5168\u90e8\u547d\u4e2d\u5224\u65ad\u9519\u8bef",
+      "risk_level": "critical",
+      "requirement_ids": [
+        "REQ002",
+        "REQ003",
+        "REQ005"
+      ],
+      "fact_ids": [
+        "FACT-003",
+        "FACT-004",
+        "FACT-007"
+      ],
+      "change_ids": [],
+      "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
+      "business_entries": [
+        "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
+        "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97"
+      ],
+      "business_object": "\u6e05\u4ed3\u80a1\u5f39\u7a97\u80a1\u7968\u884c\u3001\u6c47\u603b\u884c\u6216\u7b56\u7565\u6bb5",
+      "conditions": [
+        "\u6743\u9650\u914d\u7f6e\u5b8c\u6210",
+        "\u5b58\u5728\u547d\u4e2d\u548c\u4e0d\u547d\u4e2d\u6d4b\u8bd5\u6570\u636e"
+      ],
+      "data_shapes": [
+        "\u547d\u4e2d\u6570\u636e",
+        "\u4e0d\u547d\u4e2d\u6570\u636e"
+      ],
+      "core_action": "\u914d\u7f6e\u6743\u9650\u540e\u4ece\u771f\u5b9e\u4e1a\u52a1\u5165\u53e3\u67e5\u8be2",
+      "core_assertion": "\u5b8c\u5168\u5305\u542b\u4e8e\u5168\u90e8\u547d\u4e2d\u5224\u65ad\u9519\u8bef\u65f6\u53ef\u7531\u5bf9\u5e94 TC \u7684\u53ef\u89c1\u96c6\u5408\u3001\u6c47\u603b\u96c6\u5408\u6216\u5b57\u6bb5\u57fa\u7ebf\u5dee\u5f02\u786e\u5b9a\u5b9a\u4f4d",
+      "business_impact": "critical",
+      "test_priority": "P0",
+      "evidence_state": "\u5df2\u786e\u8ba4",
+      "regression_scope": "\u6838\u5fc3\u56de\u5f52",
+      "merge_key": "\u6e05\u4ed3\u80a1\u6743\u9650|fully contains all match error",
+      "testcase_ids": [
+        "TC010",
+        "TC015"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "\u7531\u72ec\u7acb\u53ef\u8bca\u65ad\u884c\u4e3a\u7528\u4f8b\u8986\u76d6",
+      "evidence_references": [
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 3,
+          "line_end": 3,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "\u666e\u901a\u5efa\u4ed3\u4eba\u53d6 role_type\u2208{10,20}\uff0c\u5173\u7cfb\u5305\u62ec\u7b49\u4e8e\u3001\u4e0d\u7b49\u4e8e\u3001\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\u3001\u5b8c\u5168\u5305\u542b\u4e8e\u3002",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 4,
+          "line_end": 4,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "\u666e\u901a\u8ddf\u8fdb\u4eba\u53d6 role_type=30\uff0c\u5173\u7cfb\u5305\u62ec\u7b49\u4e8e\u3001\u4e0d\u7b49\u4e8e\u3001\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\u3001\u5b8c\u5168\u5305\u542b\u4e8e\u3002",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 8,
+          "line_end": 8,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "\u7528\u6237\u4ec5\u770b\u5230\u6743\u9650\u547d\u4e2d\u7684\u80a1\u7968\u884c\uff0c\u672a\u547d\u4e2d\u80a1\u7968\u884c\u4e0d\u53ef\u89c1\uff0c\u6c47\u603b\u884c\u53ea\u7edf\u8ba1\u53ef\u89c1\u80a1\u7968\u3002",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-009",
+      "risk_title": "\u76ee\u6807\u8303\u56f4\u89e3\u6790\u9519\u8bef",
+      "risk_level": "critical",
+      "requirement_ids": [
+        "REQ002",
+        "REQ003",
+        "REQ005"
+      ],
+      "fact_ids": [
+        "FACT-002",
+        "FACT-006"
+      ],
+      "change_ids": [],
+      "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
+      "business_entries": [
+        "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
+        "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97"
+      ],
+      "business_object": "\u6e05\u4ed3\u80a1\u5f39\u7a97\u80a1\u7968\u884c\u3001\u6c47\u603b\u884c\u6216\u7b56\u7565\u6bb5",
+      "conditions": [
+        "\u6743\u9650\u914d\u7f6e\u5b8c\u6210",
+        "\u5b58\u5728\u547d\u4e2d\u548c\u4e0d\u547d\u4e2d\u6d4b\u8bd5\u6570\u636e"
+      ],
+      "data_shapes": [
+        "\u547d\u4e2d\u6570\u636e",
+        "\u4e0d\u547d\u4e2d\u6570\u636e"
+      ],
+      "core_action": "\u914d\u7f6e\u6743\u9650\u540e\u4ece\u771f\u5b9e\u4e1a\u52a1\u5165\u53e3\u67e5\u8be2",
+      "core_assertion": "\u76ee\u6807\u8303\u56f4\u89e3\u6790\u9519\u8bef\u65f6\u53ef\u7531\u5bf9\u5e94 TC \u7684\u53ef\u89c1\u96c6\u5408\u3001\u6c47\u603b\u96c6\u5408\u6216\u5b57\u6bb5\u57fa\u7ebf\u5dee\u5f02\u786e\u5b9a\u5b9a\u4f4d",
+      "business_impact": "critical",
+      "test_priority": "P0",
+      "evidence_state": "\u5df2\u786e\u8ba4",
+      "regression_scope": "\u6838\u5fc3\u56de\u5f52",
+      "merge_key": "\u6e05\u4ed3\u80a1\u6743\u9650|target scope parsing error",
+      "testcase_ids": [
+        "TC006",
+        "TC007",
+        "TC008",
+        "TC009",
+        "TC010",
+        "TC011",
+        "TC012",
+        "TC013",
+        "TC014",
+        "TC015"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "\u7531\u72ec\u7acb\u53ef\u8bca\u65ad\u884c\u4e3a\u7528\u4f8b\u8986\u76d6",
+      "evidence_references": [
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 2,
+          "line_end": 2,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "\u666e\u901a\u5efa\u4ed3\u4eba\u548c\u666e\u901a\u8ddf\u8fdb\u4eba\u7684\u76ee\u6807\u8303\u56f4\u5305\u62ec\uff1a\u81ea\u5df1\u3001\u6240\u6709\u4e0b\u7ea7\u3001\u76f4\u5c5e\u4e0a\u7ea7\u3001\u76f4\u5c5e\u4e0b\u7ea7\u3002",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 6,
+          "line_end": 6,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "\u5efa\u4ed3\u4eba=\u81ea\u5df1\u3001\u5efa\u4ed3\u4eba\u2260\u76f4\u5c5e\u4e0a\u7ea7\u7b49\u5177\u4f53\u5173\u7cfb\u4e0e\u76ee\u6807\u7ec4\u5408\u5fc5\u987b\u8fdb\u5165\u884c\u4e3a\u6d4b\u8bd5\u573a\u666f\u3002",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-010",
+      "risk_title": "\u6307\u5b9a\u7528\u6237\u591a\u503c\u96c6\u5408\u5224\u65ad\u9519\u8bef",
+      "risk_level": "critical",
+      "requirement_ids": [
+        "REQ004",
+        "REQ005"
+      ],
+      "fact_ids": [
+        "FACT-005",
+        "FACT-011"
+      ],
+      "change_ids": [],
+      "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
+      "business_entries": [
+        "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
+        "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97"
+      ],
+      "business_object": "\u6e05\u4ed3\u80a1\u5f39\u7a97\u80a1\u7968\u884c\u3001\u6c47\u603b\u884c\u6216\u7b56\u7565\u6bb5",
+      "conditions": [
+        "\u6743\u9650\u914d\u7f6e\u5b8c\u6210",
+        "\u5b58\u5728\u547d\u4e2d\u548c\u4e0d\u547d\u4e2d\u6d4b\u8bd5\u6570\u636e"
+      ],
+      "data_shapes": [
+        "\u547d\u4e2d\u6570\u636e",
+        "\u4e0d\u547d\u4e2d\u6570\u636e"
+      ],
+      "core_action": "\u914d\u7f6e\u6743\u9650\u540e\u4ece\u771f\u5b9e\u4e1a\u52a1\u5165\u53e3\u67e5\u8be2",
+      "core_assertion": "\u6307\u5b9a\u7528\u6237\u591a\u503c\u96c6\u5408\u5224\u65ad\u9519\u8bef\u65f6\u53ef\u7531\u5bf9\u5e94 TC \u7684\u53ef\u89c1\u96c6\u5408\u3001\u6c47\u603b\u96c6\u5408\u6216\u5b57\u6bb5\u57fa\u7ebf\u5dee\u5f02\u786e\u5b9a\u5b9a\u4f4d",
+      "business_impact": "critical",
+      "test_priority": "P0",
+      "evidence_state": "\u5df2\u786e\u8ba4",
+      "regression_scope": "\u6838\u5fc3\u56de\u5f52",
+      "merge_key": "\u6e05\u4ed3\u80a1\u6743\u9650|specified user set matching error",
+      "testcase_ids": [
+        "TC016",
+        "TC017",
+        "TC018",
+        "TC019"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "\u7531\u72ec\u7acb\u53ef\u8bca\u65ad\u884c\u4e3a\u7528\u4f8b\u8986\u76d6",
+      "evidence_references": [
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 5,
+          "line_end": 5,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "\u5efa\u4ed3\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09\u548c\u8ddf\u8fdb\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09\u7684\u5173\u7cfb\u5305\u62ec\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\uff0c\u5e76\u652f\u6301\u8ffd\u52a0\u591a\u4e2a\u7528\u6237\u3002",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 12,
+          "line_end": 12,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "\u6307\u5b9a\u7528\u6237\u573a\u666f\u8986\u76d6\u5355\u4e2a\u7528\u6237\u3001\u8ffd\u52a0\u591a\u4e2a\u7528\u6237\u3001\u5176\u4e2d\u4e00\u4e2a\u7528\u6237\u547d\u4e2d\u548c\u6240\u6709\u7528\u6237\u5747\u4e0d\u547d\u4e2d\u3002",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-011",
+      "risk_title": "AND \u6216 OR \u7ec4\u5408\u5224\u65ad\u9519\u8bef",
+      "risk_level": "critical",
+      "requirement_ids": [
+        "REQ007"
+      ],
+      "fact_ids": [
+        "FACT-009"
+      ],
+      "change_ids": [],
+      "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
+      "business_entries": [
+        "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
+        "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97"
+      ],
+      "business_object": "\u6e05\u4ed3\u80a1\u5f39\u7a97\u80a1\u7968\u884c\u3001\u6c47\u603b\u884c\u6216\u7b56\u7565\u6bb5",
+      "conditions": [
+        "\u6743\u9650\u914d\u7f6e\u5b8c\u6210",
+        "\u5b58\u5728\u547d\u4e2d\u548c\u4e0d\u547d\u4e2d\u6d4b\u8bd5\u6570\u636e"
+      ],
+      "data_shapes": [
+        "\u547d\u4e2d\u6570\u636e",
+        "\u4e0d\u547d\u4e2d\u6570\u636e"
+      ],
+      "core_action": "\u914d\u7f6e\u6743\u9650\u540e\u4ece\u771f\u5b9e\u4e1a\u52a1\u5165\u53e3\u67e5\u8be2",
+      "core_assertion": "AND \u6216 OR \u7ec4\u5408\u5224\u65ad\u9519\u8bef\u65f6\u53ef\u7531\u5bf9\u5e94 TC \u7684\u53ef\u89c1\u96c6\u5408\u3001\u6c47\u603b\u96c6\u5408\u6216\u5b57\u6bb5\u57fa\u7ebf\u5dee\u5f02\u786e\u5b9a\u5b9a\u4f4d",
+      "business_impact": "critical",
+      "test_priority": "P0",
+      "evidence_state": "\u5df2\u786e\u8ba4",
+      "regression_scope": "\u6838\u5fc3\u56de\u5f52",
+      "merge_key": "\u6e05\u4ed3\u80a1\u6743\u9650|boolean connector evaluation error",
+      "testcase_ids": [
+        "TC022",
+        "TC023"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "\u7531\u72ec\u7acb\u53ef\u8bca\u65ad\u884c\u4e3a\u7528\u4f8b\u8986\u76d6",
+      "evidence_references": [
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 10,
+          "line_end": 10,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "\u591a\u4e2a\u65b0\u65e7\u6743\u9650\u6761\u4ef6\u652f\u6301 AND \u548c OR \u8fde\u63a5\uff0c\u539f\u6709\u6743\u9650\u4fdd\u7559\u3002",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-012",
+      "risk_title": "\u539f\u6709\u6743\u9650\u88ab\u65b0\u589e\u6743\u9650\u8986\u76d6",
+      "risk_level": "high",
+      "requirement_ids": [
+        "REQ007"
+      ],
+      "fact_ids": [
+        "FACT-009"
+      ],
+      "change_ids": [],
+      "business_entry": "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
+      "business_entries": [
+        "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
+        "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97"
+      ],
+      "business_object": "\u6e05\u4ed3\u80a1\u5f39\u7a97\u80a1\u7968\u884c\u3001\u6c47\u603b\u884c\u6216\u7b56\u7565\u6bb5",
+      "conditions": [
+        "\u6743\u9650\u914d\u7f6e\u5b8c\u6210",
+        "\u5b58\u5728\u547d\u4e2d\u548c\u4e0d\u547d\u4e2d\u6d4b\u8bd5\u6570\u636e"
+      ],
+      "data_shapes": [
+        "\u547d\u4e2d\u6570\u636e",
+        "\u4e0d\u547d\u4e2d\u6570\u636e"
+      ],
+      "core_action": "\u914d\u7f6e\u6743\u9650\u540e\u4ece\u771f\u5b9e\u4e1a\u52a1\u5165\u53e3\u67e5\u8be2",
+      "core_assertion": "\u539f\u6709\u6743\u9650\u88ab\u65b0\u589e\u6743\u9650\u8986\u76d6\u65f6\u53ef\u7531\u5bf9\u5e94 TC \u7684\u53ef\u89c1\u96c6\u5408\u3001\u6c47\u603b\u96c6\u5408\u6216\u5b57\u6bb5\u57fa\u7ebf\u5dee\u5f02\u786e\u5b9a\u5b9a\u4f4d",
+      "business_impact": "high",
+      "test_priority": "P1",
+      "evidence_state": "\u5df2\u786e\u8ba4",
+      "regression_scope": "\u5173\u8054\u56de\u5f52",
+      "merge_key": "\u6e05\u4ed3\u80a1\u6743\u9650|existing permission overwritten",
+      "testcase_ids": [
+        "TC020"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "\u7531\u72ec\u7acb\u53ef\u8bca\u65ad\u884c\u4e3a\u7528\u4f8b\u8986\u76d6",
+      "evidence_references": [
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 10,
+          "line_end": 10,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "\u591a\u4e2a\u65b0\u65e7\u6743\u9650\u6761\u4ef6\u652f\u6301 AND \u548c OR \u8fde\u63a5\uff0c\u539f\u6709\u6743\u9650\u4fdd\u7559\u3002",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-013",
+      "risk_title": "\u53ef\u7528\u8d44\u91d1\u5f39\u7a97\u56de\u5f52\u53d7\u635f",
+      "risk_level": "high",
+      "requirement_ids": [
+        "REQ008"
+      ],
+      "fact_ids": [
+        "FACT-010"
+      ],
+      "change_ids": [],
+      "business_entry": "\u53ef\u7528\u8d44\u91d1\u5f39\u7a97",
+      "business_entries": [
+        "\u53ef\u7528\u8d44\u91d1\u5f39\u7a97"
+      ],
+      "business_object": "\u53ef\u7528\u8d44\u91d1\u5f39\u7a97",
+      "conditions": [
+        "\u6743\u9650\u914d\u7f6e\u5b8c\u6210",
+        "\u5b58\u5728\u547d\u4e2d\u548c\u4e0d\u547d\u4e2d\u6d4b\u8bd5\u6570\u636e"
+      ],
+      "data_shapes": [
+        "\u547d\u4e2d\u6570\u636e",
+        "\u4e0d\u547d\u4e2d\u6570\u636e"
+      ],
+      "core_action": "\u914d\u7f6e\u6743\u9650\u540e\u4ece\u771f\u5b9e\u4e1a\u52a1\u5165\u53e3\u67e5\u8be2",
+      "core_assertion": "\u53ef\u7528\u8d44\u91d1\u5f39\u7a97\u56de\u5f52\u53d7\u635f\u65f6\u53ef\u7531\u5bf9\u5e94 TC \u7684\u53ef\u89c1\u96c6\u5408\u3001\u6c47\u603b\u96c6\u5408\u6216\u5b57\u6bb5\u57fa\u7ebf\u5dee\u5f02\u786e\u5b9a\u5b9a\u4f4d",
+      "business_impact": "high",
+      "test_priority": "P1",
+      "evidence_state": "\u5df2\u786e\u8ba4",
+      "regression_scope": "\u5173\u8054\u56de\u5f52",
+      "merge_key": "\u6e05\u4ed3\u80a1\u6743\u9650|available funds regression",
+      "testcase_ids": [
+        "TC021"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "\u7531\u72ec\u7acb\u53ef\u8bca\u65ad\u884c\u4e3a\u7528\u4f8b\u8986\u76d6",
+      "evidence_references": [
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 11,
+          "line_end": 11,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "\u53ef\u7528\u8d44\u91d1\u5f39\u7a97\u4e0d\u53d7\u672c\u6b21\u6e05\u4ed3\u80a1\u6743\u9650\u53d8\u66f4\u5f71\u54cd\u3002",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-014",
+      "risk_title": "\u6743\u9650\u914d\u7f6e\u9879\u7f3a\u5931",
+      "risk_level": "high",
+      "requirement_ids": [
+        "REQ002",
+        "REQ003",
+        "REQ004"
+      ],
+      "fact_ids": [
+        "FACT-003",
+        "FACT-004",
+        "FACT-005"
+      ],
+      "change_ids": [],
+      "business_entry": "\u6e05\u4ed3\u80a1\u5f39\u7a97\u6743\u9650\u914d\u7f6e",
+      "business_entries": [
+        "\u6e05\u4ed3\u80a1\u5f39\u7a97\u6743\u9650\u914d\u7f6e",
+        "\u6a21\u62df\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97",
+        "\u6b63\u5f0f\u4ea4\u6613\u6e05\u4ed3\u80a1\u5f39\u7a97"
+      ],
+      "business_object": "\u6e05\u4ed3\u80a1\u5f39\u7a97\u80a1\u7968\u884c\u3001\u6c47\u603b\u884c\u6216\u7b56\u7565\u6bb5",
+      "conditions": [
+        "\u6743\u9650\u914d\u7f6e\u5b8c\u6210",
+        "\u5b58\u5728\u547d\u4e2d\u548c\u4e0d\u547d\u4e2d\u6d4b\u8bd5\u6570\u636e"
+      ],
+      "data_shapes": [
+        "\u547d\u4e2d\u6570\u636e",
+        "\u4e0d\u547d\u4e2d\u6570\u636e"
+      ],
+      "core_action": "\u914d\u7f6e\u6743\u9650\u540e\u4ece\u771f\u5b9e\u4e1a\u52a1\u5165\u53e3\u67e5\u8be2",
+      "core_assertion": "\u56db\u7c7b\u6743\u9650\u3001\u4e94\u79cd\u666e\u901a\u5173\u7cfb\u3001\u56db\u79cd\u76ee\u6807\u8303\u56f4\u6216\u6307\u5b9a\u7528\u6237\u591a\u503c\u7ec4\u4ef6\u7f3a\u5931\u65f6\u7531\u914d\u7f6e\u68c0\u67e5\u76f4\u63a5\u5b9a\u4f4d",
+      "business_impact": "high",
+      "test_priority": "P1",
+      "evidence_state": "\u5df2\u786e\u8ba4",
+      "regression_scope": "\u5173\u8054\u56de\u5f52",
+      "merge_key": "\u6e05\u4ed3\u80a1\u6743\u9650|configuration completeness",
+      "testcase_ids": [
+        "TC005"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "\u7531\u72ec\u7acb\u53ef\u8bca\u65ad\u884c\u4e3a\u7528\u4f8b\u8986\u76d6",
+      "evidence_references": [
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 3,
+          "line_end": 3,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "\u666e\u901a\u5efa\u4ed3\u4eba\u53d6 role_type\u2208{10,20}\uff0c\u5173\u7cfb\u5305\u62ec\u7b49\u4e8e\u3001\u4e0d\u7b49\u4e8e\u3001\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\u3001\u5b8c\u5168\u5305\u542b\u4e8e\u3002",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 4,
+          "line_end": 4,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "\u666e\u901a\u8ddf\u8fdb\u4eba\u53d6 role_type=30\uff0c\u5173\u7cfb\u5305\u62ec\u7b49\u4e8e\u3001\u4e0d\u7b49\u4e8e\u3001\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\u3001\u5b8c\u5168\u5305\u542b\u4e8e\u3002",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 5,
+          "line_end": 5,
+          "commit_sha": null,
+          "content_hash": "sha256:9330d0339667ef83f8e9f1e7bbc9d919f7d84f161361883b69662891bc0d5196",
+          "excerpt": "\u5efa\u4ed3\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09\u548c\u8ddf\u8fdb\u4eba\uff08\u6307\u5b9a\u7528\u6237\uff09\u7684\u5173\u7cfb\u5305\u62ec\u5305\u542b\u4e8e\u3001\u4e0d\u5305\u542b\uff0c\u5e76\u652f\u6301\u8ffd\u52a0\u591a\u4e2a\u7528\u6237\u3002",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    }
+  ],
+  "coverage_summary": {
+    "risk_count": 14,
+    "p0_risk_count": 11,
+    "covered_risk_count": 14,
+    "covered_testcase_count": 23,
+    "total_testcase_count": 23
+  }
+}
+

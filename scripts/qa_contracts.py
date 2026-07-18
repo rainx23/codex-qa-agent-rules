@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import re
 from datetime import datetime
 from pathlib import Path
@@ -48,6 +49,11 @@ ZERO_HASH = "sha256:" + "0" * 64
 KNOWLEDGE_STATUSES = ("active_confirmed", "candidate", "conflicting", "superseded", "deprecated", "missing")
 SCHEMA_SCOPES = ("complete", "partial", "blocked")
 RISK_DISPOSITIONS = ("active", "covered", "merged", "deferred", "accepted", "blocked", "not_applicable", "resolved")
+CONDITION_COVERAGE_TYPES = ("behavior", "configuration")
+TC_SPLIT_REASONS = (
+    "data_source", "permission_rule", "calculation_basis", "operation",
+    "oracle", "exception_handling", "risk_diagnostic",
+)
 FIXED_API_ASSERTION_SCOPE = "parameter_health"
 FIXED_API_HEALTH_CHECKS = (
     {"path": "content.code", "operator": "equals", "expected": 0},
@@ -158,6 +164,22 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 
 def stable_normalized_file_hash(path: Path) -> str:
     return stable_file_content_hash(path, normalize_text_newlines=True)
+
+
+def compute_core_deduplication_key(factors: dict[str, Any]) -> str:
+    """Return a deterministic entry-agnostic key for testcase merge decisions."""
+
+    ordered_fields = (
+        "business_object", "trigger_condition", "core_action", "core_assertion",
+        "risk_semantics", "data_source", "permission_rule", "calculation_basis",
+        "exception_handling",
+    )
+    normalized = {
+        field: re.sub(r"\s+", " ", str(factors.get(field, ""))).strip().casefold()
+        for field in ordered_fields
+    }
+    payload = json.dumps(normalized, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return "sha256:" + hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
 def read_rule_version(root: Path) -> str:
@@ -280,6 +302,33 @@ def validate_schema_shape(value: Any, schema: dict[str, Any], path: str = "$") -
 
 
 def requirement_schema(version: str) -> dict[str, Any]:
+    condition_dimension = _object(
+        ["dimension_id", "dimension_name", "values"],
+        {"dimension_id": _string(), "dimension_name": _string(), "values": _strings(1)},
+    )
+    required_combination = _object(
+        ["combination_id", "dimension_values", "covered_by_tc_ids"],
+        {
+            "combination_id": _string(), "dimension_values": {"type": "object"},
+            "covered_by_tc_ids": {"type": "array", "items": _string(pattern=TC_PATTERN), "uniqueItems": True},
+        },
+    )
+    excluded_combination = _object(
+        ["combination_id", "dimension_values", "exclusion_reason"],
+        {
+            "combination_id": _string(), "dimension_values": {"type": "object"},
+            "exclusion_reason": _string(),
+        },
+    )
+    condition_matrix = _object(
+        ["dimensions", "required_combinations", "excluded_combinations", "coverage_summary"],
+        {
+            "dimensions": {"type": "array", "items": condition_dimension, "minItems": 2},
+            "required_combinations": {"type": "array", "items": required_combination},
+            "excluded_combinations": {"type": "array", "items": excluded_combination},
+            "coverage_summary": {"type": "object"},
+        },
+    )
     fact = _object(
         ["fact_id", "category", "statement", "source_type", "source_reference", "confidence", "affects_core_expectation", "evidence_references"],
         {
@@ -321,6 +370,8 @@ def requirement_schema(version: str) -> dict[str, Any]:
             "data_validation_required": {"enum": list(DATA_VALIDATION_REQUIREMENTS)}, "data_validation_reason": _string(),
             "recommended_validation_method": {"enum": list(VALIDATION_METHODS)}, "sql_generation_status": {"enum": list(SQL_GENERATION_STATUSES)},
             "validation_missing_information": _strings(),
+            "condition_matrix_required": {"type": "boolean"},
+            "condition_matrix": condition_matrix,
         },
     )
     return _base_schema("Requirement Analysis Model", version, body)
@@ -584,6 +635,23 @@ def testcase_schema(version: str) -> dict[str, Any]:
             "steps": _strings(1), "expected_results": _strings(1),
         },
     )
+    condition_coverage = _object(
+        ["combination_id", "coverage_type", "dimension_values", "expected_match_state", "observable_result"],
+        {
+            "combination_id": _string(), "coverage_type": {"enum": list(CONDITION_COVERAGE_TYPES)},
+            "dimension_values": {"type": "object"}, "expected_match_state": _string(),
+            "observable_result": _string(),
+        },
+    )
+    core_deduplication_factors = _object(
+        ["business_object", "trigger_condition", "core_action", "core_assertion", "risk_semantics"],
+        {
+            "business_object": _string(), "trigger_condition": _string(), "core_action": _string(),
+            "core_assertion": _string(), "risk_semantics": _string(), "data_source": _string(),
+            "permission_rule": _string(), "calculation_basis": _string(),
+            "exception_handling": _string(),
+        },
+    )
     case = _object(
         ["tc_id", "dimension", "common_entry", "module_level_1", "module_level_2", "test_point", "steps", "expected_results", "risk_ids", "requirement_ids", "change_ids", "historical_defect_ids", "test_priority", "evidence_state", "regression_scope", "deduplication_key"],
         {
@@ -597,6 +665,10 @@ def testcase_schema(version: str) -> dict[str, Any]:
             "cleanup_steps": _strings(), "oracle_sources": _strings(), "automation_candidate": {"enum": ["yes", "no", "unknown"]}, "automation_reason": _string(),
             "test_priority": {"enum": list(TEST_PRIORITIES)}, "evidence_state": {"enum": list(EVIDENCE_STATES)},
             "regression_scope": {"enum": list(REGRESSION_SCOPES)}, "deduplication_key": _string(),
+            "core_deduplication_factors": core_deduplication_factors,
+            "core_deduplication_key": _string(pattern=r"^sha256:[0-9a-fA-F]{64}$"),
+            "split_reason": {"enum": list(TC_SPLIT_REASONS)}, "split_reason_detail": _string(),
+            "condition_coverage": {"type": "array", "items": condition_coverage, "uniqueItems": True},
         },
     )
     execution_instance = _object(
@@ -730,6 +802,8 @@ def manifest_schema(version: str) -> dict[str, Any]:
         "analysis_model_paths": _strings(), "risk_matrix_path": {"type": ["string", "null"]},
         "testcase_model_path": {"type": ["string", "null"]}, "xmind_md_path": {"type": ["string", "null"]},
         "xmind_path": {"type": ["string", "null"]}, "case_count": {"type": "integer", "minimum": 0},
+        "branch_count": {"type": "integer", "minimum": 0},
+        "execution_instance_count": {"type": "integer", "minimum": 0},
         "draft_report_path": {"type": ["string", "null"]}, "draft_risk_matrix_path": {"type": ["string", "null"]},
         "draft_testcase_model_path": {"type": ["string", "null"]}, "draft_xmind_md_path": {"type": ["string", "null"]},
         "p0_count": {"type": "integer", "minimum": 0, "description": "Compatibility alias of p0_case_count."},
@@ -847,6 +921,63 @@ def summarize_confirmations(requirement_model: dict[str, Any]) -> dict[str, int]
 
 def validate_requirement_model(data: dict[str, Any], *, evidence_root: Path | None = None) -> list[str]:
     errors = validate_schema_shape(data, requirement_schema("0.0.0"))
+    condition_matrix = data.get("condition_matrix")
+    if data.get("condition_matrix_required") is True and not isinstance(condition_matrix, dict):
+        errors.append("CONDITION_MATRIX_REQUIRED: 明确列出两个及以上条件维度时必须建立 condition_matrix")
+    if isinstance(condition_matrix, dict):
+        dimensions = condition_matrix.get("dimensions", []) if isinstance(condition_matrix.get("dimensions"), list) else []
+        dimension_ids, dimension_errors = _unique_ids(dimensions, "dimension_id")
+        errors.extend(f"CONDITION_MATRIX_REQUIRED: {item}" for item in dimension_errors)
+        dimension_values = {
+            item.get("dimension_id"): set(item.get("values", []))
+            for item in dimensions if isinstance(item, dict) and isinstance(item.get("dimension_id"), str)
+        }
+        required = condition_matrix.get("required_combinations", []) if isinstance(condition_matrix.get("required_combinations"), list) else []
+        excluded = condition_matrix.get("excluded_combinations", []) if isinstance(condition_matrix.get("excluded_combinations"), list) else []
+        combination_ids, combination_errors = _unique_ids([*required, *excluded], "combination_id")
+        errors.extend(f"CONDITION_MATRIX_REQUIRED: {item}" for item in combination_errors)
+        used_values = {dimension_id: set() for dimension_id in dimension_ids}
+        for combination in [*required, *excluded]:
+            combination_id = combination.get("combination_id")
+            values = combination.get("dimension_values")
+            if not isinstance(values, dict) or set(values) != dimension_ids:
+                errors.append(
+                    f"CONDITION_MATRIX_REQUIRED: {combination_id} dimension_values 必须完整对应全部维度"
+                )
+                continue
+            for dimension_id, value in values.items():
+                if not isinstance(value, str) or value not in dimension_values.get(dimension_id, set()):
+                    errors.append(
+                        f"CONDITION_MATRIX_REQUIRED: {combination_id}.{dimension_id} 枚举值非法：{value}"
+                    )
+                else:
+                    used_values[dimension_id].add(value)
+        for dimension_id, values in dimension_values.items():
+            for value in sorted(values - used_values.get(dimension_id, set())):
+                errors.append(
+                    f"ENUMERATION_VALUE_UNCOVERED: {dimension_id}={value} 未进入 required/excluded combination"
+                )
+        for combination in required:
+            if not combination.get("covered_by_tc_ids"):
+                errors.append(
+                    f"REQUIRED_COMBINATION_UNCOVERED: {combination.get('combination_id')} 未映射 TC"
+                )
+        for combination in excluded:
+            if not str(combination.get("exclusion_reason", "")).strip():
+                errors.append(
+                    f"COMBINATION_EXCLUSION_WITHOUT_REASON: {combination.get('combination_id')} 缺少 exclusion_reason"
+                )
+        summary = condition_matrix.get("coverage_summary", {})
+        expected_summary = {
+            "required_combination_count": len(required),
+            "covered_combination_count": sum(bool(item.get("covered_by_tc_ids")) for item in required),
+            "excluded_combination_count": len(excluded),
+        }
+        for field, expected_count in expected_summary.items():
+            if summary.get(field) != expected_count:
+                errors.append(
+                    f"CONDITION_MATRIX_REQUIRED: coverage_summary.{field}={summary.get(field)} 与实际 {expected_count} 不一致"
+                )
     requirement = data.get("data_validation_required")
     method = data.get("recommended_validation_method")
     reason = str(data.get("data_validation_reason", ""))
@@ -1160,10 +1291,16 @@ def validate_testcase_model(data: dict[str, Any]) -> list[str]:
                 errors.append(f"{tc_id} 入口分支 branch_id 必须唯一")
             for branch in branches:
                 if re.fullmatch(r"(?:入口|页面|弹窗)[A-Z一二三四五六七八九十0-9]+", str(branch.get("entry_name"))):
-                    errors.append(f"{tc_id} 入口名称缺少业务语义：{branch.get('entry_name')}")
+                    errors.append(f"ENTRY_BRANCH_WITHOUT_REAL_ENTRY: {tc_id} 入口名称缺少业务语义：{branch.get('entry_name')}")
                 if not str(branch.get("branch_id", "")).startswith(f"{tc_id}-B"):
                     errors.append(f"{tc_id} 分支 branch_id 必须使用 {tc_id}-B 前缀")
                 errors.extend(_validate_step_expectations(tc_id, branch.get("steps", []), branch.get("expected_results", []), "entry_branches"))
+                if case.get("core_deduplication_key") and not any(
+                    str(branch.get("entry_name", "")) in str(step) for step in branch.get("steps", [])
+                ):
+                    errors.append(
+                        f"ENTRY_BRANCH_DIAGNOSTIC_NOT_INDEPENDENT: {tc_id} 的 {branch.get('branch_id')} 步骤未标明真实入口"
+                    )
         else:
             if not case.get("test_point") or not case.get("steps") or not case.get("expected_results"):
                 errors.append(f"{tc_id} 缺少唯一测试点、步骤或预期")
@@ -1178,6 +1315,36 @@ def validate_testcase_model(data: dict[str, Any]) -> list[str]:
         errors.extend(_validate_step_expectations(tc_id, case.get("steps", []), case.get("expected_results", []), "expected_results"))
         for action in case.get("actions", []):
             errors.extend(_validate_step_expectations(tc_id, [action.get("action")], action.get("expected_results", []), f"actions.{action.get('step_id')}"))
+        factors = case.get("core_deduplication_factors")
+        core_key = case.get("core_deduplication_key")
+        if bool(factors) != bool(core_key):
+            errors.append(f"{tc_id} core_deduplication_factors 与 core_deduplication_key 必须同时提供")
+        if isinstance(factors, dict) and core_key:
+            expected_core_key = compute_core_deduplication_key(factors)
+            if core_key != expected_core_key:
+                errors.append(f"{tc_id} core_deduplication_key 与确定性计算结果不一致")
+        if bool(case.get("split_reason")) != bool(case.get("split_reason_detail")):
+            errors.append(f"{tc_id} 拆分 TC 时必须同时提供 split_reason 与 split_reason_detail")
+        coverage_ids = [
+            item.get("combination_id") for item in case.get("condition_coverage", [])
+            if isinstance(item, dict)
+        ]
+        if len(coverage_ids) != len(set(coverage_ids)):
+            errors.append(f"{tc_id} condition_coverage.combination_id 重复")
+    cases_by_core_key: dict[str, list[dict[str, Any]]] = {}
+    for case in cases:
+        if case.get("core_deduplication_key"):
+            cases_by_core_key.setdefault(str(case["core_deduplication_key"]), []).append(case)
+    for same_core_cases in cases_by_core_key.values():
+        if len(same_core_cases) < 2:
+            continue
+        duplicate_ids = [str(case.get("tc_id")) for case in same_core_cases]
+        errors.append(
+            f"DUPLICATE_TC_SPLIT_BY_ENTRY_ONLY: {duplicate_ids} 的 core_deduplication_key 相同"
+        )
+        errors.append(
+            f"IDENTICAL_RULE_NOT_MERGED_TO_ENTRY_BRANCHES: {duplicate_ids} 应合并为一个 TC 的平级 entry_branches"
+        )
     branches = {branch.get("branch_id") for case in cases for branch in case.get("entry_branches", [])}
     actual_branch_count = len(branches)
     if "branch_count" in data and data.get("branch_count") != actual_branch_count:
@@ -1672,6 +1839,50 @@ def validate_model_links(
             unknown = set(risk.get("requirement_fact_ids", [])) - confirmed_fact_ids
             if unknown:
                 errors.append(f"Diff 风险 {risk_id} 引用不存在 confirmed Fact：{sorted(unknown)}")
+    condition_matrix = (requirement or {}).get("condition_matrix")
+    if isinstance(condition_matrix, dict):
+        required_combinations = condition_matrix.get("required_combinations", [])
+        required_by_id = {
+            item.get("combination_id"): item
+            for item in required_combinations if isinstance(item, dict)
+        }
+        coverage_by_id: dict[str, list[tuple[str, dict[str, Any]]]] = {}
+        for tc_id, case in cases.items():
+            for coverage in case.get("condition_coverage", []):
+                if isinstance(coverage, dict) and isinstance(coverage.get("combination_id"), str):
+                    coverage_by_id.setdefault(coverage["combination_id"], []).append((tc_id, coverage))
+        for combination_id, combination in required_by_id.items():
+            mapped_tcs = set(combination.get("covered_by_tc_ids", []))
+            unknown_tcs = mapped_tcs - cases.keys()
+            if unknown_tcs:
+                errors.append(
+                    f"REQUIRED_COMBINATION_UNCOVERED: {combination_id} 引用不存在 TC：{sorted(unknown_tcs)}"
+                )
+            linked = [
+                (tc_id, coverage) for tc_id, coverage in coverage_by_id.get(str(combination_id), [])
+                if tc_id in mapped_tcs
+            ]
+            behavior = [item for item in linked if item[1].get("coverage_type") == "behavior"]
+            if not behavior:
+                if linked and all(item[1].get("coverage_type") == "configuration" for item in linked):
+                    errors.append(
+                        f"CONFIG_EXISTENCE_IS_NOT_BEHAVIOR_COVERAGE: {combination_id} 只有配置存在性覆盖"
+                    )
+                else:
+                    errors.append(
+                        f"REQUIRED_COMBINATION_UNCOVERED: {combination_id} 缺少行为型 condition_coverage"
+                    )
+                continue
+            expected_values = combination.get("dimension_values")
+            if any(coverage.get("dimension_values") != expected_values for _, coverage in behavior):
+                errors.append(
+                    f"REQUIRED_COMBINATION_UNCOVERED: {combination_id} condition_coverage 与矩阵维度值不一致"
+                )
+        unknown_coverage = set(coverage_by_id) - set(required_by_id)
+        if unknown_coverage:
+            errors.append(
+                f"REQUIRED_COMBINATION_UNCOVERED: testcase 引用不存在 required combination：{sorted(unknown_coverage)}"
+            )
     return list(dict.fromkeys(errors))
 
 

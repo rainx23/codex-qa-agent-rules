@@ -50,6 +50,13 @@ Requirement Model 校验只判断结构、Fact/Confirmation 引用、核心 miss
 - `execution_status` 仅允许 `not_run`、`passed`、`failed`、`blocked`、`skipped`；没有用户提供的实际执行证据时只能为 `not_run`。
 - `case_count` 只统计 TC；`branch_count` 与 `execution_instance_count` 独立统计，执行实例不得增加 TC 数量。
 
+## 条件矩阵与核心去重契约
+
+- Requirement Analysis Model 可选 `condition_matrix_required` 和 `condition_matrix`；历史模型缺省时保持兼容。新分析明确列出两个及以上条件维度时必须设置 `condition_matrix_required=true` 并填写 `dimensions`、`required_combinations`、`excluded_combinations` 与 `coverage_summary`。
+- 每个 required combination 使用稳定 `combination_id`、完整 `dimension_values` 和 `covered_by_tc_ids`；排除项必须携带 `exclusion_reason`。Testcase Model 通过 `condition_coverage` 逐项声明 `behavior` 或 `configuration`，只有行为型覆盖可满足 required combination。
+- Testcase Model 可选保存 `core_deduplication_factors` 与确定性 `core_deduplication_key`。因子不包含纯入口名称，至少包括业务对象、触发条件、核心动作、核心断言和风险语义；数据源、权限规则、计算口径及异常处理用于防止误合并。
+- 同核心键的多个 TC 为错误；多真实入口必须合并为一个 TC 的平级 `entry_branches`。确需拆分时，核心差异应反映在结构化因子中，并可补充 `split_reason` 与 `split_reason_detail` 供审计。
+
 ## Testcase Value Assessment Model
 
 ### 模型作用

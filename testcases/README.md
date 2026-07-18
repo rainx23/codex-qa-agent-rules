@@ -16,7 +16,7 @@
 
 ## 使用入口
 
-- 使用 `scripts/validate_manifest.py` 校验 Manifest，使用 `scripts/build_testcase_index.py` 更新索引。
+- 使用 `scripts/build_testcase_index.py` 更新索引，并用 `scripts/validate_formal_artifacts.py` 扫描校验全部 passed 正式产物。
 
 ## 维护约束
 

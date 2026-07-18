@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$comment": "Generated from scripts/qa_contracts.py; do not edit manually.",
-  "x-rule-version": "2.10.0",
+  "x-rule-version": "2.11.0",
   "title": "Requirement Analysis Model",
   "type": "object",
   "additionalProperties": false,
@@ -986,6 +986,111 @@
       },
       "minItems": 0,
       "uniqueItems": true
+    },
+    "condition_matrix_required": {
+      "type": "boolean"
+    },
+    "condition_matrix": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dimensions",
+        "required_combinations",
+        "excluded_combinations",
+        "coverage_summary"
+      ],
+      "properties": {
+        "dimensions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "dimension_id",
+              "dimension_name",
+              "values"
+            ],
+            "properties": {
+              "dimension_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "dimension_name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "values": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              }
+            }
+          },
+          "minItems": 2
+        },
+        "required_combinations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "combination_id",
+              "dimension_values",
+              "covered_by_tc_ids"
+            ],
+            "properties": {
+              "combination_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "dimension_values": {
+                "type": "object"
+              },
+              "covered_by_tc_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "^TC\\d{3}$"
+                },
+                "uniqueItems": true
+              }
+            }
+          }
+        },
+        "excluded_combinations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "combination_id",
+              "dimension_values",
+              "exclusion_reason"
+            ],
+            "properties": {
+              "combination_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "dimension_values": {
+                "type": "object"
+              },
+              "exclusion_reason": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "coverage_summary": {
+          "type": "object"
+        }
+      }
     }
   }
 }

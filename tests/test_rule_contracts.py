@@ -109,13 +109,11 @@ class RuleContractTests(unittest.TestCase):
         workflow = (ROOT / ".github/workflows/qa-rules-validation.yml").read_text(encoding="utf-8")
         self.assertEqual(2, workflow.count('- "testcases/**/*.xmind"'))
         for command in (
-            "python scripts/validate_testcase_index.py testcases/index.md",
-            "python scripts/validate_manifest.py testcases/clearance-permission-20260718/manifest.json",
-            "python scripts/validate_models.py --requirement testcases/clearance-permission-20260718/requirement-analysis.json",
-            "python scripts/verify_xmind.py testcases/clearance-permission-20260718/clearance-permission.xmind",
+            "python scripts/validate_formal_artifacts.py",
             'python scripts/verify_xmind.py "$output" --markdown tests/fixtures/valid_case_xmind.md',
         ):
             self.assertIn(command, workflow)
+        self.assertNotIn("testcases/clearance-permission-20260718/manifest.json", workflow)
         self.assertIn("artifact-governance-compatibility:", workflow)
         self.assertIn("os: [ubuntu-latest, windows-latest]", workflow)
         self.assertIn('python-version: ["3.10", "3.12"]', workflow)

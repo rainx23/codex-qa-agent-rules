@@ -22,5 +22,6 @@
 - 不为每个 Skill 重复创建 README。
 - 本目录不含自动生成文件。
 - 确认回复处理必须保留原始任务范围；blocking 归零后由需求、用例和产物 Skill 自动续跑，不要求重复指令。
+- 需求 Skill 建立条件矩阵，用例 Skill消费行为覆盖并执行多入口核心去重，产物 Skill 统一扫描 passed 正式产物。
 
 版本与完整变更历史统一见 [CHANGELOG.md](../CHANGELOG.md)。

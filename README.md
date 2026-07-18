@@ -290,9 +290,11 @@ flowchart TD
 
 完整规则见 [testcase-quality-rules.md](rules/core/testcase-quality-rules.md)。当前格式不增加独立“前置条件”或“优先级”层级，前置条件融入入口、测试点或步骤，优先级保留在分析报告和追踪矩阵中；`entry_branches` 只表达同一 TC 的入口分支，不增加 TC 或 Manifest 计数。
 
+明确列出两个及以上条件维度时，Requirement Analysis Model 必须先建立条件矩阵；每个 required combination 由行为型 `condition_coverage` 覆盖。配置项存在性不计入行为覆盖。同规则多入口使用不含纯入口名称的 `core_deduplication_key` 合并为一个 TC 的平级入口分支。
+
 XMind 节点采用无损语义精简：可删除父节点已表达的背景和说明性套话，并在无歧义时使用 `=`、`≠`、`∈`、`AND`、`OR`、`→`、集合和括号。规则不设置固定字符上限，不因文本较长报错或告警，也不允许截断、省略业务对象、条件、操作或可观察预期；混合 `AND/OR` 时必须用括号明确优先级。
 
-Manifest 的 `validation_status` 与 `sql_status` 独立：测试设计全链完成而 SQL 因 DDL/环境不足被阻塞时使用 `passed + blocked`。来源组合 Hash 对文本统一换行/BOM、对二进制保持原始字节并包含规范化相对路径。passed Manifest 更新索引后必须由 `validate_testcase_index.py` 完整复验 Manifest，并逐字段校验唯一登记。
+Manifest 的 `validation_status` 与 `sql_status` 独立：测试设计全链完成而 SQL 因 DDL/环境不足被阻塞时使用 `passed + blocked`。来源组合 Hash 对文本统一换行/BOM、对二进制保持原始字节并包含规范化相对路径。passed Manifest 更新索引后使用 `validate_formal_artifacts.py` 扫描全部正式目录，并完整复验 Manifest、模型、Markdown、Workbook 和唯一索引登记。
 
 ## 历史业务知识与数据验证
 
@@ -418,6 +420,7 @@ python scripts/validate_manifest.py path/to/manifest.json
 ```bash
 python scripts/build_testcase_index.py testcases/index.md path/to/manifest.json
 python scripts/validate_testcase_index.py testcases/index.md
+python scripts/validate_formal_artifacts.py
 ```
 
 输入是目标索引和已通过校验的 Manifest；成功后原子写入一条唯一 `artifact_id` 记录；无效 Manifest 会阻止更新。
