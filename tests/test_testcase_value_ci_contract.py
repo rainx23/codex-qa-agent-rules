@@ -13,8 +13,13 @@ class TestcaseValueCiContractTests(unittest.TestCase):
     def setUpClass(cls):
         cls.workflow = WORKFLOW.read_text(encoding="utf-8")
         marker = "  value-assessment-compatibility:"
+        next_marker = "  artifact-governance-compatibility:"
+
         start = cls.workflow.index(marker)
-        cls.value_job = cls.workflow[start:]
+        end = cls.workflow.index(next_marker, start)
+
+        cls.value_job = cls.workflow[start:end]
+
         validate_start = cls.workflow.index("  validate:")
         cls.main_job = cls.workflow[validate_start:start]
 

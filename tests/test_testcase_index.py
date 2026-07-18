@@ -133,5 +133,22 @@ class TestcaseIndexTests(unittest.TestCase):
         self.assertEqual([], validate_index(self.index))
 
 
+    def test_cells_preserves_windows_paths_and_only_unescapes_markdown_tokens(self):
+        row = (
+            r"| value | testcases\clearance-permission-20260718\manifest.json "
+            r"| escaped\|pipe | doubled\\slash |"
+        )
+
+        cells = _cells(row)
+
+        self.assertEqual("value", cells[0])
+        self.assertEqual(
+            r"testcases\clearance-permission-20260718\manifest.json",
+            cells[1],
+        )
+        self.assertEqual("escaped|pipe", cells[2])
+        self.assertEqual(r"doubled\slash", cells[3])
+
+
 if __name__ == "__main__":
     unittest.main()

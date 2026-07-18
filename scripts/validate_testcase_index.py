@@ -25,21 +25,35 @@ NOTE_FIELDS = {
 
 
 def _cells(line: str) -> list[str]:
+    """Parse a Markdown table row while preserving ordinary backslashes."""
+
     value = line.strip().strip("|")
     cells: list[str] = []
     current: list[str] = []
-    escaped = False
-    for char in value:
-        if escaped:
-            current.append(char)
-            escaped = False
-        elif char == "\\":
-            escaped = True
-        elif char == "|":
+    index = 0
+
+    while index < len(value):
+        char = value[index]
+
+        # Markdown 表格只对 \| 和 \\ 做转义处理。
+        # Windows 路径中的普通反斜杠必须原样保留。
+        if (
+            char == "\\"
+            and index + 1 < len(value)
+            and value[index + 1] in {"|", "\\"}
+        ):
+            current.append(value[index + 1])
+            index += 2
+            continue
+
+        if char == "|":
             cells.append("".join(current).strip())
             current = []
         else:
             current.append(char)
+
+        index += 1
+
     cells.append("".join(current).strip())
     return cells
 
