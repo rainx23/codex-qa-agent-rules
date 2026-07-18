@@ -1,0 +1,476 @@
+{
+  "schema_version": "2.0.0",
+  "matrix_id": "MATRIX-CLEARANCE-PERMISSION-20260718",
+  "analysis_ids": [
+    "AN-CLEARANCE-PERMISSION-20260718"
+  ],
+  "risk_items": [
+    {
+      "risk_id": "R001",
+      "risk_title": "无权限股票行被返回或通过分页刷新泄露",
+      "risk_level": "critical",
+      "fact_ids": [
+        "F004"
+      ],
+      "requirement_ids": [
+        "REQ002"
+      ],
+      "change_ids": [],
+      "business_entry": "模拟交易清仓股弹窗",
+      "business_entries": [
+        "模拟交易清仓股弹窗",
+        "正式交易清仓股弹窗",
+        "清仓股弹窗权限配置"
+      ],
+      "business_object": "股票行和汇总行",
+      "conditions": [
+        "存在权限命中和未命中数据"
+      ],
+      "data_shapes": [
+        "有权数据",
+        "无权数据",
+        "多角色数据"
+      ],
+      "core_action": "配置权限并打开弹窗",
+      "core_assertion": "无权限股票行被返回或通过分页刷新泄露",
+      "business_impact": "critical",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "merge_key": "清仓股弹窗|股票行和汇总行|权限条件|配置并查询|R001",
+      "testcase_ids": [
+        "TC001"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "由独立测试用例覆盖",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 1,
+          "line_end": 1,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "模拟交易+正式交易列表弹窗权限配置：新增跟进人、跟进人（指定用户）、建仓人、建仓人（指定用户）",
+          "captured_at": "2026-07-18 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    },
+    {
+      "risk_id": "R002",
+      "risk_title": "正式交易清仓股弹窗权限过滤失效",
+      "risk_level": "critical",
+      "fact_ids": [
+        "F004"
+      ],
+      "requirement_ids": [
+        "REQ002"
+      ],
+      "change_ids": [],
+      "business_entry": "模拟交易清仓股弹窗",
+      "business_entries": [
+        "模拟交易清仓股弹窗",
+        "正式交易清仓股弹窗",
+        "清仓股弹窗权限配置"
+      ],
+      "business_object": "股票行和汇总行",
+      "conditions": [
+        "存在权限命中和未命中数据"
+      ],
+      "data_shapes": [
+        "有权数据",
+        "无权数据",
+        "多角色数据"
+      ],
+      "core_action": "配置权限并打开弹窗",
+      "core_assertion": "正式交易清仓股弹窗权限过滤失效",
+      "business_impact": "critical",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "merge_key": "清仓股弹窗|股票行和汇总行|权限条件|配置并查询|R002",
+      "testcase_ids": [
+        "TC002"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "由独立测试用例覆盖",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 1,
+          "line_end": 1,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "模拟交易+正式交易列表弹窗权限配置：新增跟进人、跟进人（指定用户）、建仓人、建仓人（指定用户）",
+          "captured_at": "2026-07-18 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    },
+    {
+      "risk_id": "R003",
+      "risk_title": "股票行已过滤但汇总行仍包含无权限数据",
+      "risk_level": "critical",
+      "fact_ids": [
+        "F004"
+      ],
+      "requirement_ids": [
+        "REQ003"
+      ],
+      "change_ids": [],
+      "business_entry": "模拟交易清仓股弹窗",
+      "business_entries": [
+        "模拟交易清仓股弹窗",
+        "正式交易清仓股弹窗",
+        "清仓股弹窗权限配置"
+      ],
+      "business_object": "股票行和汇总行",
+      "conditions": [
+        "存在权限命中和未命中数据"
+      ],
+      "data_shapes": [
+        "有权数据",
+        "无权数据",
+        "多角色数据"
+      ],
+      "core_action": "配置权限并打开弹窗",
+      "core_assertion": "股票行已过滤但汇总行仍包含无权限数据",
+      "business_impact": "critical",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "merge_key": "清仓股弹窗|股票行和汇总行|权限条件|配置并查询|R003",
+      "testcase_ids": [
+        "TC005",
+        "TC006"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "由独立测试用例覆盖",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 1,
+          "line_end": 1,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "模拟交易+正式交易列表弹窗权限配置：新增跟进人、跟进人（指定用户）、建仓人、建仓人（指定用户）",
+          "captured_at": "2026-07-18 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    },
+    {
+      "risk_id": "R004",
+      "risk_title": "清仓策略与清后重建策略发生串权",
+      "risk_level": "critical",
+      "fact_ids": [
+        "F005"
+      ],
+      "requirement_ids": [
+        "REQ004"
+      ],
+      "change_ids": [],
+      "business_entry": "模拟交易清仓股弹窗",
+      "business_entries": [
+        "模拟交易清仓股弹窗",
+        "正式交易清仓股弹窗",
+        "清仓股弹窗权限配置"
+      ],
+      "business_object": "股票行和汇总行",
+      "conditions": [
+        "存在权限命中和未命中数据"
+      ],
+      "data_shapes": [
+        "有权数据",
+        "无权数据",
+        "多角色数据"
+      ],
+      "core_action": "配置权限并打开弹窗",
+      "core_assertion": "清仓策略与清后重建策略发生串权",
+      "business_impact": "critical",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "merge_key": "清仓股弹窗|股票行和汇总行|权限条件|配置并查询|R004",
+      "testcase_ids": [
+        "TC003",
+        "TC004"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "由独立测试用例覆盖",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 1,
+          "line_end": 1,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "模拟交易+正式交易列表弹窗权限配置：新增跟进人、跟进人（指定用户）、建仓人、建仓人（指定用户）",
+          "captured_at": "2026-07-18 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    },
+    {
+      "risk_id": "R005",
+      "risk_title": "role_type 取值错误导致建仓人或跟进人越权命中",
+      "risk_level": "critical",
+      "fact_ids": [
+        "F002",
+        "F003",
+        "F009"
+      ],
+      "requirement_ids": [
+        "REQ005"
+      ],
+      "change_ids": [],
+      "business_entry": "模拟交易清仓股弹窗",
+      "business_entries": [
+        "模拟交易清仓股弹窗",
+        "正式交易清仓股弹窗",
+        "清仓股弹窗权限配置"
+      ],
+      "business_object": "股票行和汇总行",
+      "conditions": [
+        "存在权限命中和未命中数据"
+      ],
+      "data_shapes": [
+        "有权数据",
+        "无权数据",
+        "多角色数据"
+      ],
+      "core_action": "配置权限并打开弹窗",
+      "core_assertion": "role_type 取值错误导致建仓人或跟进人越权命中",
+      "business_impact": "critical",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "merge_key": "清仓股弹窗|股票行和汇总行|权限条件|配置并查询|R005",
+      "testcase_ids": [
+        "TC007",
+        "TC012"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "由独立测试用例覆盖",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 1,
+          "line_end": 1,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "模拟交易+正式交易列表弹窗权限配置：新增跟进人、跟进人（指定用户）、建仓人、建仓人（指定用户）",
+          "captured_at": "2026-07-18 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    },
+    {
+      "risk_id": "R006",
+      "risk_title": "四类新权限、关系条件或指定用户组件保存回显错误",
+      "risk_level": "high",
+      "fact_ids": [
+        "F001",
+        "F006"
+      ],
+      "requirement_ids": [
+        "REQ001"
+      ],
+      "change_ids": [],
+      "business_entry": "模拟交易清仓股弹窗",
+      "business_entries": [
+        "模拟交易清仓股弹窗",
+        "正式交易清仓股弹窗",
+        "清仓股弹窗权限配置"
+      ],
+      "business_object": "股票行和汇总行",
+      "conditions": [
+        "存在权限命中和未命中数据"
+      ],
+      "data_shapes": [
+        "有权数据",
+        "无权数据",
+        "多角色数据"
+      ],
+      "core_action": "配置权限并打开弹窗",
+      "core_assertion": "四类新权限、关系条件或指定用户组件保存回显错误",
+      "business_impact": "high",
+      "test_priority": "P1",
+      "evidence_state": "已确认",
+      "regression_scope": "关联回归",
+      "merge_key": "清仓股弹窗|股票行和汇总行|权限条件|配置并查询|R006",
+      "testcase_ids": [
+        "TC008",
+        "TC009"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "由独立测试用例覆盖",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 1,
+          "line_end": 1,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "模拟交易+正式交易列表弹窗权限配置：新增跟进人、跟进人（指定用户）、建仓人、建仓人（指定用户）",
+          "captured_at": "2026-07-18 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    },
+    {
+      "risk_id": "R007",
+      "risk_title": "原有权限被覆盖，或可用资金弹窗被误影响",
+      "risk_level": "high",
+      "fact_ids": [
+        "F001",
+        "F007"
+      ],
+      "requirement_ids": [
+        "REQ007",
+        "REQ008"
+      ],
+      "change_ids": [],
+      "business_entry": "模拟交易清仓股弹窗",
+      "business_entries": [
+        "模拟交易清仓股弹窗",
+        "正式交易清仓股弹窗",
+        "清仓股弹窗权限配置"
+      ],
+      "business_object": "股票行和汇总行",
+      "conditions": [
+        "存在权限命中和未命中数据"
+      ],
+      "data_shapes": [
+        "有权数据",
+        "无权数据",
+        "多角色数据"
+      ],
+      "core_action": "配置权限并打开弹窗",
+      "core_assertion": "原有权限被覆盖，或可用资金弹窗被误影响",
+      "business_impact": "high",
+      "test_priority": "P1",
+      "evidence_state": "已确认",
+      "regression_scope": "关联回归",
+      "merge_key": "清仓股弹窗|股票行和汇总行|权限条件|配置并查询|R007",
+      "testcase_ids": [
+        "TC010",
+        "TC011"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "由独立测试用例覆盖",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 1,
+          "line_end": 1,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "模拟交易+正式交易列表弹窗权限配置：新增跟进人、跟进人（指定用户）、建仓人、建仓人（指定用户）",
+          "captured_at": "2026-07-18 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    },
+    {
+      "risk_id": "R008",
+      "risk_title": "任一/全部命中及 AND/OR 组合逻辑错误",
+      "risk_level": "high",
+      "fact_ids": [
+        "F008",
+        "F010"
+      ],
+      "requirement_ids": [
+        "REQ006",
+        "REQ007"
+      ],
+      "change_ids": [],
+      "business_entry": "模拟交易清仓股弹窗",
+      "business_entries": [
+        "模拟交易清仓股弹窗",
+        "正式交易清仓股弹窗",
+        "清仓股弹窗权限配置"
+      ],
+      "business_object": "股票行和汇总行",
+      "conditions": [
+        "存在权限命中和未命中数据"
+      ],
+      "data_shapes": [
+        "有权数据",
+        "无权数据",
+        "多角色数据"
+      ],
+      "core_action": "配置权限并打开弹窗",
+      "core_assertion": "任一/全部命中及 AND/OR 组合逻辑错误",
+      "business_impact": "high",
+      "test_priority": "P1",
+      "evidence_state": "已确认",
+      "regression_scope": "关联回归",
+      "merge_key": "清仓股弹窗|股票行和汇总行|权限条件|配置并查询|R008",
+      "testcase_ids": [
+        "TC013",
+        "TC014",
+        "TC015"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "由独立测试用例覆盖",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 1,
+          "line_end": 1,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "模拟交易+正式交易列表弹窗权限配置：新增跟进人、跟进人（指定用户）、建仓人、建仓人（指定用户）",
+          "captured_at": "2026-07-18 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    }
+  ],
+  "coverage_summary": {
+    "risk_count": 8,
+    "p0_risk_count": 5,
+    "covered_risk_count": 8
+  }
+}
