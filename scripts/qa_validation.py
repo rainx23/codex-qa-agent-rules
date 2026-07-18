@@ -275,8 +275,11 @@ def validate_markdown_text(markdown: str, source: Path | str = "<memory>") -> Ou
                     errors.append(f"{source}:{tc.line}: {tc.title} 的入口分支名称必须唯一")
                 if any(ENTRY_PLACEHOLDER_RE.fullmatch(branch.title) for branch in branches):
                     errors.append(f"{source}:{tc.line}: {tc.title} 的入口名称必须使用真实业务名称，不能使用入口A/页面1等占位符")
-                if any(len(branch.children) != 1 or len(branch.children[0].children) != 1 for branch in branches):
-                    errors.append(f"{source}:{tc.line}: {tc.title} 的每个入口必须是独立平级分支，且只有一个测试点分支")
+                if any(
+                    not branch.children or any(len(step.children) != 1 for step in branch.children)
+                    for branch in branches
+                ):
+                    errors.append(f"{source}:{tc.line}: {tc.title} 的每个入口必须包含独立步骤，且每个步骤只有一个对应预期")
                 expected_length = 5 if grouped else 6
                 if not paths or any(len(path) != expected_length for path in paths):
                     schema = "TC-测试点-入口-步骤-预期" if grouped else "TC-一级模块-二级功能点-入口-步骤-预期"

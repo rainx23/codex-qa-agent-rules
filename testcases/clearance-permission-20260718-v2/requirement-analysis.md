@@ -6,7 +6,7 @@ Schema Version: 2.0.0
 
 Rule Version: 2.11.0
 
-Generated At: 2026-07-18 21:28:42 Asia/Shanghai
+Generated At: 2026-07-18 21:57:42 Asia/Shanghai
 
 ## 本次分析范围
 
@@ -25,23 +25,23 @@ Generated At: 2026-07-18 21:28:42 Asia/Shanghai
 - FACT-008、FACT-009、FACT-010：策略段隔离、AND/OR、原有权限及可用资金回归分别验证。
 - FACT-012：重复用户相关行为不在本轮验收范围。
 - FACT-013：继承旧版已确认的包含于任一满足、完全包含于全部满足语义。
-- FACT-014：不包含关系的反向集合真值表缺失，关联 blocking Confirmation。
+- FACT-014：不包含关系命中则可见、未命中则不可见；多用户任一命中可见、全部未命中不可见。
 - FACT-013：继承旧版已确认的包含于任一满足、完全包含于全部满足语义。
-- FACT-014：不包含关系的反向集合真值表缺失，关联 blocking Confirmation。
+- FACT-014：不包含关系命中则可见、未命中则不可见；多用户任一命中可见、全部未命中不可见。
 - FACT-013：继承旧版已确认的包含于任一满足、完全包含于全部满足语义。
-- FACT-014：不包含关系的反向集合真值表缺失，关联 blocking Confirmation。
+- FACT-014：不包含关系命中则可见、未命中则不可见；多用户任一命中可见、全部未命中不可见。
 - FACT-013：继承旧版已确认的包含于任一满足、完全包含于全部满足语义。
-- FACT-014：不包含关系的反向集合真值表缺失，关联 blocking Confirmation。
+- FACT-014：不包含关系命中则可见、未命中则不可见；多用户任一命中可见、全部未命中不可见。
 - FACT-013：继承旧版已确认的包含于任一满足、完全包含于全部满足语义。
-- FACT-014：不包含关系的反向集合真值表缺失，关联 blocking Confirmation。
+- FACT-014：不包含关系命中则可见、未命中则不可见；多用户任一命中可见、全部未命中不可见。
 
 ## 证据来源
 
-来源类型：pasted_text、user_confirmation。旧版需求原文证据 `testcases/clearance-permission-20260718/evidence/user-requirement.md` 与 V2 用户补充证据 `testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md` 同时保留；前者确认包含于任一满足、完全包含于全部满足，后者确认矩阵范围，但二者均未给出不包含关系真值表。
+来源类型：pasted_text、user_confirmation。旧版需求原文证据 `testcases/clearance-permission-20260718/evidence/user-requirement.md` 与 V2 用户补充证据 `testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md` 同时保留；前者确认包含于任一满足、完全包含于全部满足，后者确认矩阵范围，但二者原证据未给出不包含关系真值表；本轮 CONF-001 增量确认已补齐。
 
 ## 待确认点
 
-- CONF-001 FACT-014 severity=blocking status=pending：请确认普通人员及指定用户“不包含”在单用户命中、单用户不命中、多用户部分命中和多用户全部不命中时分别应可见还是不可见。
+- CONF-001 FACT-014 severity=blocking status=resolved：已确认不包含关系命中则可见、未命中则不可见；多用户任一命中可见、全部未命中不可见。
 
 ## 风险点
 
@@ -52,11 +52,11 @@ Generated At: 2026-07-18 21:28:42 Asia/Shanghai
 - RISK-010 对应 FACT-005、FACT-011：指定用户多值集合判断错误。
 - RISK-011、RISK-012 对应 FACT-009：AND/OR 错误或原有权限被覆盖。
 - RISK-013 对应 FACT-010：可用资金弹窗回归受损。
-- RISK-015 对应 FACT-014、CONF-001：不包含关系真值表未确认，状态 blocked。
-- RISK-015 对应 FACT-014、CONF-001：不包含关系真值表未确认，状态 blocked。
-- RISK-015 对应 FACT-014、CONF-001：不包含关系真值表未确认，状态 blocked。
-- RISK-015 对应 FACT-014、CONF-001：不包含关系真值表未确认，状态 blocked。
-- RISK-015 对应 FACT-014、CONF-001：不包含关系真值表未确认，状态 blocked。
+- RISK-015 对应 FACT-014、CONF-001：不包含关系方向错误风险已覆盖。
+- RISK-015 对应 FACT-014、CONF-001：不包含关系方向错误风险已覆盖。
+- RISK-015 对应 FACT-014、CONF-001：不包含关系方向错误风险已覆盖。
+- RISK-015 对应 FACT-014、CONF-001：不包含关系方向错误风险已覆盖。
+- RISK-015 对应 FACT-014、CONF-001：不包含关系方向错误风险已覆盖。
 
 ## 需求-Diff-测试点追踪矩阵
 
@@ -108,12 +108,12 @@ Generated At: 2026-07-18 21:28:42 Asia/Shanghai
 
 ## 测试点摘要
 
-- RISK-001 至 RISK-015 共保留 23 个草稿 TC、42 个入口分支；112 个生成组合完整登记，其中 80 个已有确定性行为定位，32 个不包含组合等待 CONF-001。
+- RISK-001 至 RISK-015 共保留 23 个草稿 TC、42 个入口分支；112 个生成组合完整登记，112 个均有确定性行为定位。
 - RISK-005 至 RISK-010 的关系、目标范围和指定用户集合保留独立失败定位，没有按入口机械拆分 TC。
 
 ## P0 重点
 
-P0 TC 为 TC001-TC004、TC006-TC019、TC022-TC023，共 20 个；覆盖 12 个 P0 Risk（其中 RISK-015 blocked）。
+P0 TC 为 TC001-TC004、TC006-TC019、TC022-TC023，共 20 个；覆盖 12 个 P0 Risk。
 
 ## 回归范围
 
@@ -137,6 +137,6 @@ P0 TC 为 TC001-TC004、TC006-TC019、TC022-TC023，共 20 个；覆盖 12 个 P
 
 ## 风险覆盖与路径
 
-Requirement Analysis Model 与草稿 Risk/Testcase Model 保留完整追踪；因 CONF-001 未解决，不生成确定性 XMind Markdown 或 Workbook，Manifest 保持 pending。
+Requirement Analysis Model 与草稿 Risk/Testcase Model 保留完整追踪；CONF-001 已解决，正式 XMind Markdown、Workbook 和 Manifest 恢复生成。
 
 

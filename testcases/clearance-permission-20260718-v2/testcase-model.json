@@ -943,56 +943,201 @@
       "change_ids": [],
       "historical_defect_ids": [],
       "test_priority": "P0",
-      "evidence_state": "待确认",
+      "evidence_state": "已确认",
       "regression_scope": "核心回归",
       "deduplication_key": "清仓股弹窗|建仓人－不包含|RISK-007,RISK-009",
       "core_deduplication_factors": {
         "business_object": "清仓股弹窗股票行、汇总行或策略段",
         "trigger_condition": "完成权限配置后打开对应业务入口",
         "core_action": "建仓人－不包含",
-        "core_assertion": "CONF-001 未解决前不生成不包含关系的确定性可见性 Oracle",
+        "core_assertion": "命中不包含条件的股票可见，未命中的股票不可见",
         "risk_semantics": "不包含反向错误；目标范围解析错误",
         "data_source": "同一清仓股权限查询链路",
         "permission_rule": "用户确认的权限关系与目标范围",
         "calculation_basis": "权限命中股票可见集合",
         "exception_handling": "同一入口异常处理"
       },
-      "core_deduplication_key": "sha256:e6a22f274c3930c099340c64d5b16c54fd66d303393e77457e5fd022c8902b3f",
+      "core_deduplication_key": "sha256:ac8452ddce6edd68e4e520ac8e73492c8e99d6d4c5f31643f0d1f6288aec9a88",
       "entry_branches": [
         {
           "branch_id": "TC009-B01",
           "entry_name": "模拟交易清仓股弹窗",
           "steps": [
-            "在模拟交易清仓股弹窗配置普通建仓人 不包含 自己；准备本人、非本人及部分命中目标集合的数据，等待 CONF-001 明确反向集合规则",
-            "在模拟交易清仓股弹窗配置普通建仓人 不包含 所有下级；准备下级、非下级及部分命中目标集合的数据，等待 CONF-001 明确反向集合规则",
-            "在模拟交易清仓股弹窗配置普通建仓人 不包含 直属上级；准备直属上级、其他人员及部分命中目标集合的数据，等待 CONF-001 明确反向集合规则",
-            "在模拟交易清仓股弹窗配置普通建仓人 不包含 直属下级；准备直属下级、非直属下级及部分命中目标集合的数据，等待 CONF-001 明确反向集合规则"
+            "在模拟交易清仓股弹窗配置普通建仓人 不包含 自己；准备至少一个角色或人员不是本人以及全部角色或人员均为本人的股票",
+            "在模拟交易清仓股弹窗配置普通建仓人 不包含 所有下级；准备至少一个角色或人员不属于所有下级以及全部角色或人员均属于所有下级的股票",
+            "在模拟交易清仓股弹窗配置普通建仓人 不包含 直属上级；准备至少一个角色或人员不是直属上级以及全部角色或人员均为直属上级的股票",
+            "在模拟交易清仓股弹窗配置普通建仓人 不包含 直属下级；准备至少一个角色或人员不是直属下级以及全部角色或人员均为直属下级的股票"
           ],
           "expected_results": [
-            "自己：阻塞，CONF-001 未解决，不形成可见或不可见的确定性验收结论",
-            "所有下级：阻塞，CONF-001 未解决，不形成可见或不可见的确定性验收结论",
-            "直属上级：阻塞，CONF-001 未解决，不形成可见或不可见的确定性验收结论",
-            "直属下级：阻塞，CONF-001 未解决，不形成可见或不可见的确定性验收结论"
+            "至少一个角色或人员不是本人时命中不包含条件，股票可见；全部角色或人员均为本人时未命中不包含条件，股票不可见；汇总只统计可见股票",
+            "至少一个角色或人员不属于所有下级时命中不包含条件，股票可见；全部角色或人员均属于所有下级时未命中不包含条件，股票不可见；汇总只统计可见股票",
+            "至少一个角色或人员不是直属上级时命中不包含条件，股票可见；全部角色或人员均为直属上级时未命中不包含条件，股票不可见；汇总只统计可见股票",
+            "至少一个角色或人员不是直属下级时命中不包含条件，股票可见；全部角色或人员均为直属下级时未命中不包含条件，股票不可见；汇总只统计可见股票"
           ]
         },
         {
           "branch_id": "TC009-B02",
           "entry_name": "正式交易清仓股弹窗",
           "steps": [
-            "在正式交易清仓股弹窗配置普通建仓人 不包含 自己；准备本人、非本人及部分命中目标集合的数据，等待 CONF-001 明确反向集合规则",
-            "在正式交易清仓股弹窗配置普通建仓人 不包含 所有下级；准备下级、非下级及部分命中目标集合的数据，等待 CONF-001 明确反向集合规则",
-            "在正式交易清仓股弹窗配置普通建仓人 不包含 直属上级；准备直属上级、其他人员及部分命中目标集合的数据，等待 CONF-001 明确反向集合规则",
-            "在正式交易清仓股弹窗配置普通建仓人 不包含 直属下级；准备直属下级、非直属下级及部分命中目标集合的数据，等待 CONF-001 明确反向集合规则"
+            "在正式交易清仓股弹窗配置普通建仓人 不包含 自己；准备至少一个角色或人员不是本人以及全部角色或人员均为本人的股票",
+            "在正式交易清仓股弹窗配置普通建仓人 不包含 所有下级；准备至少一个角色或人员不属于所有下级以及全部角色或人员均属于所有下级的股票",
+            "在正式交易清仓股弹窗配置普通建仓人 不包含 直属上级；准备至少一个角色或人员不是直属上级以及全部角色或人员均为直属上级的股票",
+            "在正式交易清仓股弹窗配置普通建仓人 不包含 直属下级；准备至少一个角色或人员不是直属下级以及全部角色或人员均为直属下级的股票"
           ],
           "expected_results": [
-            "自己：阻塞，CONF-001 未解决，不形成可见或不可见的确定性验收结论",
-            "所有下级：阻塞，CONF-001 未解决，不形成可见或不可见的确定性验收结论",
-            "直属上级：阻塞，CONF-001 未解决，不形成可见或不可见的确定性验收结论",
-            "直属下级：阻塞，CONF-001 未解决，不形成可见或不可见的确定性验收结论"
+            "至少一个角色或人员不是本人时命中不包含条件，股票可见；全部角色或人员均为本人时未命中不包含条件，股票不可见；汇总只统计可见股票",
+            "至少一个角色或人员不属于所有下级时命中不包含条件，股票可见；全部角色或人员均属于所有下级时未命中不包含条件，股票不可见；汇总只统计可见股票",
+            "至少一个角色或人员不是直属上级时命中不包含条件，股票可见；全部角色或人员均为直属上级时未命中不包含条件，股票不可见；汇总只统计可见股票",
+            "至少一个角色或人员不是直属下级时命中不包含条件，股票可见；全部角色或人员均为直属下级时未命中不包含条件，股票不可见；汇总只统计可见股票"
           ]
         }
       ],
-      "condition_coverage": []
+      "condition_coverage": [
+        {
+          "combination_id": "COMBO-025",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "business_entry": "模拟交易清仓股弹窗",
+            "permission_type": "普通建仓人",
+            "role_type_scope": "role_type∈{10,20}",
+            "relation": "不包含",
+            "target_scope": "自己",
+            "expected_match_state": "命中与不命中",
+            "data_shape": "普通人员"
+          },
+          "expected_match_state": "命中与不命中",
+          "observable_result": "至少一个角色或人员不是本人时命中不包含条件，股票可见；全部角色或人员均为本人时未命中不包含条件，股票不可见；汇总只统计可见股票",
+          "branch_id": "TC009-B01",
+          "step_index": 1,
+          "expected_index": 1
+        },
+        {
+          "combination_id": "COMBO-027",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "business_entry": "模拟交易清仓股弹窗",
+            "permission_type": "普通建仓人",
+            "role_type_scope": "role_type∈{10,20}",
+            "relation": "不包含",
+            "target_scope": "所有下级",
+            "expected_match_state": "命中与不命中",
+            "data_shape": "普通人员"
+          },
+          "expected_match_state": "命中与不命中",
+          "observable_result": "至少一个角色或人员不属于所有下级时命中不包含条件，股票可见；全部角色或人员均属于所有下级时未命中不包含条件，股票不可见；汇总只统计可见股票",
+          "branch_id": "TC009-B01",
+          "step_index": 2,
+          "expected_index": 2
+        },
+        {
+          "combination_id": "COMBO-029",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "business_entry": "模拟交易清仓股弹窗",
+            "permission_type": "普通建仓人",
+            "role_type_scope": "role_type∈{10,20}",
+            "relation": "不包含",
+            "target_scope": "直属上级",
+            "expected_match_state": "命中与不命中",
+            "data_shape": "普通人员"
+          },
+          "expected_match_state": "命中与不命中",
+          "observable_result": "至少一个角色或人员不是直属上级时命中不包含条件，股票可见；全部角色或人员均为直属上级时未命中不包含条件，股票不可见；汇总只统计可见股票",
+          "branch_id": "TC009-B01",
+          "step_index": 3,
+          "expected_index": 3
+        },
+        {
+          "combination_id": "COMBO-031",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "business_entry": "模拟交易清仓股弹窗",
+            "permission_type": "普通建仓人",
+            "role_type_scope": "role_type∈{10,20}",
+            "relation": "不包含",
+            "target_scope": "直属下级",
+            "expected_match_state": "命中与不命中",
+            "data_shape": "普通人员"
+          },
+          "expected_match_state": "命中与不命中",
+          "observable_result": "至少一个角色或人员不是直属下级时命中不包含条件，股票可见；全部角色或人员均为直属下级时未命中不包含条件，股票不可见；汇总只统计可见股票",
+          "branch_id": "TC009-B01",
+          "step_index": 4,
+          "expected_index": 4
+        },
+        {
+          "combination_id": "COMBO-026",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "business_entry": "正式交易清仓股弹窗",
+            "permission_type": "普通建仓人",
+            "role_type_scope": "role_type∈{10,20}",
+            "relation": "不包含",
+            "target_scope": "自己",
+            "expected_match_state": "命中与不命中",
+            "data_shape": "普通人员"
+          },
+          "expected_match_state": "命中与不命中",
+          "observable_result": "至少一个角色或人员不是本人时命中不包含条件，股票可见；全部角色或人员均为本人时未命中不包含条件，股票不可见；汇总只统计可见股票",
+          "branch_id": "TC009-B02",
+          "step_index": 1,
+          "expected_index": 1
+        },
+        {
+          "combination_id": "COMBO-028",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "business_entry": "正式交易清仓股弹窗",
+            "permission_type": "普通建仓人",
+            "role_type_scope": "role_type∈{10,20}",
+            "relation": "不包含",
+            "target_scope": "所有下级",
+            "expected_match_state": "命中与不命中",
+            "data_shape": "普通人员"
+          },
+          "expected_match_state": "命中与不命中",
+          "observable_result": "至少一个角色或人员不属于所有下级时命中不包含条件，股票可见；全部角色或人员均属于所有下级时未命中不包含条件，股票不可见；汇总只统计可见股票",
+          "branch_id": "TC009-B02",
+          "step_index": 2,
+          "expected_index": 2
+        },
+        {
+          "combination_id": "COMBO-030",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "business_entry": "正式交易清仓股弹窗",
+            "permission_type": "普通建仓人",
+            "role_type_scope": "role_type∈{10,20}",
+            "relation": "不包含",
+            "target_scope": "直属上级",
+            "expected_match_state": "命中与不命中",
+            "data_shape": "普通人员"
+          },
+          "expected_match_state": "命中与不命中",
+          "observable_result": "至少一个角色或人员不是直属上级时命中不包含条件，股票可见；全部角色或人员均为直属上级时未命中不包含条件，股票不可见；汇总只统计可见股票",
+          "branch_id": "TC009-B02",
+          "step_index": 3,
+          "expected_index": 3
+        },
+        {
+          "combination_id": "COMBO-032",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "business_entry": "正式交易清仓股弹窗",
+            "permission_type": "普通建仓人",
+            "role_type_scope": "role_type∈{10,20}",
+            "relation": "不包含",
+            "target_scope": "直属下级",
+            "expected_match_state": "命中与不命中",
+            "data_shape": "普通人员"
+          },
+          "expected_match_state": "命中与不命中",
+          "observable_result": "至少一个角色或人员不是直属下级时命中不包含条件，股票可见；全部角色或人员均为直属下级时未命中不包含条件，股票不可见；汇总只统计可见股票",
+          "branch_id": "TC009-B02",
+          "step_index": 4,
+          "expected_index": 4
+        }
+      ]
     },
     {
       "tc_id": "TC010",
@@ -1879,56 +2024,201 @@
       "change_ids": [],
       "historical_defect_ids": [],
       "test_priority": "P0",
-      "evidence_state": "待确认",
+      "evidence_state": "已确认",
       "regression_scope": "核心回归",
       "deduplication_key": "清仓股弹窗|跟进人－不包含|RISK-007,RISK-009",
       "core_deduplication_factors": {
         "business_object": "清仓股弹窗股票行、汇总行或策略段",
         "trigger_condition": "完成权限配置后打开对应业务入口",
         "core_action": "跟进人－不包含",
-        "core_assertion": "CONF-001 未解决前不生成不包含关系的确定性可见性 Oracle",
+        "core_assertion": "命中不包含条件的股票可见，未命中的股票不可见",
         "risk_semantics": "不包含反向错误；目标范围解析错误",
         "data_source": "同一清仓股权限查询链路",
         "permission_rule": "用户确认的权限关系与目标范围",
         "calculation_basis": "权限命中股票可见集合",
         "exception_handling": "同一入口异常处理"
       },
-      "core_deduplication_key": "sha256:942a6daf4bc9b6936ffbc93bba1c45c64b5606795ab4db7aa176b588d7d035eb",
+      "core_deduplication_key": "sha256:3fedef3d20ca73563bec6e3a173f48156c6ce0b614f97bf2898dc2456b1b7375",
       "entry_branches": [
         {
           "branch_id": "TC014-B01",
           "entry_name": "模拟交易清仓股弹窗",
           "steps": [
-            "在模拟交易清仓股弹窗配置普通跟进人 不包含 自己；准备本人、非本人及部分命中目标集合的数据，等待 CONF-001 明确反向集合规则",
-            "在模拟交易清仓股弹窗配置普通跟进人 不包含 所有下级；准备下级、非下级及部分命中目标集合的数据，等待 CONF-001 明确反向集合规则",
-            "在模拟交易清仓股弹窗配置普通跟进人 不包含 直属上级；准备直属上级、其他人员及部分命中目标集合的数据，等待 CONF-001 明确反向集合规则",
-            "在模拟交易清仓股弹窗配置普通跟进人 不包含 直属下级；准备直属下级、非直属下级及部分命中目标集合的数据，等待 CONF-001 明确反向集合规则"
+            "在模拟交易清仓股弹窗配置普通跟进人 不包含 自己；准备至少一个角色或人员不是本人以及全部角色或人员均为本人的股票",
+            "在模拟交易清仓股弹窗配置普通跟进人 不包含 所有下级；准备至少一个角色或人员不属于所有下级以及全部角色或人员均属于所有下级的股票",
+            "在模拟交易清仓股弹窗配置普通跟进人 不包含 直属上级；准备至少一个角色或人员不是直属上级以及全部角色或人员均为直属上级的股票",
+            "在模拟交易清仓股弹窗配置普通跟进人 不包含 直属下级；准备至少一个角色或人员不是直属下级以及全部角色或人员均为直属下级的股票"
           ],
           "expected_results": [
-            "自己：阻塞，CONF-001 未解决，不形成可见或不可见的确定性验收结论",
-            "所有下级：阻塞，CONF-001 未解决，不形成可见或不可见的确定性验收结论",
-            "直属上级：阻塞，CONF-001 未解决，不形成可见或不可见的确定性验收结论",
-            "直属下级：阻塞，CONF-001 未解决，不形成可见或不可见的确定性验收结论"
+            "至少一个角色或人员不是本人时命中不包含条件，股票可见；全部角色或人员均为本人时未命中不包含条件，股票不可见；汇总只统计可见股票",
+            "至少一个角色或人员不属于所有下级时命中不包含条件，股票可见；全部角色或人员均属于所有下级时未命中不包含条件，股票不可见；汇总只统计可见股票",
+            "至少一个角色或人员不是直属上级时命中不包含条件，股票可见；全部角色或人员均为直属上级时未命中不包含条件，股票不可见；汇总只统计可见股票",
+            "至少一个角色或人员不是直属下级时命中不包含条件，股票可见；全部角色或人员均为直属下级时未命中不包含条件，股票不可见；汇总只统计可见股票"
           ]
         },
         {
           "branch_id": "TC014-B02",
           "entry_name": "正式交易清仓股弹窗",
           "steps": [
-            "在正式交易清仓股弹窗配置普通跟进人 不包含 自己；准备本人、非本人及部分命中目标集合的数据，等待 CONF-001 明确反向集合规则",
-            "在正式交易清仓股弹窗配置普通跟进人 不包含 所有下级；准备下级、非下级及部分命中目标集合的数据，等待 CONF-001 明确反向集合规则",
-            "在正式交易清仓股弹窗配置普通跟进人 不包含 直属上级；准备直属上级、其他人员及部分命中目标集合的数据，等待 CONF-001 明确反向集合规则",
-            "在正式交易清仓股弹窗配置普通跟进人 不包含 直属下级；准备直属下级、非直属下级及部分命中目标集合的数据，等待 CONF-001 明确反向集合规则"
+            "在正式交易清仓股弹窗配置普通跟进人 不包含 自己；准备至少一个角色或人员不是本人以及全部角色或人员均为本人的股票",
+            "在正式交易清仓股弹窗配置普通跟进人 不包含 所有下级；准备至少一个角色或人员不属于所有下级以及全部角色或人员均属于所有下级的股票",
+            "在正式交易清仓股弹窗配置普通跟进人 不包含 直属上级；准备至少一个角色或人员不是直属上级以及全部角色或人员均为直属上级的股票",
+            "在正式交易清仓股弹窗配置普通跟进人 不包含 直属下级；准备至少一个角色或人员不是直属下级以及全部角色或人员均为直属下级的股票"
           ],
           "expected_results": [
-            "自己：阻塞，CONF-001 未解决，不形成可见或不可见的确定性验收结论",
-            "所有下级：阻塞，CONF-001 未解决，不形成可见或不可见的确定性验收结论",
-            "直属上级：阻塞，CONF-001 未解决，不形成可见或不可见的确定性验收结论",
-            "直属下级：阻塞，CONF-001 未解决，不形成可见或不可见的确定性验收结论"
+            "至少一个角色或人员不是本人时命中不包含条件，股票可见；全部角色或人员均为本人时未命中不包含条件，股票不可见；汇总只统计可见股票",
+            "至少一个角色或人员不属于所有下级时命中不包含条件，股票可见；全部角色或人员均属于所有下级时未命中不包含条件，股票不可见；汇总只统计可见股票",
+            "至少一个角色或人员不是直属上级时命中不包含条件，股票可见；全部角色或人员均为直属上级时未命中不包含条件，股票不可见；汇总只统计可见股票",
+            "至少一个角色或人员不是直属下级时命中不包含条件，股票可见；全部角色或人员均为直属下级时未命中不包含条件，股票不可见；汇总只统计可见股票"
           ]
         }
       ],
-      "condition_coverage": []
+      "condition_coverage": [
+        {
+          "combination_id": "COMBO-065",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "business_entry": "模拟交易清仓股弹窗",
+            "permission_type": "普通跟进人",
+            "role_type_scope": "role_type=30",
+            "relation": "不包含",
+            "target_scope": "自己",
+            "expected_match_state": "命中与不命中",
+            "data_shape": "普通人员"
+          },
+          "expected_match_state": "命中与不命中",
+          "observable_result": "至少一个角色或人员不是本人时命中不包含条件，股票可见；全部角色或人员均为本人时未命中不包含条件，股票不可见；汇总只统计可见股票",
+          "branch_id": "TC014-B01",
+          "step_index": 1,
+          "expected_index": 1
+        },
+        {
+          "combination_id": "COMBO-067",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "business_entry": "模拟交易清仓股弹窗",
+            "permission_type": "普通跟进人",
+            "role_type_scope": "role_type=30",
+            "relation": "不包含",
+            "target_scope": "所有下级",
+            "expected_match_state": "命中与不命中",
+            "data_shape": "普通人员"
+          },
+          "expected_match_state": "命中与不命中",
+          "observable_result": "至少一个角色或人员不属于所有下级时命中不包含条件，股票可见；全部角色或人员均属于所有下级时未命中不包含条件，股票不可见；汇总只统计可见股票",
+          "branch_id": "TC014-B01",
+          "step_index": 2,
+          "expected_index": 2
+        },
+        {
+          "combination_id": "COMBO-069",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "business_entry": "模拟交易清仓股弹窗",
+            "permission_type": "普通跟进人",
+            "role_type_scope": "role_type=30",
+            "relation": "不包含",
+            "target_scope": "直属上级",
+            "expected_match_state": "命中与不命中",
+            "data_shape": "普通人员"
+          },
+          "expected_match_state": "命中与不命中",
+          "observable_result": "至少一个角色或人员不是直属上级时命中不包含条件，股票可见；全部角色或人员均为直属上级时未命中不包含条件，股票不可见；汇总只统计可见股票",
+          "branch_id": "TC014-B01",
+          "step_index": 3,
+          "expected_index": 3
+        },
+        {
+          "combination_id": "COMBO-071",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "business_entry": "模拟交易清仓股弹窗",
+            "permission_type": "普通跟进人",
+            "role_type_scope": "role_type=30",
+            "relation": "不包含",
+            "target_scope": "直属下级",
+            "expected_match_state": "命中与不命中",
+            "data_shape": "普通人员"
+          },
+          "expected_match_state": "命中与不命中",
+          "observable_result": "至少一个角色或人员不是直属下级时命中不包含条件，股票可见；全部角色或人员均为直属下级时未命中不包含条件，股票不可见；汇总只统计可见股票",
+          "branch_id": "TC014-B01",
+          "step_index": 4,
+          "expected_index": 4
+        },
+        {
+          "combination_id": "COMBO-066",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "business_entry": "正式交易清仓股弹窗",
+            "permission_type": "普通跟进人",
+            "role_type_scope": "role_type=30",
+            "relation": "不包含",
+            "target_scope": "自己",
+            "expected_match_state": "命中与不命中",
+            "data_shape": "普通人员"
+          },
+          "expected_match_state": "命中与不命中",
+          "observable_result": "至少一个角色或人员不是本人时命中不包含条件，股票可见；全部角色或人员均为本人时未命中不包含条件，股票不可见；汇总只统计可见股票",
+          "branch_id": "TC014-B02",
+          "step_index": 1,
+          "expected_index": 1
+        },
+        {
+          "combination_id": "COMBO-068",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "business_entry": "正式交易清仓股弹窗",
+            "permission_type": "普通跟进人",
+            "role_type_scope": "role_type=30",
+            "relation": "不包含",
+            "target_scope": "所有下级",
+            "expected_match_state": "命中与不命中",
+            "data_shape": "普通人员"
+          },
+          "expected_match_state": "命中与不命中",
+          "observable_result": "至少一个角色或人员不属于所有下级时命中不包含条件，股票可见；全部角色或人员均属于所有下级时未命中不包含条件，股票不可见；汇总只统计可见股票",
+          "branch_id": "TC014-B02",
+          "step_index": 2,
+          "expected_index": 2
+        },
+        {
+          "combination_id": "COMBO-070",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "business_entry": "正式交易清仓股弹窗",
+            "permission_type": "普通跟进人",
+            "role_type_scope": "role_type=30",
+            "relation": "不包含",
+            "target_scope": "直属上级",
+            "expected_match_state": "命中与不命中",
+            "data_shape": "普通人员"
+          },
+          "expected_match_state": "命中与不命中",
+          "observable_result": "至少一个角色或人员不是直属上级时命中不包含条件，股票可见；全部角色或人员均为直属上级时未命中不包含条件，股票不可见；汇总只统计可见股票",
+          "branch_id": "TC014-B02",
+          "step_index": 3,
+          "expected_index": 3
+        },
+        {
+          "combination_id": "COMBO-072",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "business_entry": "正式交易清仓股弹窗",
+            "permission_type": "普通跟进人",
+            "role_type_scope": "role_type=30",
+            "relation": "不包含",
+            "target_scope": "直属下级",
+            "expected_match_state": "命中与不命中",
+            "data_shape": "普通人员"
+          },
+          "expected_match_state": "命中与不命中",
+          "observable_result": "至少一个角色或人员不是直属下级时命中不包含条件，股票可见；全部角色或人员均为直属下级时未命中不包含条件，股票不可见；汇总只统计可见股票",
+          "branch_id": "TC014-B02",
+          "step_index": 4,
+          "expected_index": 4
+        }
+      ]
     },
     {
       "tc_id": "TC015",
@@ -2381,56 +2671,201 @@
       "change_ids": [],
       "historical_defect_ids": [],
       "test_priority": "P0",
-      "evidence_state": "待确认",
+      "evidence_state": "已确认",
       "regression_scope": "核心回归",
       "deduplication_key": "清仓股弹窗|建仓人（指定用户）－不包含|RISK-010",
       "core_deduplication_factors": {
         "business_object": "清仓股弹窗股票行、汇总行或策略段",
         "trigger_condition": "完成权限配置后打开对应业务入口",
         "core_action": "建仓人（指定用户）－不包含",
-        "core_assertion": "CONF-001 未解决前不生成不包含关系的确定性可见性 Oracle",
+        "core_assertion": "命中不包含条件的股票可见，未命中的股票不可见",
         "risk_semantics": "指定用户多值集合错误",
         "data_source": "同一清仓股权限查询链路",
         "permission_rule": "用户确认的权限关系与目标范围",
         "calculation_basis": "权限命中股票可见集合",
         "exception_handling": "同一入口异常处理"
       },
-      "core_deduplication_key": "sha256:b0bdb436663961e2cb5d068a05b0c48cbf4ad82c42f389859c914cb58bbb3f1a",
+      "core_deduplication_key": "sha256:d619634716dc16c00e14cbbc058b77e5422ecb7b64f5757dba1eaa4e3cfb24e2",
       "entry_branches": [
         {
           "branch_id": "TC017-B01",
           "entry_name": "模拟交易清仓股弹窗",
           "steps": [
-            "在模拟交易清仓股弹窗配置建仓人（指定用户） 不包含 指定用户集合；准备单用户命中股票",
-            "在模拟交易清仓股弹窗配置建仓人（指定用户） 不包含 指定用户集合；准备单用户不命中股票",
-            "在模拟交易清仓股弹窗配置建仓人（指定用户） 不包含 指定用户集合；准备多用户一个命中股票",
-            "在模拟交易清仓股弹窗配置建仓人（指定用户） 不包含 指定用户集合；准备多用户全部不命中股票"
+            "在模拟交易清仓股弹窗配置建仓人（指定用户） 不包含 指定用户集合；准备单用户不在被排除的指定用户集合内的股票",
+            "在模拟交易清仓股弹窗配置建仓人（指定用户） 不包含 指定用户集合；准备单用户在被排除的指定用户集合内的股票",
+            "在模拟交易清仓股弹窗配置建仓人（指定用户） 不包含 指定用户集合；准备多用户中至少一个不在被排除的指定用户集合内的股票",
+            "在模拟交易清仓股弹窗配置建仓人（指定用户） 不包含 指定用户集合；准备多用户全部在被排除的指定用户集合内的股票"
           ],
           "expected_results": [
-            "单用户命中：阻塞，CONF-001 未解决，不形成可见或不可见的确定性验收结论",
-            "单用户不命中：阻塞，CONF-001 未解决，不形成可见或不可见的确定性验收结论",
-            "多用户一个命中：阻塞，CONF-001 未解决，不形成可见或不可见的确定性验收结论",
-            "多用户全部不命中：阻塞，CONF-001 未解决，不形成可见或不可见的确定性验收结论"
+            "单用户不在被排除的指定用户集合内，命中不包含条件，股票可见；汇总统计该股票",
+            "单用户在被排除的指定用户集合内，未命中不包含条件，股票不可见；汇总不统计该股票",
+            "多用户中至少一个不在被排除的指定用户集合内，命中不包含条件，股票可见；汇总统计该股票",
+            "多用户全部在被排除的指定用户集合内，未命中不包含条件，股票不可见；汇总不统计该股票"
           ]
         },
         {
           "branch_id": "TC017-B02",
           "entry_name": "正式交易清仓股弹窗",
           "steps": [
-            "在正式交易清仓股弹窗配置建仓人（指定用户） 不包含 指定用户集合；准备单用户命中股票",
-            "在正式交易清仓股弹窗配置建仓人（指定用户） 不包含 指定用户集合；准备单用户不命中股票",
-            "在正式交易清仓股弹窗配置建仓人（指定用户） 不包含 指定用户集合；准备多用户一个命中股票",
-            "在正式交易清仓股弹窗配置建仓人（指定用户） 不包含 指定用户集合；准备多用户全部不命中股票"
+            "在正式交易清仓股弹窗配置建仓人（指定用户） 不包含 指定用户集合；准备单用户不在被排除的指定用户集合内的股票",
+            "在正式交易清仓股弹窗配置建仓人（指定用户） 不包含 指定用户集合；准备单用户在被排除的指定用户集合内的股票",
+            "在正式交易清仓股弹窗配置建仓人（指定用户） 不包含 指定用户集合；准备多用户中至少一个不在被排除的指定用户集合内的股票",
+            "在正式交易清仓股弹窗配置建仓人（指定用户） 不包含 指定用户集合；准备多用户全部在被排除的指定用户集合内的股票"
           ],
           "expected_results": [
-            "单用户命中：阻塞，CONF-001 未解决，不形成可见或不可见的确定性验收结论",
-            "单用户不命中：阻塞，CONF-001 未解决，不形成可见或不可见的确定性验收结论",
-            "多用户一个命中：阻塞，CONF-001 未解决，不形成可见或不可见的确定性验收结论",
-            "多用户全部不命中：阻塞，CONF-001 未解决，不形成可见或不可见的确定性验收结论"
+            "单用户不在被排除的指定用户集合内，命中不包含条件，股票可见；汇总统计该股票",
+            "单用户在被排除的指定用户集合内，未命中不包含条件，股票不可见；汇总不统计该股票",
+            "多用户中至少一个不在被排除的指定用户集合内，命中不包含条件，股票可见；汇总统计该股票",
+            "多用户全部在被排除的指定用户集合内，未命中不包含条件，股票不可见；汇总不统计该股票"
           ]
         }
       ],
-      "condition_coverage": []
+      "condition_coverage": [
+        {
+          "combination_id": "COMBO-089",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "business_entry": "模拟交易清仓股弹窗",
+            "permission_type": "建仓人（指定用户）",
+            "role_type_scope": "role_type∈{10,20}",
+            "relation": "不包含",
+            "target_scope": "指定用户集合",
+            "expected_match_state": "单用户命中",
+            "data_shape": "单用户"
+          },
+          "expected_match_state": "单用户命中",
+          "observable_result": "单用户不在被排除的指定用户集合内，命中不包含条件，股票可见；汇总统计该股票",
+          "branch_id": "TC017-B01",
+          "step_index": 1,
+          "expected_index": 1
+        },
+        {
+          "combination_id": "COMBO-091",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "business_entry": "模拟交易清仓股弹窗",
+            "permission_type": "建仓人（指定用户）",
+            "role_type_scope": "role_type∈{10,20}",
+            "relation": "不包含",
+            "target_scope": "指定用户集合",
+            "expected_match_state": "单用户不命中",
+            "data_shape": "单用户"
+          },
+          "expected_match_state": "单用户不命中",
+          "observable_result": "单用户在被排除的指定用户集合内，未命中不包含条件，股票不可见；汇总不统计该股票",
+          "branch_id": "TC017-B01",
+          "step_index": 2,
+          "expected_index": 2
+        },
+        {
+          "combination_id": "COMBO-093",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "business_entry": "模拟交易清仓股弹窗",
+            "permission_type": "建仓人（指定用户）",
+            "role_type_scope": "role_type∈{10,20}",
+            "relation": "不包含",
+            "target_scope": "指定用户集合",
+            "expected_match_state": "多用户一个命中",
+            "data_shape": "多用户"
+          },
+          "expected_match_state": "多用户一个命中",
+          "observable_result": "多用户中至少一个不在被排除的指定用户集合内，命中不包含条件，股票可见；汇总统计该股票",
+          "branch_id": "TC017-B01",
+          "step_index": 3,
+          "expected_index": 3
+        },
+        {
+          "combination_id": "COMBO-095",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "business_entry": "模拟交易清仓股弹窗",
+            "permission_type": "建仓人（指定用户）",
+            "role_type_scope": "role_type∈{10,20}",
+            "relation": "不包含",
+            "target_scope": "指定用户集合",
+            "expected_match_state": "多用户全部不命中",
+            "data_shape": "多用户"
+          },
+          "expected_match_state": "多用户全部不命中",
+          "observable_result": "多用户全部在被排除的指定用户集合内，未命中不包含条件，股票不可见；汇总不统计该股票",
+          "branch_id": "TC017-B01",
+          "step_index": 4,
+          "expected_index": 4
+        },
+        {
+          "combination_id": "COMBO-090",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "business_entry": "正式交易清仓股弹窗",
+            "permission_type": "建仓人（指定用户）",
+            "role_type_scope": "role_type∈{10,20}",
+            "relation": "不包含",
+            "target_scope": "指定用户集合",
+            "expected_match_state": "单用户命中",
+            "data_shape": "单用户"
+          },
+          "expected_match_state": "单用户命中",
+          "observable_result": "单用户不在被排除的指定用户集合内，命中不包含条件，股票可见；汇总统计该股票",
+          "branch_id": "TC017-B02",
+          "step_index": 1,
+          "expected_index": 1
+        },
+        {
+          "combination_id": "COMBO-092",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "business_entry": "正式交易清仓股弹窗",
+            "permission_type": "建仓人（指定用户）",
+            "role_type_scope": "role_type∈{10,20}",
+            "relation": "不包含",
+            "target_scope": "指定用户集合",
+            "expected_match_state": "单用户不命中",
+            "data_shape": "单用户"
+          },
+          "expected_match_state": "单用户不命中",
+          "observable_result": "单用户在被排除的指定用户集合内，未命中不包含条件，股票不可见；汇总不统计该股票",
+          "branch_id": "TC017-B02",
+          "step_index": 2,
+          "expected_index": 2
+        },
+        {
+          "combination_id": "COMBO-094",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "business_entry": "正式交易清仓股弹窗",
+            "permission_type": "建仓人（指定用户）",
+            "role_type_scope": "role_type∈{10,20}",
+            "relation": "不包含",
+            "target_scope": "指定用户集合",
+            "expected_match_state": "多用户一个命中",
+            "data_shape": "多用户"
+          },
+          "expected_match_state": "多用户一个命中",
+          "observable_result": "多用户中至少一个不在被排除的指定用户集合内，命中不包含条件，股票可见；汇总统计该股票",
+          "branch_id": "TC017-B02",
+          "step_index": 3,
+          "expected_index": 3
+        },
+        {
+          "combination_id": "COMBO-096",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "business_entry": "正式交易清仓股弹窗",
+            "permission_type": "建仓人（指定用户）",
+            "role_type_scope": "role_type∈{10,20}",
+            "relation": "不包含",
+            "target_scope": "指定用户集合",
+            "expected_match_state": "多用户全部不命中",
+            "data_shape": "多用户"
+          },
+          "expected_match_state": "多用户全部不命中",
+          "observable_result": "多用户全部在被排除的指定用户集合内，未命中不包含条件，股票不可见；汇总不统计该股票",
+          "branch_id": "TC017-B02",
+          "step_index": 4,
+          "expected_index": 4
+        }
+      ]
     },
     {
       "tc_id": "TC018",
@@ -2667,56 +3102,201 @@
       "change_ids": [],
       "historical_defect_ids": [],
       "test_priority": "P0",
-      "evidence_state": "待确认",
+      "evidence_state": "已确认",
       "regression_scope": "核心回归",
       "deduplication_key": "清仓股弹窗|跟进人（指定用户）－不包含|RISK-010",
       "core_deduplication_factors": {
         "business_object": "清仓股弹窗股票行、汇总行或策略段",
         "trigger_condition": "完成权限配置后打开对应业务入口",
         "core_action": "跟进人（指定用户）－不包含",
-        "core_assertion": "CONF-001 未解决前不生成不包含关系的确定性可见性 Oracle",
+        "core_assertion": "命中不包含条件的股票可见，未命中的股票不可见",
         "risk_semantics": "指定用户多值集合错误",
         "data_source": "同一清仓股权限查询链路",
         "permission_rule": "用户确认的权限关系与目标范围",
         "calculation_basis": "权限命中股票可见集合",
         "exception_handling": "同一入口异常处理"
       },
-      "core_deduplication_key": "sha256:89d95971a066c44a8a4180938da7d6be917b88cdcaeb933c172d35119487becb",
+      "core_deduplication_key": "sha256:2edfd36a05535610884af01e2694c2dba41d54ea47a1d7aa0e364de631aaddf9",
       "entry_branches": [
         {
           "branch_id": "TC019-B01",
           "entry_name": "模拟交易清仓股弹窗",
           "steps": [
-            "在模拟交易清仓股弹窗配置跟进人（指定用户） 不包含 指定用户集合；准备单用户命中股票",
-            "在模拟交易清仓股弹窗配置跟进人（指定用户） 不包含 指定用户集合；准备单用户不命中股票",
-            "在模拟交易清仓股弹窗配置跟进人（指定用户） 不包含 指定用户集合；准备多用户一个命中股票",
-            "在模拟交易清仓股弹窗配置跟进人（指定用户） 不包含 指定用户集合；准备多用户全部不命中股票"
+            "在模拟交易清仓股弹窗配置跟进人（指定用户） 不包含 指定用户集合；准备单用户不在被排除的指定用户集合内的股票",
+            "在模拟交易清仓股弹窗配置跟进人（指定用户） 不包含 指定用户集合；准备单用户在被排除的指定用户集合内的股票",
+            "在模拟交易清仓股弹窗配置跟进人（指定用户） 不包含 指定用户集合；准备多用户中至少一个不在被排除的指定用户集合内的股票",
+            "在模拟交易清仓股弹窗配置跟进人（指定用户） 不包含 指定用户集合；准备多用户全部在被排除的指定用户集合内的股票"
           ],
           "expected_results": [
-            "单用户命中：阻塞，CONF-001 未解决，不形成可见或不可见的确定性验收结论",
-            "单用户不命中：阻塞，CONF-001 未解决，不形成可见或不可见的确定性验收结论",
-            "多用户一个命中：阻塞，CONF-001 未解决，不形成可见或不可见的确定性验收结论",
-            "多用户全部不命中：阻塞，CONF-001 未解决，不形成可见或不可见的确定性验收结论"
+            "单用户不在被排除的指定用户集合内，命中不包含条件，股票可见；汇总统计该股票",
+            "单用户在被排除的指定用户集合内，未命中不包含条件，股票不可见；汇总不统计该股票",
+            "多用户中至少一个不在被排除的指定用户集合内，命中不包含条件，股票可见；汇总统计该股票",
+            "多用户全部在被排除的指定用户集合内，未命中不包含条件，股票不可见；汇总不统计该股票"
           ]
         },
         {
           "branch_id": "TC019-B02",
           "entry_name": "正式交易清仓股弹窗",
           "steps": [
-            "在正式交易清仓股弹窗配置跟进人（指定用户） 不包含 指定用户集合；准备单用户命中股票",
-            "在正式交易清仓股弹窗配置跟进人（指定用户） 不包含 指定用户集合；准备单用户不命中股票",
-            "在正式交易清仓股弹窗配置跟进人（指定用户） 不包含 指定用户集合；准备多用户一个命中股票",
-            "在正式交易清仓股弹窗配置跟进人（指定用户） 不包含 指定用户集合；准备多用户全部不命中股票"
+            "在正式交易清仓股弹窗配置跟进人（指定用户） 不包含 指定用户集合；准备单用户不在被排除的指定用户集合内的股票",
+            "在正式交易清仓股弹窗配置跟进人（指定用户） 不包含 指定用户集合；准备单用户在被排除的指定用户集合内的股票",
+            "在正式交易清仓股弹窗配置跟进人（指定用户） 不包含 指定用户集合；准备多用户中至少一个不在被排除的指定用户集合内的股票",
+            "在正式交易清仓股弹窗配置跟进人（指定用户） 不包含 指定用户集合；准备多用户全部在被排除的指定用户集合内的股票"
           ],
           "expected_results": [
-            "单用户命中：阻塞，CONF-001 未解决，不形成可见或不可见的确定性验收结论",
-            "单用户不命中：阻塞，CONF-001 未解决，不形成可见或不可见的确定性验收结论",
-            "多用户一个命中：阻塞，CONF-001 未解决，不形成可见或不可见的确定性验收结论",
-            "多用户全部不命中：阻塞，CONF-001 未解决，不形成可见或不可见的确定性验收结论"
+            "单用户不在被排除的指定用户集合内，命中不包含条件，股票可见；汇总统计该股票",
+            "单用户在被排除的指定用户集合内，未命中不包含条件，股票不可见；汇总不统计该股票",
+            "多用户中至少一个不在被排除的指定用户集合内，命中不包含条件，股票可见；汇总统计该股票",
+            "多用户全部在被排除的指定用户集合内，未命中不包含条件，股票不可见；汇总不统计该股票"
           ]
         }
       ],
-      "condition_coverage": []
+      "condition_coverage": [
+        {
+          "combination_id": "COMBO-105",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "business_entry": "模拟交易清仓股弹窗",
+            "permission_type": "跟进人（指定用户）",
+            "role_type_scope": "role_type=30",
+            "relation": "不包含",
+            "target_scope": "指定用户集合",
+            "expected_match_state": "单用户命中",
+            "data_shape": "单用户"
+          },
+          "expected_match_state": "单用户命中",
+          "observable_result": "单用户不在被排除的指定用户集合内，命中不包含条件，股票可见；汇总统计该股票",
+          "branch_id": "TC019-B01",
+          "step_index": 1,
+          "expected_index": 1
+        },
+        {
+          "combination_id": "COMBO-107",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "business_entry": "模拟交易清仓股弹窗",
+            "permission_type": "跟进人（指定用户）",
+            "role_type_scope": "role_type=30",
+            "relation": "不包含",
+            "target_scope": "指定用户集合",
+            "expected_match_state": "单用户不命中",
+            "data_shape": "单用户"
+          },
+          "expected_match_state": "单用户不命中",
+          "observable_result": "单用户在被排除的指定用户集合内，未命中不包含条件，股票不可见；汇总不统计该股票",
+          "branch_id": "TC019-B01",
+          "step_index": 2,
+          "expected_index": 2
+        },
+        {
+          "combination_id": "COMBO-109",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "business_entry": "模拟交易清仓股弹窗",
+            "permission_type": "跟进人（指定用户）",
+            "role_type_scope": "role_type=30",
+            "relation": "不包含",
+            "target_scope": "指定用户集合",
+            "expected_match_state": "多用户一个命中",
+            "data_shape": "多用户"
+          },
+          "expected_match_state": "多用户一个命中",
+          "observable_result": "多用户中至少一个不在被排除的指定用户集合内，命中不包含条件，股票可见；汇总统计该股票",
+          "branch_id": "TC019-B01",
+          "step_index": 3,
+          "expected_index": 3
+        },
+        {
+          "combination_id": "COMBO-111",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "business_entry": "模拟交易清仓股弹窗",
+            "permission_type": "跟进人（指定用户）",
+            "role_type_scope": "role_type=30",
+            "relation": "不包含",
+            "target_scope": "指定用户集合",
+            "expected_match_state": "多用户全部不命中",
+            "data_shape": "多用户"
+          },
+          "expected_match_state": "多用户全部不命中",
+          "observable_result": "多用户全部在被排除的指定用户集合内，未命中不包含条件，股票不可见；汇总不统计该股票",
+          "branch_id": "TC019-B01",
+          "step_index": 4,
+          "expected_index": 4
+        },
+        {
+          "combination_id": "COMBO-106",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "business_entry": "正式交易清仓股弹窗",
+            "permission_type": "跟进人（指定用户）",
+            "role_type_scope": "role_type=30",
+            "relation": "不包含",
+            "target_scope": "指定用户集合",
+            "expected_match_state": "单用户命中",
+            "data_shape": "单用户"
+          },
+          "expected_match_state": "单用户命中",
+          "observable_result": "单用户不在被排除的指定用户集合内，命中不包含条件，股票可见；汇总统计该股票",
+          "branch_id": "TC019-B02",
+          "step_index": 1,
+          "expected_index": 1
+        },
+        {
+          "combination_id": "COMBO-108",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "business_entry": "正式交易清仓股弹窗",
+            "permission_type": "跟进人（指定用户）",
+            "role_type_scope": "role_type=30",
+            "relation": "不包含",
+            "target_scope": "指定用户集合",
+            "expected_match_state": "单用户不命中",
+            "data_shape": "单用户"
+          },
+          "expected_match_state": "单用户不命中",
+          "observable_result": "单用户在被排除的指定用户集合内，未命中不包含条件，股票不可见；汇总不统计该股票",
+          "branch_id": "TC019-B02",
+          "step_index": 2,
+          "expected_index": 2
+        },
+        {
+          "combination_id": "COMBO-110",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "business_entry": "正式交易清仓股弹窗",
+            "permission_type": "跟进人（指定用户）",
+            "role_type_scope": "role_type=30",
+            "relation": "不包含",
+            "target_scope": "指定用户集合",
+            "expected_match_state": "多用户一个命中",
+            "data_shape": "多用户"
+          },
+          "expected_match_state": "多用户一个命中",
+          "observable_result": "多用户中至少一个不在被排除的指定用户集合内，命中不包含条件，股票可见；汇总统计该股票",
+          "branch_id": "TC019-B02",
+          "step_index": 3,
+          "expected_index": 3
+        },
+        {
+          "combination_id": "COMBO-112",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "business_entry": "正式交易清仓股弹窗",
+            "permission_type": "跟进人（指定用户）",
+            "role_type_scope": "role_type=30",
+            "relation": "不包含",
+            "target_scope": "指定用户集合",
+            "expected_match_state": "多用户全部不命中",
+            "data_shape": "多用户"
+          },
+          "expected_match_state": "多用户全部不命中",
+          "observable_result": "多用户全部在被排除的指定用户集合内，未命中不包含条件，股票不可见；汇总不统计该股票",
+          "branch_id": "TC019-B02",
+          "step_index": 4,
+          "expected_index": 4
+        }
+      ]
     },
     {
       "tc_id": "TC020",

@@ -263,14 +263,13 @@ class ConditionMatrixCoverageTests(unittest.TestCase):
         self.assertEqual(112, len(requirement["condition_matrix"]["required_combinations"]))
         self.assertEqual([], validate_requirement_model(requirement))
 
-    def test_current_pending_v2_models_pass_complete_validation(self):
+    def test_current_v2_models_pass_complete_validation(self):
         artifact = ROOT / "testcases/clearance-permission-20260718-v2"
-        draft = ROOT / "testcases/drafts/clearance-permission-20260718-v2"
         self.assertEqual([], validate_files(
             artifact / "requirement-analysis.json",
             None,
-            draft / "risk-coverage-matrix.json",
-            draft / "testcase-model.json",
+            artifact / "risk-coverage-matrix.json",
+            artifact / "testcase-model.json",
         ))
 
     def test_configuration_existence_does_not_count_as_behavior(self):
