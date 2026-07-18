@@ -30,6 +30,8 @@ Manifest 至少记录：
 
 所有 `draft_*` 路径必须真实存在、位于仓库内 `testcases/drafts/` 或 `tests/fixtures/drafts/`，禁止绝对路径、`..` 和越界。Pending 不要求正式 Workbook、正式索引或执行结果，但不得提前返回并跳过草稿模型、报告、数量、版本、哈希格式和路径安全校验。
 
+`validation_status` 与 `sql_status` 是两个正交状态：前者描述测试设计产物，后者描述 SQL 计划/生成/评审/执行状态。完整测试设计允许 `passed + blocked`；`sql_status=blocked` 时 `validation_sql` 和 `execution_evidence` 必须为 null。反之，`pending` 仍必须满足 draft 路径契约，不能只以 SQL 被阻塞为理由绕过草稿校验。
+
 ## 流程
 
 1. 写入版本化报告和 Markdown。
@@ -37,7 +39,8 @@ Manifest 至少记录：
 3. 转换并复验 Workbook。
 4. 生成并校验 Manifest。
 5. 原子更新索引，确保 artifact_id 唯一。
-6. 记录新增、补充、替代或废弃关系。
+6. 运行 `scripts/validate_testcase_index.py testcases/index.md`，确认每个 `testcases/**/manifest.json` 下的 passed Manifest 按 artifact_id 和 Manifest 路径唯一登记，且正式路径真实存在。
+7. 记录新增、补充、替代或废弃关系。
 
 任一步失败都不得宣称完整产物完成。失败时保留可用的 Markdown 和报告，不伪造 Workbook 路径。
 
@@ -46,6 +49,8 @@ Manifest 至少记录：
 ## 索引
 
 索引保留历史记录，统一 UTF-8，表头固定。校验状态只表达 `待校验/已校验/校验失败`，产物关系只表达新增、补充、替代、废弃；原业务状态写入备注，不能混入校验状态。旧记录必须标记 `legacy_rule_version=unknown`（无法确认时）、`current_validation_status=未按当前规则校验` 和 `migration_status=未迁移`。不同项目副本可保留各自历史行，但规则、脚本和表结构必须一致。乱码历史行应进行可逆编码修复，无法可靠修复时原样保留并在备注标记。
+
+pending/failed Manifest 不要求登记为“已校验”正式行；passed Manifest 必须且只能登记一次。重复 artifact_id、重复 Manifest 路径、缺失正式文件或仓库内 passed Manifest 漏登均为错误。
 
 ## 历史产物兼容
 

@@ -2,6 +2,10 @@
 
 报告模式：纯需求
 
+Schema Version: 2.0.0
+
+Rule Version: 2.9.0
+
 ## 本次分析范围
 
 覆盖模拟交易和正式交易汇总卡片-清仓股弹窗的四类新行权限、原有权限保留、股票行与汇总行过滤、清仓/清后重建策略隔离、role_type 映射、条件组合和可用资金弹窗回归。不包含业务代码修改、真实页面执行、接口执行或数据库连接。
@@ -12,10 +16,10 @@
 
 ## 规则拆解
 
-- 权限配置：四类新权限、普通角色五种关系、指定用户两种关系、多用户追加回显。
-- 权限计算：role_type 映射、同批次多个角色条件、包含于/完全包含于、AND/OR。
-- 展示结果：模拟/正式股票行过滤、汇总统计过滤、策略段隔离。
-- 回归：原有权限保留，可用资金弹窗不受影响。
+- FACT-001、FACT-006：四类新权限、普通角色五种关系、指定用户两种关系和多用户追加。
+- FACT-002、FACT-003、FACT-008、FACT-009、FACT-010：role_type 映射、同批次多个角色条件、包含于/完全包含于、AND/OR。
+- FACT-004、FACT-005：模拟/正式股票行过滤、汇总统计过滤、策略段隔离。
+- FACT-001、FACT-007：原有权限保留，可用资金弹窗不受影响。
 
 ## 证据来源
 
@@ -27,40 +31,45 @@
 
 ## 风险点
 
-- P0：无权限数据泄露、正式交易过滤失效、汇总行口径不一致、策略串权、role_type 映射越权。
-- P1：配置保存回显、指定用户组件、原有权限兼容、可用资金回归、任一/全部及 AND/OR 逻辑。
+- RISK-001 / FACT-004（P0）：无权限数据泄露。
+- RISK-002 / FACT-004（P0）：正式交易过滤失效。
+- RISK-003 / FACT-004（P0）：汇总行口径不一致。
+- RISK-004 / FACT-005（P0）：策略串权。
+- RISK-005 / FACT-002、FACT-003、FACT-009（P0）：role_type 映射越权。
+- RISK-006 / FACT-001、FACT-006（P1）：指定用户及关系配置错误。
+- RISK-007 / FACT-001、FACT-007（P1）：原有权限或可用资金回归受损。
+- RISK-008 / FACT-008、FACT-010（P1）：任一/全部及 AND/OR 逻辑错误。
 
 ## 需求-Diff-测试点追踪矩阵
 
 | 需求点ID | 需求证据 | 风险ID | 测试点或TC |
 |---|---|---|---|
-| REQ002 | F004 | R001 | TC001 |
-| REQ002 | F004 | R002 | TC002 |
-| REQ004 | F005 | R004 | TC003 |
-| REQ004 | F005 | R004 | TC004 |
-| REQ003 | F004 | R003 | TC005 |
-| REQ003 | F004 | R003 | TC006 |
-| REQ005 | F002、F003、F009 | R005 | TC007 |
-| REQ001 | F001、F006 | R006 | TC008 |
-| REQ001 | F001、F006 | R006 | TC009 |
-| REQ007 | F001、F010 | R007 | TC010 |
-| REQ008 | F007 | R007 | TC011 |
-| REQ005 | F002、F003、F009 | R005 | TC012 |
-| REQ006 | F008 | R008 | TC013 |
-| REQ007 | F001、F010 | R008 | TC014 |
-| REQ007 | F001、F010 | R008 | TC015 |
+| REQ002 | FACT-004 | RISK-001 | TC001 |
+| REQ002 | FACT-004 | RISK-002 | TC002 |
+| REQ004 | FACT-005 | RISK-004 | TC003 |
+| REQ004 | FACT-005 | RISK-004 | TC004 |
+| REQ003 | FACT-004 | RISK-003 | TC005 |
+| REQ003 | FACT-004 | RISK-003 | TC006 |
+| REQ005 | FACT-002、FACT-003、FACT-009 | RISK-005 | TC007 |
+| REQ001 | FACT-001、FACT-006 | RISK-006 | TC008 |
+| REQ001 | FACT-001、FACT-006 | RISK-006 | TC009 |
+| REQ007 | FACT-001、FACT-010 | RISK-007 | TC010 |
+| REQ008 | FACT-007 | RISK-007 | TC011 |
+| REQ006 | FACT-008 | RISK-008 | TC012 |
+| REQ007 | FACT-001、FACT-010 | RISK-008 | TC013 |
+| REQ007 | FACT-001、FACT-010 | RISK-008 | TC014 |
 
 ## 测试点摘要
 
-    共 15 条用例，TC001-TC006 覆盖模拟/正式数据隔离与汇总统计，TC007/TC012/TC013/TC014/TC015 覆盖角色数据和权限逻辑，TC008-TC011 覆盖配置及回归。
+    共 14 条用例，TC001-TC006 覆盖模拟/正式数据隔离与汇总统计，TC007/TC012/TC013/TC014 覆盖角色数据和权限逻辑，TC008-TC011 覆盖配置及回归。
 
 ## P0 重点
 
-TC001、TC002、TC003、TC004、TC005、TC006、TC007、TC012。
+TC001、TC002、TC003、TC004、TC005、TC006、TC007。
 
 ## 回归范围
 
-核心回归：四类权限、股票行、汇总行、策略隔离、role_type。关联回归：配置回显、指定用户、原有权限和 AND/OR。冒烟回归：可用资金弹窗。
+核心回归：四类权限、股票行、汇总行、策略隔离、role_type。关联回归：指定用户多选、原有权限和 AND/OR。冒烟回归：可用资金弹窗。
 
 ## 历史知识命中
 
@@ -68,7 +77,7 @@ TC001、TC002、TC003、TC004、TC005、TC006、TC007、TC012。
 
 ## 数据影响分析
 
-涉及 `base_sub_account_stock_num_role` 的角色字段、有效标记、股票行过滤和汇总统计，需进行数据验证。当前仅有字段片段，无法确认完整查询链路。
+涉及 `base_sub_account_stock_num_role` 的角色字段、股票行过滤和汇总统计，需进行数据验证。当前字段片段只能证明 `enabled_flag` 字段存在，不能证明其过滤或统计行为，也无法确认完整查询链路。
 
 ## 数据验证结论
 
@@ -76,11 +85,11 @@ TC001、TC002、TC003、TC004、TC005、TC006、TC007、TC012。
 
 ## 指标口径
 
-汇总统计按用户确认的现有系统口径核对；本次不改变去重口径。具体统计字段和计算公式待从接口/SQL/验收文档补充。
+汇总统计按用户确认的现有系统口径核对。具体统计字段、计算公式和去重口径待从接口、SQL 或验收文档补充。
 
 ## 验证 SQL 计划
 
-计划生成只读 SQL，验证 role_type 取数、enabled_flag 过滤、权限命中集合与汇总集合一致性。当前不生成 SQLV，因为缺少真实表结构和查询字段证据。
+计划在证据补齐后生成只读 SQL，验证 role_type 取数、权限命中集合与汇总集合一致性。`enabled_flag` 目前仅作为字段存在性记录，不生成过滤行为断言。当前不生成 SQLV，因为缺少真实表结构和查询字段证据。
 
 ## 直接对数方案
 
@@ -96,4 +105,4 @@ TC001、TC002、TC003、TC004、TC005、TC006、TC007、TC012。
 
 ## 风险覆盖与路径
 
-Risk Coverage Matrix：`testcases/clearance-permission-20260718/risk-coverage-matrix.json`；Testcase Model：`testcases/clearance-permission-20260718/testcase-model.json`；XMind Markdown：`testcases/clearance-permission-20260718/clearance-permission.xmind.md`。
+Risk Coverage Matrix、Testcase Model 与 XMind Markdown 均位于本产物目录，正式相对路径由 Manifest 记录。

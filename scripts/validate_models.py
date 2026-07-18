@@ -11,6 +11,7 @@ from qa_contracts import (
     load_json, validate_diff_model, validate_model_links, validate_requirement_model,
     validate_risk_matrix, validate_testcase_model,
 )
+from validate_evidence import evidence_precision_warnings
 
 
 def _evidence_root(path: Path) -> Path:
@@ -45,6 +46,16 @@ def validate_files(requirement: Path | None, diff: Path | None, risk: Path, test
     return list(dict.fromkeys(errors))
 
 
+def validate_warnings(requirement: Path | None) -> list[str]:
+    if requirement is None:
+        return []
+    try:
+        data = load_json(requirement)
+    except (OSError, ValueError):
+        return []
+    return evidence_precision_warnings(data.get("facts", []), root=_evidence_root(requirement))
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="校验本次生成的 Requirement/Diff/Risk/Testcase 模型")
     parser.add_argument("--requirement", type=Path)
@@ -55,11 +66,14 @@ def main() -> int:
     if not args.requirement and not args.diff:
         parser.error("--requirement 与 --diff 至少提供一个")
     errors = validate_files(args.requirement, args.diff, args.risk, args.testcase)
+    warnings = validate_warnings(args.requirement)
     for error in errors:
         print(f"FAIL {error}", file=sys.stderr)
+    for warning in warnings:
+        print(f"WARNING {warning}", file=sys.stderr)
     if not errors:
         print("PASS actual structured models are valid")
-    print(f"SUMMARY passed={0 if errors else 1} warning=0 failed={len(errors)}")
+    print(f"SUMMARY passed={0 if errors else 1} warning={len(warnings)} failed={len(errors)}")
     return 1 if errors else 0
 
 

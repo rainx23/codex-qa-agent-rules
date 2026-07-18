@@ -15,6 +15,8 @@
 | `validate_*.py` | 静态校验门禁 | 是 |
 | `validate_models.py` | 校验本次实际生成模型、跨模型引用及可访问证据文件的哈希新鲜度 | 是 |
 | `validate_testcase_quality.py` | 校验 XMind Markdown，并按需编排和展示 Testcase Value Assessment 结果 | 是 |
+| `validate_testcase_index.py` | 校验 passed Manifest 在正式索引中的唯一登记与路径完整性 | 是 |
+| `verify_xmind.py` | 对照 Markdown 复验 Workbook 根节点、TC 数和节点总数 | 是 |
 
 ## 使用入口
 
@@ -23,6 +25,7 @@
 - 可选用法：`python scripts/validate_testcase_quality.py path/to/case_xmind.md --value-assessment path/to/testcase-value-assessment.json`。该 CLI 只负责编排和稳定展示；评分内核、路径/Hash 校验和持久化重算均位于 `qa_contracts.py`。
 - Testcase Value Assessment 的 warning 和 suggestion 在阶段一非阻塞；只有 Assessment error 使该命令返回非零退出码。未传参数时不搜索默认 Assessment。
 - XMind 校验拒绝 `...`/`……` 截断标记，并对未加括号的混合 `AND/OR` 输出 warning；不设置任何节点长度 error 或 warning。
+- 正式产物在更新索引后运行 `python scripts/validate_testcase_index.py testcases/index.md`；Workbook 使用 `python scripts/verify_xmind.py path/to/case.xmind --markdown path/to/case.xmind.md` 复验。
 - 外部工作区的 Manifest 仍从规则仓库读取 `RULE_VERSION`，但来源、证据和正式产物相对路径从 Manifest 所在工作区解析；绝对路径、`..` 和 resolve 后越界仍被拒绝。
 - integrated 业务仓库缺少 `rules-repository.json.sql_defaults.author` 时，`validate_repository_mode.py` 输出显式迁移错误；脚本不会自动修改业务配置。
 

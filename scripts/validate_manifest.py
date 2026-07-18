@@ -241,6 +241,11 @@ def validate_manifest_data(data: dict[str, Any], manifest_path: Path) -> list[st
         errors.append(f"sql_status 非法：{data.get('sql_status')}")
     if data.get("sql_status") in {"executed", "passed", "failed"} and not data.get("execution_evidence"):
         errors.append("没有用户执行结果时，sql_status 不得标记 executed/passed/failed")
+    if data.get("sql_status") == "blocked":
+        if data.get("validation_sql") is not None:
+            errors.append("sql_status=blocked 时 validation_sql 必须为 null")
+        if data.get("execution_evidence") is not None:
+            errors.append("sql_status=blocked 时 execution_evidence 必须为 null")
     if data.get("p0_count") != data.get("p0_case_count"):
         errors.append("兼容字段 p0_count 必须等于 p0_case_count")
     if not data.get("requirement_id") and not data.get("commit_range"):

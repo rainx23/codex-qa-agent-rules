@@ -58,6 +58,7 @@
 - 默认不修改 SQL、Java、Groovy、前端、接口或其他业务实现。
 - 不代替产品、业务和开发进行最终需求确认。
 - 不在证据不足时虚构接口、字段、页面、权限、SQL 或业务预期。
+- Evidence 必须精确落到支撑结论的行号；Acceptance/Risk/TC 沿关联 Fact 派生，字段存在不能替代业务行为证据。
 - 不自动执行页面、接口、性能或压测任务。
 - 不等同于 Playwright、Selenium、JMeter 等自动化执行框架。
 - 不保证仅凭截图即可还原完整业务规则。
@@ -291,6 +292,8 @@ flowchart TD
 
 XMind 节点采用无损语义精简：可删除父节点已表达的背景和说明性套话，并在无歧义时使用 `=`、`≠`、`∈`、`AND`、`OR`、`→`、集合和括号。规则不设置固定字符上限，不因文本较长报错或告警，也不允许截断、省略业务对象、条件、操作或可观察预期；混合 `AND/OR` 时必须用括号明确优先级。
 
+Manifest 的 `validation_status` 与 `sql_status` 独立：测试设计全链完成而 SQL 因 DDL/环境不足被阻塞时使用 `passed + blocked`。passed Manifest 更新索引后必须由 `validate_testcase_index.py` 校验唯一登记和正式路径完整性。
+
 ## 历史业务知识与数据验证
 
 需求、Diff、用例和验证 SQL 生成前，`qa-knowledge-management` 会按业务域、表、字段、逻辑、指标和需求 ID 检索命中的 active 知识。公共规则仓库只提供脱敏的 [`qa-knowledge/examples`](qa-knowledge/examples)；集成项目把真实知识放在项目自己的 `qa-knowledge/`，不会把全部历史文件一次性加载。
@@ -311,7 +314,7 @@ python scripts/build_knowledge_index.py qa-knowledge/examples --check
 python scripts/search_knowledge.py qa-knowledge/examples --table demo.orders
 python scripts/validate_data_validation.py path/to/data-validation-model.json
 python scripts/validate_sql_style.py path/to/validation_sql.sql --strict
-python scripts/validate_sql_artifact.py path/to/validation-sql-manifest.json
+python scripts/validate_sql_artifact.py --artifact path/to/validation-sql-manifest.json --requirement path/to/requirement-analysis.json --risk path/to/risk-coverage-matrix.json --testcase path/to/testcase-model.json --knowledge path/to/qa-knowledge
 ```
 
 ## 测试产物
@@ -414,6 +417,7 @@ python scripts/validate_manifest.py path/to/manifest.json
 
 ```bash
 python scripts/build_testcase_index.py testcases/index.md path/to/manifest.json
+python scripts/validate_testcase_index.py testcases/index.md
 ```
 
 输入是目标索引和已通过校验的 Manifest；成功后原子写入一条唯一 `artifact_id` 记录；无效 Manifest 会阻止更新。

@@ -172,6 +172,18 @@ class ArtifactGovernanceTests(unittest.TestCase):
         manifest, _ = self.make_passed_manifest()
         self.assertEqual([], validate_manifest_file(manifest)[1])
 
+    def test_passed_artifacts_allow_sql_blocked_as_an_independent_state(self):
+        manifest, data = self.make_passed_manifest()
+        data.update(sql_status="blocked", validation_sql=None, execution_evidence=None)
+        self.assertEqual([], self.errors_for(manifest, data))
+
+    def test_sql_blocked_rejects_fake_sql_or_execution_evidence(self):
+        manifest, data = self.make_passed_manifest()
+        data.update(sql_status="blocked", validation_sql="validation.sql", execution_evidence="not-run")
+        errors = self.errors_for(manifest, data)
+        self.assertTrue(any("validation_sql 必须为 null" in error for error in errors))
+        self.assertTrue(any("execution_evidence 必须为 null" in error for error in errors))
+
     def test_source_hash_format_can_pass_while_content_mismatch_fails(self):
         manifest, data = self.make_passed_manifest()
         data["source_hash"] = "sha256:" + "1" * 64

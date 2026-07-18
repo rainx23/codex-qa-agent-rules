@@ -33,6 +33,19 @@ HASH_PATTERN = r"^sha256:[0-9a-fA-F]{64}$"
 COMMIT_SHA_PATTERN = r"^[0-9a-fA-F]{7,40}$"
 BINARY_SUFFIXES = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".pdf", ".xmind"}
 INFERENCE_TOKENS = ("推断", "推测", "可能", "应该", "因此", "证明")
+EVIDENCE_IDENTITY_FIELDS = (
+    "source_path", "snapshot_path", "source_record_id", "line_start", "line_end", "content_hash", "excerpt",
+)
+
+
+def normalize_evidence_text(value: str) -> str:
+    """Normalize line endings and whitespace without changing content order."""
+
+    return re.sub(r"\s+", " ", value.replace("\r\n", "\n").replace("\r", "\n")).strip()
+
+
+def evidence_reference_identity(evidence: dict[str, Any]) -> tuple[Any, ...]:
+    return tuple(evidence.get(field) for field in EVIDENCE_IDENTITY_FIELDS)
 
 
 def _is_absolute_evidence_path(value: str) -> bool:
@@ -177,8 +190,11 @@ def validate_evidence_reference(
                 lines = text.splitlines()
                 if end > len(lines):
                     errors.append(f"Evidence line_end 超出文件范围：{end}/{len(lines)}")
-                elif evidence.get("excerpt") not in "\n".join(lines[start - 1:end]):
-                    errors.append("Evidence excerpt 不在指定行号范围")
+                else:
+                    selected = normalize_evidence_text("\n".join(lines[start - 1:end]))
+                    excerpt = normalize_evidence_text(str(evidence.get("excerpt", "")))
+                    if not excerpt or excerpt not in selected:
+                        errors.append("EVIDENCE_EXCERPT_OUTSIDE_RANGE: Evidence excerpt 不在指定行号范围")
         elif start is not None or end is not None:
             if not isinstance(start, int) or not isinstance(end, int) or start < 1 or end < start:
                 errors.append("二进制 Evidence 行号必须同时为 null 或合法范围")
@@ -215,5 +231,36 @@ def validate_evidence_references(
         if isinstance(evidence, dict) and evidence.get("evidence_status") == "current" and not item_errors:
             authentic_current = True
     if confirmed and not authentic_current:
-        errors.append(f"{label} confirmed 结论至少需要一条真实且 current 的 Evidence")
+        code = "CONFIRMED_FACT_WITHOUT_CURRENT_EVIDENCE" if label.startswith("事实 ") else "CONFIRMED_EVIDENCE_REQUIRED"
+        errors.append(f"{code}: {label} confirmed 结论至少需要一条真实且 current 的 Evidence")
     return list(dict.fromkeys(errors))
+
+
+def evidence_precision_warnings(facts: Any, *, root: Path) -> list[str]:
+    """Detect the mechanical 'every fact cites the same first line' pattern."""
+
+    confirmed = [item for item in facts if isinstance(item, dict) and item.get("category") == "confirmed"] if isinstance(facts, list) else []
+    if len(confirmed) < 3:
+        return []
+    references = [item.get("evidence_references") for item in confirmed]
+    if any(not isinstance(items, list) or len(items) != 1 or not isinstance(items[0], dict) for items in references):
+        return []
+    evidence_items = [items[0] for items in references]
+    if len({evidence_reference_identity(item) for item in evidence_items}) != 1:
+        return []
+    evidence = evidence_items[0]
+    if evidence.get("line_start") != evidence.get("line_end"):
+        return []
+    path_value = evidence.get("source_path") or evidence.get("snapshot_path")
+    resolved, errors = _resolve_evidence_path(path_value, root=root, label="evidence_path")
+    if errors or resolved is None or resolved.suffix.lower() in BINARY_SUFFIXES:
+        return []
+    try:
+        effective_lines = [line for line in resolved.read_text(encoding="utf-8-sig").splitlines() if line.strip()]
+    except (OSError, UnicodeDecodeError):
+        return []
+    if len(effective_lines) <= 1:
+        return []
+    return [
+        "EVIDENCE_REFERENCE_OVERCONCENTRATED: 三条及以上 confirmed Fact 机械复用同一单行 Evidence，请复核真实行号与 excerpt"
+    ]

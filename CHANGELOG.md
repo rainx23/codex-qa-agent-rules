@@ -12,6 +12,22 @@
 
 ### Fixed
 
+## [2.9.0] - 2026-07-18
+
+### Added
+
+- 新增证据精确定位、Acceptance/Risk 派生证据、confirmed 链路和字段结构不能推导业务行为的通用校验与回归测试。
+- 新增 `validate_testcase_index.py` 和 `verify_xmind.py` 正式入口，校验 passed Manifest 唯一登记及 XMind 无损转换。
+
+### Changed
+
+- 规则版本从 2.8.0 升级到 2.9.0；Manifest 的测试设计状态与 SQL 状态正式分离，允许完整产物使用 `passed + sql_status=blocked`。
+- XMind 模糊断言扩展到“按已确认规则处理”等占位表达，并继续保持无硬长度门禁、无损语义精简和混合逻辑括号规则。
+
+### Fixed
+
+- 修复机械复用首行证据、无关 Risk/Acceptance 证据、字段存在越权扩写行为用例，以及 passed Manifest 漏登或重复登记仍可完成的问题。
+
 ## [2.8.0] - 2026-07-18
 
 ### Added

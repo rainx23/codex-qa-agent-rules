@@ -13,6 +13,7 @@ from typing import Any, Callable
 from file_hash_utils import stable_file_content_hash
 from validate_evidence import (
     _resolve_evidence_path,
+    evidence_reference_identity,
     validate_evidence_references as validate_authentic_evidence_references,
 )
 
@@ -126,6 +127,12 @@ VAGUE_ASSERTIONS = (
     "没有未处理异常即可",
     "data correctness", "result correctness", "function works", "meets requirement", "meets expectation",
     "no issue", "no problem", "no exception", "business handling is correct",
+    "按已确认规则处理", "按系统现有逻辑处理", "按规则处理", "处理成功", "展示正确",
+)
+STRUCTURE_ONLY_EVIDENCE_MARKERS = ("字段片段", "字段存在", "字段清单", "包含字段", "字段定义")
+BUSINESS_BEHAVIOR_MARKERS = (
+    "不参与", "排除", "过滤", "自动去重", "去重", "删除", "保存", "继承", "追加",
+    "生效", "失效", "拒绝", "允许", "展示", "统计", "计算", "排序", "回退",
 )
 DATA_VALIDATION_REQUIREMENTS = ("required", "optional", "not_required", "blocked")
 VALIDATION_METHODS = ("sql", "cross_source_reconciliation", "mixed", "not_applicable", "blocked")
@@ -867,6 +874,20 @@ def validate_requirement_model(data: dict[str, Any], *, evidence_root: Path | No
             errors.append(f"缺失事实 {fact_id} 必须说明 handling")
         evidence_references = fact.get("evidence_references")
         errors.extend(_validate_evidence_references(evidence_references, f"事实 {fact_id}", category == "confirmed", evidence_root=evidence_root))
+        statement = str(fact.get("statement", ""))
+        behavior_tokens = [token for token in BUSINESS_BEHAVIOR_MARKERS if token in statement]
+        excerpts = [
+            str(evidence.get("excerpt", "")) for evidence in evidence_references or []
+            if isinstance(evidence, dict) and evidence.get("evidence_status") == "current"
+        ]
+        if category == "confirmed" and behavior_tokens and excerpts and all(
+            any(marker in excerpt for marker in STRUCTURE_ONLY_EVIDENCE_MARKERS)
+            and not any(token in excerpt for token in behavior_tokens)
+            for excerpt in excerpts
+        ):
+            errors.append(
+                f"STRUCTURE_EVIDENCE_CANNOT_CONFIRM_BEHAVIOR: 事实 {fact_id} 仅有字段结构证据，不能确认业务行为"
+            )
         if isinstance(evidence_references, list) and not any(
             isinstance(evidence, dict) and evidence.get("source_type") == fact.get("source_type")
             for evidence in evidence_references
@@ -923,7 +944,22 @@ def validate_requirement_model(data: dict[str, Any], *, evidence_root: Path | No
                 errors.append(f"验收标准引用不存在事实：{fact_id}")
             elif categories.get(fact_id) != "confirmed":
                 errors.append(f"非确定事实 {fact_id} 不得进入确定性验收标准")
-        errors.extend(_validate_evidence_references(criterion.get("evidence_references"), f"验收标准 {criterion.get('criterion_id')}", True, evidence_root=evidence_root))
+        criterion_evidence = criterion.get("evidence_references")
+        errors.extend(_validate_evidence_references(criterion_evidence, f"验收标准 {criterion.get('criterion_id')}", True, evidence_root=evidence_root))
+        linked_evidence = {
+            evidence_reference_identity(evidence)
+            for fact_id in linked
+            for evidence in facts_by_id.get(fact_id, {}).get("evidence_references", [])
+            if isinstance(evidence, dict)
+        }
+        unrelated = {
+            evidence_reference_identity(evidence)
+            for evidence in criterion_evidence or [] if isinstance(evidence, dict)
+        } - linked_evidence
+        if unrelated:
+            errors.append(
+                f"ACCEPTANCE_EVIDENCE_NOT_DERIVED_FROM_FACT: 验收标准 {criterion.get('criterion_id')} 的证据未派生自关联 Fact"
+            )
     return list(dict.fromkeys(errors))
 
 
@@ -1458,16 +1494,18 @@ def validate_model_links(
     """Validate IDs and reverse mappings across all structured handoff models."""
 
     errors: list[str] = []
-    requirement_ids = {
-        item.get("criterion_id") for item in (requirement or {}).get("acceptance_criteria", [])
+    criteria_by_id = {
+        item.get("criterion_id"): item for item in (requirement or {}).get("acceptance_criteria", [])
     }
+    requirement_ids = set(criteria_by_id)
     change_ids = {item.get("change_id") for item in (diff or {}).get("change_items", [])}
     confirmed_fact_ids = {item.get("fact_id") for item in (requirement or {}).get("facts", []) if item.get("category") == "confirmed"}
     risks = {item.get("risk_id"): item for item in risk_matrix.get("risk_items", [])}
     diff_risks = {item.get("risk_id"): item for item in (diff or {}).get("risks", [])}
     defect_ids = {item.get("defect_id") for item in (diff or {}).get("suspected_defects", [])}
     cases = {item.get("tc_id"): item for item in testcase_model.get("cases", [])}
-    facts = {item.get("fact_id") for item in (requirement or {}).get("facts", [])}
+    facts_by_id = {item.get("fact_id"): item for item in (requirement or {}).get("facts", [])}
+    facts = set(facts_by_id)
     confirmations = {item.get("confirmation_id"): item for item in (requirement or {}).get("confirmation_points", [])}
     for risk_id in set(risks) & set(diff_risks):
         left, right = risks[risk_id], diff_risks[risk_id]
@@ -1501,6 +1539,36 @@ def validate_model_links(
             errors.append(f"Risk {risk_id} 必须至少引用一个真实 Fact 或 Change")
         if requirement is not None and fact_ids - facts:
             errors.append(f"Risk {risk_id} 引用不存在的 Fact：{sorted(fact_ids - facts)}")
+        if requirement is not None:
+            linked_evidence = {
+                evidence_reference_identity(evidence)
+                for fact_id in fact_ids
+                for evidence in facts_by_id.get(fact_id, {}).get("evidence_references", [])
+                if isinstance(evidence, dict)
+            }
+            linked_evidence.update(
+                evidence_reference_identity(evidence)
+                for criterion_id in risk.get("requirement_ids", [])
+                for evidence in criteria_by_id.get(criterion_id, {}).get("evidence_references", [])
+                if isinstance(evidence, dict)
+            )
+            risk_evidence = {
+                evidence_reference_identity(evidence)
+                for evidence in risk.get("evidence_references", []) if isinstance(evidence, dict)
+            }
+            if risk_evidence - linked_evidence:
+                errors.append(
+                    f"EVIDENCE_REFERENCE_NOT_DERIVED_FROM_LINKED_FACT: Risk {risk_id} 的证据未派生自关联 Fact/Acceptance Criteria"
+                )
+            if risk.get("evidence_state") == "已确认" and any(
+                facts_by_id.get(fact_id, {}).get("category") != "confirmed"
+                or not any(
+                    isinstance(evidence, dict) and evidence.get("evidence_status") == "current"
+                    for evidence in facts_by_id.get(fact_id, {}).get("evidence_references", [])
+                )
+                for fact_id in fact_ids
+            ):
+                errors.append(f"CONFIRMED_RISK_WITH_UNCONFIRMED_FACT: Risk {risk_id} 引用了未确认或无 current 证据的 Fact")
         disposition = risk.get("disposition_status")
         if disposition == "blocked":
             blocked_ids = set(risk.get("blocked_by_confirmation_ids") or risk.get("confirmation_ids", []))
@@ -1539,6 +1607,25 @@ def validate_model_links(
             unknown = set(case.get("requirement_ids", [])) - requirement_ids
             if unknown:
                 errors.append(f"{tc_id} 引用不存在需求点：{sorted(unknown)}")
+        if case.get("evidence_state") == "已确认":
+            linked_risks = [risks[risk_id] for risk_id in case.get("risk_ids", []) if risk_id in risks]
+            linked_criteria = [
+                criteria_by_id[criterion_id]
+                for criterion_id in case.get("requirement_ids", []) if criterion_id in criteria_by_id
+            ]
+            has_unconfirmed_link = any(risk.get("evidence_state") != "已确认" for risk in linked_risks)
+            for criterion in linked_criteria:
+                for fact_id in criterion.get("fact_ids", []):
+                    fact = facts_by_id.get(fact_id, {})
+                    if fact.get("category") != "confirmed" or not any(
+                        isinstance(evidence, dict) and evidence.get("evidence_status") == "current"
+                        for evidence in fact.get("evidence_references", [])
+                    ):
+                        has_unconfirmed_link = True
+            if has_unconfirmed_link:
+                errors.append(
+                    f"CONFIRMED_TESTCASE_WITH_UNCONFIRMED_LINK: {tc_id} 已确认，但关联 Risk/Fact 仍未确认"
+                )
         if diff is not None:
             unknown = set(case.get("change_ids", [])) - change_ids
             if unknown:

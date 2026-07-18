@@ -20,7 +20,7 @@
         "列表仅展示权限命中的股票；无权数据不出现在列表、分页结果和刷新结果中"
       ],
       "risk_ids": [
-        "RISK-001"
+        "R001"
       ],
       "requirement_ids": [
         "REQ002"
@@ -30,7 +30,7 @@
       "test_priority": "P0",
       "evidence_state": "已确认",
       "regression_scope": "核心回归",
-      "deduplication_key": "模拟交易清仓股弹窗|无权限股票行过滤|RISK-001"
+      "deduplication_key": "模拟交易清仓股弹窗|无权限股票行过滤|R001"
     },
     {
       "tc_id": "TC002",
@@ -46,7 +46,7 @@
         "列表仅展示权限命中的股票；无权数据不出现在列表、分页结果和刷新结果中"
       ],
       "risk_ids": [
-        "RISK-002"
+        "R002"
       ],
       "requirement_ids": [
         "REQ002"
@@ -56,7 +56,7 @@
       "test_priority": "P0",
       "evidence_state": "已确认",
       "regression_scope": "核心回归",
-      "deduplication_key": "正式交易清仓股弹窗|无权限股票行过滤|RISK-002"
+      "deduplication_key": "正式交易清仓股弹窗|无权限股票行过滤|R002"
     },
     {
       "tc_id": "TC003",
@@ -72,7 +72,7 @@
         "A可见清仓策略段且不可见清后重建策略段；策略段权限判断相互独立"
       ],
       "risk_ids": [
-        "RISK-004"
+        "R004"
       ],
       "requirement_ids": [
         "REQ004"
@@ -82,7 +82,7 @@
       "test_priority": "P0",
       "evidence_state": "已确认",
       "regression_scope": "核心回归",
-      "deduplication_key": "模拟交易清仓股弹窗|模拟交易策略段权限隔离|RISK-004"
+      "deduplication_key": "模拟交易清仓股弹窗|模拟交易策略段权限隔离|R004"
     },
     {
       "tc_id": "TC004",
@@ -98,7 +98,7 @@
         "A可见清仓策略段且不可见清后重建策略段；策略段权限判断相互独立"
       ],
       "risk_ids": [
-        "RISK-004"
+        "R004"
       ],
       "requirement_ids": [
         "REQ004"
@@ -108,7 +108,7 @@
       "test_priority": "P0",
       "evidence_state": "已确认",
       "regression_scope": "核心回归",
-      "deduplication_key": "正式交易清仓股弹窗|正式交易策略段权限隔离|RISK-004"
+      "deduplication_key": "正式交易清仓股弹窗|正式交易策略段权限隔离|R004"
     },
     {
       "tc_id": "TC005",
@@ -124,7 +124,7 @@
         "汇总行只统计可见股票行；各统计项与可见行按现有统计口径一致"
       ],
       "risk_ids": [
-        "RISK-003"
+        "R003"
       ],
       "requirement_ids": [
         "REQ003"
@@ -134,7 +134,7 @@
       "test_priority": "P0",
       "evidence_state": "已确认",
       "regression_scope": "核心回归",
-      "deduplication_key": "模拟交易清仓股弹窗|模拟交易股票行与汇总行权限口径|RISK-003"
+      "deduplication_key": "模拟交易清仓股弹窗|模拟交易股票行与汇总行权限口径|R003"
     },
     {
       "tc_id": "TC006",
@@ -150,7 +150,7 @@
         "汇总行只统计可见股票行；各统计项与可见行按现有统计口径一致"
       ],
       "risk_ids": [
-        "RISK-003"
+        "R003"
       ],
       "requirement_ids": [
         "REQ003"
@@ -160,7 +160,7 @@
       "test_priority": "P0",
       "evidence_state": "已确认",
       "regression_scope": "核心回归",
-      "deduplication_key": "正式交易清仓股弹窗|正式交易股票行与汇总行权限口径|RISK-003"
+      "deduplication_key": "正式交易清仓股弹窗|正式交易股票行与汇总行权限口径|R003"
     },
     {
       "tc_id": "TC007",
@@ -176,7 +176,7 @@
         "建仓人权限只匹配 10/20；跟进人权限只匹配 30；同批次多个 role_type 按配置条件判断，不发生跨角色越权"
       ],
       "risk_ids": [
-        "RISK-005"
+        "R005"
       ],
       "requirement_ids": [
         "REQ005"
@@ -186,7 +186,7 @@
       "test_priority": "P0",
       "evidence_state": "已确认",
       "regression_scope": "核心回归",
-      "deduplication_key": "清仓股弹窗|role_type 映射|RISK-005"
+      "deduplication_key": "清仓股弹窗|role_type 映射|R005"
     },
     {
       "tc_id": "TC008",
@@ -202,7 +202,7 @@
         "存在四类新权限；普通建仓人/跟进人支持等于、不等于、包含于、不包含、完全包含于；指定用户支持包含于、不包含"
       ],
       "risk_ids": [
-        "RISK-006"
+        "R006"
       ],
       "requirement_ids": [
         "REQ001"
@@ -212,7 +212,7 @@
       "test_priority": "P1",
       "evidence_state": "已确认",
       "regression_scope": "关联回归",
-      "deduplication_key": "清仓股弹窗权限配置|四类权限和关系条件配置|RISK-006"
+      "deduplication_key": "清仓股弹窗权限配置|四类权限和关系条件配置|R006"
     },
     {
       "tc_id": "TC009",
@@ -220,15 +220,15 @@
       "common_entry": "汇总卡片弹窗",
       "module_level_1": null,
       "module_level_2": null,
-      "test_point": "指定用户多选追加",
+      "test_point": "指定用户追加和回显",
       "steps": [
-        "选择建仓人（指定用户）或跟进人（指定用户），依次追加多个用户"
+        "选择建仓人（指定用户）或跟进人（指定用户）；追加多个用户并保存，重新进入配置后删除一个用户"
       ],
       "expected_results": [
-        "已选用户列表包含本次追加的多个用户"
+        "保存后回显全部已选用户；删除后仅剩余用户参与匹配；重复选择按已确认交互规则处理"
       ],
       "risk_ids": [
-        "RISK-006"
+        "R006"
       ],
       "requirement_ids": [
         "REQ001"
@@ -238,7 +238,7 @@
       "test_priority": "P1",
       "evidence_state": "已确认",
       "regression_scope": "关联回归",
-      "deduplication_key": "汇总卡片弹窗|指定用户权限|多用户追加|选择|已选列表包含追加用户|RISK-006"
+      "deduplication_key": "清仓股弹窗权限配置|指定用户追加和回显|R006"
     },
     {
       "tc_id": "TC010",
@@ -254,7 +254,7 @@
         "原权限仍可用；新增权限不覆盖原有可见数据"
       ],
       "risk_ids": [
-        "RISK-007"
+        "R007"
       ],
       "requirement_ids": [
         "REQ007"
@@ -264,7 +264,7 @@
       "test_priority": "P1",
       "evidence_state": "已确认",
       "regression_scope": "关联回归",
-      "deduplication_key": "模拟交易清仓股弹窗|原有权限保留|RISK-007"
+      "deduplication_key": "模拟交易清仓股弹窗|原有权限保留|R007"
     },
     {
       "tc_id": "TC011",
@@ -280,7 +280,7 @@
         "可用资金弹窗的数据和统计未发生本需求之外的变化"
       ],
       "risk_ids": [
-        "RISK-007"
+        "R007"
       ],
       "requirement_ids": [
         "REQ008"
@@ -290,10 +290,36 @@
       "test_priority": "P1",
       "evidence_state": "已确认",
       "regression_scope": "关联回归",
-      "deduplication_key": "可用资金弹窗|可用资金弹窗不受影响|RISK-007"
+      "deduplication_key": "可用资金弹窗|可用资金弹窗不受影响|R007"
     },
     {
       "tc_id": "TC012",
+      "dimension": "权限测试",
+      "common_entry": "汇总卡片弹窗",
+      "module_level_1": null,
+      "module_level_2": null,
+      "test_point": "无效角色记录处理",
+      "steps": [
+        "准备同一股票存在有效和无效角色记录，且无效记录单独命中当前用户；打开清仓股弹窗并对照有效记录权限结果"
+      ],
+      "expected_results": [
+        "权限结果按已确认的 enabled_flag 业务口径处理；无效记录不得单独使股票行或汇总行可见"
+      ],
+      "risk_ids": [
+        "R005"
+      ],
+      "requirement_ids": [
+        "REQ005"
+      ],
+      "change_ids": [],
+      "historical_defect_ids": [],
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "关联回归",
+      "deduplication_key": "清仓股弹窗|无效角色记录处理|R005"
+    },
+    {
+      "tc_id": "TC013",
       "dimension": "权限测试",
       "common_entry": "汇总卡片弹窗",
       "module_level_1": null,
@@ -306,7 +332,7 @@
         "包含于：任一角色数据满足条件时股票行可见；完全包含于：两个角色数据全部满足时可见，仅一个满足时不可见"
       ],
       "risk_ids": [
-        "RISK-008"
+        "R008"
       ],
       "requirement_ids": [
         "REQ006"
@@ -316,10 +342,10 @@
       "test_priority": "P1",
       "evidence_state": "已确认",
       "regression_scope": "关联回归",
-      "deduplication_key": "清仓股弹窗|包含于和完全包含于命中范围|RISK-008"
+      "deduplication_key": "清仓股弹窗|包含于和完全包含于命中范围|R008"
     },
     {
-      "tc_id": "TC013",
+      "tc_id": "TC014",
       "dimension": "权限测试",
       "common_entry": "汇总卡片弹窗",
       "module_level_1": null,
@@ -332,7 +358,7 @@
         "仅同时满足全部 AND 条件的数据可见；原有权限按配置规则参与判断"
       ],
       "risk_ids": [
-        "RISK-008"
+        "R008"
       ],
       "requirement_ids": [
         "REQ007"
@@ -342,10 +368,10 @@
       "test_priority": "P1",
       "evidence_state": "已确认",
       "regression_scope": "关联回归",
-      "deduplication_key": "清仓股弹窗|多条件 AND 组合|RISK-008"
+      "deduplication_key": "清仓股弹窗|多条件 AND 组合|R008"
     },
     {
-      "tc_id": "TC014",
+      "tc_id": "TC015",
       "dimension": "权限测试",
       "common_entry": "汇总卡片弹窗",
       "module_level_1": null,
@@ -358,7 +384,7 @@
         "满足任一 OR 条件的数据可见；完全不满足条件的数据不可见；原有权限按配置规则参与判断"
       ],
       "risk_ids": [
-        "RISK-008"
+        "R008"
       ],
       "requirement_ids": [
         "REQ007"
@@ -368,7 +394,7 @@
       "test_priority": "P1",
       "evidence_state": "已确认",
       "regression_scope": "关联回归",
-      "deduplication_key": "清仓股弹窗|多条件 OR 组合|RISK-008"
+      "deduplication_key": "清仓股弹窗|多条件 OR 组合|R008"
     }
   ]
 }

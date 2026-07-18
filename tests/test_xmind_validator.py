@@ -51,6 +51,12 @@ class XMindValidatorTests(unittest.TestCase):
     def test_10_fuzzy_expectation(self):
         self.assert_invalid(VALID.replace("返回集合仅包含该客户编号对应记录", "返回结果正确"), "模糊断言")
 
+    def test_confirmed_rule_placeholder_is_a_fuzzy_expectation(self):
+        self.assert_invalid(
+            VALID.replace("返回集合仅包含该客户编号对应记录", "按已确认规则处理"),
+            "模糊断言",
+        )
+
     def test_11_semantic_duplicate_fields(self):
         text = """- 字段校验
     - 功能测试
