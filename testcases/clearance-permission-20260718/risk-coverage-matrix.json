@@ -54,7 +54,7 @@
           "commit_sha": null,
           "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
           "excerpt": "用户仅看到被配置的数据，列表股票行和汇总行统计均按权限过滤；清仓策略和清后重建策略分别控权。",
-          "captured_at": "2026-07-18 00:00:00",
+          "captured_at": "2026-07-18 16:32:18",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current",
           "storage_type": "snapshot"
@@ -110,7 +110,7 @@
           "commit_sha": null,
           "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
           "excerpt": "用户仅看到被配置的数据，列表股票行和汇总行统计均按权限过滤；清仓策略和清后重建策略分别控权。",
-          "captured_at": "2026-07-18 00:00:00",
+          "captured_at": "2026-07-18 16:32:18",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current",
           "storage_type": "snapshot"
@@ -167,7 +167,7 @@
           "commit_sha": null,
           "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
           "excerpt": "用户仅看到被配置的数据，列表股票行和汇总行统计均按权限过滤；清仓策略和清后重建策略分别控权。",
-          "captured_at": "2026-07-18 00:00:00",
+          "captured_at": "2026-07-18 16:32:18",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current",
           "storage_type": "snapshot"
@@ -224,7 +224,7 @@
           "commit_sha": null,
           "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
           "excerpt": "用户仅看到被配置的数据，列表股票行和汇总行统计均按权限过滤；清仓策略和清后重建策略分别控权。",
-          "captured_at": "2026-07-18 00:00:00",
+          "captured_at": "2026-07-18 16:32:18",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current",
           "storage_type": "snapshot"
@@ -282,7 +282,7 @@
           "commit_sha": null,
           "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
           "excerpt": "建仓人取 role_type=10-建仓、20-加仓；跟进人取 role_type=30-跟进人。",
-          "captured_at": "2026-07-18 00:00:00",
+          "captured_at": "2026-07-18 16:32:18",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current",
           "storage_type": "snapshot"
@@ -297,7 +297,7 @@
           "commit_sha": null,
           "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
           "excerpt": "确认：包含于表示多个数据任一满足；完全包含于表示多个数据全部满足。一个批次存在多个 role_type 时按配置的权限条件判断。",
-          "captured_at": "2026-07-18 00:00:00",
+          "captured_at": "2026-07-18 16:32:18",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current",
           "storage_type": "snapshot"
@@ -355,7 +355,7 @@
           "commit_sha": null,
           "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
           "excerpt": "模拟交易+正式交易列表弹窗权限配置：新增跟进人、跟进人（指定用户）、建仓人、建仓人（指定用户）",
-          "captured_at": "2026-07-18 00:00:00",
+          "captured_at": "2026-07-18 16:32:18",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current",
           "storage_type": "snapshot"
@@ -370,7 +370,7 @@
           "commit_sha": null,
           "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
           "excerpt": "确认：汇总统计口径不影响本次验收；可以配置多个条件并使用 OR、AND 连接，原有权限保留。",
-          "captured_at": "2026-07-18 00:00:00",
+          "captured_at": "2026-07-18 16:32:18",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current",
           "storage_type": "snapshot"
@@ -385,7 +385,7 @@
           "commit_sha": null,
           "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
           "excerpt": "建仓人和跟进人支持等于、不等于、包含于、不包含、完全包含于；指定用户支持包含于、不包含，可追加多个用户。",
-          "captured_at": "2026-07-18 00:00:00",
+          "captured_at": "2026-07-18 16:32:18",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current",
           "storage_type": "snapshot"
@@ -444,7 +444,7 @@
           "commit_sha": null,
           "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
           "excerpt": "模拟交易+正式交易列表弹窗权限配置：新增跟进人、跟进人（指定用户）、建仓人、建仓人（指定用户）",
-          "captured_at": "2026-07-18 00:00:00",
+          "captured_at": "2026-07-18 16:32:18",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current",
           "storage_type": "snapshot"
@@ -459,7 +459,7 @@
           "commit_sha": null,
           "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
           "excerpt": "确认：汇总统计口径不影响本次验收；可以配置多个条件并使用 OR、AND 连接，原有权限保留。",
-          "captured_at": "2026-07-18 00:00:00",
+          "captured_at": "2026-07-18 16:32:18",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current",
           "storage_type": "snapshot"
@@ -474,7 +474,7 @@
           "commit_sha": null,
           "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
           "excerpt": "位置：汇总卡片-清仓股弹窗。可用资金弹窗不受影响。",
-          "captured_at": "2026-07-18 00:00:00",
+          "captured_at": "2026-07-18 16:32:18",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current",
           "storage_type": "snapshot"
@@ -534,7 +534,7 @@
           "commit_sha": null,
           "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
           "excerpt": "确认：包含于表示多个数据任一满足；完全包含于表示多个数据全部满足。一个批次存在多个 role_type 时按配置的权限条件判断。",
-          "captured_at": "2026-07-18 00:00:00",
+          "captured_at": "2026-07-18 16:32:18",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current",
           "storage_type": "snapshot"
@@ -549,7 +549,7 @@
           "commit_sha": null,
           "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
           "excerpt": "确认：汇总统计口径不影响本次验收；可以配置多个条件并使用 OR、AND 连接，原有权限保留。",
-          "captured_at": "2026-07-18 00:00:00",
+          "captured_at": "2026-07-18 16:32:18",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current",
           "storage_type": "snapshot"
@@ -564,7 +564,7 @@
           "commit_sha": null,
           "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
           "excerpt": "模拟交易+正式交易列表弹窗权限配置：新增跟进人、跟进人（指定用户）、建仓人、建仓人（指定用户）",
-          "captured_at": "2026-07-18 00:00:00",
+          "captured_at": "2026-07-18 16:32:18",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current",
           "storage_type": "snapshot"

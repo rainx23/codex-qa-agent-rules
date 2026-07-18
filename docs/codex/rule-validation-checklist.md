@@ -72,6 +72,9 @@
 - [ ] 历史缺陷保护规则有效。
 - [ ] 疑似重复不会自动删除。
 - [ ] 未提供 Assessment 时现有流程不失败。
+- [ ] Assessment 评分前已校验 Requirement、Risk、Testcase 三个引用模型及跨模型链接。
+- [ ] `insufficient_inputs` 仅输出输入不足原因，不输出低价值、简化、重复或拆分建议。
+- [ ] 合法示例至少包含一条 `score_status=computed` 且持久化结果与重算一致。
 - [ ] warning 和 suggestion 不影响退出码。
 - [ ] Python 3.10 和 3.12 结果一致。
 - [ ] `assessments` 输出顺序稳定。

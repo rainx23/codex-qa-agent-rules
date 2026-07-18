@@ -172,6 +172,19 @@ class ArtifactGovernanceTests(unittest.TestCase):
         manifest, _ = self.make_passed_manifest()
         self.assertEqual([], validate_manifest_file(manifest)[1])
 
+    def test_real_passed_manifest_source_hash_survives_text_line_endings_and_bom(self):
+        manifest, data = self.make_passed_manifest()
+        source = ROOT / data["source_files"][0]
+        normalized = source.read_text(encoding="utf-8").replace("\r\n", "\n").replace("\r", "\n")
+        for payload in (
+            normalized.replace("\n", "\r\n").encode("utf-8"),
+            normalized.replace("\n", "\r").encode("utf-8"),
+            b"\xef\xbb\xbf" + normalized.encode("utf-8"),
+        ):
+            with self.subTest(prefix=payload[:3]):
+                source.write_bytes(payload)
+                self.assertEqual([], validate_manifest_file(manifest)[1])
+
     def test_passed_artifacts_allow_sql_blocked_as_an_independent_state(self):
         manifest, data = self.make_passed_manifest()
         data.update(sql_status="blocked", validation_sql=None, execution_evidence=None)

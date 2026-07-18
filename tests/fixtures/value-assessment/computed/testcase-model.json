@@ -1,0 +1,66 @@
+{
+  "schema_version": "2.0.0",
+  "root_title": "客户查询结果",
+  "branch_count": 0,
+  "execution_instance_count": 0,
+  "execution_instances": [],
+  "cases": [
+    {
+      "tc_id": "TC001",
+      "dimension": "功能测试",
+      "common_entry": "客户列表查询入口",
+      "module_level_1": null,
+      "module_level_2": null,
+      "test_point": "条件过滤",
+      "steps": [
+        "输入已确认的客户编号并查询"
+      ],
+      "expected_results": [
+        "返回集合仅包含该客户编号对应记录"
+      ],
+      "risk_ids": [
+        "RISK-001"
+      ],
+      "requirement_ids": [
+        "REQ-POINT-001"
+      ],
+      "change_ids": [
+        "CHG-001"
+      ],
+      "historical_defect_ids": [],
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "deduplication_key": "客户列表查询入口|客户记录|客户编号有值|查询|只返回目标客户|RISK-001"
+    },
+    {
+      "tc_id": "TC002",
+      "dimension": "数据测试",
+      "common_entry": "客户列表查询入口",
+      "module_level_1": null,
+      "module_level_2": null,
+      "test_point": "分页状态",
+      "steps": [
+        "切换到第二页"
+      ],
+      "expected_results": [
+        "查询请求保留已生效筛选条件和排序字段"
+      ],
+      "risk_ids": [
+        "RISK-002"
+      ],
+      "requirement_ids": [
+        "REQ-POINT-002"
+      ],
+      "change_ids": [
+        "CHG-002"
+      ],
+      "historical_defect_ids": [],
+      "test_priority": "P1",
+      "evidence_state": "已确认",
+      "regression_scope": "关联回归",
+      "deduplication_key": "客户列表查询入口|分页查询状态|已筛选|翻页|保留条件|RISK-002"
+    }
+  ],
+  "model_id": "TC-MODEL-COMPUTED"
+}

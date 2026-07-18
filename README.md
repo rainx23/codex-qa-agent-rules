@@ -292,7 +292,7 @@ flowchart TD
 
 XMind 节点采用无损语义精简：可删除父节点已表达的背景和说明性套话，并在无歧义时使用 `=`、`≠`、`∈`、`AND`、`OR`、`→`、集合和括号。规则不设置固定字符上限，不因文本较长报错或告警，也不允许截断、省略业务对象、条件、操作或可观察预期；混合 `AND/OR` 时必须用括号明确优先级。
 
-Manifest 的 `validation_status` 与 `sql_status` 独立：测试设计全链完成而 SQL 因 DDL/环境不足被阻塞时使用 `passed + blocked`。passed Manifest 更新索引后必须由 `validate_testcase_index.py` 校验唯一登记和正式路径完整性。
+Manifest 的 `validation_status` 与 `sql_status` 独立：测试设计全链完成而 SQL 因 DDL/环境不足被阻塞时使用 `passed + blocked`。来源组合 Hash 对文本统一换行/BOM、对二进制保持原始字节并包含规范化相对路径。passed Manifest 更新索引后必须由 `validate_testcase_index.py` 完整复验 Manifest，并逐字段校验唯一登记。
 
 ## 历史业务知识与数据验证
 
@@ -395,7 +395,7 @@ python scripts/validate_xmind_md.py path/to/case_xmind.md --strict
 python scripts/validate_testcase_quality.py tests/fixtures/valid_case_xmind.md --risk-matrix tests/fixtures/models/risk-coverage-matrix.json --testcase-model tests/fixtures/models/testcase-model.json --value-assessment tests/fixtures/value-assessment/testcase-value-assessment-valid.json
 ```
 
-未传 `--value-assessment` 时不会搜索默认 Assessment；合法 Assessment 的 warning 和 suggestion 不改变退出码，结构、引用、Hash 或持久化重算错误返回非零退出码。
+未传 `--value-assessment` 时不会搜索默认 Assessment；合法 Assessment 的 warning 和 suggestion 不改变退出码，结构、引用、Hash 或持久化重算错误返回非零退出码。评分前会完整校验引用模型和跨模型链接；`insufficient_inputs` 不产生依赖分数的低价值或简化建议。
 
 ### 6. 转换为 XMind
 

@@ -12,6 +12,23 @@
 
 ### Fixed
 
+## [2.10.0] - 2026-07-18
+
+### Added
+
+- 新增 Workbook 完整树无损复验、索引与合法 Manifest 强一致校验，以及 Ubuntu/Windows、Python 3.10/3.12 的产物治理兼容矩阵。
+- 新增真正可计算的 Testcase Value Assessment 模型组和 Golden 输出，并在评分前校验全部引用模型与跨模型链接。
+
+### Changed
+
+- 规则版本从 2.9.0 升级到 2.10.0；Manifest 组合来源 Hash 统一使用文本换行/BOM 归一化、二进制原始字节和规范化相对路径。
+- 正式 CI 接入当前真实 Manifest、模型、Workbook、index 及临时 Workbook 复验。
+
+### Fixed
+
+- 阻止结构或容量 Evidence 推导自动去重等额外业务行为，阻止模糊统计口径和无基线回归断言。
+- 修复 `insufficient_inputs` 产生低价值或简化建议的问题。
+
 ## [2.9.0] - 2026-07-18
 
 ### Added

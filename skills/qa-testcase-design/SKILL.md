@@ -35,7 +35,7 @@ description: 用于基于证据设计 QA 测试点和最小有效 XMind Markdown
 9. 消费 Knowledge Search 结果和 Data Validation Model 后再选风险。区分 UI 行为、业务数据断言、SQL 校验、对账和展示检查；XMind 引用 `SQLV###` 或 `REC###`，不嵌入大段 SQL。
 10. 阻塞解除后必须重新计算 Risk Coverage Matrix，并从新矩阵重新生成、校验 Testcase Model；不得沿用阻塞状态下的旧 Risk，也不得仅更新 `.xmind.md`。
 11. XMind Markdown 必须从 Testcase Model 渲染，并按语义精简规则去除重复背景；禁止硬字数门禁、自动截断或删除执行所需语义。
-    - 拒绝“按已确认规则处理”“按系统现有逻辑处理”“处理成功”“展示正确”等模糊预期；混合 `AND/OR` 使用括号明确优先级。
+    - 拒绝“按已确认规则处理”“按系统现有逻辑处理”“按现有统计口径一致”“其他功能不受影响”等模糊预期；统计口径必须写明对象、来源和 Oracle，回归断言必须写明变更前基线、同条件比较对象和可观察字段。混合 `AND/OR` 使用括号明确优先级。
 12. 原始任务包含最终用例时，模型与 Markdown 校验通过后自动交接 `qa-artifact-validation`，继续 Workbook、Manifest 和索引链。
 
 ## 可选测试用例价值评估

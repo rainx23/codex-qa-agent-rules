@@ -57,6 +57,19 @@ class XMindValidatorTests(unittest.TestCase):
             "模糊断言",
         )
 
+    def test_vague_existing_rule_and_baseline_assertions_are_rejected(self):
+        expected = "返回集合仅包含该客户编号对应记录"
+        self.assert_invalid(VALID.replace(expected, "各统计项按现有统计口径一致"), "VAGUE_EXISTING_RULE_ASSERTION")
+        self.assert_invalid(VALID.replace(expected, "其他功能不受影响"), "VAGUE_BASELINE_ASSERTION")
+
+    def test_explicit_baseline_and_field_oracle_are_allowed(self):
+        step = "输入已确认的客户编号并查询"
+        expected = "返回集合仅包含该客户编号对应记录"
+        text = VALID.replace(step, "使用同一账号和查询条件记录变更前基线后重新查询").replace(
+            expected, "变更前后行数、可见范围和金额逐项一致"
+        )
+        self.assertEqual(2, len(validate_markdown_text(text).tc_nodes))
+
     def test_11_semantic_duplicate_fields(self):
         text = """- 字段校验
     - 功能测试

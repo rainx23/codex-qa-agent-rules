@@ -187,6 +187,24 @@ class StructuredModelTests(unittest.TestCase):
         data["cases"][0]["expected_results"] = ["页面正常展示"]
         self.assertTrue(any("模糊断言" in error for error in validate_testcase_model(data)))
 
+    def test_testcase_model_rejects_vague_existing_rule_and_baseline_assertions(self):
+        for expected, code in (
+            ("各统计项与可见行按现有统计口径一致", "VAGUE_EXISTING_RULE_ASSERTION"),
+            ("其他功能不受影响", "VAGUE_BASELINE_ASSERTION"),
+        ):
+            data = self.load("testcase-model.json")
+            data["cases"][0]["expected_results"] = [expected]
+            self.assertTrue(any(code in error for error in validate_testcase_model(data)))
+
+    def test_testcase_model_accepts_explicit_baseline_and_aggregation_oracles(self):
+        data = self.load("testcase-model.json")
+        data["cases"][0]["steps"] = ["使用同一账号和查询条件记录变更前基线，变更后重新查询"]
+        data["cases"][0]["expected_results"] = ["变更前后行数、可见范围和金额逐项一致"]
+        self.assertEqual([], validate_testcase_model(data))
+        data["cases"][0]["steps"] = ["记录可见股票行各统计字段并逐项汇总"]
+        data["cases"][0]["expected_results"] = ["可见股票行各字段逐项汇总后与汇总行对应字段一致"]
+        self.assertEqual([], validate_testcase_model(data))
+
     def test_multi_entry_testcase_model_requires_branch_only_steps(self):
         data = self.load("testcase-model-multi-entry.json")
         self.assertEqual([], validate_testcase_model(data))

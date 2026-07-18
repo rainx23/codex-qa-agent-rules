@@ -75,7 +75,7 @@ Testcase Value Assessment Model 保存可复算的测试用例价值评估结果
 
 ### 重算校验
 
-持久化 Assessment 必须校验引用路径、模型 ID 和归一化 Hash，再调用 `scripts/qa_contracts.py` 的唯一评分内核重新计算。`dimensions`、`total_score`、`value_band`、`guardrails`、`reason_codes` 和 `recommendation` 必须全部一致，不能只比较总分；引用 Hash 不一致或持久化结果被篡改必须报错。
+持久化 Assessment 必须校验引用路径、模型 ID 和归一化 Hash，并在评分前完整校验引用的 Requirement Model、Risk Matrix、Testcase Model 及其跨模型双向链接，再调用 `scripts/qa_contracts.py` 的唯一评分内核重新计算。任一引用模型或链接非法时必须停止，不得生成误导评分。`dimensions`、`total_score`、`value_band`、`guardrails`、`reason_codes` 和 `recommendation` 必须全部一致，不能只比较总分；引用 Hash 不一致或持久化结果被篡改必须报错。
 
 ## 数据与知识模型
 

@@ -3,22 +3,28 @@
   "assessment_model_id": "TVA-001",
   "algorithm_version": "1.0.0",
   "testcase_model_reference": {
-    "model_id": "TC-MODEL-MULTI-ENTRY",
-    "path": "tests/fixtures/models/testcase-model-multi-entry.json",
-    "content_hash": "sha256:3cde035ca88fa0d208346833be8056f191fcea28dce14ff9a439a40011bcd4b2"
+    "model_id": "TC-MODEL-COMPUTED",
+    "path": "tests/fixtures/value-assessment/computed/testcase-model.json",
+    "content_hash": "sha256:d3028b1b6cb3294c0e6311e1856f7a4b6b933e4a07a4fb21b8e3f902cbc55bd5"
   },
   "risk_matrix_reference": {
     "matrix_id": "MATRIX-001",
-    "path": "tests/fixtures/models/risk-coverage-matrix.json",
-    "content_hash": "sha256:1fb9e3bee3b5a950aa39797d4e5540d235c7abfa73d04cb6a7b21dca933f6f57"
+    "path": "tests/fixtures/value-assessment/computed/risk-coverage-matrix.json",
+    "content_hash": "sha256:9c783f14b1d7c48f4dfb6c2f4af02cb0e2fdddb11bb5ba0585451d851ed73097"
   },
   "requirement_model_reference": {
     "analysis_id": "AN-REQ-001",
-    "path": "tests/fixtures/models/requirement-analysis.json",
+    "path": "tests/fixtures/value-assessment/computed/requirement-analysis.json",
     "content_hash": "sha256:7d5efd801d30a638fdefb8d258a7f63c420a1a09b5fa9f5630923a7375b4637d"
   },
   "maintenance_inputs": {
     "TC001": {
+      "external_system_dependency_count": 0,
+      "mutable_shared_data_dependency_count": 0,
+      "manual_oracle_count": 0,
+      "environment_specific_dependency_count": 0
+    },
+    "TC002": {
       "external_system_dependency_count": 0,
       "mutable_shared_data_dependency_count": 0,
       "manual_oracle_count": 0,
@@ -28,25 +34,48 @@
   "assessments": [
     {
       "tc_id": "TC001",
-      "score_status": "insufficient_inputs",
+      "score_status": "computed",
       "dimensions": {
-        "business_impact": 0,
-        "risk_coverage_value": 0,
-        "regression_value": 3,
-        "diagnostic_value": 0,
-        "evidence_confidence": 0,
-        "maintenance_cost": 4,
+        "business_impact": 5,
+        "risk_coverage_value": 5,
+        "regression_value": 5,
+        "diagnostic_value": 5,
+        "evidence_confidence": 5,
+        "maintenance_cost": 1,
         "redundancy_penalty": 0
       },
-      "total_score": null,
-      "value_band": null,
+      "total_score": 98,
+      "value_band": "high_value_core",
+      "guardrails": [
+        "p0_mapped"
+      ],
+      "reason_codes": [
+        "CRITICAL_BUSINESS_IMPACT",
+        "P0_RISK_COVERAGE",
+        "CORE_REGRESSION"
+      ],
+      "recommendation": "retain_guarded"
+    },
+    {
+      "tc_id": "TC002",
+      "score_status": "computed",
+      "dimensions": {
+        "business_impact": 4,
+        "risk_coverage_value": 4,
+        "regression_value": 3,
+        "diagnostic_value": 5,
+        "evidence_confidence": 5,
+        "maintenance_cost": 1,
+        "redundancy_penalty": 0
+      },
+      "total_score": 79,
+      "value_band": "regression_keep",
       "guardrails": [],
       "reason_codes": [
-        "LOW_EVIDENCE_CONFIDENCE",
-        "HIGH_MAINTENANCE_COST",
-        "INSUFFICIENT_INPUTS"
+        "HIGH_BUSINESS_IMPACT",
+        "UNIQUE_P1_RISK_COVERAGE"
       ],
-      "recommendation": "insufficient_inputs"
+      "recommendation": "retain"
     }
   ]
 }

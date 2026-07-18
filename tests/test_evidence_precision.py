@@ -116,26 +116,51 @@ class EvidencePrecisionTests(unittest.TestCase):
         data["facts"][0]["evidence_references"] = [self.evidence(3, "字段片段包含 enabled_flag。")]
         data["acceptance_criteria"][0]["evidence_references"] = copy.deepcopy(data["facts"][0]["evidence_references"])
         errors = validate_requirement_model(data, evidence_root=self.root)
-        self.assertTrue(any("STRUCTURE_EVIDENCE_CANNOT_CONFIRM_BEHAVIOR" in error for error in errors))
+        self.assertTrue(any("EVIDENCE_CAPABILITY_CANNOT_CONFIRM_BEHAVIOR" in error for error in errors))
 
     def test_multiple_user_field_cannot_imply_automatic_deduplication(self):
+        self.source.write_text("可追加多个用户。\n分页保留筛选条件。\n字段片段包含 enabled_flag。\n", encoding="utf-8")
         data = self.requirement()
         data["facts"][0]["statement"] = "多个用户选择后自动去重"
-        data["facts"][0]["evidence_references"] = [self.evidence(3, "字段片段包含 enabled_flag。")]
+        data["facts"][0]["evidence_references"] = [self.evidence(1, "可追加多个用户。")]
         data["acceptance_criteria"][0]["evidence_references"] = copy.deepcopy(data["facts"][0]["evidence_references"])
         self.assertTrue(any(
-            "STRUCTURE_EVIDENCE_CANNOT_CONFIRM_BEHAVIOR" in error
+            "EVIDENCE_CAPABILITY_CANNOT_CONFIRM_BEHAVIOR" in error
             for error in validate_requirement_model(data, evidence_root=self.root)
         ))
 
+    def test_multiple_user_capacity_cannot_imply_duplicate_rejection_or_saved_dedup(self):
+        for evidence_text, statement in (
+            ("支持多个用户。", "重复用户不可选择"),
+            ("可多选。", "保存后自动去重"),
+        ):
+            self.source.write_text(f"{evidence_text}\n分页保留筛选条件。\n字段片段包含 enabled_flag。\n", encoding="utf-8")
+            data = self.requirement()
+            data["facts"][0]["statement"] = statement
+            data["facts"][0]["evidence_references"] = [self.evidence(1, evidence_text)]
+            data["acceptance_criteria"][0]["evidence_references"] = copy.deepcopy(data["facts"][0]["evidence_references"])
+            self.assertTrue(any(
+                "EVIDENCE_CAPABILITY_CANNOT_CONFIRM_BEHAVIOR" in error
+                for error in validate_requirement_model(data, evidence_root=self.root)
+            ))
+
+    def test_explicit_deduplication_behavior_with_capacity_passes(self):
+        text = "支持追加多个用户，重复用户自动去重。"
+        self.source.write_text(f"{text}\n分页保留筛选条件。\n字段片段包含 enabled_flag。\n", encoding="utf-8")
+        data = self.requirement()
+        data["facts"][0]["statement"] = "多个用户选择后自动去重"
+        data["facts"][0]["evidence_references"] = [self.evidence(1, text)]
+        data["acceptance_criteria"][0]["evidence_references"] = copy.deepcopy(data["facts"][0]["evidence_references"])
+        self.assertEqual([], validate_requirement_model(data, evidence_root=self.root))
+
     def test_explicit_behavior_evidence_can_confirm_behavior(self):
         self.source.write_text(
-            "enabled_flag=false 的记录不参与统计。\n分页保留筛选条件。\n字段片段包含 enabled_flag。\n",
+            "enabled_flag=0 的记录不参与权限判断。\n分页保留筛选条件。\n字段片段包含 enabled_flag。\n",
             encoding="utf-8",
         )
         data = self.requirement()
-        data["facts"][0]["statement"] = "enabled_flag=false 的记录不参与统计"
-        data["facts"][0]["evidence_references"] = [self.evidence(1, "enabled_flag=false 的记录不参与统计。")]
+        data["facts"][0]["statement"] = "enabled_flag=0 不参与权限"
+        data["facts"][0]["evidence_references"] = [self.evidence(1, "enabled_flag=0 的记录不参与权限判断。")]
         data["acceptance_criteria"][0]["evidence_references"] = copy.deepcopy(data["facts"][0]["evidence_references"])
         self.assertEqual([], validate_requirement_model(data, evidence_root=self.root))
 

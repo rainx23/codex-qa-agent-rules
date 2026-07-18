@@ -3,14 +3,14 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable
 
-from file_hash_utils import stable_file_content_hash
+from file_hash_utils import stable_file_content_hash, stable_multi_file_hash
+from assertion_quality import expectation_quality_error
 from validate_evidence import (
     _resolve_evidence_path,
     evidence_reference_identity,
@@ -129,10 +129,19 @@ VAGUE_ASSERTIONS = (
     "no issue", "no problem", "no exception", "business handling is correct",
     "按已确认规则处理", "按系统现有逻辑处理", "按规则处理", "处理成功", "展示正确",
 )
-STRUCTURE_ONLY_EVIDENCE_MARKERS = ("字段片段", "字段存在", "字段清单", "包含字段", "字段定义")
-BUSINESS_BEHAVIOR_MARKERS = (
-    "不参与", "排除", "过滤", "自动去重", "去重", "删除", "保存", "继承", "追加",
-    "生效", "失效", "拒绝", "允许", "展示", "统计", "计算", "排序", "回退",
+STRUCTURE_EVIDENCE_MARKERS = (
+    "字段存在", "字段片段", "字段清单", "字段定义", "包含字段", "表结构", "控件存在", "选项存在",
+)
+CAPABILITY_EVIDENCE_MARKERS = (
+    "可追加多个用户", "支持多个用户", "支持多选", "可以多选", "可多选", "可选择多个",
+    "可配置多个值", "支持追加",
+)
+BEHAVIOR_EVIDENCE_CATEGORIES = (
+    ("deduplication", ("自动去重", "去重", "重复值被拒绝", "重复用户不可选择", "重复值被合并", "重复选择提示")),
+    ("participation", ("不参与统计", "不参与权限", "权限判断", "默认过滤", "过滤", "排除")),
+    ("persistence", ("保存后", "删除一个值", "删除一个用户", "删除后")),
+    ("inheritance", ("继承", "覆盖原有", "覆盖已有")),
+    ("uniqueness", ("唯一约束",)),
 )
 DATA_VALIDATION_REQUIREMENTS = ("required", "optional", "not_required", "blocked")
 VALIDATION_METHODS = ("sql", "cross_source_reconciliation", "mixed", "not_applicable", "blocked")
@@ -875,19 +884,23 @@ def validate_requirement_model(data: dict[str, Any], *, evidence_root: Path | No
         evidence_references = fact.get("evidence_references")
         errors.extend(_validate_evidence_references(evidence_references, f"事实 {fact_id}", category == "confirmed", evidence_root=evidence_root))
         statement = str(fact.get("statement", ""))
-        behavior_tokens = [token for token in BUSINESS_BEHAVIOR_MARKERS if token in statement]
         excerpts = [
             str(evidence.get("excerpt", "")) for evidence in evidence_references or []
             if isinstance(evidence, dict) and evidence.get("evidence_status") == "current"
         ]
-        if category == "confirmed" and behavior_tokens and excerpts and all(
-            any(marker in excerpt for marker in STRUCTURE_ONLY_EVIDENCE_MARKERS)
-            and not any(token in excerpt for token in behavior_tokens)
-            for excerpt in excerpts
-        ):
-            errors.append(
-                f"STRUCTURE_EVIDENCE_CANNOT_CONFIRM_BEHAVIOR: 事实 {fact_id} 仅有字段结构证据，不能确认业务行为"
-            )
+        if category == "confirmed" and excerpts:
+            for behavior_category, markers in BEHAVIOR_EVIDENCE_CATEGORIES:
+                if not any(marker in statement for marker in markers):
+                    continue
+                if not any(any(marker in excerpt for marker in markers) for excerpt in excerpts):
+                    evidence_boundary = "结构/容量" if all(
+                        any(marker in excerpt for marker in (*STRUCTURE_EVIDENCE_MARKERS, *CAPABILITY_EVIDENCE_MARKERS))
+                        for excerpt in excerpts
+                    ) else "当前"
+                    errors.append(
+                        f"EVIDENCE_CAPABILITY_CANNOT_CONFIRM_BEHAVIOR: 事实 {fact_id} 的{evidence_boundary}证据"
+                        f"不能确认 {behavior_category} 行为"
+                    )
         if isinstance(evidence_references, list) and not any(
             isinstance(evidence, dict) and evidence.get("source_type") == fact.get("source_type")
             for evidence in evidence_references
@@ -1154,7 +1167,13 @@ def validate_testcase_model(data: dict[str, Any]) -> list[str]:
         else:
             if not case.get("test_point") or not case.get("steps") or not case.get("expected_results"):
                 errors.append(f"{tc_id} 缺少唯一测试点、步骤或预期")
-        if not branches and case.get("common_entry") and any(token in " ".join(case.get("steps", [])) for token in ("/", "、", "分别", "以及")):
+        steps_text = " ".join(str(step) for step in case.get("steps", []))
+        entry_marker_count = sum(steps_text.count(marker) for marker in ("页面", "弹窗", "页签", "下钻", "入口"))
+        explicit_multi_entry = bool(re.search(r"分别(?:打开|进入)|依次(?:打开|进入)|在多个|所有相关", steps_text))
+        if not branches and case.get("common_entry") and (
+            entry_marker_count >= 2 and bool(re.search(r"[/、，,]|分别|以及|多个|三个|各个", steps_text))
+            or entry_marker_count >= 1 and explicit_multi_entry
+        ):
             errors.append(f"{tc_id} 可能将多个入口压在同一步骤，必须填写 entry_branches 并拆成平级分支")
         errors.extend(_validate_step_expectations(tc_id, case.get("steps", []), case.get("expected_results", []), "expected_results"))
         for action in case.get("actions", []):
@@ -1224,6 +1243,9 @@ def _validate_step_expectations(tc_id: Any, steps: Any, expected_results: Any, l
         vague = next((token for token in VAGUE_ASSERTIONS if token in str(result)), None)
         if vague and not re.search(r"(?:字段|状态|文案).*(?:异常.*正常|正常.*异常)", str(result)):
             errors.append(f"{tc_id} {location} 包含模糊断言或未确认口径：{vague}")
+        quality_error = expectation_quality_error(str(result), " ".join(str(step) for step in steps))
+        if quality_error:
+            errors.append(f"{quality_error}: {tc_id} {location} 缺少可执行基线或 Oracle：{result}")
     return errors
 
 
@@ -2153,6 +2175,26 @@ def validate_testcase_value_assessment(
 
     if testcase_model is None or risk_model is None:
         return list(dict.fromkeys(errors))
+    model_errors: list[str] = []
+    if requirement_model is not None:
+        model_errors.extend(
+            f"Requirement Model 非法：{error}"
+            for error in validate_requirement_model(requirement_model, evidence_root=root)
+        )
+    model_errors.extend(
+        f"Risk Matrix 非法：{error}"
+        for error in validate_risk_matrix(risk_model, evidence_root=root)
+    )
+    model_errors.extend(
+        f"Testcase Model 非法：{error}" for error in validate_testcase_model(testcase_model)
+    )
+    model_errors.extend(
+        f"Assessment 引用模型链路非法：{error}"
+        for error in validate_model_links(requirement_model, None, risk_model, testcase_model)
+    )
+    errors.extend(model_errors)
+    if model_errors:
+        return list(dict.fromkeys(errors))
     try:
         recomputed = calculate_testcase_value_assessments(
             testcase_model,
@@ -2223,6 +2265,9 @@ def format_testcase_value_assessment(assessment_model: dict[str, Any]) -> list[s
         else:
             insufficient_count += 1
 
+        if status == "insufficient_inputs":
+            continue
+
         guarded = bool(guardrails)
         low_band = assessment["value_band"] in {"review_simplify_or_merge", "low_value_review"}
         high_priority = "p0_mapped" in guardrails or dimensions["risk_coverage_value"] >= 3
@@ -2289,20 +2334,7 @@ MODEL_VALIDATORS: dict[str, Callable[[dict[str, Any]], list[str]]] = {
 
 
 def stable_source_hash(root: Path, paths: list[str]) -> str:
-    digest = hashlib.sha256()
-    for relative in sorted(paths):
-        normalized = Path(relative).as_posix()
-        path = (root / normalized).resolve()
-        root_resolved = root.resolve()
-        if path != root_resolved and root_resolved not in path.parents:
-            raise ValueError(f"来源路径越界：{relative}")
-        if not path.is_file():
-            raise ValueError(f"来源文件不存在：{relative}")
-        digest.update(normalized.encode("utf-8"))
-        digest.update(b"\0")
-        digest.update(path.read_bytes())
-        digest.update(b"\0")
-    return "sha256:" + digest.hexdigest()
+    return stable_multi_file_hash(root, paths)
 
 
 def valid_generated_at(value: Any) -> bool:

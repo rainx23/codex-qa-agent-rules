@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import json
+import shutil
 import sys
 import tempfile
 import unittest
@@ -14,6 +15,7 @@ from qa_contracts import (  # noqa: E402
     VALUE_ASSESSMENT_ALGORITHM_VERSION,
     VALUE_ASSESSMENT_REASON_CODES,
     calculate_testcase_value_assessments,
+    format_testcase_value_assessment,
     load_json,
     schema_documents,
     stable_normalized_file_hash,
@@ -85,15 +87,13 @@ class TestcaseValueAssessmentTests(unittest.TestCase):
         return load_json(VALUE_FIXTURES / name)
 
     def write_bundle(self, root: Path, *, requirement: bool = True, two_cases: bool = False):
-        cases = [self.case("TC001")]
-        if two_cases:
-            cases.append(self.case("TC002", deduplication_key="case-2", test_point="second case"))
-        testcase_model = {"model_id": "TC-MODEL-TEMP", "cases": cases}
-        risk_model = {
-            "matrix_id": "MATRIX-TEMP",
-            "risk_items": [self.risk(testcase_ids=[case["tc_id"] for case in cases])],
-        }
-        requirement_model = {"analysis_id": "AN-TEMP", **self.requirement()} if requirement else None
+        models = VALUE_FIXTURES / "computed"
+        testcase_model = load_json(models / "testcase-model.json")
+        risk_model = load_json(models / "risk-coverage-matrix.json")
+        requirement_model = load_json(models / "requirement-analysis.json") if requirement else None
+        source_target = root / "tests/fixtures/sources"
+        source_target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copytree(ROOT / "tests/fixtures/sources", source_target)
 
         testcase_path = root / "testcase.json"
         risk_path = root / "risk.json"
@@ -163,6 +163,53 @@ class TestcaseValueAssessmentTests(unittest.TestCase):
         self.assertIsNone(result["total_score"])
         self.assertIsNone(result["value_band"])
         self.assertEqual("insufficient_inputs", result["recommendation"])
+
+    def test_insufficient_inputs_formatter_emits_no_value_based_advice(self):
+        assessment = self.assessment(cases=[self.case(risk_ids=["RISK-UNKNOWN"])], risks=[])
+        lines = format_testcase_value_assessment({"assessments": [assessment]})
+        output = "\n".join(lines)
+        self.assertIn("status=insufficient_inputs", output)
+        self.assertIn("INSUFFICIENT_INPUTS", output)
+        for forbidden in (
+            "REVIEW_LOW_VALUE_SMOKE", "REVIEW_SIMPLIFICATION", "REVIEW_DUPLICATE",
+            "SPLIT_FOR_DIAGNOSIS", "P0_LOW_SCORE_GUARDED",
+        ):
+            self.assertNotIn(forbidden, output)
+
+    def test_valid_fixture_is_computed_not_insufficient(self):
+        model = self.load_assessment_fixture("testcase-value-assessment-valid.json")
+        self.assertTrue(all(item["score_status"] == "computed" for item in model["assessments"]))
+        self.assertTrue(all(item["total_score"] is not None and item["value_band"] for item in model["assessments"]))
+
+    def test_invalid_referenced_model_links_block_persisted_assessment(self):
+        for target, mutate, token in (
+            ("risk", lambda data: data["risk_items"][0].update(testcase_ids=["TC999"]), "不存在 TC"),
+            ("testcase", lambda data: data["cases"][0].update(risk_ids=["RISK-UNKNOWN"]), "不存在风险"),
+            ("requirement", lambda data: data["facts"][0].update(category="inferred"), "Requirement Model 非法"),
+        ):
+            with self.subTest(target=target), tempfile.TemporaryDirectory(dir=ROOT / "tests/fixtures/value-assessment") as directory:
+                bundle = Path(directory)
+                computed = VALUE_FIXTURES / "computed"
+                paths = {
+                    "testcase": bundle / "testcase-model.json",
+                    "risk": bundle / "risk-coverage-matrix.json",
+                    "requirement": bundle / "requirement-analysis.json",
+                }
+                for key, path in paths.items():
+                    shutil.copy2(computed / path.name, path)
+                data = load_json(paths[target])
+                mutate(data)
+                paths[target].write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+                model = self.load_assessment_fixture("testcase-value-assessment-valid.json")
+                for key, reference_key in (
+                    ("testcase", "testcase_model_reference"),
+                    ("risk", "risk_matrix_reference"),
+                    ("requirement", "requirement_model_reference"),
+                ):
+                    model[reference_key]["path"] = paths[key].relative_to(ROOT).as_posix()
+                    model[reference_key]["content_hash"] = stable_normalized_file_hash(paths[key])
+                errors = validate_testcase_value_assessment(model, root=ROOT)
+                self.assertTrue(any(token in error for error in errors), errors)
 
     def test_multi_entry_increases_maintenance_without_increasing_case_count(self):
         single = self.case("TC001")

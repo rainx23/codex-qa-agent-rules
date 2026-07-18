@@ -7,14 +7,14 @@ import argparse
 import sys
 from pathlib import Path
 
-from qa_validation import ValidationError, count_tree_nodes, validate_markdown_file, validate_xmind_archive
+from qa_validation import ValidationError, count_tree_nodes, markdown_tree, validate_markdown_file, validate_xmind_archive
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="校验 XMind Markdown 与工作簿节点完整性")
     parser.add_argument("xmind", type=Path)
     parser.add_argument("--markdown", type=Path)
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     markdown = args.markdown or args.xmind.with_suffix(".xmind.md")
     try:
         outline = validate_markdown_file(markdown)
@@ -24,6 +24,7 @@ def main() -> int:
             expected_root=outline.root.title,
             expected_tc_count=len(outline.tc_nodes),
             expected_node_count=node_count,
+            expected_tree=markdown_tree(outline.root),
         )
     except (OSError, ValidationError, ValueError) as exc:
         print(f"FAIL {exc}", file=sys.stderr)

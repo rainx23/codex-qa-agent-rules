@@ -19,7 +19,7 @@ from qa_contracts import (
     validate_schema_shape,
 )
 from qa_validation import (
-    ValidationError, count_tree_nodes, validate_markdown_file, validate_traceability_mapping,
+    ValidationError, count_tree_nodes, markdown_tree, validate_markdown_file, validate_traceability_mapping,
     validate_xmind_archive,
 )
 from validate_analysis_report import canonical_heading, detect_mode, validate as validate_analysis_report
@@ -511,7 +511,10 @@ def validate_manifest_data(data: dict[str, Any], manifest_path: Path) -> list[st
             errors.append(f"P0 风险映射 TC 未全部存在于 XMind：{sorted(p0_risk_tc_ids - xmind_tc_ids)}")
         if len(testcase_model.get("cases", [])) != data["case_count"] or len(outline.tc_nodes) != data["case_count"]:
             errors.append("case_count 与 Testcase Model 或 Markdown TC 数不一致")
-        validate_xmind_archive(paths["xmind_path"], outline.root.title, len(outline.tc_nodes), count_tree_nodes(outline.root))
+        validate_xmind_archive(
+            paths["xmind_path"], outline.root.title, len(outline.tc_nodes), count_tree_nodes(outline.root),
+            markdown_tree(outline.root),
+        )
     except (OSError, ValueError, json.JSONDecodeError, ValidationError) as exc:
         errors.append(f"产物复验失败：{exc}")
     return list(dict.fromkeys(errors))
