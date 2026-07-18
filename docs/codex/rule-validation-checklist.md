@@ -30,12 +30,13 @@
        python scripts/build_knowledge_index.py qa-knowledge/examples --check
        python scripts/validate_sql_style.py tests/fixtures/sql/valid_validation_sql.sql --strict
        python scripts/validate_data_validation.py tests/fixtures/models/data-validation-valid.json
-       python scripts/validate_sql_artifact.py tests/fixtures/artifacts/validation-sql-manifest.json
+       python scripts/validate_sql_artifact.py --artifact tests/fixtures/artifacts/validation-sql-manifest.json --requirement tests/fixtures/models/requirement-analysis.json --diff tests/fixtures/models/diff-impact.json --risk tests/fixtures/models/risk-coverage-matrix.json --testcase tests/fixtures/models/testcase-model.json --knowledge qa-knowledge/examples
 
 5. Manifest 示例和索引编码：
 
        python scripts/validate_manifest.py testcases/manifest.example.json
        python scripts/repair_text_encoding.py testcases/index.md --check
+       python scripts/validate_testcase_index.py testcases/index.md
 
 6. 三种分析报告模式：
 
@@ -50,6 +51,7 @@
        python scripts/validate_xmind_md.py tests/fixtures/multi_entry_valid_xmind.md
        python scripts/validate_xmind_md.py tests/fixtures/multi_entry_direct_valid_xmind.md
        python scripts/md_to_xmind.py tests/fixtures/valid_case_xmind.md -o 临时输出路径
+       python scripts/verify_xmind.py 临时输出路径 --markdown tests/fixtures/valid_case_xmind.md
 
 8. CI 工作流必须覆盖 Python 3.10 和 3.12，并以实际 YAML 解析器检查语法。
 
@@ -70,6 +72,9 @@
 - [ ] 历史缺陷保护规则有效。
 - [ ] 疑似重复不会自动删除。
 - [ ] 未提供 Assessment 时现有流程不失败。
+- [ ] Assessment 评分前已校验 Requirement、Risk、Testcase 三个引用模型及跨模型链接。
+- [ ] `insufficient_inputs` 仅输出输入不足原因，不输出低价值、简化、重复或拆分建议。
+- [ ] 合法示例至少包含一条 `score_status=computed` 且持久化结果与重算一致。
 - [ ] warning 和 suggestion 不影响退出码。
 - [ ] Python 3.10 和 3.12 结果一致。
 - [ ] `assessments` 输出顺序稳定。
@@ -96,8 +101,10 @@
 - 结构化模型的事实状态、冲突确认、Diff 覆盖状态、P0 风险和 TC 来源校验。
 - Diff Impact Chain/Risk/Suspected Defect 强类型字段、引用 ID 存在性与跨模型双向一致性。
 - Evidence Reference 路径、行号、Commit、内容哈希、截图/粘贴定位和来源变化后的 stale/reconfirm 门禁。
+- Evidence excerpt 越界、首行证据过度集中、Acceptance/Risk 证据派生、confirmed TC 未确认链路，以及字段存在不能推导过滤/统计/去重行为。
 - Testcase Execution Instance 状态枚举、执行证据、重跑引用、分支/实例独立计数及不增加 TC 数量。
 - Manifest 来源哈希、规则版本、时区、待确认/P0 计数、安全路径、supersedes 循环、状态语义和 Workbook 损坏。
+- Manifest `validation_status`/`sql_status` 独立状态、passed+blocked、pending draft 契约，以及 passed Manifest 索引唯一登记和正式路径存在性。
 - 输出文件已存在、两份批量成功加一份局部失败、失败无伪 Workbook、索引 artifact_id 重复。
 - 真实历史 XMind Markdown 原样识别，迁移样例合并重复、移除模糊预期且不降低 P0 业务覆盖。
 - 多入口有效分支、无公共入口多入口、单入口多余层级、混合直接步骤、单分支、占位入口名和拼接入口步骤；普通组合操作不得被误报。

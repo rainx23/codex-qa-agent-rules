@@ -15,6 +15,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from qa_contracts import (  # noqa: E402
     VALUE_ASSESSMENT_ALGORITHM_VERSION,
     calculate_testcase_value_assessments,
+    format_testcase_value_assessment,
     stable_normalized_file_hash,
 )
 from validate_testcase_quality import main  # noqa: E402
@@ -37,6 +38,10 @@ class TestcaseValueGoldenTests(unittest.TestCase):
         output = normalize_newlines(stdout.getvalue())
         marker = output.index("ASSESSMENT ")
         return result, output[marker:], normalize_newlines(stderr.getvalue())
+
+    def capture_model(self, assessment: dict):
+        output = "\n".join(format_testcase_value_assessment(assessment)) + "\n"
+        return 0, output, ""
 
     def case(self, tc_id: str, risk_ids: list[str]):
         return {
@@ -114,7 +119,7 @@ class TestcaseValueGoldenTests(unittest.TestCase):
         }
         assessment_path = directory / "assessment.json"
         assessment_path.write_bytes((json.dumps(assessment, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
-        return assessment_path
+        return assessment_path, assessment
 
     def test_cli_assessment_output_matches_golden_exactly(self):
         result, actual, stderr = self.capture(VALID_ASSESSMENT)
@@ -134,12 +139,11 @@ class TestcaseValueGoldenTests(unittest.TestCase):
     def test_same_cli_input_is_byte_stable_across_two_runs(self):
         self.assertEqual(self.capture(VALID_ASSESSMENT), self.capture(VALID_ASSESSMENT))
 
-    def test_golden_contains_complete_insufficient_result_without_fake_score(self):
+    def test_golden_contains_complete_computed_results(self):
         text = GOLDEN.read_text(encoding="utf-8")
-        self.assertIn("ASSESSMENT TC001 status=insufficient_inputs score=null band=null", text)
+        self.assertRegex(text, r"ASSESSMENT TC001 status=computed score=\d+ band=\w+")
         self.assertIn("DIMENSIONS TC001", text)
-        self.assertIn("REASON TC001 INSUFFICIENT_INPUTS", text)
-        self.assertIn("SUMMARY testcase_value_assessment computed=0 insufficient=1", text)
+        self.assertIn("SUMMARY testcase_value_assessment computed=2 insufficient=0", text)
 
     def test_golden_contains_no_unstable_or_destructive_content(self):
         text = GOLDEN.read_text(encoding="utf-8")
@@ -149,8 +153,8 @@ class TestcaseValueGoldenTests(unittest.TestCase):
 
     def test_computed_and_insufficient_statuses_are_stable(self):
         with tempfile.TemporaryDirectory(dir=ROOT / "tests") as directory:
-            path = self.write_mixed_bundle(Path(directory))
-            result, output, stderr = self.capture(path)
+            _, model = self.write_mixed_bundle(Path(directory))
+            result, output, stderr = self.capture_model(model)
         self.assertEqual(0, result)
         self.assertEqual("", stderr)
         self.assertRegex(output, r"ASSESSMENT TC001 status=computed score=\d+ band=\w+")
@@ -160,21 +164,21 @@ class TestcaseValueGoldenTests(unittest.TestCase):
     def test_reversing_cases_keeps_assessment_output_identical(self):
         with tempfile.TemporaryDirectory(dir=ROOT / "tests") as directory:
             root = Path(directory)
-            forward = self.write_mixed_bundle(root / "forward")
-            reverse = self.write_mixed_bundle(root / "reverse", reverse_cases=True)
-            self.assertEqual(self.capture(forward), self.capture(reverse))
+            _, forward = self.write_mixed_bundle(root / "forward")
+            _, reverse = self.write_mixed_bundle(root / "reverse", reverse_cases=True)
+            self.assertEqual(self.capture_model(forward), self.capture_model(reverse))
 
     def test_reversing_risks_keeps_assessment_output_identical(self):
         with tempfile.TemporaryDirectory(dir=ROOT / "tests") as directory:
             root = Path(directory)
-            forward = self.write_mixed_bundle(root / "forward")
-            reverse = self.write_mixed_bundle(root / "reverse", reverse_risks=True)
-            self.assertEqual(self.capture(forward), self.capture(reverse))
+            _, forward = self.write_mixed_bundle(root / "forward")
+            _, reverse = self.write_mixed_bundle(root / "reverse", reverse_risks=True)
+            self.assertEqual(self.capture_model(forward), self.capture_model(reverse))
 
     def test_warning_and_suggestion_order_is_fixed_and_nonblocking(self):
         with tempfile.TemporaryDirectory(dir=ROOT / "tests") as directory:
-            path = self.write_mixed_bundle(Path(directory))
-            result, output, _ = self.capture(path)
+            _, model = self.write_mixed_bundle(Path(directory))
+            result, output, _ = self.capture_model(model)
         advisory = [line for line in output.splitlines() if line.startswith(("WARNING TC001", "SUGGESTION TC001"))]
         self.assertEqual(0, result)
         self.assertEqual([
@@ -188,8 +192,8 @@ class TestcaseValueGoldenTests(unittest.TestCase):
 
     def test_assessment_output_has_stable_tc_and_reason_order(self):
         with tempfile.TemporaryDirectory(dir=ROOT / "tests") as directory:
-            path = self.write_mixed_bundle(Path(directory), reverse_cases=True, reverse_risks=True)
-            _, output, _ = self.capture(path)
+            _, model = self.write_mixed_bundle(Path(directory), reverse_cases=True, reverse_risks=True)
+            _, output, _ = self.capture_model(model)
         ids = [line.split()[1] for line in output.splitlines() if line.startswith("ASSESSMENT ")]
         self.assertEqual(["TC001", "TC002"], ids)
         reasons = [line for line in output.splitlines() if line.startswith("REASON TC001")]

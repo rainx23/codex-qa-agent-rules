@@ -21,5 +21,6 @@
 - 新增或改变 Skill 路由、输入输出或门禁时同步更新本 README、根 README 和受影响测试。
 - 不为每个 Skill 重复创建 README。
 - 本目录不含自动生成文件。
+- 确认回复处理必须保留原始任务范围；blocking 归零后由需求、用例和产物 Skill 自动续跑，不要求重复指令。
 
 版本与完整变更历史统一见 [CHANGELOG.md](../CHANGELOG.md)。

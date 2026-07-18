@@ -17,6 +17,7 @@ on:
       - "testcases/**/*.json"
       - "testcases/**/*.md"
       - "testcases/**/*.sql"
+      - "testcases/**/*.xmind"
       - "qa-knowledge/**"
       - "docs/codex/**"
       - ".github/workflows/**"
@@ -36,6 +37,7 @@ on:
       - "testcases/**/*.json"
       - "testcases/**/*.md"
       - "testcases/**/*.sql"
+      - "testcases/**/*.xmind"
       - "qa-knowledge/**"
       - "docs/codex/**"
       - ".github/workflows/**"
@@ -103,16 +105,25 @@ jobs:
           python scripts/validate_schemas.py
           python scripts/validate_models.py --requirement tests/fixtures/models/requirement-analysis.json --diff tests/fixtures/models/diff-impact.json --risk tests/fixtures/models/risk-coverage-matrix.json --testcase tests/fixtures/models/testcase-model.json
           if python scripts/migrate_schema.py --input tests/fixtures/migration/v1/unrecognized.json --output "${migration_root}/invalid.json" --report "${migration_root}/reports/invalid.json" --strict; then exit 1; fi
-      - name: Validate Manifest and index encoding
+      - name: Validate formal Manifests and index
         run: |
           python scripts/validate_manifest.py testcases/manifest.example.json
+          python scripts/validate_manifest.py testcases/clearance-permission-20260718/manifest.json
+          python scripts/validate_testcase_index.py testcases/index.md
           python scripts/repair_text_encoding.py testcases/index.md --check
+      - name: Validate current formal models and Workbook
+        run: |
+          python scripts/validate_models.py --requirement testcases/clearance-permission-20260718/requirement-analysis.json --risk testcases/clearance-permission-20260718/risk-coverage-matrix.json --testcase testcases/clearance-permission-20260718/testcase-model.json
+          python scripts/validate_xmind_md.py testcases/clearance-permission-20260718/clearance-permission.xmind.md
+          python scripts/validate_testcase_quality.py testcases/clearance-permission-20260718/clearance-permission.xmind.md --risk-matrix testcases/clearance-permission-20260718/risk-coverage-matrix.json --testcase-model testcases/clearance-permission-20260718/testcase-model.json
+          python scripts/verify_xmind.py testcases/clearance-permission-20260718/clearance-permission.xmind --markdown testcases/clearance-permission-20260718/clearance-permission.xmind.md
       - name: Convert and verify XMind fixture in temp directory
         shell: bash
         run: |
           output="${RUNNER_TEMP}/valid_case_workbook.xmind"
           python scripts/validate_xmind_md.py tests/fixtures/valid_case_xmind.md
           python scripts/md_to_xmind.py tests/fixtures/valid_case_xmind.md -o "$output"
+          python scripts/verify_xmind.py "$output" --markdown tests/fixtures/valid_case_xmind.md
       - name: Ensure checks leave no generated changes
         run: git diff --exit-code
 
@@ -143,3 +154,28 @@ jobs:
         run: python scripts/validate_testcase_quality.py tests/fixtures/valid_case_xmind.md --risk-matrix tests/fixtures/models/risk-coverage-matrix.json --testcase-model tests/fixtures/models/testcase-model.json --value-assessment tests/fixtures/value-assessment/testcase-value-assessment-valid.json
       - name: Check generated Schemas
         run: python scripts/generate_schemas.py --check
+
+  artifact-governance-compatibility:
+    name: Artifact governance compatibility
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.10", "3.12"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Test cross-platform artifact governance
+        run: python -m unittest tests.test_file_hash_utils tests.test_evidence_precision tests.test_artifact_governance tests.test_testcase_index tests.test_verify_xmind -v
+      - name: Validate current formal artifacts
+        run: |
+          python scripts/validate_manifest.py testcases/clearance-permission-20260718/manifest.json
+          python scripts/validate_testcase_index.py testcases/index.md
+          python scripts/verify_xmind.py testcases/clearance-permission-20260718/clearance-permission.xmind --markdown testcases/clearance-permission-20260718/clearance-permission.xmind.md
+      - name: Ensure checks leave no generated changes
+        run: git diff --exit-code

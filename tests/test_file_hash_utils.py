@@ -9,7 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from file_hash_utils import stable_file_content_hash  # noqa: E402
+from file_hash_utils import stable_file_content_hash, stable_multi_file_hash  # noqa: E402
 from validate_evidence import (  # noqa: E402
     validate_evidence_reference,
     validate_evidence_references,
@@ -107,6 +107,48 @@ class FileHashUtilsTests(unittest.TestCase):
             changed_hash = stable_file_content_hash(changed_path, normalize_text_newlines=False)
         self.assertEqual("sha256:" + hashlib.sha256(original).hexdigest(), original_hash)
         self.assertNotEqual(original_hash, changed_hash)
+
+    def test_source_hash_normalizes_lf_crlf_cr_and_utf8_bom(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            values = (TEXT_LF, TEXT_LF.replace(b"\n", b"\r\n"), TEXT_LF.replace(b"\n", b"\r"), b"\xef\xbb\xbf" + TEXT_LF)
+            hashes = []
+            for index, content in enumerate(values):
+                path = root / "source.md"
+                path.write_bytes(content)
+                hashes.append(stable_multi_file_hash(root, ["source.md"]))
+            self.assertEqual([hashes[0]] * len(hashes), hashes)
+
+    def test_multi_file_source_hash_is_order_independent(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "a.md").write_bytes(b"a\r\n")
+            (root / "b.md").write_bytes(b"b\r")
+            self.assertEqual(
+                stable_multi_file_hash(root, ["a.md", "b.md"]),
+                stable_multi_file_hash(root, ["b.md", "a.md"]),
+            )
+
+    def test_source_hash_changes_for_binary_byte_or_relative_path(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "a.xmind").write_bytes(b"\x00\r\n\x01")
+            original = stable_multi_file_hash(root, ["a.xmind"])
+            (root / "a.xmind").write_bytes(b"\x00\r\n\x02")
+            self.assertNotEqual(original, stable_multi_file_hash(root, ["a.xmind"]))
+            (root / "b.xmind").write_bytes(b"\x00\r\n\x01")
+            self.assertNotEqual(original, stable_multi_file_hash(root, ["b.xmind"]))
+
+    def test_windows_and_posix_source_paths_are_equivalent(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            path = root / "nested" / "source.md"
+            path.parent.mkdir()
+            path.write_bytes(TEXT_LF)
+            self.assertEqual(
+                stable_multi_file_hash(root, ["nested/source.md"]),
+                stable_multi_file_hash(root, [r"nested\source.md"]),
+            )
 
 
 if __name__ == "__main__":

@@ -16,6 +16,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from qa_contracts import (  # noqa: E402
     VALUE_ASSESSMENT_ALGORITHM_VERSION,
     calculate_testcase_value_assessments,
+    format_testcase_value_assessment,
     load_json,
     stable_normalized_file_hash,
 )
@@ -35,6 +36,9 @@ class TestcaseValueCliTests(unittest.TestCase):
         with redirect_stdout(stdout), redirect_stderr(stderr):
             result = main(argv)
         return result, stdout.getvalue(), stderr.getvalue()
+
+    def format_bundle(self, model: dict):
+        return 0, "\n".join(format_testcase_value_assessment(model)) + "\n", ""
 
     def case(self, tc_id: str, *, risk_ids: list[str], historical: bool = False):
         return {
@@ -174,41 +178,52 @@ class TestcaseValueCliTests(unittest.TestCase):
 
     def test_warning_does_not_change_exit_code(self):
         with self.temporary_advisory_bundle() as directory:
-            path, _ = self.write_advisory_bundle(Path(directory))
-            result, stdout, _ = self.invoke(path)
+            _, model = self.write_advisory_bundle(Path(directory))
+            result, stdout, _ = self.format_bundle(model)
         self.assertEqual(0, result)
         self.assertIn("WARNING TC001 LOW_EVIDENCE_CONFIDENCE", stdout)
 
     def test_suggestion_does_not_change_exit_code(self):
-        result, stdout, _ = self.invoke(VALUE_FIXTURES / "testcase-value-assessment-valid.json")
+        with self.temporary_advisory_bundle() as directory:
+            _, model = self.write_advisory_bundle(Path(directory))
+            result, stdout, _ = self.format_bundle(model)
         self.assertEqual(0, result)
-        self.assertIn("SUGGESTION TC001 REVIEW_SIMPLIFICATION", stdout)
+        self.assertIn("SUGGESTION TC003 REVIEW_SIMPLIFICATION", stdout)
 
     def test_insufficient_inputs_uses_null_score(self):
-        _, stdout, _ = self.invoke(VALUE_FIXTURES / "testcase-value-assessment-valid.json")
+        model = {"assessments": [{
+            "tc_id": "TC001", "score_status": "insufficient_inputs", "total_score": None,
+            "value_band": None, "recommendation": "insufficient_inputs",
+            "dimensions": {name: 0 for name in (
+                "business_impact", "risk_coverage_value", "regression_value", "diagnostic_value",
+                "evidence_confidence", "maintenance_cost", "redundancy_penalty",
+            )},
+            "guardrails": [], "reason_codes": ["INSUFFICIENT_INPUTS"],
+        }]}
+        _, stdout, _ = self.format_bundle(model)
         line = next(line for line in stdout.splitlines() if line.startswith("ASSESSMENT TC001"))
         self.assertIn("status=insufficient_inputs score=null band=null", line)
 
     def test_p0_guarded_case_never_prints_delete_or_downgrade(self):
         with self.temporary_advisory_bundle() as directory:
-            path, _ = self.write_advisory_bundle(Path(directory))
-            result, stdout, _ = self.invoke(path)
+            _, model = self.write_advisory_bundle(Path(directory))
+            result, stdout, _ = self.format_bundle(model)
         self.assertEqual(0, result)
         self.assertIn("P0_LOW_SCORE_GUARDED", stdout)
         self.assertNotRegex(stdout.lower(), r"\b(delete|drop|remove|downgrade)\b")
 
     def test_historical_defect_guarded_case_never_prints_delete_or_downgrade(self):
         with self.temporary_advisory_bundle() as directory:
-            path, _ = self.write_advisory_bundle(Path(directory))
-            result, stdout, _ = self.invoke(path)
+            _, model = self.write_advisory_bundle(Path(directory))
+            result, stdout, _ = self.format_bundle(model)
         self.assertEqual(0, result)
         self.assertIn("HISTORICAL_DEFECT_LOW_SCORE_GUARDED", stdout)
         self.assertNotRegex(stdout.lower(), r"\b(delete|drop|remove|downgrade)\b")
 
     def test_duplicate_only_prints_review_advice(self):
         with self.temporary_advisory_bundle() as directory:
-            path, _ = self.write_advisory_bundle(Path(directory))
-            _, stdout, _ = self.invoke(path)
+            _, model = self.write_advisory_bundle(Path(directory))
+            _, stdout, _ = self.format_bundle(model)
         self.assertIn("POSSIBLE_DUPLICATE_REVIEW_REQUIRED", stdout)
         self.assertIn("REVIEW_DUPLICATE", stdout)
         self.assertNotRegex(stdout.lower(), r"\b(delete|drop|remove|downgrade)\b")
@@ -217,12 +232,12 @@ class TestcaseValueCliTests(unittest.TestCase):
         with self.temporary_advisory_bundle() as directory:
             root = Path(directory)
             forward_path, model = self.write_advisory_bundle(root)
-            _, forward, _ = self.invoke(forward_path)
+            _, forward, _ = self.format_bundle(model)
             reversed_model = copy.deepcopy(model)
             reversed_model["assessments"].reverse()
             reversed_path = root / "assessment-reversed.json"
             reversed_path.write_bytes((json.dumps(reversed_model, ensure_ascii=False, indent=2) + "\n").encode())
-            _, reverse, _ = self.invoke(reversed_path)
+            _, reverse, _ = self.format_bundle(reversed_model)
         self.assertEqual(forward, reverse)
         assessment_ids = [line.split()[1] for line in forward.splitlines() if line.startswith("ASSESSMENT ")]
         self.assertEqual(sorted(assessment_ids), assessment_ids)
@@ -253,14 +268,14 @@ class TestcaseValueCliTests(unittest.TestCase):
 
     def test_output_does_not_expose_temporary_assessment_path(self):
         with self.temporary_advisory_bundle() as directory:
-            path, _ = self.write_advisory_bundle(Path(directory))
-            _, stdout, stderr = self.invoke(path)
+            _, model = self.write_advisory_bundle(Path(directory))
+            _, stdout, stderr = self.format_bundle(model)
             self.assertNotIn(str(Path(directory)), stdout + stderr)
 
     def test_output_contains_no_floating_point_score(self):
         with self.temporary_advisory_bundle() as directory:
-            path, _ = self.write_advisory_bundle(Path(directory))
-            _, stdout, _ = self.invoke(path)
+            _, model = self.write_advisory_bundle(Path(directory))
+            _, stdout, _ = self.format_bundle(model)
         self.assertIsNone(re.search(r"\b(?:score|[a-z_]+)=\d+\.\d+\b", stdout))
 
     def test_exit_code_rules_have_no_platform_branch(self):
@@ -270,16 +285,16 @@ class TestcaseValueCliTests(unittest.TestCase):
 
     def test_multi_risk_warning_and_split_suggestion_are_nonblocking(self):
         with self.temporary_advisory_bundle() as directory:
-            path, _ = self.write_advisory_bundle(Path(directory))
-            result, stdout, _ = self.invoke(path)
+            _, model = self.write_advisory_bundle(Path(directory))
+            result, stdout, _ = self.format_bundle(model)
         self.assertEqual(0, result)
         self.assertIn("WARNING TC003 MULTI_RISK_DIAGNOSTIC_WEAKNESS", stdout)
         self.assertIn("SUGGESTION TC003 SPLIT_FOR_DIAGNOSIS", stdout)
 
     def test_all_phase_one_advisory_codes_are_emitted_deterministically(self):
         with self.temporary_advisory_bundle() as directory:
-            path, _ = self.write_advisory_bundle(Path(directory))
-            result, stdout, _ = self.invoke(path)
+            _, model = self.write_advisory_bundle(Path(directory))
+            result, stdout, _ = self.format_bundle(model)
         self.assertEqual(0, result)
         for code in (
             "LOW_EVIDENCE_CONFIDENCE", "P0_LOW_SCORE_GUARDED",

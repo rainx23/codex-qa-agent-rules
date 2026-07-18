@@ -10,7 +10,7 @@ import uuid
 import zipfile
 from pathlib import Path
 from typing import Iterable
-from qa_validation import Node, ValidationError, count_tree_nodes, validate_markdown_file, validate_xmind_archive
+from qa_validation import Node, ValidationError, count_tree_nodes, markdown_tree, validate_markdown_file, validate_xmind_archive
 
 def topic_id() -> str:
     return uuid.uuid4().hex
@@ -68,7 +68,10 @@ def convert_file(
         raise ValidationError(f"{input_path}: strict 模式拒绝 {len(outline.warnings)} 个 warning")
     write_xmind(outline.root, output)
     try:
-        validate_xmind_archive(output, outline.root.title, len(outline.tc_nodes), count_tree_nodes(outline.root))
+        validate_xmind_archive(
+            output, outline.root.title, len(outline.tc_nodes), count_tree_nodes(outline.root),
+            markdown_tree(outline.root),
+        )
     except Exception:
         output.unlink(missing_ok=True)
         raise

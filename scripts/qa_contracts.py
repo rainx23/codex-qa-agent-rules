@@ -3,16 +3,17 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable
 
-from file_hash_utils import stable_file_content_hash
+from file_hash_utils import stable_file_content_hash, stable_multi_file_hash
+from assertion_quality import expectation_quality_error
 from validate_evidence import (
     _resolve_evidence_path,
+    evidence_reference_identity,
     validate_evidence_references as validate_authentic_evidence_references,
 )
 
@@ -126,6 +127,21 @@ VAGUE_ASSERTIONS = (
     "没有未处理异常即可",
     "data correctness", "result correctness", "function works", "meets requirement", "meets expectation",
     "no issue", "no problem", "no exception", "business handling is correct",
+    "按已确认规则处理", "按系统现有逻辑处理", "按规则处理", "处理成功", "展示正确",
+)
+STRUCTURE_EVIDENCE_MARKERS = (
+    "字段存在", "字段片段", "字段清单", "字段定义", "包含字段", "表结构", "控件存在", "选项存在",
+)
+CAPABILITY_EVIDENCE_MARKERS = (
+    "可追加多个用户", "支持多个用户", "支持多选", "可以多选", "可多选", "可选择多个",
+    "可配置多个值", "支持追加",
+)
+BEHAVIOR_EVIDENCE_CATEGORIES = (
+    ("deduplication", ("自动去重", "去重", "重复值被拒绝", "重复用户不可选择", "重复值被合并", "重复选择提示")),
+    ("participation", ("不参与统计", "不参与权限", "权限判断", "默认过滤", "过滤", "排除")),
+    ("persistence", ("保存后", "删除一个值", "删除一个用户", "删除后")),
+    ("inheritance", ("继承", "覆盖原有", "覆盖已有")),
+    ("uniqueness", ("唯一约束",)),
 )
 DATA_VALIDATION_REQUIREMENTS = ("required", "optional", "not_required", "blocked")
 VALIDATION_METHODS = ("sql", "cross_source_reconciliation", "mixed", "not_applicable", "blocked")
@@ -770,11 +786,12 @@ def _validate_evidence_references(
     *,
     changed_files: set[str] | None = None,
     expected_change_file: str | None = None,
+    evidence_root: Path | None = None,
 ) -> list[str]:
     return validate_authentic_evidence_references(
         items,
         label=label,
-        root=REPOSITORY_ROOT,
+        root=evidence_root or REPOSITORY_ROOT,
         confirmed=confirmed,
         changed_files=changed_files,
         expected_change_file=expected_change_file,
@@ -828,7 +845,7 @@ def summarize_confirmations(requirement_model: dict[str, Any]) -> dict[str, int]
     }
 
 
-def validate_requirement_model(data: dict[str, Any]) -> list[str]:
+def validate_requirement_model(data: dict[str, Any], *, evidence_root: Path | None = None) -> list[str]:
     errors = validate_schema_shape(data, requirement_schema("0.0.0"))
     requirement = data.get("data_validation_required")
     method = data.get("recommended_validation_method")
@@ -865,7 +882,25 @@ def validate_requirement_model(data: dict[str, Any]) -> list[str]:
         if category == "missing" and not fact.get("handling"):
             errors.append(f"缺失事实 {fact_id} 必须说明 handling")
         evidence_references = fact.get("evidence_references")
-        errors.extend(_validate_evidence_references(evidence_references, f"事实 {fact_id}", category == "confirmed"))
+        errors.extend(_validate_evidence_references(evidence_references, f"事实 {fact_id}", category == "confirmed", evidence_root=evidence_root))
+        statement = str(fact.get("statement", ""))
+        excerpts = [
+            str(evidence.get("excerpt", "")) for evidence in evidence_references or []
+            if isinstance(evidence, dict) and evidence.get("evidence_status") == "current"
+        ]
+        if category == "confirmed" and excerpts:
+            for behavior_category, markers in BEHAVIOR_EVIDENCE_CATEGORIES:
+                if not any(marker in statement for marker in markers):
+                    continue
+                if not any(any(marker in excerpt for marker in markers) for excerpt in excerpts):
+                    evidence_boundary = "结构/容量" if all(
+                        any(marker in excerpt for marker in (*STRUCTURE_EVIDENCE_MARKERS, *CAPABILITY_EVIDENCE_MARKERS))
+                        for excerpt in excerpts
+                    ) else "当前"
+                    errors.append(
+                        f"EVIDENCE_CAPABILITY_CANNOT_CONFIRM_BEHAVIOR: 事实 {fact_id} 的{evidence_boundary}证据"
+                        f"不能确认 {behavior_category} 行为"
+                    )
         if isinstance(evidence_references, list) and not any(
             isinstance(evidence, dict) and evidence.get("source_type") == fact.get("source_type")
             for evidence in evidence_references
@@ -892,7 +927,7 @@ def validate_requirement_model(data: dict[str, Any]) -> list[str]:
                 errors.append(f"Confirmation {point_id} resolved 必须提供 resolution、resolution_evidence_references 和 resolved_at")
             if point.get("resolved_at") and not valid_generated_at(point.get("resolved_at")):
                 errors.append(f"Confirmation {point_id} resolved_at 格式非法")
-            errors.extend(_validate_evidence_references(point.get("resolution_evidence_references"), f"Confirmation {point_id} resolution", True))
+            errors.extend(_validate_evidence_references(point.get("resolution_evidence_references"), f"Confirmation {point_id} resolution", True, evidence_root=evidence_root))
             unresolved_linked = [
                 fact_id for fact_id in linked
                 if facts_by_id.get(fact_id, {}).get("affects_core_expectation") is True
@@ -905,7 +940,7 @@ def validate_requirement_model(data: dict[str, Any]) -> list[str]:
         if point.get("status") == "skipped":
             if not point.get("skip_reason") or not point.get("decision_evidence"):
                 errors.append(f"Confirmation {point_id} skipped 必须提供 skip_reason 和 decision_evidence")
-            errors.extend(_validate_evidence_references(point.get("decision_evidence"), f"Confirmation {point_id} decision"))
+            errors.extend(_validate_evidence_references(point.get("decision_evidence"), f"Confirmation {point_id} decision", evidence_root=evidence_root))
     for fact_id, category in categories.items():
         if category == "conflicting" and fact_id not in confirmation_fact_ids:
             errors.append(f"冲突事实 {fact_id} 未关联待确认点")
@@ -922,11 +957,26 @@ def validate_requirement_model(data: dict[str, Any]) -> list[str]:
                 errors.append(f"验收标准引用不存在事实：{fact_id}")
             elif categories.get(fact_id) != "confirmed":
                 errors.append(f"非确定事实 {fact_id} 不得进入确定性验收标准")
-        errors.extend(_validate_evidence_references(criterion.get("evidence_references"), f"验收标准 {criterion.get('criterion_id')}", True))
+        criterion_evidence = criterion.get("evidence_references")
+        errors.extend(_validate_evidence_references(criterion_evidence, f"验收标准 {criterion.get('criterion_id')}", True, evidence_root=evidence_root))
+        linked_evidence = {
+            evidence_reference_identity(evidence)
+            for fact_id in linked
+            for evidence in facts_by_id.get(fact_id, {}).get("evidence_references", [])
+            if isinstance(evidence, dict)
+        }
+        unrelated = {
+            evidence_reference_identity(evidence)
+            for evidence in criterion_evidence or [] if isinstance(evidence, dict)
+        } - linked_evidence
+        if unrelated:
+            errors.append(
+                f"ACCEPTANCE_EVIDENCE_NOT_DERIVED_FROM_FACT: 验收标准 {criterion.get('criterion_id')} 的证据未派生自关联 Fact"
+            )
     return list(dict.fromkeys(errors))
 
 
-def validate_diff_model(data: dict[str, Any]) -> list[str]:
+def validate_diff_model(data: dict[str, Any], *, evidence_root: Path | None = None) -> list[str]:
     errors = validate_schema_shape(data, diff_schema("0.0.0"))
     changes = data.get("change_items", []) if isinstance(data.get("change_items"), list) else []
     changed_files = {
@@ -948,6 +998,7 @@ def validate_diff_model(data: dict[str, Any]) -> list[str]:
             True,
             changed_files=changed_files,
             expected_change_file=change.get("file"),
+            evidence_root=evidence_root,
         ))
     chains = data.get("impact_chains", []) if isinstance(data.get("impact_chains"), list) else []
     _, chain_errors = _unique_ids(chains, "chain_id")
@@ -956,7 +1007,7 @@ def validate_diff_model(data: dict[str, Any]) -> list[str]:
         unknown = set(chain.get("change_ids", [])) - change_ids
         if unknown:
             errors.append(f"影响链 {chain.get('chain_id')} 引用不存在 change_id：{sorted(unknown)}")
-        errors.extend(_validate_evidence_references(chain.get("evidence_references"), f"影响链 {chain.get('chain_id')}", True))
+        errors.extend(_validate_evidence_references(chain.get("evidence_references"), f"影响链 {chain.get('chain_id')}", True, evidence_root=evidence_root))
     diff_risks = data.get("risks", []) if isinstance(data.get("risks"), list) else []
     diff_risk_ids, risk_errors = _unique_ids(diff_risks, "risk_id")
     errors.extend(risk_errors)
@@ -964,7 +1015,7 @@ def validate_diff_model(data: dict[str, Any]) -> list[str]:
         unknown = set(risk.get("change_ids", [])) - change_ids
         if unknown:
             errors.append(f"Diff 风险 {risk.get('risk_id')} 引用不存在 change_id：{sorted(unknown)}")
-        errors.extend(_validate_evidence_references(risk.get("evidence_references"), f"Diff 风险 {risk.get('risk_id')}", risk.get("evidence_state") == "已确认"))
+        errors.extend(_validate_evidence_references(risk.get("evidence_references"), f"Diff 风险 {risk.get('risk_id')}", risk.get("evidence_state") == "已确认", evidence_root=evidence_root))
     for coverage in data.get("coverage_results", []) if isinstance(data.get("coverage_results"), list) else []:
         status = coverage.get("coverage_status")
         if status not in COVERAGE_STATUSES:
@@ -988,11 +1039,11 @@ def validate_diff_model(data: dict[str, Any]) -> list[str]:
             errors.append(f"疑似缺陷 {defect_id} observed 与 expected 不得相同")
         if defect.get("confidence") == "low":
             errors.append(f"低置信度项 {defect_id} 只能记录为风险")
-        errors.extend(_validate_evidence_references(defect.get("evidence_references"), f"疑似缺陷 {defect_id}", True))
+        errors.extend(_validate_evidence_references(defect.get("evidence_references"), f"疑似缺陷 {defect_id}", True, evidence_root=evidence_root))
     return list(dict.fromkeys(errors))
 
 
-def validate_risk_matrix(data: dict[str, Any]) -> list[str]:
+def validate_risk_matrix(data: dict[str, Any], *, evidence_root: Path | None = None) -> list[str]:
     errors = validate_schema_shape(data, risk_matrix_schema("0.0.0"))
     risks = data.get("risk_items", []) if isinstance(data.get("risk_items"), list) else []
     _, id_errors = _unique_ids(risks, "risk_id")
@@ -1064,7 +1115,7 @@ def validate_risk_matrix(data: dict[str, Any]) -> list[str]:
                 errors.append(f"风险 {risk.get('risk_id')} 引用非法 TC：{tc_id}")
         if risk.get("business_entry") not in risk.get("business_entries", []):
             errors.append(f"风险 {risk.get('risk_id')} 主 business_entry 必须包含在 business_entries")
-        errors.extend(_validate_evidence_references(risk.get("evidence_references"), f"风险 {risk.get('risk_id')}", risk.get("evidence_state") == "已确认"))
+        errors.extend(_validate_evidence_references(risk.get("evidence_references"), f"风险 {risk.get('risk_id')}", risk.get("evidence_state") == "已确认", evidence_root=evidence_root))
     summary = data.get("coverage_summary", {})
     expected_summary = {
         "risk_count": len(risks),
@@ -1116,7 +1167,13 @@ def validate_testcase_model(data: dict[str, Any]) -> list[str]:
         else:
             if not case.get("test_point") or not case.get("steps") or not case.get("expected_results"):
                 errors.append(f"{tc_id} 缺少唯一测试点、步骤或预期")
-        if not branches and case.get("common_entry") and any(token in " ".join(case.get("steps", [])) for token in ("/", "、", "分别", "以及")):
+        steps_text = " ".join(str(step) for step in case.get("steps", []))
+        entry_marker_count = sum(steps_text.count(marker) for marker in ("页面", "弹窗", "页签", "下钻", "入口"))
+        explicit_multi_entry = bool(re.search(r"分别(?:打开|进入)|依次(?:打开|进入)|在多个|所有相关", steps_text))
+        if not branches and case.get("common_entry") and (
+            entry_marker_count >= 2 and bool(re.search(r"[/、，,]|分别|以及|多个|三个|各个", steps_text))
+            or entry_marker_count >= 1 and explicit_multi_entry
+        ):
             errors.append(f"{tc_id} 可能将多个入口压在同一步骤，必须填写 entry_branches 并拆成平级分支")
         errors.extend(_validate_step_expectations(tc_id, case.get("steps", []), case.get("expected_results", []), "expected_results"))
         for action in case.get("actions", []):
@@ -1186,6 +1243,9 @@ def _validate_step_expectations(tc_id: Any, steps: Any, expected_results: Any, l
         vague = next((token for token in VAGUE_ASSERTIONS if token in str(result)), None)
         if vague and not re.search(r"(?:字段|状态|文案).*(?:异常.*正常|正常.*异常)", str(result)):
             errors.append(f"{tc_id} {location} 包含模糊断言或未确认口径：{vague}")
+        quality_error = expectation_quality_error(str(result), " ".join(str(step) for step in steps))
+        if quality_error:
+            errors.append(f"{quality_error}: {tc_id} {location} 缺少可执行基线或 Oracle：{result}")
     return errors
 
 
@@ -1456,16 +1516,18 @@ def validate_model_links(
     """Validate IDs and reverse mappings across all structured handoff models."""
 
     errors: list[str] = []
-    requirement_ids = {
-        item.get("criterion_id") for item in (requirement or {}).get("acceptance_criteria", [])
+    criteria_by_id = {
+        item.get("criterion_id"): item for item in (requirement or {}).get("acceptance_criteria", [])
     }
+    requirement_ids = set(criteria_by_id)
     change_ids = {item.get("change_id") for item in (diff or {}).get("change_items", [])}
     confirmed_fact_ids = {item.get("fact_id") for item in (requirement or {}).get("facts", []) if item.get("category") == "confirmed"}
     risks = {item.get("risk_id"): item for item in risk_matrix.get("risk_items", [])}
     diff_risks = {item.get("risk_id"): item for item in (diff or {}).get("risks", [])}
     defect_ids = {item.get("defect_id") for item in (diff or {}).get("suspected_defects", [])}
     cases = {item.get("tc_id"): item for item in testcase_model.get("cases", [])}
-    facts = {item.get("fact_id") for item in (requirement or {}).get("facts", [])}
+    facts_by_id = {item.get("fact_id"): item for item in (requirement or {}).get("facts", [])}
+    facts = set(facts_by_id)
     confirmations = {item.get("confirmation_id"): item for item in (requirement or {}).get("confirmation_points", [])}
     for risk_id in set(risks) & set(diff_risks):
         left, right = risks[risk_id], diff_risks[risk_id]
@@ -1499,6 +1561,36 @@ def validate_model_links(
             errors.append(f"Risk {risk_id} 必须至少引用一个真实 Fact 或 Change")
         if requirement is not None and fact_ids - facts:
             errors.append(f"Risk {risk_id} 引用不存在的 Fact：{sorted(fact_ids - facts)}")
+        if requirement is not None:
+            linked_evidence = {
+                evidence_reference_identity(evidence)
+                for fact_id in fact_ids
+                for evidence in facts_by_id.get(fact_id, {}).get("evidence_references", [])
+                if isinstance(evidence, dict)
+            }
+            linked_evidence.update(
+                evidence_reference_identity(evidence)
+                for criterion_id in risk.get("requirement_ids", [])
+                for evidence in criteria_by_id.get(criterion_id, {}).get("evidence_references", [])
+                if isinstance(evidence, dict)
+            )
+            risk_evidence = {
+                evidence_reference_identity(evidence)
+                for evidence in risk.get("evidence_references", []) if isinstance(evidence, dict)
+            }
+            if risk_evidence - linked_evidence:
+                errors.append(
+                    f"EVIDENCE_REFERENCE_NOT_DERIVED_FROM_LINKED_FACT: Risk {risk_id} 的证据未派生自关联 Fact/Acceptance Criteria"
+                )
+            if risk.get("evidence_state") == "已确认" and any(
+                facts_by_id.get(fact_id, {}).get("category") != "confirmed"
+                or not any(
+                    isinstance(evidence, dict) and evidence.get("evidence_status") == "current"
+                    for evidence in facts_by_id.get(fact_id, {}).get("evidence_references", [])
+                )
+                for fact_id in fact_ids
+            ):
+                errors.append(f"CONFIRMED_RISK_WITH_UNCONFIRMED_FACT: Risk {risk_id} 引用了未确认或无 current 证据的 Fact")
         disposition = risk.get("disposition_status")
         if disposition == "blocked":
             blocked_ids = set(risk.get("blocked_by_confirmation_ids") or risk.get("confirmation_ids", []))
@@ -1537,6 +1629,25 @@ def validate_model_links(
             unknown = set(case.get("requirement_ids", [])) - requirement_ids
             if unknown:
                 errors.append(f"{tc_id} 引用不存在需求点：{sorted(unknown)}")
+        if case.get("evidence_state") == "已确认":
+            linked_risks = [risks[risk_id] for risk_id in case.get("risk_ids", []) if risk_id in risks]
+            linked_criteria = [
+                criteria_by_id[criterion_id]
+                for criterion_id in case.get("requirement_ids", []) if criterion_id in criteria_by_id
+            ]
+            has_unconfirmed_link = any(risk.get("evidence_state") != "已确认" for risk in linked_risks)
+            for criterion in linked_criteria:
+                for fact_id in criterion.get("fact_ids", []):
+                    fact = facts_by_id.get(fact_id, {})
+                    if fact.get("category") != "confirmed" or not any(
+                        isinstance(evidence, dict) and evidence.get("evidence_status") == "current"
+                        for evidence in fact.get("evidence_references", [])
+                    ):
+                        has_unconfirmed_link = True
+            if has_unconfirmed_link:
+                errors.append(
+                    f"CONFIRMED_TESTCASE_WITH_UNCONFIRMED_LINK: {tc_id} 已确认，但关联 Risk/Fact 仍未确认"
+                )
         if diff is not None:
             unknown = set(case.get("change_ids", [])) - change_ids
             if unknown:
@@ -2064,6 +2175,26 @@ def validate_testcase_value_assessment(
 
     if testcase_model is None or risk_model is None:
         return list(dict.fromkeys(errors))
+    model_errors: list[str] = []
+    if requirement_model is not None:
+        model_errors.extend(
+            f"Requirement Model 非法：{error}"
+            for error in validate_requirement_model(requirement_model, evidence_root=root)
+        )
+    model_errors.extend(
+        f"Risk Matrix 非法：{error}"
+        for error in validate_risk_matrix(risk_model, evidence_root=root)
+    )
+    model_errors.extend(
+        f"Testcase Model 非法：{error}" for error in validate_testcase_model(testcase_model)
+    )
+    model_errors.extend(
+        f"Assessment 引用模型链路非法：{error}"
+        for error in validate_model_links(requirement_model, None, risk_model, testcase_model)
+    )
+    errors.extend(model_errors)
+    if model_errors:
+        return list(dict.fromkeys(errors))
     try:
         recomputed = calculate_testcase_value_assessments(
             testcase_model,
@@ -2134,6 +2265,9 @@ def format_testcase_value_assessment(assessment_model: dict[str, Any]) -> list[s
         else:
             insufficient_count += 1
 
+        if status == "insufficient_inputs":
+            continue
+
         guarded = bool(guardrails)
         low_band = assessment["value_band"] in {"review_simplify_or_merge", "low_value_review"}
         high_priority = "p0_mapped" in guardrails or dimensions["risk_coverage_value"] >= 3
@@ -2200,20 +2334,7 @@ MODEL_VALIDATORS: dict[str, Callable[[dict[str, Any]], list[str]]] = {
 
 
 def stable_source_hash(root: Path, paths: list[str]) -> str:
-    digest = hashlib.sha256()
-    for relative in sorted(paths):
-        normalized = Path(relative).as_posix()
-        path = (root / normalized).resolve()
-        root_resolved = root.resolve()
-        if path != root_resolved and root_resolved not in path.parents:
-            raise ValueError(f"来源路径越界：{relative}")
-        if not path.is_file():
-            raise ValueError(f"来源文件不存在：{relative}")
-        digest.update(normalized.encode("utf-8"))
-        digest.update(b"\0")
-        digest.update(path.read_bytes())
-        digest.update(b"\0")
-    return "sha256:" + digest.hexdigest()
+    return stable_multi_file_hash(root, paths)
 
 
 def valid_generated_at(value: Any) -> bool:

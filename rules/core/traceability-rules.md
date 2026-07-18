@@ -12,6 +12,8 @@
 
 每个 TC 必须出现在至少一条合法数据行，不以普通正文中的编号或 `TC001-TC010` 范围代替。每行必须有风险 ID；联动行必须同时有需求证据和 Diff 变更 ID；疑似遗漏和实现不一致必须关联风险。一个 TC 可显式列出多个风险或需求点，废弃测试点不计入覆盖。
 
+Acceptance Criteria 的 Evidence 必须是其关联 confirmed Fact Evidence 的子集；Risk Evidence 必须派生自其关联 Fact 或 Acceptance Criteria，不得另接无关行号。标记“已确认”的 Risk 必须只引用有 current Evidence 的 confirmed Fact；标记“已确认”的 TC 不得链接待确认/疑似 Risk 或未确认 Fact。
+
 ## 分类字段
 
 - 风险等级和执行优先级：P0、P1、P2，不使用 P3。

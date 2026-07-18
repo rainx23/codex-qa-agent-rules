@@ -95,13 +95,24 @@ def update(index: Path, manifest: Path) -> None:
     data, errors = validate_manifest_file(manifest)
     if errors:
         raise ValueError("；".join(errors))
-    row = build_row(data, manifest)
+    root = index.resolve().parent.parent if index.resolve().parent.name == "testcases" else index.resolve().parent
+    try:
+        indexed_manifest = manifest.resolve().relative_to(root).as_posix()
+    except ValueError as exc:
+        raise ValueError(f"Manifest 必须位于索引所属仓库内：{manifest}") from exc
+    row = build_row(data, Path(indexed_manifest))
     text = index.read_text(encoding="utf-8-sig") if index.exists() else HEADER
     lines = migrate_index_text(text).splitlines()
     marker = f"artifact_id={data['artifact_id']}"
     positions = [position for position, line in enumerate(lines) if marker in line]
     if len(positions) > 1:
         raise ValueError(f"索引中 artifact_id 重复：{data['artifact_id']}")
+    manifest_positions = [
+        position for position, line in enumerate(lines)
+        if len(_cells(line)) == 11 and _cells(line)[9].replace("\\", "/") == indexed_manifest
+    ]
+    if len(manifest_positions) > 1 or (manifest_positions and manifest_positions != positions):
+        raise ValueError(f"索引中 Manifest 路径重复或绑定其他 artifact_id：{indexed_manifest}")
     if positions:
         lines[positions[0]] = row
     else:

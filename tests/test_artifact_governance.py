@@ -14,7 +14,8 @@ from build_testcase_index import migrate_index_text, update
 from md_to_xmind import convert_file
 from qa_contracts import read_rule_version, stable_source_hash
 from repair_text_encoding import merge_reference_index, repair_text
-from validate_manifest import validate_manifest_file
+from validate_manifest import artifact_workspace_root, resolve_safe_path, validate_manifest_file
+from validate_models import _evidence_root
 from validate_skill_contracts import validate_skill
 
 
@@ -154,9 +155,47 @@ class ArtifactGovernanceTests(unittest.TestCase):
         _, errors = validate_manifest_file(ROOT / "testcases/manifest.example.json")
         self.assertEqual([], errors)
 
+    def test_external_workspace_root_artifacts_and_evidence_resolve_locally(self):
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            manifest = workspace / "delivery-manifest.json"
+            artifact = workspace / "delivery-report.md"
+            artifact.write_text("# report\n", encoding="utf-8")
+            manifest.write_text("{}", encoding="utf-8")
+            self.assertEqual(workspace.resolve(), artifact_workspace_root(manifest))
+            resolved, error = resolve_safe_path(artifact.name, manifest)
+            self.assertIsNone(error)
+            self.assertEqual(artifact.resolve(), resolved)
+            self.assertEqual(workspace.resolve(), _evidence_root(workspace / "requirement.json"))
+
     def test_passed_manifest_revalidates_every_artifact(self):
         manifest, _ = self.make_passed_manifest()
         self.assertEqual([], validate_manifest_file(manifest)[1])
+
+    def test_real_passed_manifest_source_hash_survives_text_line_endings_and_bom(self):
+        manifest, data = self.make_passed_manifest()
+        source = ROOT / data["source_files"][0]
+        normalized = source.read_text(encoding="utf-8").replace("\r\n", "\n").replace("\r", "\n")
+        for payload in (
+            normalized.replace("\n", "\r\n").encode("utf-8"),
+            normalized.replace("\n", "\r").encode("utf-8"),
+            b"\xef\xbb\xbf" + normalized.encode("utf-8"),
+        ):
+            with self.subTest(prefix=payload[:3]):
+                source.write_bytes(payload)
+                self.assertEqual([], validate_manifest_file(manifest)[1])
+
+    def test_passed_artifacts_allow_sql_blocked_as_an_independent_state(self):
+        manifest, data = self.make_passed_manifest()
+        data.update(sql_status="blocked", validation_sql=None, execution_evidence=None)
+        self.assertEqual([], self.errors_for(manifest, data))
+
+    def test_sql_blocked_rejects_fake_sql_or_execution_evidence(self):
+        manifest, data = self.make_passed_manifest()
+        data.update(sql_status="blocked", validation_sql="validation.sql", execution_evidence="not-run")
+        errors = self.errors_for(manifest, data)
+        self.assertTrue(any("validation_sql 必须为 null" in error for error in errors))
+        self.assertTrue(any("execution_evidence 必须为 null" in error for error in errors))
 
     def test_source_hash_format_can_pass_while_content_mismatch_fails(self):
         manifest, data = self.make_passed_manifest()

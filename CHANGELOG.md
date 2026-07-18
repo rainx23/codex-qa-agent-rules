@@ -12,6 +12,56 @@
 
 ### Fixed
 
+## [2.10.0] - 2026-07-18
+
+### Added
+
+- 新增 Workbook 完整树无损复验、索引与合法 Manifest 强一致校验，以及 Ubuntu/Windows、Python 3.10/3.12 的产物治理兼容矩阵。
+- 新增真正可计算的 Testcase Value Assessment 模型组和 Golden 输出，并在评分前校验全部引用模型与跨模型链接。
+
+### Changed
+
+- 规则版本从 2.9.0 升级到 2.10.0；Manifest 组合来源 Hash 统一使用文本换行/BOM 归一化、二进制原始字节和规范化相对路径。
+- 正式 CI 接入当前真实 Manifest、模型、Workbook、index 及临时 Workbook 复验。
+
+### Fixed
+
+- 阻止结构或容量 Evidence 推导自动去重等额外业务行为，阻止模糊统计口径和无基线回归断言。
+- 修复 `insufficient_inputs` 产生低价值或简化建议的问题。
+
+## [2.9.0] - 2026-07-18
+
+### Added
+
+- 新增证据精确定位、Acceptance/Risk 派生证据、confirmed 链路和字段结构不能推导业务行为的通用校验与回归测试。
+- 新增 `validate_testcase_index.py` 和 `verify_xmind.py` 正式入口，校验 passed Manifest 唯一登记及 XMind 无损转换。
+
+### Changed
+
+- 规则版本从 2.8.0 升级到 2.9.0；Manifest 的测试设计状态与 SQL 状态正式分离，允许完整产物使用 `passed + sql_status=blocked`。
+- XMind 模糊断言扩展到“按已确认规则处理”等占位表达，并继续保持无硬长度门禁、无损语义精简和混合逻辑括号规则。
+
+### Fixed
+
+- 修复机械复用首行证据、无关 Risk/Acceptance 证据、字段存在越权扩写行为用例，以及 passed Manifest 漏登或重复登记仍可完成的问题。
+
+## [2.8.0] - 2026-07-18
+
+### Added
+
+- 新增 blocking Confirmation 解除后的完整状态迁移与原始任务自动续跑契约，覆盖 Confirmation 证据、关联 Fact、风险、验收标准、Risk Matrix、Testcase Model 和正式产物链。
+- 新增 XMind 无损语义精简规则与校验测试，允许明确的比较、集合、逻辑和状态迁移符号；拒绝截断标记，并提示未加括号的混合 AND/OR。
+
+### Changed
+
+- 规则版本从 2.7.0 升级到 2.8.0；需求、用例与产物 Skill 在 blocking 归零后自动完成原始任务，不要求用户重复发送继续指令。
+- 完整交付明确要求 Requirement Analysis Model、Risk Coverage Matrix、Testcase Model、XMind Markdown、Workbook、Manifest 和索引全部通过正式复验。
+
+### Fixed
+
+- 修复只更新需求报告和 XMind Markdown、未同步 JSON 模型与正式产物的问题。
+- 明确 XMind 不使用固定字符上限，不因节点较长失败或告警，也不自动改写用户文本。
+
 ## [2.7.0] - 2026-07-17
 
 ### Added

@@ -1,8 +1,11 @@
-ASSESSMENT TC001 status=insufficient_inputs score=null band=null recommendation=insufficient_inputs
-DIMENSIONS TC001 business_impact=0 risk_coverage_value=0 regression_value=3 diagnostic_value=0 evidence_confidence=0 maintenance_cost=4 redundancy_penalty=0
-REASON TC001 LOW_EVIDENCE_CONFIDENCE
-REASON TC001 HIGH_MAINTENANCE_COST
-REASON TC001 INSUFFICIENT_INPUTS
-SUGGESTION TC001 REVIEW_LOW_VALUE_SMOKE
-SUGGESTION TC001 REVIEW_SIMPLIFICATION
-SUMMARY testcase_value_assessment computed=0 insufficient=1 warning=0 suggestion=2 error=0
+ASSESSMENT TC001 status=computed score=98 band=high_value_core recommendation=retain_guarded
+DIMENSIONS TC001 business_impact=5 risk_coverage_value=5 regression_value=5 diagnostic_value=5 evidence_confidence=5 maintenance_cost=1 redundancy_penalty=0
+GUARDRAIL TC001 p0_mapped
+REASON TC001 CRITICAL_BUSINESS_IMPACT
+REASON TC001 P0_RISK_COVERAGE
+REASON TC001 CORE_REGRESSION
+ASSESSMENT TC002 status=computed score=79 band=regression_keep recommendation=retain
+DIMENSIONS TC002 business_impact=4 risk_coverage_value=4 regression_value=3 diagnostic_value=5 evidence_confidence=5 maintenance_cost=1 redundancy_penalty=0
+REASON TC002 HIGH_BUSINESS_IMPACT
+REASON TC002 UNIQUE_P1_RISK_COVERAGE
+SUMMARY testcase_value_assessment computed=2 insufficient=0 warning=0 suggestion=0 error=0

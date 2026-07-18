@@ -1,0 +1,891 @@
+{
+  "schema_version": "2.0.0",
+  "analysis_id": "AN-CLEARANCE-PERMISSION-20260718",
+  "report_mode": "requirement",
+  "source_type": "pasted_text",
+  "source_ids": [
+    "CHAT-CLEARANCE-PERMISSION-20260718"
+  ],
+  "analysis_scope": "模拟交易和正式交易汇总卡片-清仓股弹窗行权限及汇总统计",
+  "business_goal": "按配置权限隔离清仓股数据并保持策略段和统计口径一致",
+  "acceptance_basis": "四类新权限、role_type 映射、权限过滤、策略隔离、AND/OR 组合及可用资金弹窗回归",
+  "facts": [
+    {
+      "fact_id": "FACT-001",
+      "category": "confirmed",
+      "statement": "清仓股弹窗新增建仓人、建仓人（指定用户）、跟进人、跟进人（指定用户）四类权限，并保留原有权限",
+      "source_type": "pasted_text",
+      "source_reference": "CHAT-CLEARANCE-PERMISSION-20260718",
+      "confidence": "high",
+      "affects_core_expectation": true,
+      "handling": null,
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 1,
+          "line_end": 1,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "模拟交易+正式交易列表弹窗权限配置：新增跟进人、跟进人（指定用户）、建仓人、建仓人（指定用户）",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        },
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 7,
+          "line_end": 7,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "确认：汇总统计口径不影响本次验收；可以配置多个条件并使用 OR、AND 连接，原有权限保留。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    },
+    {
+      "fact_id": "FACT-002",
+      "category": "confirmed",
+      "statement": "建仓人取 role_type=10 或 20",
+      "source_type": "pasted_text",
+      "source_reference": "CHAT-CLEARANCE-PERMISSION-20260718",
+      "confidence": "high",
+      "affects_core_expectation": true,
+      "handling": null,
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 3,
+          "line_end": 3,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "建仓人取 role_type=10-建仓、20-加仓；跟进人取 role_type=30-跟进人。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    },
+    {
+      "fact_id": "FACT-003",
+      "category": "confirmed",
+      "statement": "跟进人取 role_type=30",
+      "source_type": "pasted_text",
+      "source_reference": "CHAT-CLEARANCE-PERMISSION-20260718",
+      "confidence": "high",
+      "affects_core_expectation": true,
+      "handling": null,
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 3,
+          "line_end": 3,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "建仓人取 role_type=10-建仓、20-加仓；跟进人取 role_type=30-跟进人。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    },
+    {
+      "fact_id": "FACT-004",
+      "category": "confirmed",
+      "statement": "用户仅看到权限命中的股票行，汇总行统计按相同权限过滤",
+      "source_type": "pasted_text",
+      "source_reference": "CHAT-CLEARANCE-PERMISSION-20260718",
+      "confidence": "high",
+      "affects_core_expectation": true,
+      "handling": null,
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 5,
+          "line_end": 5,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "用户仅看到被配置的数据，列表股票行和汇总行统计均按权限过滤；清仓策略和清后重建策略分别控权。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    },
+    {
+      "fact_id": "FACT-005",
+      "category": "confirmed",
+      "statement": "清仓策略和清后重建策略分别控权",
+      "source_type": "pasted_text",
+      "source_reference": "CHAT-CLEARANCE-PERMISSION-20260718",
+      "confidence": "high",
+      "affects_core_expectation": true,
+      "handling": null,
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 5,
+          "line_end": 5,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "用户仅看到被配置的数据，列表股票行和汇总行统计均按权限过滤；清仓策略和清后重建策略分别控权。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    },
+    {
+      "fact_id": "FACT-006",
+      "category": "confirmed",
+      "statement": "普通建仓人和跟进人支持五种关系条件，指定用户支持包含于和不包含并可追加多个用户",
+      "source_type": "pasted_text",
+      "source_reference": "CHAT-CLEARANCE-PERMISSION-20260718",
+      "confidence": "high",
+      "affects_core_expectation": true,
+      "handling": null,
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 4,
+          "line_end": 4,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "建仓人和跟进人支持等于、不等于、包含于、不包含、完全包含于；指定用户支持包含于、不包含，可追加多个用户。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    },
+    {
+      "fact_id": "FACT-007",
+      "category": "confirmed",
+      "statement": "可用资金弹窗不受影响",
+      "source_type": "pasted_text",
+      "source_reference": "CHAT-CLEARANCE-PERMISSION-20260718",
+      "confidence": "high",
+      "affects_core_expectation": true,
+      "handling": null,
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 2,
+          "line_end": 2,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "位置：汇总卡片-清仓股弹窗。可用资金弹窗不受影响。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    },
+    {
+      "fact_id": "FACT-008",
+      "category": "confirmed",
+      "statement": "包含于表示任一数据满足，完全包含于表示全部数据满足",
+      "source_type": "pasted_text",
+      "source_reference": "CHAT-CLEARANCE-PERMISSION-20260718",
+      "confidence": "high",
+      "affects_core_expectation": true,
+      "handling": null,
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 6,
+          "line_end": 6,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "确认：包含于表示多个数据任一满足；完全包含于表示多个数据全部满足。一个批次存在多个 role_type 时按配置的权限条件判断。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    },
+    {
+      "fact_id": "FACT-009",
+      "category": "confirmed",
+      "statement": "同一批次多个 role_type 按已配置权限条件判断",
+      "source_type": "pasted_text",
+      "source_reference": "CHAT-CLEARANCE-PERMISSION-20260718",
+      "confidence": "high",
+      "affects_core_expectation": true,
+      "handling": null,
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 6,
+          "line_end": 6,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "确认：包含于表示多个数据任一满足；完全包含于表示多个数据全部满足。一个批次存在多个 role_type 时按配置的权限条件判断。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    },
+    {
+      "fact_id": "FACT-010",
+      "category": "confirmed",
+      "statement": "多个新旧权限条件支持 OR 和 AND 连接",
+      "source_type": "pasted_text",
+      "source_reference": "CHAT-CLEARANCE-PERMISSION-20260718",
+      "confidence": "high",
+      "affects_core_expectation": true,
+      "handling": null,
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 7,
+          "line_end": 7,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "确认：汇总统计口径不影响本次验收；可以配置多个条件并使用 OR、AND 连接，原有权限保留。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    }
+  ],
+  "confirmation_points": [],
+  "risks": [
+    {
+      "risk_id": "RISK-001",
+      "statement": "无权限股票行被返回或通过分页刷新泄露",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 5,
+          "line_end": 5,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "用户仅看到被配置的数据，列表股票行和汇总行统计均按权限过滤；清仓策略和清后重建策略分别控权。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-002",
+      "statement": "正式交易清仓股弹窗权限过滤失效",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 5,
+          "line_end": 5,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "用户仅看到被配置的数据，列表股票行和汇总行统计均按权限过滤；清仓策略和清后重建策略分别控权。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-003",
+      "statement": "股票行已过滤但汇总行仍包含无权限数据",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 5,
+          "line_end": 5,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "用户仅看到被配置的数据，列表股票行和汇总行统计均按权限过滤；清仓策略和清后重建策略分别控权。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-004",
+      "statement": "清仓策略与清后重建策略发生串权",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 5,
+          "line_end": 5,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "用户仅看到被配置的数据，列表股票行和汇总行统计均按权限过滤；清仓策略和清后重建策略分别控权。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-005",
+      "statement": "role_type 取值错误导致建仓人或跟进人越权命中",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 3,
+          "line_end": 3,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "建仓人取 role_type=10-建仓、20-加仓；跟进人取 role_type=30-跟进人。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        },
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 6,
+          "line_end": 6,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "确认：包含于表示多个数据任一满足；完全包含于表示多个数据全部满足。一个批次存在多个 role_type 时按配置的权限条件判断。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-006",
+      "statement": "四类新权限、关系条件或指定用户组件保存回显错误",
+      "test_priority": "P1",
+      "evidence_state": "已确认",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 1,
+          "line_end": 1,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "模拟交易+正式交易列表弹窗权限配置：新增跟进人、跟进人（指定用户）、建仓人、建仓人（指定用户）",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        },
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 4,
+          "line_end": 4,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "建仓人和跟进人支持等于、不等于、包含于、不包含、完全包含于；指定用户支持包含于、不包含，可追加多个用户。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-007",
+      "statement": "原有权限被覆盖，或可用资金弹窗被误影响",
+      "test_priority": "P1",
+      "evidence_state": "已确认",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 1,
+          "line_end": 1,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "模拟交易+正式交易列表弹窗权限配置：新增跟进人、跟进人（指定用户）、建仓人、建仓人（指定用户）",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        },
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 2,
+          "line_end": 2,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "位置：汇总卡片-清仓股弹窗。可用资金弹窗不受影响。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        },
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 7,
+          "line_end": 7,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "确认：汇总统计口径不影响本次验收；可以配置多个条件并使用 OR、AND 连接，原有权限保留。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-008",
+      "statement": "任一/全部命中及 AND/OR 组合逻辑错误",
+      "test_priority": "P1",
+      "evidence_state": "已确认",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 6,
+          "line_end": 6,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "确认：包含于表示多个数据任一满足；完全包含于表示多个数据全部满足。一个批次存在多个 role_type 时按配置的权限条件判断。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        },
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 7,
+          "line_end": 7,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "确认：汇总统计口径不影响本次验收；可以配置多个条件并使用 OR、AND 连接，原有权限保留。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    }
+  ],
+  "acceptance_criteria": [
+    {
+      "criterion_id": "REQ001",
+      "statement": "四类新权限和原有权限配置",
+      "fact_ids": [
+        "FACT-001",
+        "FACT-006"
+      ],
+      "risk_ids": [
+        "RISK-006"
+      ],
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 1,
+          "line_end": 1,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "模拟交易+正式交易列表弹窗权限配置：新增跟进人、跟进人（指定用户）、建仓人、建仓人（指定用户）",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        },
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 7,
+          "line_end": 7,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "确认：汇总统计口径不影响本次验收；可以配置多个条件并使用 OR、AND 连接，原有权限保留。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        },
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 4,
+          "line_end": 4,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "建仓人和跟进人支持等于、不等于、包含于、不包含、完全包含于；指定用户支持包含于、不包含，可追加多个用户。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    },
+    {
+      "criterion_id": "REQ002",
+      "statement": "股票行权限过滤",
+      "fact_ids": [
+        "FACT-004"
+      ],
+      "risk_ids": [
+        "RISK-001",
+        "RISK-002"
+      ],
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 5,
+          "line_end": 5,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "用户仅看到被配置的数据，列表股票行和汇总行统计均按权限过滤；清仓策略和清后重建策略分别控权。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    },
+    {
+      "criterion_id": "REQ003",
+      "statement": "汇总行按权限统计",
+      "fact_ids": [
+        "FACT-004"
+      ],
+      "risk_ids": [
+        "RISK-003"
+      ],
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 5,
+          "line_end": 5,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "用户仅看到被配置的数据，列表股票行和汇总行统计均按权限过滤；清仓策略和清后重建策略分别控权。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    },
+    {
+      "criterion_id": "REQ004",
+      "statement": "清仓与清后重建策略隔离",
+      "fact_ids": [
+        "FACT-005"
+      ],
+      "risk_ids": [
+        "RISK-004"
+      ],
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 5,
+          "line_end": 5,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "用户仅看到被配置的数据，列表股票行和汇总行统计均按权限过滤；清仓策略和清后重建策略分别控权。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    },
+    {
+      "criterion_id": "REQ005",
+      "statement": "role_type 映射",
+      "fact_ids": [
+        "FACT-002",
+        "FACT-003",
+        "FACT-009"
+      ],
+      "risk_ids": [
+        "RISK-005"
+      ],
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 3,
+          "line_end": 3,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "建仓人取 role_type=10-建仓、20-加仓；跟进人取 role_type=30-跟进人。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        },
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 3,
+          "line_end": 3,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "建仓人取 role_type=10-建仓、20-加仓；跟进人取 role_type=30-跟进人。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        },
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 6,
+          "line_end": 6,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "确认：包含于表示多个数据任一满足；完全包含于表示多个数据全部满足。一个批次存在多个 role_type 时按配置的权限条件判断。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    },
+    {
+      "criterion_id": "REQ006",
+      "statement": "包含于/完全包含于语义",
+      "fact_ids": [
+        "FACT-008"
+      ],
+      "risk_ids": [
+        "RISK-008"
+      ],
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 6,
+          "line_end": 6,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "确认：包含于表示多个数据任一满足；完全包含于表示多个数据全部满足。一个批次存在多个 role_type 时按配置的权限条件判断。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    },
+    {
+      "criterion_id": "REQ007",
+      "statement": "多条件 AND/OR 和原有权限组合",
+      "fact_ids": [
+        "FACT-001",
+        "FACT-010"
+      ],
+      "risk_ids": [
+        "RISK-007",
+        "RISK-008"
+      ],
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 1,
+          "line_end": 1,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "模拟交易+正式交易列表弹窗权限配置：新增跟进人、跟进人（指定用户）、建仓人、建仓人（指定用户）",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        },
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 7,
+          "line_end": 7,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "确认：汇总统计口径不影响本次验收；可以配置多个条件并使用 OR、AND 连接，原有权限保留。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        },
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 7,
+          "line_end": 7,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "确认：汇总统计口径不影响本次验收；可以配置多个条件并使用 OR、AND 连接，原有权限保留。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    },
+    {
+      "criterion_id": "REQ008",
+      "statement": "可用资金弹窗回归",
+      "fact_ids": [
+        "FACT-007"
+      ],
+      "risk_ids": [
+        "RISK-007"
+      ],
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718/evidence/user-requirement.md",
+          "source_record_id": "CHAT-CLEARANCE-PERMISSION-20260718",
+          "line_start": 2,
+          "line_end": 2,
+          "commit_sha": null,
+          "content_hash": "sha256:a1704a6541125dffae577db05ec0c5826898d2522eb774c44487aec0292b5944",
+          "excerpt": "位置：汇总卡片-清仓股弹窗。可用资金弹窗不受影响。",
+          "captured_at": "2026-07-18 16:32:18",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current",
+          "storage_type": "snapshot"
+        }
+      ]
+    }
+  ],
+  "regression_scope": [
+    "核心回归",
+    "关联回归",
+    "冒烟回归"
+  ],
+  "matched_profiles": [
+    "web-ui",
+    "financial"
+  ],
+  "data_validation_required": "required",
+  "data_validation_reason": "需求涉及角色表字段、权限过滤结果和汇总统计，需要核对列表与角色数据口径；当前只具备字段片段，无法生成可执行 SQL",
+  "recommended_validation_method": "sql",
+  "sql_generation_status": "blocked",
+  "validation_missing_information": [
+    "完整 CREATE TABLE DDL、查询接口/SQL、汇总指标口径和可执行测试数据"
+  ]
+}

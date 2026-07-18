@@ -12,6 +12,8 @@ from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Any
 
+from assertion_quality import expectation_quality_error
+
 VALID_DIMENSIONS = {
     "功能测试", "数据测试", "异常测试", "权限测试",
     "导出测试", "兼容性测试", "回归测试", "SQL验证",
@@ -19,6 +21,7 @@ VALID_DIMENSIONS = {
 FUZZY_ASSERTIONS = (
     "正常", "正确", "合理", "符合预期", "功能可用", "页面无异常",
     "查询成功", "展示正常", "运行正常", "交互正常", "数据正常",
+    "按已确认规则处理", "按系统现有逻辑处理", "按规则处理", "处理成功", "展示正确",
 )
 LABEL_PREFIXES = (
     "模块：", "模块:", "测试点：", "测试点:",
@@ -32,6 +35,8 @@ TC_LIKE_RE = re.compile(r"^TC", re.IGNORECASE)
 LIST_RE = re.compile(r"^(?P<indent> *)-\s+(?P<title>.*?)\s*$")
 ENTRY_MARKERS = ("页面", "弹窗", "页签", "下钻", "入口")
 ENTRY_PLACEHOLDER_RE = re.compile(r"^(?:入口|页面|弹窗)[A-Z一二三四五六七八九十0-9]+$")
+TRUNCATION_MARKERS = ("...", "……")
+AMBIGUOUS_BOOLEAN_RE = re.compile(r"(?<![A-Za-z0-9_])AND(?![A-Za-z0-9_]).*(?<![A-Za-z0-9_])OR(?![A-Za-z0-9_])|(?<![A-Za-z0-9_])OR(?![A-Za-z0-9_]).*(?<![A-Za-z0-9_])AND(?![A-Za-z0-9_])", re.IGNORECASE)
 
 
 class ValidationError(ValueError):
@@ -130,9 +135,8 @@ def _fuzzy_tokens(title: str) -> list[str]:
 def _compressed_entry_error(tc: Node) -> Node | None:
     """Return the step that packs multiple UI entrances into one action text."""
 
-    for node in walk_nodes(tc):
-        if node is tc:
-            continue
+    steps = {id(path[-2]): path[-2] for path in descendant_paths(tc) if len(path) >= 2}
+    for node in steps.values():
         marker_count = sum(node.title.count(marker) for marker in ENTRY_MARKERS)
         has_split_language = bool(re.search(r"[/、，,]|分别|以及|多个|三个|各个", node.title))
         explicit_multi = bool(re.search(r"分别(?:打开|进入)|依次(?:打开|进入)|在多个|所有相关", node.title))
@@ -201,6 +205,8 @@ def _parse_markdown(markdown: str, source: Path) -> tuple[list[Node], list[Node]
             errors.append(f"{source}:{line_no}: 禁止标签式节点 '{title}'")
         if PLACEHOLDER_RE.search(title):
             errors.append(f"{source}:{line_no}: 禁止虚构 SQL、字段、接口或页面占位名称")
+        if any(marker in title for marker in TRUNCATION_MARKERS):
+            errors.append(f"{source}:{line_no}: 节点包含截断或省略标记，必须保留完整测试语义")
 
     if len(roots) != 1:
         errors.append(f"{source}: 根节点必须唯一，实际 {len(roots)} 个")
@@ -226,6 +232,11 @@ def validate_markdown_text(markdown: str, source: Path | str = "<memory>") -> Ou
         errors.append(f"{source}:{root.line}: 根节点缺少测试维度")
 
     tc_nodes = [node for node in nodes if TC_RE.fullmatch(node.title)]
+    for node in nodes:
+        if AMBIGUOUS_BOOLEAN_RE.search(node.title) and not any(token in node.title for token in ("(", ")", "（", "）")):
+            warnings.append(
+                f"{source}:{node.line}: AND/OR 同时出现但缺少括号；请明确逻辑优先级"
+            )
     for dimension in root.children:
         if dimension.title not in VALID_DIMENSIONS:
             errors.append(f"{source}:{dimension.line}: 非法测试维度 '{dimension.title}'")
@@ -331,6 +342,10 @@ def validate_markdown_text(markdown: str, source: Path | str = "<memory>") -> Ou
         matched = _fuzzy_tokens(expected.title)
         if matched:
             errors.append(f"{source}:{expected.line}: 预期包含模糊断言 {matched}，必须改为可观察结果")
+        context_path = next((path for path in descendant_paths(root) if expected in path), [])
+        quality_error = expectation_quality_error(expected.title, " ".join(node.title for node in context_path[:-1]))
+        if quality_error:
+            errors.append(f"{source}:{expected.line}: {quality_error}: 预期缺少可执行基线或 Oracle")
 
     if errors:
         raise ValidationError("\n".join(dict.fromkeys(errors)))
@@ -588,11 +603,46 @@ def count_tree_nodes(node: Node) -> int:
     return 1 + sum(count_tree_nodes(child) for child in node.children)
 
 
+def markdown_tree(node: Node) -> dict[str, Any]:
+    return {"title": node.title, "children": [markdown_tree(child) for child in node.children]}
+
+
+def _xmind_topic_tree(topic: dict[str, Any], path: Path) -> dict[str, Any]:
+    title = topic.get("title")
+    if not isinstance(title, str) or not title:
+        raise ValidationError(f"{path}: XMind 存在空标题节点")
+    children = topic.get("children", {}).get("attached", [])
+    if not isinstance(children, list):
+        raise ValidationError(f"{path}: XMind 子节点结构非法")
+    return {"title": title, "children": [_xmind_topic_tree(child, path) for child in children]}
+
+
+def compare_topic_trees(expected: dict[str, Any], actual: dict[str, Any], *, path: tuple[str, ...] = ()) -> None:
+    expected_title = str(expected.get("title", ""))
+    actual_title = str(actual.get("title", ""))
+    current = (*path, expected_title or actual_title or "<empty>")
+    display_path = "/".join(("root", *current[1:]))
+    if expected_title != actual_title:
+        raise ValidationError(
+            f"TREE_TITLE_MISMATCH path={display_path}: Markdown={expected_title!r} Workbook={actual_title!r}"
+        )
+    expected_children = expected.get("children", [])
+    actual_children = actual.get("children", [])
+    if len(expected_children) != len(actual_children):
+        raise ValidationError(
+            f"TREE_CHILD_COUNT_MISMATCH path={display_path}: "
+            f"Markdown={len(expected_children)} Workbook={len(actual_children)}"
+        )
+    for expected_child, actual_child in zip(expected_children, actual_children):
+        compare_topic_trees(expected_child, actual_child, path=current)
+
+
 def validate_xmind_archive(
     path: Path,
     expected_root: str | None = None,
     expected_tc_count: int | None = None,
     expected_node_count: int | None = None,
+    expected_tree: dict[str, Any] | None = None,
 ) -> dict:
     required = {"content.json", "metadata.json", "manifest.json"}
     try:
@@ -613,20 +663,15 @@ def validate_xmind_archive(
     if not isinstance(content, list) or len(content) != 1 or "rootTopic" not in content[0]:
         raise ValidationError(f"{path}: XMind 必须包含唯一根主题")
     root = content[0]["rootTopic"]
+    actual_tree = _xmind_topic_tree(root, path)
     titles: list[str] = []
 
-    def walk(topic: dict) -> None:
-        title = topic.get("title")
-        if not isinstance(title, str) or not title:
-            raise ValidationError(f"{path}: XMind 存在空标题节点")
-        titles.append(title)
-        children = topic.get("children", {}).get("attached", [])
-        if not isinstance(children, list):
-            raise ValidationError(f"{path}: XMind 子节点结构非法")
-        for child in children:
-            walk(child)
+    def collect(tree: dict[str, Any]) -> None:
+        titles.append(tree["title"])
+        for child in tree["children"]:
+            collect(child)
 
-    walk(root)
+    collect(actual_tree)
     if expected_root is not None and root.get("title") != expected_root:
         raise ValidationError(f"{path}: 根主题名称不一致")
     actual_tc = sum(bool(TC_RE.fullmatch(title)) for title in titles)
@@ -634,4 +679,6 @@ def validate_xmind_archive(
         raise ValidationError(f"{path}: TC 数量 {actual_tc} 与 Markdown {expected_tc_count} 不一致")
     if expected_node_count is not None and len(titles) != expected_node_count:
         raise ValidationError(f"{path}: 节点数量 {len(titles)} 与 Markdown {expected_node_count} 不一致")
-    return {"root": root.get("title"), "tc_count": actual_tc, "node_count": len(titles)}
+    if expected_tree is not None:
+        compare_topic_trees(expected_tree, actual_tree)
+    return {"root": root.get("title"), "tc_count": actual_tc, "node_count": len(titles), "tree": actual_tree}

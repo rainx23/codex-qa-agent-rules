@@ -32,7 +32,11 @@ class ConverterTests(unittest.TestCase):
     def test_20_conversion_success_and_failure(self):
         output = convert_file(self.source)
         result = validate_xmind_archive(output, "客户查询结果", 2, 13)
-        self.assertEqual({"root": "客户查询结果", "tc_count": 2, "node_count": 13}, result)
+
+        self.assertEqual("客户查询结果", result["root"])
+        self.assertEqual(2, result["tc_count"])
+        self.assertEqual(13, result["node_count"])
+        self.assertEqual("客户查询结果", result["tree"]["title"])
 
         invalid = self.directory / "invalid_xmind_20260715.md"
         invalid.write_text("- 根\n        - 功能测试\n", encoding="utf-8")
