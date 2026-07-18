@@ -32,6 +32,8 @@ TC_LIKE_RE = re.compile(r"^TC", re.IGNORECASE)
 LIST_RE = re.compile(r"^(?P<indent> *)-\s+(?P<title>.*?)\s*$")
 ENTRY_MARKERS = ("页面", "弹窗", "页签", "下钻", "入口")
 ENTRY_PLACEHOLDER_RE = re.compile(r"^(?:入口|页面|弹窗)[A-Z一二三四五六七八九十0-9]+$")
+TRUNCATION_MARKERS = ("...", "……")
+AMBIGUOUS_BOOLEAN_RE = re.compile(r"(?<![A-Za-z0-9_])AND(?![A-Za-z0-9_]).*(?<![A-Za-z0-9_])OR(?![A-Za-z0-9_])|(?<![A-Za-z0-9_])OR(?![A-Za-z0-9_]).*(?<![A-Za-z0-9_])AND(?![A-Za-z0-9_])", re.IGNORECASE)
 
 
 class ValidationError(ValueError):
@@ -201,6 +203,8 @@ def _parse_markdown(markdown: str, source: Path) -> tuple[list[Node], list[Node]
             errors.append(f"{source}:{line_no}: 禁止标签式节点 '{title}'")
         if PLACEHOLDER_RE.search(title):
             errors.append(f"{source}:{line_no}: 禁止虚构 SQL、字段、接口或页面占位名称")
+        if any(marker in title for marker in TRUNCATION_MARKERS):
+            errors.append(f"{source}:{line_no}: 节点包含截断或省略标记，必须保留完整测试语义")
 
     if len(roots) != 1:
         errors.append(f"{source}: 根节点必须唯一，实际 {len(roots)} 个")
@@ -226,6 +230,11 @@ def validate_markdown_text(markdown: str, source: Path | str = "<memory>") -> Ou
         errors.append(f"{source}:{root.line}: 根节点缺少测试维度")
 
     tc_nodes = [node for node in nodes if TC_RE.fullmatch(node.title)]
+    for node in nodes:
+        if AMBIGUOUS_BOOLEAN_RE.search(node.title) and not any(token in node.title for token in ("(", ")", "（", "）")):
+            warnings.append(
+                f"{source}:{node.line}: AND/OR 同时出现但缺少括号；请明确逻辑优先级"
+            )
     for dimension in root.children:
         if dimension.title not in VALID_DIMENSIONS:
             errors.append(f"{source}:{dimension.line}: 非法测试维度 '{dimension.title}'")

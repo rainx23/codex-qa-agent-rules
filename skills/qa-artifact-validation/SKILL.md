@@ -23,6 +23,8 @@ description: 用于校验 QA 分析报告、XMind Markdown、XMind Workbook、Ma
 9. 任一必需检查失败时标记校验失败，并停止“完整交付”的结论。
 10. 产物存在时运行 `validate_knowledge.py`、`build_knowledge_index.py --check`、`validate_data_validation.py`、`validate_sql_style.py --strict` 和 `validate_sql_artifact.py`。确认 SQL 只读，且只有在用户提供执行证据时才标记为已执行/通过/失败。
 11. 接口自动化产物存在时，运行 `../../scripts/validate_api_automation_artifacts.py --excel <case.xlsx> --parameters <parameter.txt> --model <api-automation.json>`；固定表头、JSON、健康校验、变量和参数维度任一失败都阻止交付。
+12. 原始任务同时要求需求分析和测试用例时，passed 交付必须具备并复验 Requirement Analysis Model、Risk Coverage Matrix、Testcase Model、XMind Markdown、Workbook 和 Manifest；缺少任一项不得声明完成。
+13. blocking 解除后不得继续只维护 draft 路径。全部正式门禁通过后才生成或更新 Workbook、passed Manifest 和 index；任何正式校验失败时停止完整交付结论。
 
 ## 可选 Testcase Value Assessment 校验
 

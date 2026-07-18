@@ -22,6 +22,8 @@
 - `validate_schemas.py` 校验仓库契约和固定 Fixture；`validate_models.py` 校验本次真实模型；`validate_manifest.py` 最终复验全链路产物。
 - 可选用法：`python scripts/validate_testcase_quality.py path/to/case_xmind.md --value-assessment path/to/testcase-value-assessment.json`。该 CLI 只负责编排和稳定展示；评分内核、路径/Hash 校验和持久化重算均位于 `qa_contracts.py`。
 - Testcase Value Assessment 的 warning 和 suggestion 在阶段一非阻塞；只有 Assessment error 使该命令返回非零退出码。未传参数时不搜索默认 Assessment。
+- XMind 校验拒绝 `...`/`……` 截断标记，并对未加括号的混合 `AND/OR` 输出 warning；不设置任何节点长度 error 或 warning。
+- 外部工作区的 Manifest 仍从规则仓库读取 `RULE_VERSION`，但来源、证据和正式产物相对路径从 Manifest 所在工作区解析；绝对路径、`..` 和 resolve 后越界仍被拒绝。
 - integrated 业务仓库缺少 `rules-repository.json.sql_defaults.author` 时，`validate_repository_mode.py` 输出显式迁移错误；脚本不会自动修改业务配置。
 
 ## 维护约束

@@ -22,5 +22,6 @@
 - 改动规则行为必须更新测试、CHANGELOG 和 RULE_VERSION，并评估根 README。
 - 不将完整规则复制到 AGENTS、Skill 或检查清单；它们只引用正式规则文件。
 - 本目录不含自动生成文件。
+- blocking Confirmation 解除后必须恢复原始任务并自动完成未结束的正式产物链；XMind 采用无固定字数门禁的语义精简规则。
 
 版本与完整变更历史统一见 [CHANGELOG.md](../../CHANGELOG.md)。

@@ -17,7 +17,11 @@
 4. Testcase Model 渲染固定 XMind Markdown；模型字段不得成为新的 XMind 节点。
 5. 产物 Skill 依次校验报告、分析模型、风险矩阵、用例模型、Markdown、Workbook、Manifest 和索引。
 
+原始任务范围是续跑依据。若任务同时要求需求分析和测试用例，blocking Confirmation 归零后必须从已更新的 Requirement Analysis Model 继续完成尚未生成或需要重算的下游产物，不得要求用户重复授权同一任务，也不得用阻塞期间的 Markdown 草稿替代结构化模型交接。
+
 报告与模型必须来自同一分析结果，不得在事实、待确认点、风险、模式或计数上互相矛盾。Risk Coverage Matrix 同时保存主 `business_entry` 和用于合并场景的 `business_entries` 覆盖入口列表。需求点、Diff 变更、风险和 TC 的 ID 必须双向一致；所有 P0 风险必须映射 TC；模型 TC 与 Markdown TC 集合、维度、公共入口/模块层级、测试点、步骤和预期必须一致。
+
+确认回复完成后必须先回写 Confirmation、Fact、风险和验收标准，再重新生成 Risk Coverage Matrix 与 Testcase Model，最后渲染 XMind。只修改报告或 XMind Markdown 而不同步 JSON 模型属于不完整状态迁移。
 
 Evidence Reference 必须显式区分 `file` 与 `snapshot`，并统一通过 `scripts/validate_evidence.py` 复验路径、哈希、文本行号、excerpt、记录 ID 和状态。Schema 只描述字段形状，真实性由同一公共验证器执行；`qa_contracts.py` 和 `validate_models.py` 不得维护第二套文件校验。confirmed Fact 至少需要一条真实且 current 的同源 Evidence；stale/reconfirm_required 只能保留为历史或待确认依据。
 

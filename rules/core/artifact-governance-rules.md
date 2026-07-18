@@ -4,7 +4,7 @@
 
 ## 产物集合
 
-完整输出必须包含分析报告、XMind Markdown、经复验的 .xmind Workbook、Manifest 和 testcases/index.md 记录。新版本不得覆盖历史文件。
+完整输出必须包含分析报告、Requirement Analysis Model、Risk Coverage Matrix、Testcase Model、XMind Markdown、经复验的 .xmind Workbook、Manifest 和 testcases/index.md 记录；存在 Diff 输入时额外包含 Diff 分析报告与 Diff Impact Model。Testcase Value Assessment 仅在用户明确要求时生成，不属于默认必需链。新版本不得覆盖历史文件。
 
 ## Manifest
 
@@ -40,6 +40,8 @@ Manifest 至少记录：
 6. 记录新增、补充、替代或废弃关系。
 
 任一步失败都不得宣称完整产物完成。失败时保留可用的 Markdown 和报告，不伪造 Workbook 路径。
+
+原始任务同时要求需求分析和测试用例时，缺少 Requirement Analysis Model、Risk Coverage Matrix、Testcase Model、XMind Markdown、Workbook 或 Manifest 任一项均不得宣称完整交付；正式索引只能在 passed Manifest 全链路复验后更新。
 
 ## 索引
 

@@ -85,6 +85,26 @@ class RuleContractTests(unittest.TestCase):
         self.assertNotIn("排序测试\n", quality)
         self.assertIn("排序属于“功能测试”", readme)
 
+    def test_confirmation_resolution_resumes_original_delivery_chain(self):
+        gate = (ROOT / "rules/core/confirmation-gate.md").read_text(encoding="utf-8")
+        requirement = (ROOT / "skills/qa-requirement-analysis/SKILL.md").read_text(encoding="utf-8")
+        testcase = (ROOT / "skills/qa-testcase-design/SKILL.md").read_text(encoding="utf-8")
+        artifact = (ROOT / "skills/qa-artifact-validation/SKILL.md").read_text(encoding="utf-8")
+        for token in ("原始任务", "blocking_pending_count=0", "不要求用户再次", "Risk Coverage Matrix", "XMind Workbook", "Manifest", "index"):
+            self.assertIn(token, gate)
+        self.assertIn("确认回复", requirement)
+        self.assertIn("自动交接", requirement)
+        self.assertIn("重新计算 Risk Coverage Matrix", testcase)
+        self.assertIn("不得仅更新 `.xmind.md`", testcase)
+        self.assertIn("缺少任一项不得声明完成", artifact)
+
+    def test_xmind_compaction_contract_has_no_hard_length_limit(self):
+        quality = (ROOT / "rules/core/testcase-quality-rules.md").read_text(encoding="utf-8")
+        for token in ("不设置", "固定字符上限", "不得自动截断", "role_type=30 AND enabled_flag=1", "(A AND B) OR C"):
+            self.assertIn(token, quality)
+        for forbidden in ("MAX_TEST_POINT_LENGTH", "MAX_STEP_LENGTH", "MAX_EXPECTED_LENGTH"):
+            self.assertNotIn(forbidden, quality)
+
 
 if __name__ == "__main__":
     unittest.main()

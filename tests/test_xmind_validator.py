@@ -160,6 +160,32 @@ class XMindValidatorTests(unittest.TestCase):
         text = VALID.replace("输入已确认的客户编号并查询", "输入股票代码和交易日期后查询")
         self.assertEqual(2, len(validate_markdown_text(text).tc_nodes))
 
+    def test_semantic_compaction_symbols_are_valid_without_length_gate(self):
+        step = "输入已确认的客户编号并查询"
+        expected = "返回集合仅包含该客户编号对应记录"
+        compact = VALID.replace(step, "查询 role_type=30 AND enabled_flag=1 的记录").replace(
+            expected, "role_type∈{10,20,30} 的目标记录状态由未配置→已配置"
+        )
+        self.assertEqual(2, len(validate_markdown_text(compact).tc_nodes))
+
+        long_but_complete = VALID.replace(
+            step,
+            "对已确认客户编号执行查询并保留业务对象、核心条件和操作主体" * 30,
+        )
+        self.assertEqual(2, len(validate_markdown_text(long_but_complete).tc_nodes))
+
+    def test_truncation_markers_are_rejected(self):
+        step = "输入已确认的客户编号并查询"
+        self.assert_invalid(VALID.replace(step, "输入客户编号..."), "截断或省略")
+        self.assert_invalid(VALID.replace(step, "输入客户编号……"), "截断或省略")
+
+    def test_ambiguous_and_or_warns_but_parenthesized_expression_passes(self):
+        step = "输入已确认的客户编号并查询"
+        ambiguous = validate_markdown_text(VALID.replace(step, "按 A AND B OR C 查询"))
+        self.assertTrue(any("AND/OR" in warning and "括号" in warning for warning in ambiguous.warnings))
+        explicit = validate_markdown_text(VALID.replace(step, "按 (A AND B) OR C 查询"))
+        self.assertFalse(any("AND/OR" in warning for warning in explicit.warnings))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -12,9 +12,10 @@ from typing import Any
 
 from heading_utils import parse_markdown_sections
 from qa_contracts import (
-    ALLOWED_TIMEZONES, MODEL_VALIDATORS, RELATIONS, SCHEMA_VERSION, VALIDATION_STATUSES, SQL_EXECUTION_STATUSES,
+    ALLOWED_TIMEZONES, RELATIONS, SCHEMA_VERSION, VALIDATION_STATUSES, SQL_EXECUTION_STATUSES,
     ZERO_HASH, build_model_id_index, load_json, manifest_schema, read_rule_version, stable_source_hash, valid_generated_at,
-    summarize_confirmations, validate_model_links, validate_risk_matrix, validate_testcase_model,
+    summarize_confirmations, validate_diff_model, validate_model_links, validate_requirement_model,
+    validate_risk_matrix, validate_testcase_model,
     validate_schema_shape,
 )
 from qa_validation import (
@@ -43,6 +44,16 @@ def find_repo_root(start: Path) -> Path:
     return Path.cwd().resolve()
 
 
+def artifact_workspace_root(manifest_path: Path) -> Path:
+    """Resolve external deliveries relative to their own workspace, not the rules repository."""
+
+    contract_root = find_repo_root(manifest_path.parent)
+    manifest_parent = manifest_path.resolve().parent
+    if manifest_parent == contract_root or contract_root in manifest_parent.parents:
+        return contract_root
+    return manifest_parent
+
+
 def resolve_safe_path(value: Any, manifest_path: Path, artifact: bool = True) -> tuple[Path | None, str | None]:
     if value is None:
         return None, None
@@ -51,12 +62,10 @@ def resolve_safe_path(value: Any, manifest_path: Path, artifact: bool = True) ->
     candidate = Path(value)
     if candidate.is_absolute() or ".." in candidate.parts:
         return None, f"路径禁止绝对路径或 ../：{value}"
-    root = find_repo_root(manifest_path.parent)
+    root = artifact_workspace_root(manifest_path)
     resolved = (root / candidate).resolve()
     if resolved != root and root not in resolved.parents:
         return None, f"路径越界：{value}"
-    if artifact and candidate.parts and candidate.parts[0] not in {"testcases", "tests"}:
-        return None, f"产物路径必须位于 testcases 或 tests：{value}"
     return resolved, None
 
 
@@ -157,7 +166,7 @@ def _validate_supersedes(data: dict[str, Any], manifest_path: Path) -> list[str]
         return ["替代或废弃关系必须填写 supersedes"]
     if supersedes == artifact_id:
         return ["supersedes 不能指向自身"]
-    root = find_repo_root(manifest_path.parent)
+    root = artifact_workspace_root(manifest_path)
     ids, graph = _artifact_registry(root, manifest_path)
     if supersedes not in ids:
         errors.append(f"supersedes 指向不存在 artifact_id：{supersedes}")
@@ -174,7 +183,7 @@ def _validate_supersedes(data: dict[str, Any], manifest_path: Path) -> list[str]
     return errors
 
 
-def _load_analysis_models(paths: list[Path]) -> tuple[list[dict[str, Any]], list[str]]:
+def _load_analysis_models(paths: list[Path], *, evidence_root: Path | None = None) -> tuple[list[dict[str, Any]], list[str]]:
     models: list[dict[str, Any]] = []
     errors: list[str] = []
     for path in paths:
@@ -187,7 +196,8 @@ def _load_analysis_models(paths: list[Path]) -> tuple[list[dict[str, Any]], list
         if kind is None:
             errors.append(f"无法识别结构化分析模型类型：{path}")
             continue
-        errors.extend(f"{path}: {error}" for error in MODEL_VALIDATORS[kind](data))
+        validator = validate_requirement_model if kind == "requirement" else validate_diff_model
+        errors.extend(f"{path}: {error}" for error in validator(data, evidence_root=evidence_root))
         models.append(data)
     return models, errors
 
@@ -198,9 +208,10 @@ def validate_manifest_data(data: dict[str, Any], manifest_path: Path) -> list[st
     errors = [f"Manifest 缺少字段：{field}" for field in sorted(REQUIRED - set(data))]
     if errors:
         return errors
-    root = find_repo_root(manifest_path.parent)
+    root = artifact_workspace_root(manifest_path)
+    contract_root = find_repo_root(manifest_path.parent)
     try:
-        current_version = read_rule_version(root)
+        current_version = read_rule_version(contract_root)
     except (OSError, ValueError) as exc:
         errors.append(str(exc))
         current_version = None
@@ -292,7 +303,7 @@ def validate_manifest_data(data: dict[str, Any], manifest_path: Path) -> list[st
                     errors.append(f"结构化分析模型不存在：{value}")
                 else:
                     analysis_paths.append(path)
-        models, model_errors = _load_analysis_models(analysis_paths)
+        models, model_errors = _load_analysis_models(analysis_paths, evidence_root=root)
         errors.extend(model_errors)
         requirement_model = next((model for model in models if "facts" in model), None)
         diff_model = next((model for model in models if "change_items" in model), None)
@@ -303,7 +314,7 @@ def validate_manifest_data(data: dict[str, Any], manifest_path: Path) -> list[st
         try:
             risk_matrix = load_json(draft_paths["draft_risk_matrix_path"])
             testcase_model = load_json(draft_paths["draft_testcase_model_path"])
-            errors.extend(validate_risk_matrix(risk_matrix))
+            errors.extend(validate_risk_matrix(risk_matrix, evidence_root=root))
             errors.extend(validate_testcase_model(testcase_model))
             errors.extend(validate_model_links(requirement_model, diff_model, risk_matrix, testcase_model, validation_status="pending"))
             summary = summarize_confirmations(requirement_model)
@@ -414,15 +425,17 @@ def validate_manifest_data(data: dict[str, Any], manifest_path: Path) -> list[st
     if errors:
         return list(dict.fromkeys(errors))
 
-    models, model_errors = _load_analysis_models(analysis_paths)
+    models, model_errors = _load_analysis_models(analysis_paths, evidence_root=root)
     errors.extend(model_errors)
     try:
         risk_matrix = load_json(paths["risk_matrix_path"])
         testcase_model = load_json(paths["testcase_model_path"])
-        errors.extend(validate_risk_matrix(risk_matrix))
+        errors.extend(validate_risk_matrix(risk_matrix, evidence_root=root))
         errors.extend(validate_testcase_model(testcase_model))
         requirement_model = next((model for model in models if "facts" in model), None)
         diff_model = next((model for model in models if "change_items" in model), None)
+        if data.get("report_mode") in {"requirement", "combined"} and requirement_model is None:
+            errors.append("需求分析交付缺少 Requirement Analysis Model")
         summary = summarize_confirmations(requirement_model or {})
         manifest_summary = {
             key: data.get(key)

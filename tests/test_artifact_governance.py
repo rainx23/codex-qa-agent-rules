@@ -14,7 +14,8 @@ from build_testcase_index import migrate_index_text, update
 from md_to_xmind import convert_file
 from qa_contracts import read_rule_version, stable_source_hash
 from repair_text_encoding import merge_reference_index, repair_text
-from validate_manifest import validate_manifest_file
+from validate_manifest import artifact_workspace_root, resolve_safe_path, validate_manifest_file
+from validate_models import _evidence_root
 from validate_skill_contracts import validate_skill
 
 
@@ -153,6 +154,19 @@ class ArtifactGovernanceTests(unittest.TestCase):
     def test_manifest_example_is_valid_passed(self):
         _, errors = validate_manifest_file(ROOT / "testcases/manifest.example.json")
         self.assertEqual([], errors)
+
+    def test_external_workspace_root_artifacts_and_evidence_resolve_locally(self):
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            manifest = workspace / "delivery-manifest.json"
+            artifact = workspace / "delivery-report.md"
+            artifact.write_text("# report\n", encoding="utf-8")
+            manifest.write_text("{}", encoding="utf-8")
+            self.assertEqual(workspace.resolve(), artifact_workspace_root(manifest))
+            resolved, error = resolve_safe_path(artifact.name, manifest)
+            self.assertIsNone(error)
+            self.assertEqual(artifact.resolve(), resolved)
+            self.assertEqual(workspace.resolve(), _evidence_root(workspace / "requirement.json"))
 
     def test_passed_manifest_revalidates_every_artifact(self):
         manifest, _ = self.make_passed_manifest()

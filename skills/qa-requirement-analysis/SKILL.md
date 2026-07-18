@@ -22,6 +22,7 @@ confirmed Fact 必须有非 inference 的可验证来源，不能使用 low conf
 
 ## 执行流程
 
+0. 记录用户原始任务范围。若本轮消息是在回答已有 Confirmation，则读取此前 Requirement Analysis Model 和草稿报告，将消息作为确认回复处理，不把它误判为独立新需求，也不要求用户重复“继续生成”。
 1. 确认每个需求来源均可读取，并说明本次分析范围。
 2. 分析禅道需求时，区分第一部分业务背景与第三部分产品实现规则；优先采用用户确认的范围，不把普通背景与计划差异直接判定为阻塞冲突。
 3. 提取业务目标、系统或页面入口、角色、主流程、字段规则、数据定义、验收标准、异常行为和明确排除项。
@@ -33,6 +34,8 @@ confirmed Fact 必须有非 inference 的可验证来源，不能使用 low conf
 9. 定稿前必须调用 `qa-knowledge-management` 的 `search` 模式。记录 active/candidate/conflicting/superseded 命中，历史知识不得直接视为当前确认事实。
 10. 填充数据影响与验证决策：`data_validation_required`、原因、推荐方式、SQL 生成状态、指标定义缺口和阻塞问题。指标准确性默认采用 SQL，除非用户提供明确且可信的对账依据。
 11. 用户粘贴完整 DDL 时，解析草稿并与知识库比较规范化哈希；只提供少量字段时标记为 partial，不创建或覆盖完整表 DDL。
+12. 处理确认回复时，只更新答案覆盖的 Confirmation，保存 resolution、resolution_evidence_references、resolved_at，并同步更新关联 Fact、风险和验收标准；随后重新校验 Requirement Analysis Model，不得只修改需求报告 Markdown。
+13. 重新计算统一 Confirmation Summary。若仍有 blocking，维持草稿链；若 `blocking_pending_count=0` 且原始任务要求测试用例，立即将更新后的正式 Requirement Analysis Model 自动交接给 `qa-testcase-design`，无需用户再次发送继续指令。
 
 ## 接口自动化影响评估
 

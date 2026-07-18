@@ -12,6 +12,23 @@
 
 ### Fixed
 
+## [2.8.0] - 2026-07-18
+
+### Added
+
+- 新增 blocking Confirmation 解除后的完整状态迁移与原始任务自动续跑契约，覆盖 Confirmation 证据、关联 Fact、风险、验收标准、Risk Matrix、Testcase Model 和正式产物链。
+- 新增 XMind 无损语义精简规则与校验测试，允许明确的比较、集合、逻辑和状态迁移符号；拒绝截断标记，并提示未加括号的混合 AND/OR。
+
+### Changed
+
+- 规则版本从 2.7.0 升级到 2.8.0；需求、用例与产物 Skill 在 blocking 归零后自动完成原始任务，不要求用户重复发送继续指令。
+- 完整交付明确要求 Requirement Analysis Model、Risk Coverage Matrix、Testcase Model、XMind Markdown、Workbook、Manifest 和索引全部通过正式复验。
+
+### Fixed
+
+- 修复只更新需求报告和 XMind Markdown、未同步 JSON 模型与正式产物的问题。
+- 明确 XMind 不使用固定字符上限，不因节点较长失败或告警，也不自动改写用户文本。
+
 ## [2.7.0] - 2026-07-17
 
 ### Added

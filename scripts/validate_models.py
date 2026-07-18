@@ -13,6 +13,14 @@ from qa_contracts import (
 )
 
 
+def _evidence_root(path: Path) -> Path:
+    parent = path.resolve().parent
+    for candidate in (parent, *parent.parents):
+        if (candidate / "RULE_VERSION").is_file() and (candidate / "AGENTS.md").is_file():
+            return candidate
+    return parent
+
+
 def validate_files(requirement: Path | None, diff: Path | None, risk: Path, testcase: Path) -> list[str]:
     errors: list[str] = []
     try:
@@ -22,11 +30,12 @@ def validate_files(requirement: Path | None, diff: Path | None, risk: Path, test
         testcase_data = load_json(testcase)
     except (OSError, ValueError) as exc:
         return [str(exc)]
+    evidence_root = _evidence_root(requirement or diff or risk)
     if requirement_data:
-        errors.extend(f"requirement: {item}" for item in validate_requirement_model(requirement_data))
+        errors.extend(f"requirement: {item}" for item in validate_requirement_model(requirement_data, evidence_root=evidence_root))
     if diff_data:
-        errors.extend(f"diff: {item}" for item in validate_diff_model(diff_data))
-    errors.extend(f"risk: {item}" for item in validate_risk_matrix(risk_data))
+        errors.extend(f"diff: {item}" for item in validate_diff_model(diff_data, evidence_root=evidence_root))
+    errors.extend(f"risk: {item}" for item in validate_risk_matrix(risk_data, evidence_root=evidence_root))
     errors.extend(f"testcase: {item}" for item in validate_testcase_model(testcase_data))
     modes = {model.get("report_mode") for model in (requirement_data, diff_data) if model}
     expected_mode = "combined" if requirement_data and diff_data else "requirement" if requirement_data else "diff"

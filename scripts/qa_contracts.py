@@ -770,11 +770,12 @@ def _validate_evidence_references(
     *,
     changed_files: set[str] | None = None,
     expected_change_file: str | None = None,
+    evidence_root: Path | None = None,
 ) -> list[str]:
     return validate_authentic_evidence_references(
         items,
         label=label,
-        root=REPOSITORY_ROOT,
+        root=evidence_root or REPOSITORY_ROOT,
         confirmed=confirmed,
         changed_files=changed_files,
         expected_change_file=expected_change_file,
@@ -828,7 +829,7 @@ def summarize_confirmations(requirement_model: dict[str, Any]) -> dict[str, int]
     }
 
 
-def validate_requirement_model(data: dict[str, Any]) -> list[str]:
+def validate_requirement_model(data: dict[str, Any], *, evidence_root: Path | None = None) -> list[str]:
     errors = validate_schema_shape(data, requirement_schema("0.0.0"))
     requirement = data.get("data_validation_required")
     method = data.get("recommended_validation_method")
@@ -865,7 +866,7 @@ def validate_requirement_model(data: dict[str, Any]) -> list[str]:
         if category == "missing" and not fact.get("handling"):
             errors.append(f"缺失事实 {fact_id} 必须说明 handling")
         evidence_references = fact.get("evidence_references")
-        errors.extend(_validate_evidence_references(evidence_references, f"事实 {fact_id}", category == "confirmed"))
+        errors.extend(_validate_evidence_references(evidence_references, f"事实 {fact_id}", category == "confirmed", evidence_root=evidence_root))
         if isinstance(evidence_references, list) and not any(
             isinstance(evidence, dict) and evidence.get("source_type") == fact.get("source_type")
             for evidence in evidence_references
@@ -892,7 +893,7 @@ def validate_requirement_model(data: dict[str, Any]) -> list[str]:
                 errors.append(f"Confirmation {point_id} resolved 必须提供 resolution、resolution_evidence_references 和 resolved_at")
             if point.get("resolved_at") and not valid_generated_at(point.get("resolved_at")):
                 errors.append(f"Confirmation {point_id} resolved_at 格式非法")
-            errors.extend(_validate_evidence_references(point.get("resolution_evidence_references"), f"Confirmation {point_id} resolution", True))
+            errors.extend(_validate_evidence_references(point.get("resolution_evidence_references"), f"Confirmation {point_id} resolution", True, evidence_root=evidence_root))
             unresolved_linked = [
                 fact_id for fact_id in linked
                 if facts_by_id.get(fact_id, {}).get("affects_core_expectation") is True
@@ -905,7 +906,7 @@ def validate_requirement_model(data: dict[str, Any]) -> list[str]:
         if point.get("status") == "skipped":
             if not point.get("skip_reason") or not point.get("decision_evidence"):
                 errors.append(f"Confirmation {point_id} skipped 必须提供 skip_reason 和 decision_evidence")
-            errors.extend(_validate_evidence_references(point.get("decision_evidence"), f"Confirmation {point_id} decision"))
+            errors.extend(_validate_evidence_references(point.get("decision_evidence"), f"Confirmation {point_id} decision", evidence_root=evidence_root))
     for fact_id, category in categories.items():
         if category == "conflicting" and fact_id not in confirmation_fact_ids:
             errors.append(f"冲突事实 {fact_id} 未关联待确认点")
@@ -922,11 +923,11 @@ def validate_requirement_model(data: dict[str, Any]) -> list[str]:
                 errors.append(f"验收标准引用不存在事实：{fact_id}")
             elif categories.get(fact_id) != "confirmed":
                 errors.append(f"非确定事实 {fact_id} 不得进入确定性验收标准")
-        errors.extend(_validate_evidence_references(criterion.get("evidence_references"), f"验收标准 {criterion.get('criterion_id')}", True))
+        errors.extend(_validate_evidence_references(criterion.get("evidence_references"), f"验收标准 {criterion.get('criterion_id')}", True, evidence_root=evidence_root))
     return list(dict.fromkeys(errors))
 
 
-def validate_diff_model(data: dict[str, Any]) -> list[str]:
+def validate_diff_model(data: dict[str, Any], *, evidence_root: Path | None = None) -> list[str]:
     errors = validate_schema_shape(data, diff_schema("0.0.0"))
     changes = data.get("change_items", []) if isinstance(data.get("change_items"), list) else []
     changed_files = {
@@ -948,6 +949,7 @@ def validate_diff_model(data: dict[str, Any]) -> list[str]:
             True,
             changed_files=changed_files,
             expected_change_file=change.get("file"),
+            evidence_root=evidence_root,
         ))
     chains = data.get("impact_chains", []) if isinstance(data.get("impact_chains"), list) else []
     _, chain_errors = _unique_ids(chains, "chain_id")
@@ -956,7 +958,7 @@ def validate_diff_model(data: dict[str, Any]) -> list[str]:
         unknown = set(chain.get("change_ids", [])) - change_ids
         if unknown:
             errors.append(f"影响链 {chain.get('chain_id')} 引用不存在 change_id：{sorted(unknown)}")
-        errors.extend(_validate_evidence_references(chain.get("evidence_references"), f"影响链 {chain.get('chain_id')}", True))
+        errors.extend(_validate_evidence_references(chain.get("evidence_references"), f"影响链 {chain.get('chain_id')}", True, evidence_root=evidence_root))
     diff_risks = data.get("risks", []) if isinstance(data.get("risks"), list) else []
     diff_risk_ids, risk_errors = _unique_ids(diff_risks, "risk_id")
     errors.extend(risk_errors)
@@ -964,7 +966,7 @@ def validate_diff_model(data: dict[str, Any]) -> list[str]:
         unknown = set(risk.get("change_ids", [])) - change_ids
         if unknown:
             errors.append(f"Diff 风险 {risk.get('risk_id')} 引用不存在 change_id：{sorted(unknown)}")
-        errors.extend(_validate_evidence_references(risk.get("evidence_references"), f"Diff 风险 {risk.get('risk_id')}", risk.get("evidence_state") == "已确认"))
+        errors.extend(_validate_evidence_references(risk.get("evidence_references"), f"Diff 风险 {risk.get('risk_id')}", risk.get("evidence_state") == "已确认", evidence_root=evidence_root))
     for coverage in data.get("coverage_results", []) if isinstance(data.get("coverage_results"), list) else []:
         status = coverage.get("coverage_status")
         if status not in COVERAGE_STATUSES:
@@ -988,11 +990,11 @@ def validate_diff_model(data: dict[str, Any]) -> list[str]:
             errors.append(f"疑似缺陷 {defect_id} observed 与 expected 不得相同")
         if defect.get("confidence") == "low":
             errors.append(f"低置信度项 {defect_id} 只能记录为风险")
-        errors.extend(_validate_evidence_references(defect.get("evidence_references"), f"疑似缺陷 {defect_id}", True))
+        errors.extend(_validate_evidence_references(defect.get("evidence_references"), f"疑似缺陷 {defect_id}", True, evidence_root=evidence_root))
     return list(dict.fromkeys(errors))
 
 
-def validate_risk_matrix(data: dict[str, Any]) -> list[str]:
+def validate_risk_matrix(data: dict[str, Any], *, evidence_root: Path | None = None) -> list[str]:
     errors = validate_schema_shape(data, risk_matrix_schema("0.0.0"))
     risks = data.get("risk_items", []) if isinstance(data.get("risk_items"), list) else []
     _, id_errors = _unique_ids(risks, "risk_id")
@@ -1064,7 +1066,7 @@ def validate_risk_matrix(data: dict[str, Any]) -> list[str]:
                 errors.append(f"风险 {risk.get('risk_id')} 引用非法 TC：{tc_id}")
         if risk.get("business_entry") not in risk.get("business_entries", []):
             errors.append(f"风险 {risk.get('risk_id')} 主 business_entry 必须包含在 business_entries")
-        errors.extend(_validate_evidence_references(risk.get("evidence_references"), f"风险 {risk.get('risk_id')}", risk.get("evidence_state") == "已确认"))
+        errors.extend(_validate_evidence_references(risk.get("evidence_references"), f"风险 {risk.get('risk_id')}", risk.get("evidence_state") == "已确认", evidence_root=evidence_root))
     summary = data.get("coverage_summary", {})
     expected_summary = {
         "risk_count": len(risks),

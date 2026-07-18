@@ -33,6 +33,7 @@
 - 改变规则、脚本、Schema、CI 或产物契约时必须补充或更新测试。
 - Testcase Value Assessment 测试必须保持整数算法、跨 Python 3.10/3.12 结果、换行归一化 Hash、跨平台路径拒绝、保护规则和 CLI 非阻塞语义稳定。
 - CI 只验证仓库提供的合法 Assessment Fixture，不要求所有测试产物包含 Assessment；warning 和 suggestion 仍然非阻塞。
+- 回归测试覆盖 blocking Confirmation 解决后的 Fact/计数迁移、原始任务自动续跑契约、正式产物完整性，以及 XMind 无损语义精简、符号、截断和逻辑优先级行为。
 - Golden 变化必须经过人工确认，测试运行时不得自动创建或覆盖 Golden，也不为不同操作系统或 Python 版本维护不同副本。
 - Fixture 和 Golden 只服务测试，不作为业务历史版本说明。
 
