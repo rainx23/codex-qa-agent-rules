@@ -115,3 +115,31 @@ jobs:
           python scripts/md_to_xmind.py tests/fixtures/valid_case_xmind.md -o "$output"
       - name: Ensure checks leave no generated changes
         run: git diff --exit-code
+
+  value-assessment-compatibility:
+    name: Testcase value assessment compatibility
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.10", "3.12"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Confirm Python version
+        run: python --version
+      - name: Validate assessment calculation and persistence
+        run: python -m unittest discover -s tests -p "test_testcase_value_assessment.py" -v
+      - name: Validate assessment CLI
+        run: python -m unittest discover -s tests -p "test_testcase_value_cli.py" -v
+      - name: Validate assessment Golden output
+        run: python -m unittest discover -s tests -p "test_testcase_value_golden.py" -v
+      - name: Validate legal assessment example
+        run: python scripts/validate_testcase_quality.py tests/fixtures/valid_case_xmind.md --risk-matrix tests/fixtures/models/risk-coverage-matrix.json --testcase-model tests/fixtures/models/testcase-model.json --value-assessment tests/fixtures/value-assessment/testcase-value-assessment-valid.json
+      - name: Check generated Schemas
+        run: python scripts/generate_schemas.py --check

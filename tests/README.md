@@ -14,17 +14,26 @@
 | `test_anti_hallucination_contracts.py` | 反幻觉、门禁、模型和 SQL 配置反例 | 是 |
 | `test_anti_hallucination_fixtures.py` | 八类独立反幻觉 Fixture 的统一回归入口 | 是 |
 | `fixtures/anti_hallucination/` | confirmed inference、blocking gate、DDL partial、模糊断言、缺失证据、虚构标识符、疑似缺陷、API health scope 的合法/非法输入与 Golden | 是 |
+| `test_testcase_value_assessment.py` | 七维评分确定性、持久化重算、Hash、路径安全及 P0/历史缺陷保护 | 是 |
+| `test_testcase_value_cli.py` | 可选 Assessment CLI 输出顺序、warning/suggestion 和退出码契约 | 是 |
+| `test_testcase_value_golden.py` | 验证 CLI Assessment 输出 Golden、编码、换行和顺序稳定性 | 是 |
+| `test_testcase_value_ci_contract.py` | 验证 Windows/Linux 与 Python 3.10/3.12 兼容性 Job 配置 | 是 |
+| `fixtures/value-assessment/` | 有效、Hash 错误、评分篡改和未知 TC 的独立 Assessment Fixture | 是 |
 | `fixtures/` | 输入样例 | 是 |
 | `golden/` | 预期输出 | 是 |
 
 ## 使用入口
 
 - 独立反幻觉回归：`python -m unittest discover -s tests -p test_anti_hallucination_fixtures.py -v`。
+- 测试用例价值评估回归：运行 `test_testcase_value_assessment.py`、`test_testcase_value_cli.py`、`test_testcase_value_golden.py` 和 `test_testcase_value_ci_contract.py`。
 - 全量回归：`python -m unittest discover -s tests -v`。
 
 ## 维护约束
 
 - 改变规则、脚本、Schema、CI 或产物契约时必须补充或更新测试。
+- Testcase Value Assessment 测试必须保持整数算法、跨 Python 3.10/3.12 结果、换行归一化 Hash、跨平台路径拒绝、保护规则和 CLI 非阻塞语义稳定。
+- CI 只验证仓库提供的合法 Assessment Fixture，不要求所有测试产物包含 Assessment；warning 和 suggestion 仍然非阻塞。
+- Golden 变化必须经过人工确认，测试运行时不得自动创建或覆盖 Golden，也不为不同操作系统或 Python 版本维护不同副本。
 - Fixture 和 Golden 只服务测试，不作为业务历史版本说明。
 
 版本与完整变更历史统一见 [CHANGELOG.md](../CHANGELOG.md)。

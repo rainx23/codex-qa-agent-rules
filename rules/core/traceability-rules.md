@@ -19,3 +19,10 @@
 - 回归范围：核心回归、关联回归、冒烟回归。
 
 P0 表示核心链路、资金或关键数据、严重权限安全、接口契约或重大兼容风险；P1 表示主要功能、复杂组合和较广关联影响；P2 表示有证据命中的局部展示或低频边界。严重度、证据置信度和回归范围不得混为同一字段。无业务意义的文档、注释、格式化或重命名不生成业务 TC。
+
+## Testcase Value Assessment 追踪边界
+
+- Testcase Value Assessment Model 通过 `tc_id` 关联 Testcase Model，并从 Risk Coverage Matrix 和可选 Requirement Model 派生可复算评分。
+- Risk、Requirement、Testcase 和 Evidence 仍是正式追踪事实来源；Assessment 不能成为新的事实源，也不能反向修改 `risk_ids`、`requirement_ids`、`change_ids`、`historical_defect_ids`、`test_priority`、`regression_scope` 或 `evidence_state`。
+- Assessment 只保存评分内核生成的可复算结果。引用模型必须校验仓库相对 `path`、对应 `model_id` 或 `matrix_id` 以及归一化 `content_hash`。
+- Assessment 不参与 Manifest `case_count`，不参与 XMind TC 编号，也不参与 Execution Model 的 `branch_count` 或 `execution_instance_count`。

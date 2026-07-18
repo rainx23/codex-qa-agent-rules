@@ -24,4 +24,11 @@ description: 用于校验 QA 分析报告、XMind Markdown、XMind Workbook、Ma
 10. 产物存在时运行 `validate_knowledge.py`、`build_knowledge_index.py --check`、`validate_data_validation.py`、`validate_sql_style.py --strict` 和 `validate_sql_artifact.py`。确认 SQL 只读，且只有在用户提供执行证据时才标记为已执行/通过/失败。
 11. 接口自动化产物存在时，运行 `../../scripts/validate_api_automation_artifacts.py --excel <case.xlsx> --parameters <parameter.txt> --model <api-automation.json>`；固定表头、JSON、健康校验、变量和参数维度任一失败都阻止交付。
 
+## 可选 Testcase Value Assessment 校验
+
+- 用户提供 Assessment 时，通过 `../../scripts/validate_testcase_quality.py --value-assessment <path>` 校验 Schema、路径、模型 ID、归一化 Hash、TC 完整性和持久化重算一致性，并输出 error、warning、suggestion 与评分摘要。
+- error 包括 Schema 不合法、引用或 Hash 错误、未知或遗漏 TC、评分字段被篡改以及不支持的 `algorithm_version`；这些错误返回非零退出码。
+- 低价值、高维护成本、证据不足、疑似重复以及 P0 或历史缺陷低分保护提示均为非阻塞 warning/suggestion，不得自动修改用例。阶段一不得启用 value strict 门禁。
+- 用户未提供 Assessment 时，不搜索默认文件、不报缺失错误、不增加 warning，也不影响现有产物验收。
+
 保留历史产物。除非操作已版本化或得到明确授权，不修复或覆盖已有产物。

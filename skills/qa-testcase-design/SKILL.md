@@ -33,6 +33,12 @@ description: 用于基于证据设计 QA 测试点和最小有效 XMind Markdown
 8. 仅在校验通过后转换，并将模型与渲染产物交给 `../qa-artifact-validation/SKILL.md`。
 9. 消费 Knowledge Search 结果和 Data Validation Model 后再选风险。区分 UI 行为、业务数据断言、SQL 校验、对账和展示检查；XMind 引用 `SQLV###` 或 `REC###`，不嵌入大段 SQL。
 
+## 可选测试用例价值评估
+
+- Risk Coverage Matrix 和 Testcase Model 均校验通过后，可按用户要求生成独立 Testcase Value Assessment Model；Assessment 只能从正式模型派生，不能直接从原始自然语言评分。
+- 用户未要求测试用例价值评估时不强制生成，也不默认输出大段评分报告。评分只用于人工审核和用例优化建议，不计入 TC 数量，XMind 不展示评分节点。
+- 评分不得改写 P0/P1/P2、TC 编号、XMind 层级、`risk_ids` 或 `regression_scope`。P0 和历史缺陷用例低分时只能提出改善建议，疑似重复不得自动删除或合并。
+
 需要表达多入口执行状态时，只在结构化模型中生成可选 `execution_instances`；实例关联真实 `tc_id` 和 `branch_id`，分别维护 `branch_count`、`execution_instance_count`，不得改变 `case_count` 或现有 XMind TC 数量。未获得用户实际执行证据时所有实例必须为 `not_run`，本仓库不承担完整测试执行平台职责。
 
 对于既有逻辑变更，聚焦变更条件、反向路径、组合和边界；不要用未变更的入口可用、按钮可点或展示冒烟场景填充用例集。

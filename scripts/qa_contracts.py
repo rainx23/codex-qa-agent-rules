@@ -14,7 +14,6 @@ from validate_evidence import (
     _resolve_evidence_path,
     validate_evidence_references as validate_authentic_evidence_references,
 )
-from validate_execution_instances import _sha as stable_normalized_file_hash
 
 
 SCHEMA_VERSION = "2.0.0"
@@ -138,6 +137,11 @@ SENSITIVE_PATTERN = re.compile(r"(?i)(?:password|passwd|token|jdbc|private[_ -]?
 COMMIT_SHA_PATTERN = r"^[0-9a-fA-F]{7,40}$"
 CAPTURED_AT_PATTERN = r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$"
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+
+
+def stable_normalized_file_hash(path: Path) -> str:
+    content = path.read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+    return "sha256:" + hashlib.sha256(content).hexdigest()
 
 
 def read_rule_version(root: Path) -> str:

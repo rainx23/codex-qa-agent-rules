@@ -57,6 +57,35 @@
 
 10. 检查校验命令未产生非预期文件变化；干净仓库执行 `git diff --exit-code`。
 
+### Testcase Value Assessment
+
+- [ ] Assessment Schema 由 `qa_contracts.py` 生成。
+- [ ] `algorithm_version` 明确。
+- [ ] 评分公式只有一处实现。
+- [ ] `dimensions`、`total_score` 和 `reason_codes` 可重算。
+- [ ] Testcase、Risk、Requirement 引用 ID 一致。
+- [ ] 文本 Hash 已统一换行。
+- [ ] Windows、POSIX 和 UNC 绝对路径均被拒绝。
+- [ ] P0 保护规则有效。
+- [ ] 历史缺陷保护规则有效。
+- [ ] 疑似重复不会自动删除。
+- [ ] 未提供 Assessment 时现有流程不失败。
+- [ ] warning 和 suggestion 不影响退出码。
+- [ ] Python 3.10 和 3.12 结果一致。
+- [ ] `assessments` 输出顺序稳定。
+- [ ] XMind、Manifest 和 Execution Model 未被污染。
+- [ ] Ubuntu Python 3.10 通过。
+- [ ] Ubuntu Python 3.12 通过。
+- [ ] Windows Python 3.10 通过。
+- [ ] Windows Python 3.12 通过。
+- [ ] Golden CLI 输出一致。
+- [ ] Golden 使用 UTF-8、无 BOM、LF。
+- [ ] warning 和 suggestion 不改变退出码。
+- [ ] 新 Job 未使用 value strict。
+- [ ] 新 Job 未要求所有正式产物包含 Assessment。
+- [ ] 现有主校验 Job 未被无必要扩大为矩阵。
+- [ ] 未使用平台专属 Shell 命令。
+
 ## 必须覆盖的失败路径
 
 - 多根、TC 跳号和重复、非三位 TC、非法维度、Tab、非 4 空格、层级跳跃。

@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 """Validate execution instances, reruns, evidence and model references."""
 from __future__ import annotations
-import argparse, hashlib, json, re, sys
+import argparse, json, re, sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+
+from qa_contracts import stable_normalized_file_hash
 
 REQUIRED_MODEL_FIELDS = ("schema_version","rule_version","execution_model_id","testcase_model_id","validation_status","branch_count","execution_instance_count","execution_instances")
 REQUIRED_INSTANCE_FIELDS = ("execution_instance_id","testcase_id","branch_id","run_type","run_sequence","status","executed_at","executor","actual_result","evidence_references","defect_ids","confirmation_ids","rerun_of_execution_instance_id","notes")
 STATUSES = {"not_run","passed","failed","blocked","skipped"}
 
-def _sha(path: Path) -> str:
-    content = path.read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n")
-    return "sha256:" + hashlib.sha256(content).hexdigest()
+_sha = stable_normalized_file_hash
 
 def build_testcase_branch_index(model: dict[str, Any]) -> dict[str, Any]:
     result = {}

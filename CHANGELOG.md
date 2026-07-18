@@ -12,6 +12,19 @@
 
 ### Fixed
 
+## [2.7.0] - 2026-07-17
+
+### Added
+
+- 新增独立、可选的 Testcase Value Assessment Model、生成式 JSON Schema 和七维确定性评分能力。
+- 新增 P0 Risk 与历史缺陷回归保护、持久化结果全字段重算校验，以及路径、模型 ID、归一化 Hash 和 TC 完整性校验。
+- `validate_testcase_quality.py` 新增可选 `--value-assessment`，稳定输出 error、warning、suggestion 和评分摘要。
+
+### Changed
+
+- 规则版本从 2.6.0 升级到 2.7.0；测试用例设计与产物校验 Skill 增加可选 Assessment 职责边界。
+- 阶段一 warning 和 suggestion 保持非阻塞；Assessment 不影响 XMind 层级、Manifest 计数、Testcase Model、Execution Model 或既有交付流程。
+
 ## [2.6.0] - 2026-07-17
 
 ### Added

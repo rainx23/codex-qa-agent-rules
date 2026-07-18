@@ -22,6 +22,7 @@ from qa_contracts import (  # noqa: E402
     validate_testcase_model,
     validate_testcase_value_assessment,
 )
+from validate_execution_instances import _sha as execution_file_hash  # noqa: E402
 
 VALUE_FIXTURES = ROOT / "tests" / "fixtures" / "value-assessment"
 
@@ -424,6 +425,9 @@ class TestcaseValueAssessmentTests(unittest.TestCase):
             paths[2].write_bytes(b'{"value": 1}\r')
             hashes = [stable_normalized_file_hash(path) for path in paths]
         self.assertEqual(1, len(set(hashes)))
+
+    def test_execution_and_assessment_share_public_hash_implementation(self):
+        self.assertIs(stable_normalized_file_hash, execution_file_hash)
 
     def test_reference_hash_changes_when_content_changes(self):
         with tempfile.TemporaryDirectory() as directory:

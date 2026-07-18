@@ -42,13 +42,40 @@ Requirement Model 校验只判断结构、Fact/Confirmation 引用、核心 miss
 - `execution_status` 仅允许 `not_run`、`passed`、`failed`、`blocked`、`skipped`；没有用户提供的实际执行证据时只能为 `not_run`。
 - `case_count` 只统计 TC；`branch_count` 与 `execution_instance_count` 独立统计，执行实例不得增加 TC 数量。
 
+## Testcase Value Assessment Model
+
+### 模型作用
+
+Testcase Value Assessment Model 保存可复算的测试用例价值评估结果，绑定 Testcase Model、Risk Coverage Matrix 和可选 Requirement Model，记录 `algorithm_version`、客观 `maintenance_inputs` 与逐 TC `assessments`。它独立于 Testcase Model、XMind Markdown、Execution Model 和 Manifest。
+
+### 字段职责
+
+- `schema_version`：结构契约版本。
+- `algorithm_version`：确定性评分算法版本。
+- `testcase_model_reference`：静态用例来源及其路径、ID、Hash。
+- `risk_matrix_reference`：风险来源及其路径、ID、Hash。
+- `requirement_model_reference`：可选的需求与证据上下文；缺失时按评分内核规则处理。
+- `maintenance_inputs`：只能保存外部系统、共享可变数据、人工判定和环境特定依赖等客观非负计数。
+- `assessments`：只能保存统一评分内核生成的 `computed` 或 `insufficient_inputs` 结果。
+
+### 禁止事项
+
+- 不允许人工或 AI 直接填写 `dimensions` 或修改 `total_score`。
+- 不允许自由填写 `reason_codes`，`recommendation` 不得包含删除、降级或自动合并指令。
+- 不允许 Assessment 覆盖 Testcase、Risk、Requirement 或 Evidence 的正式字段。
+- Assessment 是阶段一可选模型，缺失不得阻止旧产物通过。
+
+### 重算校验
+
+持久化 Assessment 必须校验引用路径、模型 ID 和归一化 Hash，再调用 `scripts/qa_contracts.py` 的唯一评分内核重新计算。`dimensions`、`total_score`、`value_band`、`guardrails`、`reason_codes` 和 `recommendation` 必须全部一致，不能只比较总分；引用 Hash 不一致或持久化结果被篡改必须报错。
+
 ## 数据与知识模型
 
 - Knowledge Table、Logic Version、Metric、Requirement Knowledge 和 Data Validation Model 由 `scripts/qa_contracts.py` 统一生成 Schema。
 - 完整 DDL 使用 `schema_scope=complete` 并保存原始/规范化哈希；原文中明确存在的主键、唯一键、Duplicate/Aggregate Key、分区、分桶、索引、Engine 和 Properties 必须全部稳定提取，否则降级为 `partial` 或 `blocked`。局部字段使用 `partial`，不得覆盖 complete 版本。
 - Data Validation Model 使用 `required`、`optional`、`not_required`、`blocked`；验证方式使用 `sql`、`cross_source_reconciliation`、`mixed`、`not_applicable`、`blocked`。指标准确性默认必须有关联 SQL。
 - Validation SQL 使用全局 `SQLV###`，直接对数使用 `REC###`；它们可被多个 TC 复用，必须与需求、风险和 TC 建立引用关系。知识、SQL 和对数模型不得成为新的 XMind 层级。
-Schema contract version is `2.0.0`; it is distinct from the repository `RULE_VERSION` (`2.6.0`). Models with `schema_version=1.0.0` require the explicit migration script and re-confirmation before validation.
+Schema contract version is `2.0.0`; it is distinct from the repository `RULE_VERSION`. Models with `schema_version=1.0.0` require the explicit migration script and re-confirmation before validation.
 
 ## DDL 完整消费门禁
 

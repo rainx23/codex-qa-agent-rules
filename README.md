@@ -36,7 +36,10 @@
 | 禅道、OpenSpec、Markdown、截图、用户补充 | 需求理解、规则拆解、待确认点和验收基准 | 需求分析报告、风险和回归范围 |
 | Commit、Diff、分支、工作区变更 | 变更范围、调用链、需求覆盖和影响分析 | Diff 分析报告、疑似风险和测试点 |
 | 已确认需求和风险 | 风险矩阵、去重和最小有效用例集 | 固定格式 XMind Markdown |
+| Testcase、Risk、Requirement 和 Evidence | 可复算、可解释的测试用例价值评估 | 可选 Testcase Value Assessment Model、人工审核建议 |
 | 报告、Markdown、Workbook、Manifest | 自动校验、转换、复验和版本治理 | `.xmind`、Manifest、`testcases/index.md` |
+
+测试用例价值评估可识别高价值核心用例、回归保留用例、低价值冒烟、诊断不足、疑似重复和高维护成本。该阶段一能力可选且非阻塞，不自动删除、合并或降级用例，也不改变 XMind 结构、Manifest 计数或 Execution Model。
 
 第一次使用建议先阅读本 README，再看 [AGENTS.md](AGENTS.md) 和当前任务对应的 `SKILL.md`。
 
@@ -380,6 +383,14 @@ python scripts/validate_xmind_md.py path/to/case_xmind.md --strict
 ```
 
 输入是用例 Markdown；成功时输出 TC 数；失败表示根节点、维度、层级、编号、断言或去重规则不满足要求。
+
+如需主动校验独立的 Testcase Value Assessment Model，可使用单行命令：
+
+```bash
+python scripts/validate_testcase_quality.py tests/fixtures/valid_case_xmind.md --risk-matrix tests/fixtures/models/risk-coverage-matrix.json --testcase-model tests/fixtures/models/testcase-model.json --value-assessment tests/fixtures/value-assessment/testcase-value-assessment-valid.json
+```
+
+未传 `--value-assessment` 时不会搜索默认 Assessment；合法 Assessment 的 warning 和 suggestion 不改变退出码，结构、引用、Hash 或持久化重算错误返回非零退出码。
 
 ### 6. 转换为 XMind
 

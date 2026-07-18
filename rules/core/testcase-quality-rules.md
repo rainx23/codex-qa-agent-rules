@@ -45,6 +45,40 @@
 
 SQL、接口和字段只能使用证据中存在的标识；禁止某表、某字段、xxx、假设表等占位事实。
 
+## 测试用例价值评估
+
+### 评估目标
+
+测试用例价值评估（Testcase Value Assessment）是 Testcase、Risk、Requirement 和 Evidence 的派生评估结果，用于识别高价值核心用例、长期回归保留用例、低价值 reachability 冒烟、疑似重复、多风险混合导致的诊断价值不足、低风险高维护成本，以及高优先级但证据不足的用例。它不是 `test_priority`、`business_impact`、执行结果、覆盖率或人工工作量估算的替代品，也不能作为修改业务代码的事实依据。
+
+### 七维评分
+
+评估维度固定为：
+
+- `business_impact`
+- `risk_coverage_value`
+- `regression_value`
+- `diagnostic_value`
+- `evidence_confidence`
+- `maintenance_cost`
+- `redundancy_penalty`
+
+七个维度和总分均由程序确定性计算，用户或 AI 不得直接填写分数。权重方向强调业务影响、风险覆盖、回归复用、失败诊断和证据可信度，并扣减维护成本和重复惩罚；唯一评分公式、映射和取整规则只在 `scripts/qa_contracts.py` 维护，规则文档不复制实现代码。
+
+### 保护规则
+
+- 映射 P0 Risk 的 TC 必须保留；`historical_defect_ids` 非空的回归 TC 也必须保留。
+- 受保护用例低分时只能提出改善建议，不得自动删除、自动合并、自动降级或自动跳过。
+- 疑似重复只触发人工复核，不得据此自动改变 TC。
+- 测试用例价值评估不能覆盖 P0/P1/P2、风险映射、证据状态或回归范围。
+
+### 阶段一边界
+
+- Testcase Value Assessment Model 是独立、可选、非阻塞模型；未生成 Assessment 不影响现有正式产物。
+- warning 和 suggestion 仅供人工审核，不阻塞交付；只有结构、引用、Hash 或持久化重算结果错误才作为 error。
+- Assessment 不写入 Testcase Model 或 XMind Markdown，不参与 Manifest 计数，也不改变 TC 数量、分支数或执行实例数。
+- Assessment 独立于 Execution Model，不代表测试已经执行。
+
 ## 固定 XMind Markdown
 
 存在公共入口：
