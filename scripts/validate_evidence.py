@@ -3,10 +3,11 @@
 
 from __future__ import annotations
 
-import hashlib
 import re
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any
+
+from file_hash_utils import stable_file_content_hash
 
 
 EVIDENCE_REQUIRED_FIELDS = (
@@ -134,7 +135,11 @@ def validate_evidence_reference(
         except OSError as exc:
             errors.append(f"Evidence 文件无法读取：{exc}")
     if raw is not None and re.fullmatch(HASH_PATTERN, str(content_hash or "")):
-        actual_hash = "sha256:" + hashlib.sha256(raw).hexdigest()
+        binary = resolved is not None and resolved.suffix.lower() in BINARY_SUFFIXES
+        actual_hash = stable_file_content_hash(
+            resolved,
+            normalize_text_newlines=not binary,
+        )
         if status == "current" and actual_hash != content_hash:
             errors.append(f"current Evidence content_hash 与文件不一致：actual={actual_hash}")
 

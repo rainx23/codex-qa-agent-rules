@@ -10,6 +10,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable
 
+from file_hash_utils import stable_file_content_hash
 from validate_evidence import (
     _resolve_evidence_path,
     validate_evidence_references as validate_authentic_evidence_references,
@@ -140,8 +141,7 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 
 
 def stable_normalized_file_hash(path: Path) -> str:
-    content = path.read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n")
-    return "sha256:" + hashlib.sha256(content).hexdigest()
+    return stable_file_content_hash(path, normalize_text_newlines=True)
 
 
 def read_rule_version(root: Path) -> str:
