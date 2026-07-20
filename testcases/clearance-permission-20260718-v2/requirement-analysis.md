@@ -42,6 +42,7 @@ Generated At: 2026-07-18 21:57:42 Asia/Shanghai
 ## 待确认点
 
 - CONF-001 FACT-014 severity=blocking status=resolved：已确认不包含关系命中则可见、未命中则不可见；多用户任一命中可见、全部未命中不可见。
+- CONF-002 FACT-015 severity=nonblocking status=pending：SQL 对账缺少表结构和稳定行标识字段；不阻塞测试设计，SQL验证保持 blocked。
 
 ## 风险点
 
@@ -53,6 +54,19 @@ Generated At: 2026-07-18 21:57:42 Asia/Shanghai
 - RISK-011、RISK-012 对应 FACT-009：AND/OR 错误或原有权限被覆盖。
 - RISK-013 对应 FACT-010：可用资金弹窗回归受损。
 - RISK-015 对应 FACT-014、CONF-001：不包含关系方向错误风险已覆盖。
+
+## 测试维度扫描
+
+| 测试维度 | 状态 | 主要风险 | 对应 TC | 原因或阻塞 |
+| --- | --- | --- | --- | --- |
+| 功能测试 | 不适用 | 无独立流程风险 | 无 | 核心 Oracle 为权限可见集合 |
+| 数据测试 | 已覆盖 | 汇总越权 | TC003 | 作为权限主维度用例的辅助维度 |
+| 异常测试 | 不适用 | 无 | 无 | 未提供独立异常处理规则 |
+| 权限测试 | 已覆盖 | 可见性、关系、目标范围、AND/OR | TC001-TC019、TC022-TC023 | 权限矩阵主链路 |
+| 导出测试 | 不适用 | 无 | 无 | 两个弹窗未包含导出对象 |
+| 兼容性测试 | 不适用 | 无 | 无 | 未提供设备、浏览器或协议兼容变更 |
+| 回归测试 | 已覆盖 | 原有权限与关联弹窗受损 | TC020、TC021 | 两条用例以回归为主要 Oracle |
+| SQL验证 | blocked | 数据对账 | 无 | FACT-015 / CONF-002：缺少表结构和稳定行标识字段 |
 - RISK-015 对应 FACT-014、CONF-001：不包含关系方向错误风险已覆盖。
 - RISK-015 对应 FACT-014、CONF-001：不包含关系方向错误风险已覆盖。
 - RISK-015 对应 FACT-014、CONF-001：不包含关系方向错误风险已覆盖。
@@ -138,5 +152,4 @@ P0 TC 为 TC001-TC004、TC006-TC019、TC022-TC023，共 20 个；覆盖 12 个 P
 ## 风险覆盖与路径
 
 Requirement Analysis Model 与草稿 Risk/Testcase Model 保留完整追踪；CONF-001 已解决，正式 XMind Markdown、Workbook 和 Manifest 恢复生成。
-
 

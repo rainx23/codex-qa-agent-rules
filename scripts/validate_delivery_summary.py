@@ -12,7 +12,7 @@ from qa_contracts import load_json, summarize_confirmations
 
 
 REQUIRED_SECTIONS = (
-    "处理结果", "待确认点", "主要交付文件", "追踪和校验文件", "校验结果", "未执行事项",
+    "处理结果", "待确认点", "主要交付文件", "追踪和校验文件", "测试维度覆盖", "校验结果", "未执行事项",
 )
 FORBIDDEN_VAGUE_ONLY = ("相关文件", "产物见目录", "已生成若干文件", "查看对应文件")
 ANSI_RE = re.compile(r"\x1b\[[0-?]*[ -/]*[@-~]")
@@ -43,6 +43,11 @@ def validate_summary(text: str, manifest_path: Path) -> list[str]:
     testcase_task = any(manifest.get(field) for field in ("testcase_model_path", "draft_testcase_model_path", "xmind_md_path", "draft_xmind_md_path", "xmind_path"))
     if testcase_task and not re.search(r"(?m)^## 用例摘要\s*$", text):
         errors.append("完整用例任务必须包含用例摘要")
+    if testcase_task:
+        dimension_body = text.split("## 测试维度覆盖", 1)[1].split("\n## ", 1)[0] if "## 测试维度覆盖" in text else ""
+        for dimension in ("功能测试", "数据测试", "异常测试", "权限测试", "导出测试", "兼容性测试", "回归测试", "SQL验证"):
+            if dimension not in dimension_body:
+                errors.append(f"测试维度覆盖遗漏：{dimension}")
     if ANSI_RE.search(text):
         errors.append("输出包含 ANSI 控制字符")
     if "validation_status" not in text or "sql_status" not in text:

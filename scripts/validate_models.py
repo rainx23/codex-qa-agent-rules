@@ -9,7 +9,7 @@ from pathlib import Path
 
 from qa_contracts import (
     load_json, validate_diff_model, validate_model_links, validate_requirement_model,
-    validate_risk_matrix, validate_testcase_model, summarize_confirmations,
+    validate_risk_matrix, validate_testcase_model, validate_test_dimension_warnings, summarize_confirmations,
 )
 from validate_evidence import evidence_precision_warnings
 
@@ -67,11 +67,18 @@ def main() -> int:
     parser.add_argument("--diff", type=Path)
     parser.add_argument("--risk", required=True, type=Path)
     parser.add_argument("--testcase", required=True, type=Path)
+    parser.add_argument("--strict", action="store_true", help="将测试维度 warning 提升为失败")
     args = parser.parse_args()
     if not args.requirement and not args.diff:
         parser.error("--requirement 与 --diff 至少提供一个")
     errors = validate_files(args.requirement, args.diff, args.risk, args.testcase)
     warnings = validate_warnings(args.requirement)
+    requirement_data = load_json(args.requirement) if args.requirement else None
+    testcase_data = load_json(args.testcase)
+    warnings.extend(validate_test_dimension_warnings(requirement_data, testcase_data))
+    if args.strict:
+        errors.extend(warnings)
+        warnings = []
     for error in errors:
         print(f"FAIL {error}", file=sys.stderr)
     for warning in warnings:

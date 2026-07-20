@@ -13,7 +13,7 @@
 | `qa_contracts.py` | Schema 与 Manifest 的可执行契约源 | 是 |
 | `generate_schemas.py` | 生成或检查 Schema | 是 |
 | `validate_*.py` | 静态校验门禁 | 是 |
-| `validate_models.py` | 校验本次实际生成模型、跨模型引用及可访问证据文件的哈希新鲜度 | 是 |
+| `validate_models.py` | 校验本次实际生成模型、跨模型引用、测试维度评估及可访问证据文件的哈希新鲜度；`--strict` 可提升维度 review warning | 是 |
 | `validate_testcase_quality.py` | 校验 XMind Markdown，并按需编排和展示 Testcase Value Assessment 结果 | 是 |
 | `validate_testcase_index.py` | 完整校验 passed Manifest，并逐字段核对正式索引的唯一登记 | 是 |
 | `validate_formal_artifacts.py` | 扫描全部 passed 正式 Manifest，并统一复验模型、Markdown、Workbook 与索引 | 是 |
@@ -29,7 +29,7 @@
 - Testcase Value Assessment 的 warning 和 suggestion 在阶段一非阻塞；只有 Assessment error 使该命令返回非零退出码。未传参数时不搜索默认 Assessment。
 - XMind 校验拒绝 `...`/`……` 截断标记，并对未加括号的混合 `AND/OR` 输出 warning；不设置任何节点长度 error 或 warning。
 - 正式产物在更新索引后运行 `python scripts/validate_formal_artifacts.py`；单个 Workbook 可使用 `python scripts/verify_xmind.py path/to/case.xmind --markdown path/to/case.xmind.md` 复验。
-- 最终聊天交付使用 `python scripts/render_delivery_summary.py --manifest path/to/manifest.json --check`；可选 `--output` 保存副本，独立文件使用 `validate_delivery_summary.py --manifest ... --summary ...` 校验。
+- 最终聊天交付使用 `python scripts/render_delivery_summary.py --manifest path/to/manifest.json --check`；可选 `--output` 保存副本，独立文件使用 `validate_delivery_summary.py --manifest ... --summary ...` 校验。完整用例摘要固定展示八类测试维度覆盖。
 - 来源组合 Hash 统一由 `file_hash_utils.py` 处理：文本换行和 UTF-8 BOM 归一，二进制保持原始字节，规范化相对路径参与组合 Hash。
 - 外部工作区的 Manifest 仍从规则仓库读取 `RULE_VERSION`，但来源、证据和正式产物相对路径从 Manifest 所在工作区解析；绝对路径、`..` 和 resolve 后越界仍被拒绝。
 - integrated 业务仓库缺少 `rules-repository.json.sql_defaults.author` 时，`validate_repository_mode.py` 输出显式迁移错误；脚本不会自动修改业务配置。

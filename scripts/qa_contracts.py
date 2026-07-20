@@ -42,6 +42,9 @@ DIMENSIONS = (
     "功能测试", "数据测试", "异常测试", "权限测试",
     "导出测试", "兼容性测试", "回归测试", "SQL验证",
 )
+TEST_DIMENSION_STATUSES = ("covered", "not_applicable", "explicitly_excluded", "pending", "blocked")
+CONDITION_MATRIX_APPLICABILITY_STATUSES = ("required", "not_required", "blocked")
+SCOPE_DISPOSITION_STATUSES = TEST_DIMENSION_STATUSES
 TC_PATTERN = r"^TC\d{3}$"
 SEMVER_PATTERN = r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$"
 GENERATED_AT_FORMAT = "%Y-%m-%d %H:%M:%S"
@@ -303,6 +306,33 @@ def validate_schema_shape(value: Any, schema: dict[str, Any], path: str = "$") -
 
 
 def requirement_schema(version: str) -> dict[str, Any]:
+    test_dimension_assessment = _object(
+        ["dimension", "status", "reason", "fact_ids", "risk_ids", "confirmation_ids", "testcase_ids", "evidence_references"],
+        {
+            "dimension": {"enum": list(DIMENSIONS)},
+            "status": {"enum": list(TEST_DIMENSION_STATUSES)},
+            "reason": _string(), "fact_ids": _strings(), "risk_ids": _strings(),
+            "confirmation_ids": _strings(), "testcase_ids": _strings(),
+            "evidence_references": {"type": "array", "items": _evidence_reference()},
+        },
+    )
+    condition_matrix_applicability = _object(
+        ["status", "dimension_ids", "reason", "evidence_references"],
+        {
+            "status": {"enum": list(CONDITION_MATRIX_APPLICABILITY_STATUSES)},
+            "dimension_ids": _strings(), "reason": _string(),
+            "evidence_references": {"type": "array", "items": _evidence_reference()},
+            "confirmation_ids": _strings(), "missing_fact_ids": _strings(),
+        },
+    )
+    scope_disposition = _object(
+        ["scope_item", "status", "reason", "evidence_references"],
+        {
+            "scope_item": _string(), "status": {"enum": list(SCOPE_DISPOSITION_STATUSES)},
+            "reason": _string(), "evidence_references": {"type": "array", "items": _evidence_reference()},
+            "fact_ids": _strings(), "confirmation_ids": _strings(),
+        },
+    )
     condition_dimension = _object(
         ["dimension_id", "dimension_name", "values"],
         {"dimension_id": _string(), "dimension_name": _string(), "values": _strings(1)},
@@ -394,6 +424,9 @@ def requirement_schema(version: str) -> dict[str, Any]:
             "validation_missing_information": _strings(),
             "condition_matrix_required": {"type": "boolean"},
             "condition_matrix": condition_matrix,
+            "test_dimension_assessment": {"type": "array", "items": test_dimension_assessment},
+            "condition_matrix_applicability": condition_matrix_applicability,
+            "scope_dispositions": {"type": "array", "items": scope_disposition},
         },
     )
     return _base_schema("Requirement Analysis Model", version, body)
@@ -680,6 +713,7 @@ def testcase_schema(version: str) -> dict[str, Any]:
         ["tc_id", "dimension", "common_entry", "module_level_1", "module_level_2", "test_point", "steps", "expected_results", "risk_ids", "requirement_ids", "change_ids", "historical_defect_ids", "test_priority", "evidence_state", "regression_scope", "deduplication_key"],
         {
             "tc_id": _string(pattern=TC_PATTERN), "dimension": {"enum": list(DIMENSIONS)},
+            "secondary_dimensions": {"type": "array", "items": {"enum": list(DIMENSIONS)}, "uniqueItems": True},
             "common_entry": {"type": ["string", "null"]}, "module_level_1": {"type": ["string", "null"]},
             "module_level_2": {"type": ["string", "null"]}, "test_point": _string(),
             "steps": _strings(), "expected_results": _strings(), "actions": {"type": "array", "items": action}, "risk_ids": _strings(1),
@@ -1021,6 +1055,66 @@ def _generate_expected_condition_combinations(
 
 def validate_requirement_model(data: dict[str, Any], *, evidence_root: Path | None = None) -> list[str]:
     errors = validate_schema_shape(data, requirement_schema("0.0.0"))
+    facts = data.get("facts", []) if isinstance(data.get("facts"), list) else []
+    confirmations = data.get("confirmation_points", []) if isinstance(data.get("confirmation_points"), list) else []
+    fact_ids = {item.get("fact_id") for item in facts if isinstance(item, dict)}
+    confirmation_ids = {item.get("confirmation_id") for item in confirmations if isinstance(item, dict)}
+    assessment = data.get("test_dimension_assessment")
+    if assessment is not None:
+        items = assessment if isinstance(assessment, list) else []
+        dimensions = [item.get("dimension") for item in items if isinstance(item, dict)]
+        if len(dimensions) != len(set(dimensions)):
+            errors.append("DUPLICATE_TEST_DIMENSION_ASSESSMENT: 每个测试分类维度只能出现一次")
+        if set(dimensions) != set(DIMENSIONS):
+            errors.append("TEST_DIMENSION_ASSESSMENT_INCOMPLETE: 必须完整扫描固定八个测试分类维度")
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            dimension, status = item.get("dimension"), item.get("status")
+            reason = str(item.get("reason", "")).strip()
+            evidence = item.get("evidence_references", [])
+            if status not in TEST_DIMENSION_STATUSES:
+                errors.append(f"INVALID_TEST_DIMENSION_STATUS: {dimension} status={status}")
+            if status == "not_applicable" and not reason:
+                errors.append(f"NOT_APPLICABLE_DIMENSION_WITHOUT_REASON: {dimension}")
+            if status == "not_applicable" and not (set(item.get("fact_ids", [])) & fact_ids or evidence):
+                errors.append(f"NOT_APPLICABLE_DIMENSION_WITHOUT_REASON: {dimension} 缺少范围 Fact 或 Evidence")
+            if status == "explicitly_excluded" and not evidence:
+                errors.append(f"EXCLUDED_DIMENSION_WITHOUT_EVIDENCE: {dimension}")
+            if status == "pending" and not (set(item.get("confirmation_ids", [])) & confirmation_ids):
+                errors.append(f"PENDING_DIMENSION_WITHOUT_CONFIRMATION: {dimension}")
+            if status == "blocked" and not reason:
+                errors.append(f"BLOCKED_DIMENSION_WITHOUT_REASON: {dimension}")
+            if status == "blocked" and not (
+                set(item.get("confirmation_ids", [])) & confirmation_ids
+                or set(item.get("fact_ids", [])) & fact_ids
+            ):
+                errors.append(f"BLOCKED_DIMENSION_WITHOUT_REASON: {dimension} 缺少 Confirmation 或 Missing Fact")
+    applicability = data.get("condition_matrix_applicability")
+    if isinstance(applicability, dict):
+        status = applicability.get("status")
+        if status == "required" and not isinstance(data.get("condition_matrix"), dict):
+            errors.append("CONDITION_MATRIX_REQUIRED_FOR_MULTI_DIMENSION_REQUIREMENT: required 时必须提供 condition_matrix")
+        if status == "required" and not applicability.get("dimension_ids"):
+            errors.append("CONDITION_MATRIX_REQUIRED_FOR_MULTI_DIMENSION_REQUIREMENT: required 时必须提供 dimension_ids")
+        if status == "not_required" and not str(applicability.get("reason", "")).strip():
+            errors.append("CONDITION_MATRIX_REQUIRED_FOR_MULTI_DIMENSION_REQUIREMENT: not_required 必须说明无组合差异的依据")
+        if status == "blocked" and not (
+            set(applicability.get("confirmation_ids", [])) & confirmation_ids
+            or set(applicability.get("missing_fact_ids", [])) & fact_ids
+        ):
+            errors.append("CONDITION_MATRIX_REQUIRED_FOR_MULTI_DIMENSION_REQUIREMENT: blocked 必须关联 Confirmation 或 Missing Fact")
+    for disposition in data.get("scope_dispositions", []) if isinstance(data.get("scope_dispositions"), list) else []:
+        if not isinstance(disposition, dict):
+            continue
+        status = disposition.get("status")
+        evidence = disposition.get("evidence_references", [])
+        if status == "explicitly_excluded" and not evidence:
+            errors.append(f"TEST_SCOPE_EXCLUDED_WITHOUT_EVIDENCE: {disposition.get('scope_item')}")
+        if status == "pending" and not (set(disposition.get("confirmation_ids", [])) & confirmation_ids):
+            errors.append(f"TEST_SCOPE_EXCLUDED_WITHOUT_EVIDENCE: {disposition.get('scope_item')} pending 未关联 Confirmation")
+        if status == "blocked" and not str(disposition.get("reason", "")).strip():
+            errors.append(f"TEST_SCOPE_EXCLUDED_WITHOUT_EVIDENCE: {disposition.get('scope_item')} blocked 缺少原因")
     condition_matrix = data.get("condition_matrix")
     if data.get("condition_matrix_required") is True and not isinstance(condition_matrix, dict):
         errors.append("CONDITION_MATRIX_REQUIRED: 明确列出两个及以上条件维度时必须建立 condition_matrix")
@@ -1403,6 +1497,14 @@ def validate_testcase_model(data: dict[str, Any]) -> list[str]:
             errors.append(f"{tc_id} 未关联风险")
         if not any(case.get(field) for field in ("requirement_ids", "change_ids", "historical_defect_ids")):
             errors.append(f"{tc_id} 未关联需求、Diff 或历史缺陷")
+        secondary = case.get("secondary_dimensions", [])
+        if case.get("dimension") in secondary:
+            errors.append(f"SECONDARY_DIMENSION_DUPLICATES_PRIMARY: {tc_id}")
+        if len(secondary) != len(set(secondary)):
+            errors.append(f"DUPLICATE_SECONDARY_DIMENSION: {tc_id}")
+        for dimension in secondary:
+            if dimension not in DIMENSIONS:
+                errors.append(f"UNKNOWN_SECONDARY_DIMENSION: {tc_id} {dimension}")
         common = case.get("common_entry")
         modules = bool(case.get("module_level_1") and case.get("module_level_2"))
         if bool(common) == modules:
@@ -1824,6 +1926,35 @@ def validate_model_links(
     facts_by_id = {item.get("fact_id"): item for item in (requirement or {}).get("facts", [])}
     facts = set(facts_by_id)
     confirmations = {item.get("confirmation_id"): item for item in (requirement or {}).get("confirmation_points", [])}
+    assessment = (requirement or {}).get("test_dimension_assessment")
+    dimension_contract_adopted = any(
+        field in (requirement or {})
+        for field in ("test_dimension_assessment", "condition_matrix_applicability", "scope_dispositions")
+    ) or any("secondary_dimensions" in case for case in cases.values())
+    if validation_status == "passed" and dimension_contract_adopted and not isinstance(assessment, list):
+        errors.append("TEST_DIMENSION_ASSESSMENT_REQUIRED: 正式用例任务必须提供 test_dimension_assessment")
+    if isinstance(assessment, list):
+        for item in assessment:
+            if not isinstance(item, dict):
+                continue
+            dimension = item.get("dimension")
+            risk_ids = set(item.get("risk_ids", []))
+            testcase_ids = set(item.get("testcase_ids", []))
+            if item.get("status") == "covered":
+                if not testcase_ids:
+                    errors.append(f"COVERED_DIMENSION_WITHOUT_TESTCASE: {dimension}")
+                if not risk_ids:
+                    errors.append(f"COVERED_DIMENSION_WITHOUT_RISK: {dimension}")
+            if validation_status == "passed" and item.get("status") == "pending":
+                errors.append(f"PENDING_DIMENSION_WITHOUT_CONFIRMATION: passed 产物不得保留 pending 维度 {dimension}")
+            if risk_ids - set(risks):
+                errors.append(f"COVERED_DIMENSION_WITHOUT_RISK: {dimension} 引用不存在 Risk {sorted(risk_ids - set(risks))}")
+            if testcase_ids - set(cases):
+                errors.append(f"COVERED_DIMENSION_WITHOUT_TESTCASE: {dimension} 引用不存在 TC {sorted(testcase_ids - set(cases))}")
+            for tc_id in testcase_ids & set(cases):
+                case_dimensions = {cases[tc_id].get("dimension"), *cases[tc_id].get("secondary_dimensions", [])}
+                if dimension not in case_dimensions:
+                    errors.append(f"TESTCASE_PRIMARY_DIMENSION_MISMATCH: {tc_id} 未声明评估维度 {dimension}")
     for risk_id in set(risks) & set(diff_risks):
         left, right = risks[risk_id], diff_risks[risk_id]
         if left.get("disposition_status") != right.get("disposition_status", "covered"):
@@ -2122,6 +2253,25 @@ def validate_model_links(
                     f"RELATION_SCENARIO_INCOMPLETE: {permission_type}/{relation} 缺少 {sorted(set(missing_markers))}"
                 )
     return list(dict.fromkeys(errors))
+
+
+def validate_test_dimension_warnings(
+    requirement: dict[str, Any] | None,
+    testcase_model: dict[str, Any],
+) -> list[str]:
+    """Return review-only warnings that must not block unless strict is requested."""
+    cases = [item for item in testcase_model.get("cases", []) if isinstance(item, dict)]
+    assessment = (requirement or {}).get("test_dimension_assessment", [])
+    covered = {
+        item.get("dimension") for item in assessment
+        if isinstance(item, dict) and item.get("status") == "covered"
+    }
+    primary = {item.get("dimension") for item in cases}
+    if len(cases) >= 5 and len(primary) == 1 and len(covered) >= 2:
+        return [
+            "SINGLE_PRIMARY_DIMENSION_REVIEW_REQUIRED: TC>=5、主维度集中且需求评估识别出多个 covered 风险类型，需人工复核"
+        ]
+    return []
 
 
 _VALUE_IMPACT_SCORES = {"critical": 5, "high": 4, "medium": 2, "low": 1}

@@ -63,6 +63,22 @@
               "SQL验证"
             ]
           },
+          "secondary_dimensions": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "功能测试",
+                "数据测试",
+                "异常测试",
+                "权限测试",
+                "导出测试",
+                "兼容性测试",
+                "回归测试",
+                "SQL验证"
+              ]
+            },
+            "uniqueItems": true
+          },
           "common_entry": {
             "type": [
               "string",

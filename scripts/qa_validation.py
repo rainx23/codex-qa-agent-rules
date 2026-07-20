@@ -334,7 +334,7 @@ def validate_markdown_text(markdown: str, source: Path | str = "<memory>") -> Ou
             semantic_cases.append((tc, signature, context))
 
     numbers = [int(TC_RE.fullmatch(node.title).group("number")) for node in tc_nodes]
-    if numbers != list(range(1, len(numbers) + 1)):
+    if sorted(numbers) != list(range(1, len(numbers) + 1)):
         errors.append(f"{source}: TC 编号必须从 TC001 全局连续，实际 {numbers}")
     if len(numbers) != len(set(numbers)):
         errors.append(f"{source}: TC 编号重复")

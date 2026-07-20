@@ -299,6 +299,17 @@ def validate(
             errors.append(f"缺少章节（{MODE_LABELS[resolved_mode]}）：{name}")
         elif not _body(bodies, name):
             errors.append(f"章节正文为空（{MODE_LABELS[resolved_mode]}）：{name}")
+    if validation_status == "passed_dimension_assessment":
+        dimension_body = _body(bodies, "测试维度扫描")
+        if not dimension_body:
+            errors.append("缺少章节（正式用例任务）：测试维度扫描")
+        else:
+            for dimension in (
+                "功能测试", "数据测试", "异常测试", "权限测试",
+                "导出测试", "兼容性测试", "回归测试", "SQL验证",
+            ):
+                if dimension not in dimension_body:
+                    errors.append(f"测试维度扫描遗漏：{dimension}")
 
     evidence = _body(bodies, "证据来源")
     if evidence and not ALLOWED_EVIDENCE.search(evidence):

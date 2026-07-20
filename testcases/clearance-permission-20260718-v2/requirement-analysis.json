@@ -388,6 +388,33 @@
           "storage_type": "snapshot"
         }
       ]
+    },
+    {
+      "fact_id": "FACT-015",
+      "category": "missing",
+      "statement": "缺少用于 SQL 对账的表结构和稳定行标识字段",
+      "source_type": "user_confirmation",
+      "source_reference": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+      "confidence": "medium",
+      "affects_core_expectation": false,
+      "handling": "记录为待确认或阻塞项，不写入确定性业务预期",
+      "evidence_references": [
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 1,
+          "line_end": 1,
+          "commit_sha": null,
+          "content_hash": "sha256:89524afa7a0fa4ea0b157e912286e2cc91562c68cb2d696351334346aec7995f",
+          "excerpt": "模拟交易和正式交易的核心规则、操作和预期一致时，合并为同一个 TC，并使用两个平级入口分支覆盖。",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
     }
   ],
   "confirmation_points": [
@@ -418,6 +445,20 @@
         }
       ],
       "resolved_at": "2026-07-18 21:57:42",
+      "skip_reason": null,
+      "decision_evidence": []
+    },
+    {
+      "confirmation_id": "CONF-002",
+      "severity": "nonblocking",
+      "statement": "如需执行 SQL 对账，请补充表结构和稳定行标识字段",
+      "fact_ids": [
+        "FACT-015"
+      ],
+      "status": "pending",
+      "resolution": null,
+      "resolution_evidence_references": [],
+      "resolved_at": null,
       "skip_reason": null,
       "decision_evidence": []
     }
@@ -3862,5 +3903,208 @@
         }
       ]
     }
-  }
+  },
+  "condition_matrix_applicability": {
+    "status": "required",
+    "dimension_ids": [
+      "permission_type",
+      "relation",
+      "target_scope",
+      "state",
+      "business_entry"
+    ],
+    "reason": "权限类型、关系、目标范围、命中状态与业务入口共同决定可见集合和汇总 Oracle",
+    "evidence_references": [],
+    "confirmation_ids": [],
+    "missing_fact_ids": []
+  },
+  "scope_dispositions": [
+    {
+      "scope_item": "重复用户自动去重、拒绝选择、提示和删除后保存",
+      "status": "explicitly_excluded",
+      "reason": "用户证据明确禁止扩写",
+      "evidence_references": [
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/clearance-permission-20260718-v2/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-CLEARANCE-PERMISSION-20260718-V2",
+          "line_start": 1,
+          "line_end": 1,
+          "commit_sha": null,
+          "content_hash": "sha256:89524afa7a0fa4ea0b157e912286e2cc91562c68cb2d696351334346aec7995f",
+          "excerpt": "模拟交易和正式交易的核心规则、操作和预期一致时，合并为同一个 TC，并使用两个平级入口分支覆盖。",
+          "captured_at": "2026-07-18 20:18:36",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ],
+      "fact_ids": [
+        "FACT-012"
+      ],
+      "confirmation_ids": []
+    },
+    {
+      "scope_item": "SQL 数据对账",
+      "status": "blocked",
+      "reason": "缺少表结构和稳定行标识字段",
+      "evidence_references": [],
+      "fact_ids": [
+        "FACT-015"
+      ],
+      "confirmation_ids": [
+        "CONF-002"
+      ]
+    }
+  ],
+  "test_dimension_assessment": [
+    {
+      "dimension": "功能测试",
+      "status": "not_applicable",
+      "reason": "本次核心 Oracle 是权限可见集合，业务动作与流程未发生独立变更",
+      "fact_ids": [
+        "FACT-007"
+      ],
+      "risk_ids": [],
+      "confirmation_ids": [],
+      "testcase_ids": [],
+      "evidence_references": []
+    },
+    {
+      "dimension": "数据测试",
+      "status": "covered",
+      "reason": "汇总行必须只统计可见股票",
+      "fact_ids": [
+        "FACT-007"
+      ],
+      "risk_ids": [
+        "RISK-002"
+      ],
+      "confirmation_ids": [],
+      "testcase_ids": [
+        "TC003"
+      ],
+      "evidence_references": []
+    },
+    {
+      "dimension": "异常测试",
+      "status": "not_applicable",
+      "reason": "已确认范围为权限矩阵行为，未提供独立异常处理规则",
+      "fact_ids": [
+        "FACT-006"
+      ],
+      "risk_ids": [],
+      "confirmation_ids": [],
+      "testcase_ids": [],
+      "evidence_references": []
+    },
+    {
+      "dimension": "权限测试",
+      "status": "covered",
+      "reason": "覆盖权限矩阵、汇总越权和 AND/OR",
+      "fact_ids": [
+        "FACT-002",
+        "FACT-007",
+        "FACT-009"
+      ],
+      "risk_ids": [
+        "RISK-001",
+        "RISK-002",
+        "RISK-003",
+        "RISK-004",
+        "RISK-005",
+        "RISK-006",
+        "RISK-007",
+        "RISK-008",
+        "RISK-009",
+        "RISK-010",
+        "RISK-011",
+        "RISK-014",
+        "RISK-015"
+      ],
+      "confirmation_ids": [],
+      "testcase_ids": [
+        "TC001",
+        "TC002",
+        "TC003",
+        "TC004",
+        "TC005",
+        "TC006",
+        "TC007",
+        "TC008",
+        "TC009",
+        "TC010",
+        "TC011",
+        "TC012",
+        "TC013",
+        "TC014",
+        "TC015",
+        "TC016",
+        "TC017",
+        "TC018",
+        "TC019",
+        "TC022",
+        "TC023"
+      ],
+      "evidence_references": []
+    },
+    {
+      "dimension": "导出测试",
+      "status": "not_applicable",
+      "reason": "本次两个清仓股弹窗未包含导出对象或文件规则",
+      "fact_ids": [
+        "FACT-007"
+      ],
+      "risk_ids": [],
+      "confirmation_ids": [],
+      "testcase_ids": [],
+      "evidence_references": []
+    },
+    {
+      "dimension": "兼容性测试",
+      "status": "not_applicable",
+      "reason": "未提供浏览器、设备、协议版本或新旧模式兼容变更",
+      "fact_ids": [
+        "FACT-001"
+      ],
+      "risk_ids": [],
+      "confirmation_ids": [],
+      "testcase_ids": [],
+      "evidence_references": []
+    },
+    {
+      "dimension": "回归测试",
+      "status": "covered",
+      "reason": "原有权限与可用资金弹窗不得受影响",
+      "fact_ids": [
+        "FACT-009",
+        "FACT-010"
+      ],
+      "risk_ids": [
+        "RISK-012",
+        "RISK-013"
+      ],
+      "confirmation_ids": [],
+      "testcase_ids": [
+        "TC020",
+        "TC021"
+      ],
+      "evidence_references": []
+    },
+    {
+      "dimension": "SQL验证",
+      "status": "blocked",
+      "reason": "缺少表结构和稳定行标识字段",
+      "fact_ids": [
+        "FACT-015"
+      ],
+      "risk_ids": [],
+      "confirmation_ids": [
+        "CONF-002"
+      ],
+      "testcase_ids": [],
+      "evidence_references": []
+    }
+  ]
 }

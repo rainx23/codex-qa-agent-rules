@@ -50,8 +50,9 @@
 3. `主要交付文件`：优先显示用户直接使用的文件。passed 首项为正式 `.xmind`，其后是 `.xmind.md` 和 `requirement-analysis.md`；pending 使用准确的草稿名称；requirement-only 不显示不存在的用例文件。
 4. `追踪和校验文件`：Requirement Model、Risk Matrix、Testcase Model、Manifest 和 Index，各自显示仓库相对路径、固定类型用途与状态。
 5. `用例摘要`：完整用例任务显示 TC、P0 TC、P0 Risk、Risk、入口分支、条件组合、行为覆盖、blocked、excluded、uncovered、relation 和 supersedes。数量只从结构化模型和 Manifest 读取；`entry_branches` 不得当作 TC，`covered_by_tc_ids` 不得当作行为覆盖。
-6. `校验结果`：Requirement Model、Risk Matrix、Testcase Model、XMind Markdown、Workbook 完整树、Manifest、Index、正式产物统一扫描、全量单元测试和 `git diff --check` 的真实执行状态。
-7. `未执行事项`：明确未连接的页面、接口、SQL、自动化和 Git 操作，防止把产物校验误解为业务功能执行通过。
+6. `测试维度覆盖`：从 Requirement Model 的 `test_dimension_assessment` 固定展示八类状态；covered 的 TC 数按主维度与辅助维度集合计算，同一 TC 不重复计数，未生成 TC 的维度仍展示处置原因。
+7. `校验结果`：Requirement Model、Risk Matrix、Testcase Model、XMind Markdown、Workbook 完整树、Manifest、Index、正式产物统一扫描、全量单元测试和 `git diff --check` 的真实执行状态。
+8. `未执行事项`：明确未连接的页面、接口、SQL、自动化和 Git 操作，防止把产物校验误解为业务功能执行通过。
 
 ## 三种状态
 

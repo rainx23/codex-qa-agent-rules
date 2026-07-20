@@ -175,6 +175,9 @@
             "未命中股票不进入列表；可见股票行各字段逐项汇总后与汇总行对应字段一致"
           ]
         }
+      ],
+      "secondary_dimensions": [
+        "数据测试"
       ]
     },
     {
@@ -3300,7 +3303,7 @@
     },
     {
       "tc_id": "TC020",
-      "dimension": "权限测试",
+      "dimension": "回归测试",
       "common_entry": "汇总卡片弹窗",
       "module_level_1": null,
       "module_level_2": null,
@@ -3352,11 +3355,14 @@
             "新增权限前后原权限命中的股票集合逐项一致；新权限不覆盖原权限"
           ]
         }
+      ],
+      "secondary_dimensions": [
+        "权限测试"
       ]
     },
     {
       "tc_id": "TC021",
-      "dimension": "权限测试",
+      "dimension": "回归测试",
       "common_entry": "汇总卡片弹窗",
       "module_level_1": null,
       "module_level_2": null,
@@ -3390,7 +3396,10 @@
         "calculation_basis": "权限命中股票可见集合",
         "exception_handling": "同一入口异常处理"
       },
-      "core_deduplication_key": "sha256:148c8c8569aec228b11bf16cba551fb615fdbc850186a0bdd065aaef993baf5f"
+      "core_deduplication_key": "sha256:148c8c8569aec228b11bf16cba551fb615fdbc850186a0bdd065aaef993baf5f",
+      "secondary_dimensions": [
+        "权限测试"
+      ]
     },
     {
       "tc_id": "TC022",

@@ -78,7 +78,7 @@ class DeliverySummaryPassedTests(unittest.TestCase):
             self.assertIn(heading, self.text)
 
     def test_confirmation_empty_groups_say_none(self):
-        self.assertGreaterEqual(self.text.count("- 无"), 2)
+        self.assertGreaterEqual(self.text.count("- 无"), 1)
 
     def test_validation_and_sql_status_are_separate(self):
         self.assertIn("- validation_status：passed", self.text)
@@ -164,7 +164,7 @@ class DeliverySummaryStateTests(unittest.TestCase):
         manifest = copy.deepcopy(load_json(PASSED_MANIFEST))
         requirement = load_json(ROOT / manifest["analysis_model_paths"][0])
         requirement["confirmation_points"].append({
-            "confirmation_id": "CONF-002", "severity": "blocking", "statement": "确认核心入口",
+            "confirmation_id": "CONF-003", "severity": "blocking", "statement": "确认核心入口",
             "fact_ids": ["FACT-001"], "status": "pending", "resolution_evidence_references": [],
             "decision_evidence": [], "resolution": None, "resolved_at": None, "skip_reason": None,
         })
@@ -189,9 +189,9 @@ class DeliverySummaryStateTests(unittest.TestCase):
             manifest[field] = None
         manifest.update({
             "analysis_model_paths": [self._relative(model_path)], "validation_status": "pending",
-            "pending_reason": "CONF-002 未解决，正式 XMind 未生成", "failure_reason": None,
-            "pending_count": 1, "blocking_pending_count": 1,
-            "nonblocking_pending_count": 0, "suggested_pending_count": 0,
+            "pending_reason": "CONF-003 未解决，正式 XMind 未生成", "failure_reason": None,
+            "pending_count": 2, "blocking_pending_count": 1,
+            "nonblocking_pending_count": 1, "suggested_pending_count": 0,
         })
         path = self.directory / "manifest.json"
         self._write_json(path, manifest)
@@ -216,7 +216,7 @@ class DeliverySummaryStateTests(unittest.TestCase):
 
     def test_pending_displays_blocking_confirmation(self):
         text = render_delivery_summary(self.pending_manifest())
-        self.assertIn("`CONF-002`", text)
+        self.assertIn("`CONF-003`", text)
         self.assertIn("状态：待确认", text)
 
     def test_pending_displays_draft_files(self):

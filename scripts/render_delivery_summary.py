@@ -47,8 +47,13 @@ FILE_TYPES: dict[str, tuple[str, str]] = {
 }
 
 SECTION_ORDER = (
-    "处理结果", "待确认点", "主要交付文件", "追踪和校验文件", "用例摘要", "校验结果", "未执行事项",
+    "处理结果", "待确认点", "主要交付文件", "追踪和校验文件", "用例摘要", "测试维度覆盖", "校验结果", "未执行事项",
 )
+
+STATUS_LABELS = {
+    "covered": "已覆盖", "not_applicable": "不适用", "explicitly_excluded": "明确排除",
+    "pending": "待确认", "blocked": "blocked",
+}
 
 _ANSI_RE = re.compile(r"\x1b\[[0-?]*[ -/]*[@-~]")
 
@@ -320,6 +325,25 @@ def render_delivery_summary(manifest_path: Path) -> str:
             f"- supersedes：{manifest.get('supersedes') or '无'}",
             "",
         ])
+        assessment = requirement.get("test_dimension_assessment", []) if requirement else []
+        by_dimension = {
+            item.get("dimension"): item for item in assessment if isinstance(item, dict)
+        }
+        cases = [item for item in (testcase or {}).get("cases", []) if isinstance(item, dict)]
+        lines.extend(["## 测试维度覆盖", ""])
+        for dimension in (
+            "功能测试", "数据测试", "异常测试", "权限测试",
+            "导出测试", "兼容性测试", "回归测试", "SQL验证",
+        ):
+            item = by_dimension.get(dimension, {})
+            status_label = STATUS_LABELS.get(item.get("status"), "未评估")
+            tc_count = sum(
+                dimension == case.get("dimension") or dimension in case.get("secondary_dimensions", [])
+                for case in cases
+            )
+            suffix = f"TC 数量 {tc_count}" if item.get("status") == "covered" else str(item.get("reason") or "未提供原因")
+            lines.append(f"- {dimension}：{status_label}，{suffix}")
+        lines.append("")
 
     results = _validation_results(manifest, manifest_path, requirement, risk, testcase, resolved_paths)
     lines.extend(["## 校验结果", ""] + [f"- {label}：{value}" for label, value in results.items()])

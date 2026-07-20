@@ -22,6 +22,7 @@
 | `test_evidence_precision.py` | 证据精确定位、派生链、confirmed/current 链路和字段结构边界 | 是 |
 | `test_testcase_index.py` | passed Manifest 索引唯一性、漏登、重复和正式路径完整性 | 是 |
 | `test_delivery_summary.py` | passed/pending/failed 对话摘要、Confirmation、路径、计数、顺序和 CLI 契约 | 是 |
+| `test_dimension_assessment.py` | 八类测试维度扫描、主辅维度、covered 引用和单主维度复核 warning | 是 |
 | `fixtures/value-assessment/` | computed 合法模型组、Golden、Hash 错误、评分篡改和未知 TC 的独立 Assessment Fixture | 是 |
 | `fixtures/` | 输入样例 | 是 |
 | `golden/` | 预期输出 | 是 |

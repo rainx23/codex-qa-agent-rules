@@ -8,6 +8,9 @@
 
 ### Added
 
+- 新增八类 `test_dimension_assessment`、`condition_matrix_applicability`、`scope_dispositions` 与 Testcase `secondary_dimensions` 的兼容 Schema 和确定性交叉校验。
+- 新增对话“测试维度覆盖”固定章节及维度完整性、范围排除证据、主辅维度和单主维度复核错误码。
+
 ### Changed
 
 ### Fixed
@@ -29,6 +32,8 @@
 - 三个 QA Skill 接入对话交付契约；产物校验后使用渲染器生成最终聊天回复主体，并分开显示 `validation_status` 与 `sql_status`。
 
 ### Fixed
+
+- 修复 XMind 按主维度分组时把合法的全局连续 TC 集合误判为必须按树遍历顺序递增，以及权限/分页需求被机械归入单一主维度的问题。
 
 - 修复模拟/正式入口名称进入唯一键导致等价 TC 被拆分，以及明确枚举只生成配置项存在性用例而遗漏真实行为组合的问题。
 - 修复 required combinations 自身漏项无法发现、多个组合共用同一超长步骤以及模糊关系 Oracle 可通过的问题；增加分组笛卡尔积复算和 branch/step/expected 定位，并在关系证据不足时保持 pending。

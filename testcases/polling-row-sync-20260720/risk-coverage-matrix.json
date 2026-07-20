@@ -1,11 +1,727 @@
 {
-  "schema_version":"2.0.0","matrix_id":"MATRIX-POLLING-ROW-SYNC-20260720","analysis_ids":["AN-POLLING-ROW-SYNC-20260720"],"risk_items":[
-    {"risk_id":"RISK-001","risk_title":"非末页新增引发页面跳动","risk_level":"critical","fact_ids":["FACT-002"],"requirement_ids":["REQ002"],"change_ids":[],"business_entry":"清仓股弹窗","business_entries":["清仓股弹窗","雷达预选股弹窗"],"business_object":"当前页、前一页、后一页及全局末页","conditions":["当前页不是末页","全局末尾新增一行"],"data_shapes":["当前第2页","末页第3页"],"core_action":"等待新增行轮询并查看相邻页","core_assertion":"当前页及前页不变，新增行仅出现在全局末页，分页统计同步","business_impact":"critical","test_priority":"P0","evidence_state":"已确认","regression_scope":"核心回归","merge_key":"新增|非末页|全局末尾|RISK-001","testcase_ids":["TC001"],"disposition_status":"covered","disposition_reason":"独立覆盖非末页观察点","evidence_references":[{"source_type":"formal_change_record","storage_type":"snapshot","source_path":null,"snapshot_path":"testcases/polling-row-sync-20260720/evidence/kydoc-solution.md","source_record_id":"kydoc:8d7990ebf9a144aaa2a2a350a257faad","line_start":17,"line_end":18,"commit_sha":null,"content_hash":"sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c","excerpt":"增删页面需要更新当前页数据、全局序号、分页条数和分页数。\nPC当前页不是最后一页，或者最后一页没有被删完时：新增数据插入全局分页末尾；删除数据后由后续数据向前移动补全。","captured_at":"2026-07-20 00:00:00","captured_timezone":"Asia/Shanghai","evidence_status":"current"}]},
-    {"risk_id":"RISK-002","risk_title":"末页新增落页与分页边界错误","risk_level":"critical","fact_ids":["FACT-002"],"requirement_ids":["REQ002"],"change_ids":[],"business_entry":"清仓股弹窗","business_entries":["清仓股弹窗","雷达预选股弹窗"],"business_object":"当前末页和新末页","conditions":["末页未满或末页已满","全局末尾新增一行"],"data_shapes":["15行pageSize=10","20行pageSize=10"],"core_action":"等待新增行轮询并查看当前页和下一页","core_assertion":"未满时追加当前末页，已满时创建新页并将新增行置于新页","business_impact":"critical","test_priority":"P0","evidence_state":"已确认","regression_scope":"核心回归","merge_key":"新增|末页边界|RISK-002","testcase_ids":["TC002","TC003"],"disposition_status":"covered","disposition_reason":"末页未满与已满分开覆盖","evidence_references":[{"source_type":"formal_change_record","storage_type":"snapshot","source_path":null,"snapshot_path":"testcases/polling-row-sync-20260720/evidence/kydoc-solution.md","source_record_id":"kydoc:8d7990ebf9a144aaa2a2a350a257faad","line_start":17,"line_end":18,"commit_sha":null,"content_hash":"sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c","excerpt":"增删页面需要更新当前页数据、全局序号、分页条数和分页数。\nPC当前页不是最后一页，或者最后一页没有被删完时：新增数据插入全局分页末尾；删除数据后由后续数据向前移动补全。","captured_at":"2026-07-20 00:00:00","captured_timezone":"Asia/Shanghai","evidence_status":"current"}]},
-    {"risk_id":"RISK-003","risk_title":"当前页删除跨页补位错误","risk_level":"critical","fact_ids":["FACT-003"],"requirement_ids":["REQ003"],"change_ids":[],"business_entry":"清仓股弹窗","business_entries":["清仓股弹窗","雷达预选股弹窗"],"business_object":"当前页和后一页","conditions":["当前页不是末页","删除当前页一行"],"data_shapes":["25行pageSize=10当前第2页"],"core_action":"等待删除轮询并查看当前页和后一页","core_assertion":"后一页首行补到当前页末尾，后续页依序前移，无重复漏行","business_impact":"critical","test_priority":"P0","evidence_state":"已确认","regression_scope":"核心回归","merge_key":"删除|当前页|跨页补位|RISK-003","testcase_ids":["TC004"],"disposition_status":"covered","disposition_reason":"独立定位当前页删除","evidence_references":[{"source_type":"formal_change_record","storage_type":"snapshot","source_path":null,"snapshot_path":"testcases/polling-row-sync-20260720/evidence/kydoc-solution.md","source_record_id":"kydoc:8d7990ebf9a144aaa2a2a350a257faad","line_start":17,"line_end":18,"commit_sha":null,"content_hash":"sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c","excerpt":"增删页面需要更新当前页数据、全局序号、分页条数和分页数。\nPC当前页不是最后一页，或者最后一页没有被删完时：新增数据插入全局分页末尾；删除数据后由后续数据向前移动补全。","captured_at":"2026-07-20 00:00:00","captured_timezone":"Asia/Shanghai","evidence_status":"current"}]},
-    {"risk_id":"RISK-004","risk_title":"前一页删除导致当前页位移错误","risk_level":"critical","fact_ids":["FACT-003"],"requirement_ids":["REQ003"],"change_ids":[],"business_entry":"清仓股弹窗","business_entries":["清仓股弹窗","雷达预选股弹窗"],"business_object":"前一页、当前页和后一页","conditions":["当前第2页","删除第1页一行"],"data_shapes":["25行pageSize=10"],"core_action":"等待删除轮询并查看三页边界行","core_assertion":"原当前页首行前移至前页，当前页其余行前移并由后页首行补末尾","business_impact":"critical","test_priority":"P0","evidence_state":"已确认","regression_scope":"核心回归","merge_key":"删除|前一页|当前页位移|RISK-004","testcase_ids":["TC005"],"disposition_status":"covered","disposition_reason":"独立定位前页删除影响","evidence_references":[{"source_type":"formal_change_record","storage_type":"snapshot","source_path":null,"snapshot_path":"testcases/polling-row-sync-20260720/evidence/kydoc-solution.md","source_record_id":"kydoc:8d7990ebf9a144aaa2a2a350a257faad","line_start":17,"line_end":18,"commit_sha":null,"content_hash":"sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c","excerpt":"增删页面需要更新当前页数据、全局序号、分页条数和分页数。\nPC当前页不是最后一页，或者最后一页没有被删完时：新增数据插入全局分页末尾；删除数据后由后续数据向前移动补全。","captured_at":"2026-07-20 00:00:00","captured_timezone":"Asia/Shanghai","evidence_status":"current"}]},
-    {"risk_id":"RISK-005","risk_title":"后页或末页删除误改当前页","risk_level":"high","fact_ids":["FACT-003"],"requirement_ids":["REQ003"],"change_ids":[],"business_entry":"清仓股弹窗","business_entries":["清仓股弹窗","雷达预选股弹窗"],"business_object":"当前页、后一页和末页","conditions":["当前第2页","删除第3页或末页数据"],"data_shapes":["后一页部分删除","末页部分或全部删除"],"core_action":"等待删除轮询并查看当前页及目标页","core_assertion":"删除位置在当前页之后时当前页行集合不变，目标页按全局顺序收缩并同步分页","business_impact":"high","test_priority":"P1","evidence_state":"已确认","regression_scope":"关联回归","merge_key":"删除|后页末页|当前页不变|RISK-005","testcase_ids":["TC006","TC007"],"disposition_status":"covered","disposition_reason":"后一页和更远末页分开覆盖","evidence_references":[{"source_type":"formal_change_record","storage_type":"snapshot","source_path":null,"snapshot_path":"testcases/polling-row-sync-20260720/evidence/kydoc-solution.md","source_record_id":"kydoc:8d7990ebf9a144aaa2a2a350a257faad","line_start":17,"line_end":18,"commit_sha":null,"content_hash":"sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c","excerpt":"增删页面需要更新当前页数据、全局序号、分页条数和分页数。\nPC当前页不是最后一页，或者最后一页没有被删完时：新增数据插入全局分页末尾；删除数据后由后续数据向前移动补全。","captured_at":"2026-07-20 00:00:00","captured_timezone":"Asia/Shanghai","evidence_status":"current"}]},
-    {"risk_id":"RISK-006","risk_title":"当前末页删除后的留页或回退错误","risk_level":"critical","fact_ids":["FACT-004"],"requirement_ids":["REQ004"],"change_ids":[],"business_entry":"清仓股弹窗","business_entries":["清仓股弹窗","雷达预选股弹窗"],"business_object":"当前最后一页和前一页","conditions":["当前页是末页","部分删除或全部删除"],"data_shapes":["末页仍有行","末页删空"],"core_action":"等待删除轮询并查看当前页码和前页","core_assertion":"部分删除留在本页，全部删除回退最近有数据页","business_impact":"critical","test_priority":"P0","evidence_state":"已确认","regression_scope":"核心回归","merge_key":"删除|当前末页|留页回退|RISK-006","testcase_ids":["TC008","TC009"],"disposition_status":"covered","disposition_reason":"部分与全部删除分开覆盖","evidence_references":[{"source_type":"formal_change_record","storage_type":"snapshot","source_path":null,"snapshot_path":"testcases/polling-row-sync-20260720/evidence/kydoc-solution.md","source_record_id":"kydoc:8d7990ebf9a144aaa2a2a350a257faad","line_start":19,"line_end":20,"commit_sha":null,"content_hash":"sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c","excerpt":"最后一页被删除完时，自动回退到上一个最近有数据的分页，前端不需要请求获取最新全量rowKey。\n已知异常场景：假设原有100页且当前在第100页，被删除两页后，点击上一页时数据会为空。","captured_at":"2026-07-20 00:00:00","captured_timezone":"Asia/Shanghai","evidence_status":"current"}]},
-    {"risk_id":"RISK-007","risk_title":"连续删除末两页后导航为空","risk_level":"critical","fact_ids":["FACT-004","FACT-005"],"requirement_ids":["REQ004"],"change_ids":[],"business_entry":"清仓股弹窗","business_entries":["清仓股弹窗","雷达预选股弹窗"],"business_object":"第100页、第99页、第98页和上一页导航","conditions":["原有100页","末两页全部删除"],"data_shapes":["page大于实际pageTotal"],"core_action":"等待删除轮询后点击上一页","core_assertion":"当前页重置为第98页且有数据，上一页进入第97页且不为空","business_impact":"critical","test_priority":"P0","evidence_state":"已确认","regression_scope":"核心回归","merge_key":"删除|末两页|页码重置|RISK-007","testcase_ids":["TC010"],"disposition_status":"covered","disposition_reason":"直接复现已知100页异常","evidence_references":[{"source_type":"formal_change_record","storage_type":"snapshot","source_path":null,"snapshot_path":"testcases/polling-row-sync-20260720/evidence/kydoc-solution.md","source_record_id":"kydoc:8d7990ebf9a144aaa2a2a350a257faad","line_start":36,"line_end":38,"commit_sha":null,"content_hash":"sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c","excerpt":"最后一页数据全部删除时返回最近一个分页的数据，前端不需要请求获取最新全量rowKey。\n如果请求 page 大于实际总页数，返回 page 重置为实际总页数。\n返回分页信息包含 rowTotal、pageTotal、page、pageSize。","captured_at":"2026-07-20 00:00:00","captured_timezone":"Asia/Shanghai","evidence_status":"current"}]}
-  ],"coverage_summary":{"risk_count":7,"p0_risk_count":6,"covered_risk_count":7}
+  "schema_version": "2.0.0",
+  "matrix_id": "MATRIX-POLLING-ROW-SYNC-20260720",
+  "analysis_ids": [
+    "AN-POLLING-ROW-SYNC-20260720"
+  ],
+  "risk_items": [
+    {
+      "risk_id": "RISK-001",
+      "risk_title": "非末页新增引发页面跳动",
+      "risk_level": "critical",
+      "fact_ids": [
+        "FACT-002"
+      ],
+      "requirement_ids": [
+        "REQ002"
+      ],
+      "change_ids": [],
+      "business_entry": "清仓股弹窗",
+      "business_entries": [
+        "清仓股弹窗",
+        "雷达预选股弹窗"
+      ],
+      "business_object": "当前页、前一页、后一页及全局末页",
+      "conditions": [
+        "当前页不是末页",
+        "全局末尾新增一行"
+      ],
+      "data_shapes": [
+        "当前第2页",
+        "末页第3页"
+      ],
+      "core_action": "等待新增行轮询并查看相邻页",
+      "core_assertion": "当前页及前页不变，新增行仅出现在全局末页，分页统计同步",
+      "business_impact": "critical",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "merge_key": "新增|非末页|全局末尾|RISK-001",
+      "testcase_ids": [
+        "TC001"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "独立覆盖非末页观察点",
+      "evidence_references": [
+        {
+          "source_type": "formal_change_record",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/polling-row-sync-20260720/evidence/kydoc-solution.md",
+          "source_record_id": "kydoc:8d7990ebf9a144aaa2a2a350a257faad",
+          "line_start": 17,
+          "line_end": 18,
+          "commit_sha": null,
+          "content_hash": "sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c",
+          "excerpt": "增删页面需要更新当前页数据、全局序号、分页条数和分页数。\nPC当前页不是最后一页，或者最后一页没有被删完时：新增数据插入全局分页末尾；删除数据后由后续数据向前移动补全。",
+          "captured_at": "2026-07-20 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-002",
+      "risk_title": "末页新增落页与分页边界错误",
+      "risk_level": "critical",
+      "fact_ids": [
+        "FACT-002"
+      ],
+      "requirement_ids": [
+        "REQ002"
+      ],
+      "change_ids": [],
+      "business_entry": "清仓股弹窗",
+      "business_entries": [
+        "清仓股弹窗",
+        "雷达预选股弹窗"
+      ],
+      "business_object": "当前末页和新末页",
+      "conditions": [
+        "末页未满或末页已满",
+        "全局末尾新增一行"
+      ],
+      "data_shapes": [
+        "15行pageSize=10",
+        "20行pageSize=10"
+      ],
+      "core_action": "等待新增行轮询并查看当前页和下一页",
+      "core_assertion": "未满时追加当前末页，已满时创建新页并将新增行置于新页",
+      "business_impact": "critical",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "merge_key": "新增|末页边界|RISK-002",
+      "testcase_ids": [
+        "TC002",
+        "TC003"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "末页未满与已满分开覆盖",
+      "evidence_references": [
+        {
+          "source_type": "formal_change_record",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/polling-row-sync-20260720/evidence/kydoc-solution.md",
+          "source_record_id": "kydoc:8d7990ebf9a144aaa2a2a350a257faad",
+          "line_start": 17,
+          "line_end": 18,
+          "commit_sha": null,
+          "content_hash": "sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c",
+          "excerpt": "增删页面需要更新当前页数据、全局序号、分页条数和分页数。\nPC当前页不是最后一页，或者最后一页没有被删完时：新增数据插入全局分页末尾；删除数据后由后续数据向前移动补全。",
+          "captured_at": "2026-07-20 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-003",
+      "risk_title": "当前页删除跨页补位错误",
+      "risk_level": "critical",
+      "fact_ids": [
+        "FACT-003"
+      ],
+      "requirement_ids": [
+        "REQ003"
+      ],
+      "change_ids": [],
+      "business_entry": "清仓股弹窗",
+      "business_entries": [
+        "清仓股弹窗",
+        "雷达预选股弹窗"
+      ],
+      "business_object": "当前页和后一页",
+      "conditions": [
+        "当前页不是末页",
+        "删除当前页一行"
+      ],
+      "data_shapes": [
+        "25行pageSize=10当前第2页"
+      ],
+      "core_action": "等待删除轮询并查看当前页和后一页",
+      "core_assertion": "后一页首行补到当前页末尾，后续页依序前移，无重复漏行",
+      "business_impact": "critical",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "merge_key": "删除|当前页|跨页补位|RISK-003",
+      "testcase_ids": [
+        "TC004"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "独立定位当前页删除",
+      "evidence_references": [
+        {
+          "source_type": "formal_change_record",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/polling-row-sync-20260720/evidence/kydoc-solution.md",
+          "source_record_id": "kydoc:8d7990ebf9a144aaa2a2a350a257faad",
+          "line_start": 17,
+          "line_end": 18,
+          "commit_sha": null,
+          "content_hash": "sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c",
+          "excerpt": "增删页面需要更新当前页数据、全局序号、分页条数和分页数。\nPC当前页不是最后一页，或者最后一页没有被删完时：新增数据插入全局分页末尾；删除数据后由后续数据向前移动补全。",
+          "captured_at": "2026-07-20 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-004",
+      "risk_title": "前一页删除导致当前页位移错误",
+      "risk_level": "critical",
+      "fact_ids": [
+        "FACT-003"
+      ],
+      "requirement_ids": [
+        "REQ003"
+      ],
+      "change_ids": [],
+      "business_entry": "清仓股弹窗",
+      "business_entries": [
+        "清仓股弹窗",
+        "雷达预选股弹窗"
+      ],
+      "business_object": "前一页、当前页和后一页",
+      "conditions": [
+        "当前第2页",
+        "删除第1页一行"
+      ],
+      "data_shapes": [
+        "25行pageSize=10"
+      ],
+      "core_action": "等待删除轮询并查看三页边界行",
+      "core_assertion": "原当前页首行前移至前页，当前页其余行前移并由后页首行补末尾",
+      "business_impact": "critical",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "merge_key": "删除|前一页|当前页位移|RISK-004",
+      "testcase_ids": [
+        "TC005"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "独立定位前页删除影响",
+      "evidence_references": [
+        {
+          "source_type": "formal_change_record",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/polling-row-sync-20260720/evidence/kydoc-solution.md",
+          "source_record_id": "kydoc:8d7990ebf9a144aaa2a2a350a257faad",
+          "line_start": 17,
+          "line_end": 18,
+          "commit_sha": null,
+          "content_hash": "sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c",
+          "excerpt": "增删页面需要更新当前页数据、全局序号、分页条数和分页数。\nPC当前页不是最后一页，或者最后一页没有被删完时：新增数据插入全局分页末尾；删除数据后由后续数据向前移动补全。",
+          "captured_at": "2026-07-20 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-005",
+      "risk_title": "后页或末页删除误改当前页",
+      "risk_level": "high",
+      "fact_ids": [
+        "FACT-003"
+      ],
+      "requirement_ids": [
+        "REQ003"
+      ],
+      "change_ids": [],
+      "business_entry": "清仓股弹窗",
+      "business_entries": [
+        "清仓股弹窗",
+        "雷达预选股弹窗"
+      ],
+      "business_object": "当前页、后一页和末页",
+      "conditions": [
+        "当前第2页",
+        "删除第3页或末页数据"
+      ],
+      "data_shapes": [
+        "后一页部分删除",
+        "末页部分或全部删除"
+      ],
+      "core_action": "等待删除轮询并查看当前页及目标页",
+      "core_assertion": "删除位置在当前页之后时当前页行集合不变，目标页按全局顺序收缩并同步分页",
+      "business_impact": "high",
+      "test_priority": "P1",
+      "evidence_state": "已确认",
+      "regression_scope": "关联回归",
+      "merge_key": "删除|后页末页|当前页不变|RISK-005",
+      "testcase_ids": [
+        "TC006",
+        "TC007"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "后一页和更远末页分开覆盖",
+      "evidence_references": [
+        {
+          "source_type": "formal_change_record",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/polling-row-sync-20260720/evidence/kydoc-solution.md",
+          "source_record_id": "kydoc:8d7990ebf9a144aaa2a2a350a257faad",
+          "line_start": 17,
+          "line_end": 18,
+          "commit_sha": null,
+          "content_hash": "sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c",
+          "excerpt": "增删页面需要更新当前页数据、全局序号、分页条数和分页数。\nPC当前页不是最后一页，或者最后一页没有被删完时：新增数据插入全局分页末尾；删除数据后由后续数据向前移动补全。",
+          "captured_at": "2026-07-20 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-006",
+      "risk_title": "当前末页删除后的留页或回退错误",
+      "risk_level": "critical",
+      "fact_ids": [
+        "FACT-004"
+      ],
+      "requirement_ids": [
+        "REQ004"
+      ],
+      "change_ids": [],
+      "business_entry": "清仓股弹窗",
+      "business_entries": [
+        "清仓股弹窗",
+        "雷达预选股弹窗"
+      ],
+      "business_object": "当前最后一页和前一页",
+      "conditions": [
+        "当前页是末页",
+        "部分删除或全部删除"
+      ],
+      "data_shapes": [
+        "末页仍有行",
+        "末页删空"
+      ],
+      "core_action": "等待删除轮询并查看当前页码和前页",
+      "core_assertion": "部分删除留在本页，全部删除回退最近有数据页",
+      "business_impact": "critical",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "merge_key": "删除|当前末页|留页回退|RISK-006",
+      "testcase_ids": [
+        "TC008",
+        "TC009"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "部分与全部删除分开覆盖",
+      "evidence_references": [
+        {
+          "source_type": "formal_change_record",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/polling-row-sync-20260720/evidence/kydoc-solution.md",
+          "source_record_id": "kydoc:8d7990ebf9a144aaa2a2a350a257faad",
+          "line_start": 19,
+          "line_end": 20,
+          "commit_sha": null,
+          "content_hash": "sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c",
+          "excerpt": "最后一页被删除完时，自动回退到上一个最近有数据的分页，前端不需要请求获取最新全量rowKey。\n已知异常场景：假设原有100页且当前在第100页，被删除两页后，点击上一页时数据会为空。",
+          "captured_at": "2026-07-20 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-007",
+      "risk_title": "连续删除末两页后导航为空",
+      "risk_level": "critical",
+      "fact_ids": [
+        "FACT-004",
+        "FACT-005"
+      ],
+      "requirement_ids": [
+        "REQ004"
+      ],
+      "change_ids": [],
+      "business_entry": "清仓股弹窗",
+      "business_entries": [
+        "清仓股弹窗",
+        "雷达预选股弹窗"
+      ],
+      "business_object": "第100页、第99页、第98页和上一页导航",
+      "conditions": [
+        "原有100页",
+        "末两页全部删除"
+      ],
+      "data_shapes": [
+        "page大于实际pageTotal"
+      ],
+      "core_action": "等待删除轮询后点击上一页",
+      "core_assertion": "当前页重置为第98页且有数据，上一页进入第97页且不为空",
+      "business_impact": "critical",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "merge_key": "删除|末两页|页码重置|RISK-007",
+      "testcase_ids": [
+        "TC010"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "直接复现已知100页异常",
+      "evidence_references": [
+        {
+          "source_type": "formal_change_record",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/polling-row-sync-20260720/evidence/kydoc-solution.md",
+          "source_record_id": "kydoc:8d7990ebf9a144aaa2a2a350a257faad",
+          "line_start": 36,
+          "line_end": 38,
+          "commit_sha": null,
+          "content_hash": "sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c",
+          "excerpt": "最后一页数据全部删除时返回最近一个分页的数据，前端不需要请求获取最新全量rowKey。\n如果请求 page 大于实际总页数，返回 page 重置为实际总页数。\n返回分页信息包含 rowTotal、pageTotal、page、pageSize。",
+          "captured_at": "2026-07-20 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-008",
+      "risk_title": "轮询启停条件错误",
+      "risk_level": "critical",
+      "fact_ids": [
+        "FACT-006"
+      ],
+      "requirement_ids": [
+        "REQ005"
+      ],
+      "change_ids": [],
+      "business_entry": "清仓股弹窗",
+      "business_entries": [
+        "清仓股弹窗",
+        "雷达预选股弹窗"
+      ],
+      "business_object": "轮询列表与汇总",
+      "conditions": [
+        "轮询启停条件错误"
+      ],
+      "data_shapes": [],
+      "core_action": "执行对应轮询或非轮询场景",
+      "core_assertion": "日期或盘中条件不满足时错误启用轮询，或满足时未启用",
+      "business_impact": "critical",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "merge_key": "RISK-008|轮询启停条件错误",
+      "testcase_ids": [
+        "TC011",
+        "TC012",
+        "TC013",
+        "TC014"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "按核心风险和 Oracle 独立覆盖",
+      "evidence_references": [
+        {
+          "source_type": "formal_change_record",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/polling-row-sync-20260720/evidence/kydoc-solution.md",
+          "source_record_id": "kydoc:8d7990ebf9a144aaa2a2a350a257faad",
+          "line_start": 15,
+          "line_end": 16,
+          "commit_sha": null,
+          "content_hash": "sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c",
+          "excerpt": "开启轮询条件：查询交易日期条件的开始和结束必须都是当天。\n不调整指标逻辑口径；日期只要是当天且能查询出数据就可以轮询，底仓等特殊数据来源不影响正常轮询。",
+          "captured_at": "2026-07-20 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-009",
+      "risk_title": "汇总与全局列表范围不一致",
+      "risk_level": "critical",
+      "fact_ids": [
+        "FACT-007"
+      ],
+      "requirement_ids": [
+        "REQ006"
+      ],
+      "change_ids": [],
+      "business_entry": "清仓股弹窗",
+      "business_entries": [
+        "清仓股弹窗",
+        "雷达预选股弹窗"
+      ],
+      "business_object": "轮询列表与汇总",
+      "conditions": [
+        "汇总与全局列表范围不一致"
+      ],
+      "data_shapes": [],
+      "core_action": "执行对应轮询或非轮询场景",
+      "core_assertion": "新增删除后列表全局集合与汇总统计对象不一致",
+      "business_impact": "critical",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "merge_key": "RISK-009|汇总与全局列表范围不一致",
+      "testcase_ids": [
+        "TC015",
+        "TC016",
+        "TC017"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "按核心风险和 Oracle 独立覆盖",
+      "evidence_references": [
+        {
+          "source_type": "formal_change_record",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/polling-row-sync-20260720/evidence/kydoc-solution.md",
+          "source_record_id": "kydoc:8d7990ebf9a144aaa2a2a350a257faad",
+          "line_start": 9,
+          "line_end": 11,
+          "commit_sha": null,
+          "content_hash": "sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c",
+          "excerpt": "3秒轮询T0股弹窗的汇总条和股票列表统计范围不同导致数据对不上；T0股弹窗只是其中一个例子，目前3S轮询方案都存在该情况。\n汇总条全局统计更新，盯盘过程有新成交的股票也会统计进去。\n股票列表局部更新：点击查询时加载股票列表并定版，后续只轮询定版股票，盯盘过程有新交易的股票不会自动统计。",
+          "captured_at": "2026-07-20 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-010",
+      "risk_title": "冲突参数未拒绝",
+      "risk_level": "high",
+      "fact_ids": [
+        "FACT-008"
+      ],
+      "requirement_ids": [
+        "REQ007"
+      ],
+      "change_ids": [],
+      "business_entry": "清仓股弹窗",
+      "business_entries": [
+        "清仓股弹窗",
+        "雷达预选股弹窗"
+      ],
+      "business_object": "轮询列表与汇总",
+      "conditions": [
+        "冲突参数未拒绝"
+      ],
+      "data_shapes": [],
+      "core_action": "执行对应轮询或非轮询场景",
+      "core_assertion": "互斥参数同时出现时仍进入正常轮询",
+      "business_impact": "high",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "merge_key": "RISK-010|冲突参数未拒绝",
+      "testcase_ids": [
+        "TC018"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "按核心风险和 Oracle 独立覆盖",
+      "evidence_references": [
+        {
+          "source_type": "formal_change_record",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/polling-row-sync-20260720/evidence/kydoc-solution.md",
+          "source_record_id": "kydoc:8d7990ebf9a144aaa2a2a350a257faad",
+          "line_start": 24,
+          "line_end": 29,
+          "commit_sha": null,
+          "content_hash": "sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c",
+          "excerpt": "轮询标识为 `$.params.roundRobin=true`。\nPC端 `$.pageSize` 传实际 pageSize，`$.page` 按实际页码传参。\n轮询全量 key 为有序的 `$.params.roundRobinRowKey`，使用逗号拼接。\n可视范围开始位置为 `$.params.visibleStartIdx`，从0开始，位置基于 roundRobinRowKey。\n可视范围结束位置为 `$.params.visibleEndIdx`，位置基于 roundRobinRowKey。\n`$.params.rowKey` 只用于通过 rowKey 查询数据，不能与 roundRobinRowKey 一起使用。",
+          "captured_at": "2026-07-20 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "formal_change_record",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/polling-row-sync-20260720/evidence/kydoc-solution.md",
+          "source_record_id": "kydoc:8d7990ebf9a144aaa2a2a350a257faad",
+          "line_start": 42,
+          "line_end": 45,
+          "commit_sha": null,
+          "content_hash": "sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c",
+          "excerpt": "rowKey 和 roundRobinRowKey 同时非空时抛出异常。\nroundRobin=true 时 rowKey 非空则抛出异常。\nroundRobin=false 或 null 时 roundRobinRowKey 非空则抛出异常。\n轮询时由于会动态新增数据，动态列调整为返回所有字段；非轮询继续兼容动态列参数。",
+          "captured_at": "2026-07-20 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-011",
+      "risk_title": "rowKeyType 行语义错误",
+      "risk_level": "high",
+      "fact_ids": [
+        "FACT-009"
+      ],
+      "requirement_ids": [
+        "REQ007"
+      ],
+      "change_ids": [],
+      "business_entry": "清仓股弹窗",
+      "business_entries": [
+        "清仓股弹窗",
+        "雷达预选股弹窗"
+      ],
+      "business_object": "轮询列表与汇总",
+      "conditions": [
+        "rowKeyType 行语义错误"
+      ],
+      "data_shapes": [],
+      "core_action": "执行对应轮询或非轮询场景",
+      "core_assertion": "新增、删除、补全和有效行被前端错误识别",
+      "business_impact": "high",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "merge_key": "RISK-011|rowKeyType 行语义错误",
+      "testcase_ids": [
+        "TC019"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "按核心风险和 Oracle 独立覆盖",
+      "evidence_references": [
+        {
+          "source_type": "formal_change_record",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/polling-row-sync-20260720/evidence/kydoc-solution.md",
+          "source_record_id": "kydoc:8d7990ebf9a144aaa2a2a350a257faad",
+          "line_start": 33,
+          "line_end": 38,
+          "commit_sha": null,
+          "content_hash": "sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c",
+          "excerpt": "返回行位于 `$.data.rows`，每行包含 `$.data.rowKeyType`。\nrowKeyType枚举：0表示可视范围有效，1表示数据补全，2表示新增，3表示删除。\n如果由0和1类型组成的有效数据不满一页，按照 pageSize 补全；新增和删除行不参与补全数量计算。\n最后一页数据全部删除时返回最近一个分页的数据，前端不需要请求获取最新全量rowKey。\n如果请求 page 大于实际总页数，返回 page 重置为实际总页数。\n返回分页信息包含 rowTotal、pageTotal、page、pageSize。",
+          "captured_at": "2026-07-20 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-012",
+      "risk_title": "非轮询动态列兼容受损",
+      "risk_level": "high",
+      "fact_ids": [
+        "FACT-010"
+      ],
+      "requirement_ids": [
+        "REQ008"
+      ],
+      "change_ids": [],
+      "business_entry": "清仓股弹窗",
+      "business_entries": [
+        "清仓股弹窗",
+        "雷达预选股弹窗"
+      ],
+      "business_object": "轮询列表与汇总",
+      "conditions": [
+        "非轮询动态列兼容受损"
+      ],
+      "data_shapes": [],
+      "core_action": "执行对应轮询或非轮询场景",
+      "core_assertion": "轮询返回所有字段的规则污染非轮询动态列参数",
+      "business_impact": "high",
+      "test_priority": "P1",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "merge_key": "RISK-012|非轮询动态列兼容受损",
+      "testcase_ids": [
+        "TC020"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "按核心风险和 Oracle 独立覆盖",
+      "evidence_references": [
+        {
+          "source_type": "formal_change_record",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/polling-row-sync-20260720/evidence/kydoc-solution.md",
+          "source_record_id": "kydoc:8d7990ebf9a144aaa2a2a350a257faad",
+          "line_start": 42,
+          "line_end": 45,
+          "commit_sha": null,
+          "content_hash": "sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c",
+          "excerpt": "rowKey 和 roundRobinRowKey 同时非空时抛出异常。\nroundRobin=true 时 rowKey 非空则抛出异常。\nroundRobin=false 或 null 时 roundRobinRowKey 非空则抛出异常。\n轮询时由于会动态新增数据，动态列调整为返回所有字段；非轮询继续兼容动态列参数。",
+          "captured_at": "2026-07-20 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-013",
+      "risk_title": "原有非轮询入口回归受损",
+      "risk_level": "high",
+      "fact_ids": [
+        "FACT-001",
+        "FACT-010"
+      ],
+      "requirement_ids": [
+        "REQ008"
+      ],
+      "change_ids": [],
+      "business_entry": "清仓股弹窗",
+      "business_entries": [
+        "清仓股弹窗",
+        "雷达预选股弹窗"
+      ],
+      "business_object": "轮询列表与汇总",
+      "conditions": [
+        "原有非轮询入口回归受损"
+      ],
+      "data_shapes": [],
+      "core_action": "执行对应轮询或非轮询场景",
+      "core_assertion": "两个入口关闭轮询时原查询和翻页能力变化",
+      "business_impact": "high",
+      "test_priority": "P1",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "merge_key": "RISK-013|原有非轮询入口回归受损",
+      "testcase_ids": [
+        "TC021"
+      ],
+      "disposition_status": "covered",
+      "disposition_reason": "按核心风险和 Oracle 独立覆盖",
+      "evidence_references": [
+        {
+          "source_type": "formal_change_record",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/polling-row-sync-20260720/evidence/kydoc-solution.md",
+          "source_record_id": "kydoc:8d7990ebf9a144aaa2a2a350a257faad",
+          "line_start": 42,
+          "line_end": 45,
+          "commit_sha": null,
+          "content_hash": "sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c",
+          "excerpt": "rowKey 和 roundRobinRowKey 同时非空时抛出异常。\nroundRobin=true 时 rowKey 非空则抛出异常。\nroundRobin=false 或 null 时 roundRobinRowKey 非空则抛出异常。\n轮询时由于会动态新增数据，动态列调整为返回所有字段；非轮询继续兼容动态列参数。",
+          "captured_at": "2026-07-20 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    }
+  ],
+  "coverage_summary": {
+    "risk_count": 13,
+    "p0_risk_count": 10,
+    "covered_risk_count": 13
+  }
 }

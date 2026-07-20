@@ -511,7 +511,7 @@ def validate_manifest_data(data: dict[str, Any], manifest_path: Path) -> list[st
                 risk_model=risk_matrix,
                 testcase_model=testcase_model,
             ),
-            validation_status="passed",
+            validation_status=("passed_dimension_assessment" if isinstance((requirement_model or {}).get("test_dimension_assessment"), list) else "passed"),
         )
         errors.extend(f"分析报告复验失败：{error}" for error in report_errors)
         outline = validate_markdown_file(paths["xmind_md_path"])
