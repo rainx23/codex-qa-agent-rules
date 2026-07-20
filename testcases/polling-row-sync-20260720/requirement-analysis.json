@@ -1,0 +1,459 @@
+{
+  "schema_version": "2.0.0",
+  "analysis_id": "AN-POLLING-ROW-SYNC-20260720",
+  "report_mode": "requirement",
+  "source_type": "user_confirmation",
+  "source_ids": [
+    "CHAT-POLLING-ROW-SYNC-20260720",
+    "KYDOC-8D7990EBF9A144AAA2A2A350A257FAAD"
+  ],
+  "analysis_scope": "PC端清仓股弹窗、雷达预选股弹窗轮询增删的分页数据变化场景",
+  "business_goal": "以当前页为观察点，验证前页、当前页、后页及末页发生增删时的数据移动、补位和分页现象",
+  "acceptance_basis": "用户本轮范围确认与方案文档第二部分轮询更新范围",
+  "facts": [
+    {
+      "fact_id": "FACT-001",
+      "category": "confirmed",
+      "statement": "本次仅覆盖PC端清仓股弹窗和雷达预选股弹窗，移动端及其他入口不在范围",
+      "source_type": "user_confirmation",
+      "source_reference": "CHAT-POLLING-ROW-SYNC-20260720",
+      "confidence": "high",
+      "affects_core_expectation": true,
+      "handling": null,
+      "evidence_references": [
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/polling-row-sync-20260720/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-POLLING-ROW-SYNC-20260720",
+          "line_start": 5,
+          "line_end": 6,
+          "commit_sha": null,
+          "content_hash": "sha256:c9071c3aa2af6dbcdadf89668dfef548f645424206f57d3ab705cbba609dc980",
+          "excerpt": "用户确认：本次只在两个入口新增该功能，清仓股弹窗、雷达预选股弹窗；需求未提到的其他入口不纳入本次范围。\n用户确认：移动端内容可以忽略，本次仅分析和设计 PC 端用例。",
+          "captured_at": "2026-07-20 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "fact_id": "FACT-002",
+      "category": "confirmed",
+      "statement": "新增数据插入全局分页末尾，并同步当前页数据、全局序号、总条数和总页数",
+      "source_type": "formal_change_record",
+      "source_reference": "KYDOC-8D7990EBF9A144AAA2A2A350A257FAAD",
+      "confidence": "high",
+      "affects_core_expectation": true,
+      "handling": null,
+      "evidence_references": [
+        {
+          "source_type": "formal_change_record",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/polling-row-sync-20260720/evidence/kydoc-solution.md",
+          "source_record_id": "kydoc:8d7990ebf9a144aaa2a2a350a257faad",
+          "line_start": 17,
+          "line_end": 18,
+          "commit_sha": null,
+          "content_hash": "sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c",
+          "excerpt": "增删页面需要更新当前页数据、全局序号、分页条数和分页数。\nPC当前页不是最后一页，或者最后一页没有被删完时：新增数据插入全局分页末尾；删除数据后由后续数据向前移动补全。",
+          "captured_at": "2026-07-20 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "fact_id": "FACT-003",
+      "category": "confirmed",
+      "statement": "删除数据时后续数据按全局顺序向前移动补全，并同步当前页、序号和分页信息",
+      "source_type": "formal_change_record",
+      "source_reference": "KYDOC-8D7990EBF9A144AAA2A2A350A257FAAD",
+      "confidence": "high",
+      "affects_core_expectation": true,
+      "handling": null,
+      "evidence_references": [
+        {
+          "source_type": "formal_change_record",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/polling-row-sync-20260720/evidence/kydoc-solution.md",
+          "source_record_id": "kydoc:8d7990ebf9a144aaa2a2a350a257faad",
+          "line_start": 17,
+          "line_end": 18,
+          "commit_sha": null,
+          "content_hash": "sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c",
+          "excerpt": "增删页面需要更新当前页数据、全局序号、分页条数和分页数。\nPC当前页不是最后一页，或者最后一页没有被删完时：新增数据插入全局分页末尾；删除数据后由后续数据向前移动补全。",
+          "captured_at": "2026-07-20 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "fact_id": "FACT-004",
+      "category": "confirmed",
+      "statement": "当前最后一页删除为空时自动回退到最近有数据的分页，前端不重新获取最新全量rowKey",
+      "source_type": "formal_change_record",
+      "source_reference": "KYDOC-8D7990EBF9A144AAA2A2A350A257FAAD",
+      "confidence": "high",
+      "affects_core_expectation": true,
+      "handling": null,
+      "evidence_references": [
+        {
+          "source_type": "formal_change_record",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/polling-row-sync-20260720/evidence/kydoc-solution.md",
+          "source_record_id": "kydoc:8d7990ebf9a144aaa2a2a350a257faad",
+          "line_start": 19,
+          "line_end": 20,
+          "commit_sha": null,
+          "content_hash": "sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c",
+          "excerpt": "最后一页被删除完时，自动回退到上一个最近有数据的分页，前端不需要请求获取最新全量rowKey。\n已知异常场景：假设原有100页且当前在第100页，被删除两页后，点击上一页时数据会为空。",
+          "captured_at": "2026-07-20 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "fact_id": "FACT-005",
+      "category": "confirmed",
+      "statement": "请求页码大于实际总页数时当前页重置为实际总页数，并返回最近一个分页数据",
+      "source_type": "formal_change_record",
+      "source_reference": "KYDOC-8D7990EBF9A144AAA2A2A350A257FAAD",
+      "confidence": "high",
+      "affects_core_expectation": true,
+      "handling": null,
+      "evidence_references": [
+        {
+          "source_type": "formal_change_record",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/polling-row-sync-20260720/evidence/kydoc-solution.md",
+          "source_record_id": "kydoc:8d7990ebf9a144aaa2a2a350a257faad",
+          "line_start": 36,
+          "line_end": 38,
+          "commit_sha": null,
+          "content_hash": "sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c",
+          "excerpt": "最后一页数据全部删除时返回最近一个分页的数据，前端不需要请求获取最新全量rowKey。\n如果请求 page 大于实际总页数，返回 page 重置为实际总页数。\n返回分页信息包含 rowTotal、pageTotal、page、pageSize。",
+          "captured_at": "2026-07-20 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    }
+  ],
+  "confirmation_points": [],
+  "risks": [
+    {
+      "risk_id": "RISK-001",
+      "statement": "当前页不是末页时新增导致当前页或相邻页异常跳动",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "evidence_references": [
+        {
+          "source_type": "formal_change_record",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/polling-row-sync-20260720/evidence/kydoc-solution.md",
+          "source_record_id": "kydoc:8d7990ebf9a144aaa2a2a350a257faad",
+          "line_start": 17,
+          "line_end": 18,
+          "commit_sha": null,
+          "content_hash": "sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c",
+          "excerpt": "增删页面需要更新当前页数据、全局序号、分页条数和分页数。\nPC当前页不是最后一页，或者最后一页没有被删完时：新增数据插入全局分页末尾；删除数据后由后续数据向前移动补全。",
+          "captured_at": "2026-07-20 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-002",
+      "statement": "末页未满或已满时新增落页、总页数或序号错误",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "evidence_references": [
+        {
+          "source_type": "formal_change_record",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/polling-row-sync-20260720/evidence/kydoc-solution.md",
+          "source_record_id": "kydoc:8d7990ebf9a144aaa2a2a350a257faad",
+          "line_start": 17,
+          "line_end": 18,
+          "commit_sha": null,
+          "content_hash": "sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c",
+          "excerpt": "增删页面需要更新当前页数据、全局序号、分页条数和分页数。\nPC当前页不是最后一页，或者最后一页没有被删完时：新增数据插入全局分页末尾；删除数据后由后续数据向前移动补全。",
+          "captured_at": "2026-07-20 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-003",
+      "statement": "当前页删除后未由后一页首行补位或跨页出现重复漏行",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "evidence_references": [
+        {
+          "source_type": "formal_change_record",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/polling-row-sync-20260720/evidence/kydoc-solution.md",
+          "source_record_id": "kydoc:8d7990ebf9a144aaa2a2a350a257faad",
+          "line_start": 17,
+          "line_end": 18,
+          "commit_sha": null,
+          "content_hash": "sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c",
+          "excerpt": "增删页面需要更新当前页数据、全局序号、分页条数和分页数。\nPC当前页不是最后一页，或者最后一页没有被删完时：新增数据插入全局分页末尾；删除数据后由后续数据向前移动补全。",
+          "captured_at": "2026-07-20 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-004",
+      "statement": "前一页删除后当前页数据未整体前移或补位错误",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "evidence_references": [
+        {
+          "source_type": "formal_change_record",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/polling-row-sync-20260720/evidence/kydoc-solution.md",
+          "source_record_id": "kydoc:8d7990ebf9a144aaa2a2a350a257faad",
+          "line_start": 17,
+          "line_end": 18,
+          "commit_sha": null,
+          "content_hash": "sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c",
+          "excerpt": "增删页面需要更新当前页数据、全局序号、分页条数和分页数。\nPC当前页不是最后一页，或者最后一页没有被删完时：新增数据插入全局分页末尾；删除数据后由后续数据向前移动补全。",
+          "captured_at": "2026-07-20 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-005",
+      "statement": "后一页或末页删除错误影响当前页或相邻页",
+      "test_priority": "P1",
+      "evidence_state": "已确认",
+      "evidence_references": [
+        {
+          "source_type": "formal_change_record",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/polling-row-sync-20260720/evidence/kydoc-solution.md",
+          "source_record_id": "kydoc:8d7990ebf9a144aaa2a2a350a257faad",
+          "line_start": 17,
+          "line_end": 18,
+          "commit_sha": null,
+          "content_hash": "sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c",
+          "excerpt": "增删页面需要更新当前页数据、全局序号、分页条数和分页数。\nPC当前页不是最后一页，或者最后一页没有被删完时：新增数据插入全局分页末尾；删除数据后由后续数据向前移动补全。",
+          "captured_at": "2026-07-20 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-006",
+      "statement": "当前末页部分删除或全部删除后的留页和回退错误",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "evidence_references": [
+        {
+          "source_type": "formal_change_record",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/polling-row-sync-20260720/evidence/kydoc-solution.md",
+          "source_record_id": "kydoc:8d7990ebf9a144aaa2a2a350a257faad",
+          "line_start": 19,
+          "line_end": 20,
+          "commit_sha": null,
+          "content_hash": "sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c",
+          "excerpt": "最后一页被删除完时，自动回退到上一个最近有数据的分页，前端不需要请求获取最新全量rowKey。\n已知异常场景：假设原有100页且当前在第100页，被删除两页后，点击上一页时数据会为空。",
+          "captured_at": "2026-07-20 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-007",
+      "statement": "连续删除末两页后页码未重置或点击上一页为空",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "evidence_references": [
+        {
+          "source_type": "formal_change_record",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/polling-row-sync-20260720/evidence/kydoc-solution.md",
+          "source_record_id": "kydoc:8d7990ebf9a144aaa2a2a350a257faad",
+          "line_start": 36,
+          "line_end": 38,
+          "commit_sha": null,
+          "content_hash": "sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c",
+          "excerpt": "最后一页数据全部删除时返回最近一个分页的数据，前端不需要请求获取最新全量rowKey。\n如果请求 page 大于实际总页数，返回 page 重置为实际总页数。\n返回分页信息包含 rowTotal、pageTotal、page、pageSize。",
+          "captured_at": "2026-07-20 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    }
+  ],
+  "acceptance_criteria": [
+    {
+      "criterion_id": "REQ001",
+      "statement": "仅两个PC弹窗执行分页增删场景",
+      "fact_ids": [
+        "FACT-001"
+      ],
+      "risk_ids": [],
+      "evidence_references": [
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/polling-row-sync-20260720/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-POLLING-ROW-SYNC-20260720",
+          "line_start": 5,
+          "line_end": 6,
+          "commit_sha": null,
+          "content_hash": "sha256:c9071c3aa2af6dbcdadf89668dfef548f645424206f57d3ab705cbba609dc980",
+          "excerpt": "用户确认：本次只在两个入口新增该功能，清仓股弹窗、雷达预选股弹窗；需求未提到的其他入口不纳入本次范围。\n用户确认：移动端内容可以忽略，本次仅分析和设计 PC 端用例。",
+          "captured_at": "2026-07-20 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "criterion_id": "REQ002",
+      "statement": "新增行落在全局末尾，当前页及分页信息按其页位产生对应变化",
+      "fact_ids": [
+        "FACT-002"
+      ],
+      "risk_ids": [
+        "RISK-001",
+        "RISK-002"
+      ],
+      "evidence_references": [
+        {
+          "source_type": "formal_change_record",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/polling-row-sync-20260720/evidence/kydoc-solution.md",
+          "source_record_id": "kydoc:8d7990ebf9a144aaa2a2a350a257faad",
+          "line_start": 17,
+          "line_end": 18,
+          "commit_sha": null,
+          "content_hash": "sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c",
+          "excerpt": "增删页面需要更新当前页数据、全局序号、分页条数和分页数。\nPC当前页不是最后一页，或者最后一页没有被删完时：新增数据插入全局分页末尾；删除数据后由后续数据向前移动补全。",
+          "captured_at": "2026-07-20 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "criterion_id": "REQ003",
+      "statement": "删除发生在前页、当前页、后页或末页时，后续数据依全局顺序前移并保持分页连续",
+      "fact_ids": [
+        "FACT-003"
+      ],
+      "risk_ids": [
+        "RISK-003",
+        "RISK-004",
+        "RISK-005"
+      ],
+      "evidence_references": [
+        {
+          "source_type": "formal_change_record",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/polling-row-sync-20260720/evidence/kydoc-solution.md",
+          "source_record_id": "kydoc:8d7990ebf9a144aaa2a2a350a257faad",
+          "line_start": 17,
+          "line_end": 18,
+          "commit_sha": null,
+          "content_hash": "sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c",
+          "excerpt": "增删页面需要更新当前页数据、全局序号、分页条数和分页数。\nPC当前页不是最后一页，或者最后一页没有被删完时：新增数据插入全局分页末尾；删除数据后由后续数据向前移动补全。",
+          "captured_at": "2026-07-20 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "criterion_id": "REQ004",
+      "statement": "末页删空或当前页超过实际总页数时回退最近有数据页",
+      "fact_ids": [
+        "FACT-004",
+        "FACT-005"
+      ],
+      "risk_ids": [
+        "RISK-006",
+        "RISK-007"
+      ],
+      "evidence_references": [
+        {
+          "source_type": "formal_change_record",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/polling-row-sync-20260720/evidence/kydoc-solution.md",
+          "source_record_id": "kydoc:8d7990ebf9a144aaa2a2a350a257faad",
+          "line_start": 19,
+          "line_end": 20,
+          "commit_sha": null,
+          "content_hash": "sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c",
+          "excerpt": "最后一页被删除完时，自动回退到上一个最近有数据的分页，前端不需要请求获取最新全量rowKey。\n已知异常场景：假设原有100页且当前在第100页，被删除两页后，点击上一页时数据会为空。",
+          "captured_at": "2026-07-20 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "formal_change_record",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/polling-row-sync-20260720/evidence/kydoc-solution.md",
+          "source_record_id": "kydoc:8d7990ebf9a144aaa2a2a350a257faad",
+          "line_start": 36,
+          "line_end": 38,
+          "commit_sha": null,
+          "content_hash": "sha256:4f31687c37febfdfa6e4e66f89fac79be10b3b923011750bb87a93a5e2b72f6c",
+          "excerpt": "最后一页数据全部删除时返回最近一个分页的数据，前端不需要请求获取最新全量rowKey。\n如果请求 page 大于实际总页数，返回 page 重置为实际总页数。\n返回分页信息包含 rowTotal、pageTotal、page、pageSize。",
+          "captured_at": "2026-07-20 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    }
+  ],
+  "regression_scope": [
+    "核心回归",
+    "关联回归"
+  ],
+  "matched_profiles": [
+    "zentao",
+    "web-ui",
+    "finance-trading"
+  ],
+  "data_validation_required": "required",
+  "data_validation_reason": "分页行增删会改变跨页集合、全局序号、总条数和总页数",
+  "recommended_validation_method": "sql",
+  "sql_generation_status": "blocked",
+  "validation_missing_information": [
+    "两个弹窗对应的数据表与rowKey字段",
+    "可控新增删除测试数据"
+  ]
+}

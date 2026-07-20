@@ -18,11 +18,15 @@
 
 - 新增枚举条件矩阵、required/excluded combination、行为型 `condition_coverage` 与稳定错误码门禁。
 - 新增不含纯入口名称的 `core_deduplication_key`，以及正式产物统一扫描校验入口。
+- 新增统一对话交付契约、Confirmation 聊天摘要、文件名称与固定用途展示，以及 passed/pending/failed 三种回复模板。
+- 新增确定性 `render_delivery_summary.py` 与 `validate_delivery_summary.py`，从 Manifest 和结构化模型读取路径、数量、版本和状态并校验摘要一致性。
+- 新增 47 项对话摘要回归测试，覆盖当前清仓权限 passed Manifest、临时 pending/failed Fixture、跨平台路径和无 ANSI 输出。
 
 ### Changed
 
 - 规则版本从 2.10.0 升级到 2.11.0；配置存在性与配置行为覆盖分离，多入口同规则 TC 强制合并为平级入口分支。
 - 权限组合覆盖按关系、目标范围、命中状态和指定用户数据形态确定性校验；CI 不再硬编码单一业务产物目录。
+- 三个 QA Skill 接入对话交付契约；产物校验后使用渲染器生成最终聊天回复主体，并分开显示 `validation_status` 与 `sql_status`。
 
 ### Fixed
 

@@ -35,6 +35,7 @@
 5. Manifest 示例和索引编码：
 
        python scripts/validate_manifest.py testcases/manifest.example.json
+       python scripts/render_delivery_summary.py --manifest testcases/clearance-permission-20260718-v2/manifest.json --check
        python scripts/repair_text_encoding.py testcases/index.md --check
        python scripts/validate_formal_artifacts.py
 

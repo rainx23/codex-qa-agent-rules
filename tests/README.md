@@ -21,6 +21,7 @@
 | `test_testcase_value_ci_contract.py` | 验证 Windows/Linux 与 Python 3.10/3.12 兼容性 Job 配置 | 是 |
 | `test_evidence_precision.py` | 证据精确定位、派生链、confirmed/current 链路和字段结构边界 | 是 |
 | `test_testcase_index.py` | passed Manifest 索引唯一性、漏登、重复和正式路径完整性 | 是 |
+| `test_delivery_summary.py` | passed/pending/failed 对话摘要、Confirmation、路径、计数、顺序和 CLI 契约 | 是 |
 | `fixtures/value-assessment/` | computed 合法模型组、Golden、Hash 错误、评分篡改和未知 TC 的独立 Assessment Fixture | 是 |
 | `fixtures/` | 输入样例 | 是 |
 | `golden/` | 预期输出 | 是 |
@@ -39,6 +40,7 @@
 - 产物治理兼容测试覆盖文本换行/BOM Hash、二进制 Hash、完整 Manifest/index 一致性及 Workbook 完整树复验。
 - 回归测试覆盖 blocking Confirmation 解决后的 Fact/计数迁移、原始任务自动续跑契约、正式产物完整性，以及 XMind 无损语义精简、符号、截断和逻辑优先级行为。
 - 回归测试覆盖 `validation_status=passed + sql_status=blocked`、证据精度与索引全量覆盖；这些规则均使用通用 Fixture，不绑定特定业务样例。
+- 对话摘要回归使用正式 passed 产物与临时 pending/failed Fixture，验证固定章节、文件用途、无 Confirmation 时的“无”、计数单一来源、跨平台路径和无 ANSI 输出。
 - 条件矩阵、配置存在性/行为分离、多入口核心去重和正式产物统一扫描分别由对应 `test_condition_matrix_*`、`test_entry_branch_*` 与 `test_formal_artifact_scan.py` 覆盖。
 - Golden 变化必须经过人工确认，测试运行时不得自动创建或覆盖 Golden，也不为不同操作系统或 Python 版本维护不同副本。
 - Fixture 和 Golden 只服务测试，不作为业务历史版本说明。

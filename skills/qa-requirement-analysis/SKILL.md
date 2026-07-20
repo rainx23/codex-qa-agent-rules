@@ -16,9 +16,10 @@ confirmed Fact 必须有非 inference 的可验证来源，不能使用 low conf
 3. 完整读取 `../../rules/core/analysis-report-contract.md`。
 4. 完整读取 `../../rules/core/traceability-rules.md`。
 5. 完整读取 `../../rules/core/structured-model-contract.md`。
-6. 对禅道或同类分段需求，读取 `../../rules/profiles/zentao.md`，并以第三部分产品规则作为默认验收依据。
-7. 仅读取与需求匹配的其他 `../../rules/profiles` 文件。
-8. 用户要求生成最终用例时，将结构化结果交给 `../qa-testcase-design/SKILL.md`。
+6. 完整读取 `../../rules/core/conversation-delivery-contract.md`。
+7. 对禅道或同类分段需求，读取 `../../rules/profiles/zentao.md`，并以第三部分产品规则作为默认验收依据。
+8. 仅读取与需求匹配的其他 `../../rules/profiles` 文件。
+9. 用户要求生成最终用例时，将结构化结果交给 `../qa-testcase-design/SKILL.md`。
 
 ## 执行流程
 
@@ -38,6 +39,8 @@ confirmed Fact 必须有非 inference 的可验证来源，不能使用 low conf
 11. 用户粘贴完整 DDL 时，解析草稿并与知识库比较规范化哈希；只提供少量字段时标记为 partial，不创建或覆盖完整表 DDL。
 12. 处理确认回复时，只更新答案覆盖的 Confirmation，保存 resolution、resolution_evidence_references、resolved_at，并同步更新关联 Fact、风险和验收标准；随后重新校验 Requirement Analysis Model，不得只修改需求报告 Markdown。
 13. 重新计算统一 Confirmation Summary。若仍有 blocking，维持草稿链；若 `blocking_pending_count=0` 且原始任务要求测试用例，立即将更新后的正式 Requirement Analysis Model 自动交接给 `qa-testcase-design`，无需用户再次发送继续指令。
+14. 发现 blocking Confirmation 时，立即按对话交付契约在聊天框逐项展示问题、证据边界、影响范围、当前处理和已生成草稿路径；不得只写入 Requirement Model 或报告。
+15. requirement-only 任务结束时，使用对话交付契约展示分析状态、blocking/nonblocking/suggested 全部分组、报告和 Requirement Model 路径；没有待确认点也必须明确写“无”。
 
 ## 接口自动化影响评估
 

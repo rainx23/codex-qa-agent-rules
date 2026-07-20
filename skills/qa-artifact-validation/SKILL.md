@@ -9,6 +9,8 @@ description: 用于校验 QA 分析报告、XMind Markdown、XMind Workbook、Ma
 
 将本 Skill 的根目录解析为当前 `SKILL.md` 向上两级的仓库根目录。
 
+开始校验前完整读取 `../../rules/core/conversation-delivery-contract.md`，并将聊天回复视为正式交付的一部分。
+
 ## 执行流程
 
 1. 读取 `../../rules/core/analysis-report-contract.md`，识别显式或自动报告模式；需要时使用对应 `--mode` 运行 `../../scripts/validate_analysis_report.py`。校验模式章节、证据、疑似缺陷依据、P0 映射和联合追踪。
@@ -27,6 +29,7 @@ description: 用于校验 QA 分析报告、XMind Markdown、XMind Workbook、Ma
 12. 原始任务同时要求需求分析和测试用例时，passed 交付必须具备并复验 Requirement Analysis Model、Risk Coverage Matrix、Testcase Model、XMind Markdown、Workbook 和 Manifest；缺少任一项不得声明完成。
 13. blocking 解除后不得继续只维护 draft 路径。全部正式门禁通过后才生成或更新 Workbook、passed Manifest 和 index；任何正式校验失败时停止完整交付结论。
 14. `validation_status` 与 `sql_status` 分开判定。报告、模型、Markdown、Workbook 完整时允许 `passed + sql_status=blocked`；不得因 SQL 缺少 DDL/执行条件把测试设计降级为 pending，也不得为解除阻塞伪造 SQL 或执行证据。
+15. Manifest 校验后运行 `python ../../scripts/render_delivery_summary.py --manifest <manifest.json> --check`，使用 stdout 的固定 Markdown 作为最终聊天回复主体。passed、pending、failed 均必须渲染；不得只输出内部校验命令结果。脚本输出后只可增加一句极简人工说明，不得删除固定章节。
 
 ## 可选 Testcase Value Assessment 校验
 

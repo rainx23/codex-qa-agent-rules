@@ -11,6 +11,7 @@
 | 路径 | 作用 | 是否手工维护 |
 | --- | --- | --- |
 | `repository-documentation-rules.md` | README 与版本历史治理 | 是 |
+| `conversation-delivery-contract.md` | 聊天框 Confirmation、文件用途、状态模板和确定性摘要契约 | 是 |
 | `*-contract.md`、`*-rules.md` | 通用规则和契约 | 是 |
 
 ## 使用入口

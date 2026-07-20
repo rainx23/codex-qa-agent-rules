@@ -15,8 +15,9 @@ description: 用于基于证据设计 QA 测试点和最小有效 XMind Markdown
 2. 完整读取 `../../rules/core/traceability-rules.md`。
 3. 完整读取 `../../rules/core/confirmation-gate.md`。
 4. 完整读取 `../../rules/core/structured-model-contract.md`。
-5. 仅读取与需求匹配的 `../../rules/profiles` 文件。
-6. 设计用例前读取 Requirement Analysis Model、可选的 Diff Impact Model 和可选的历史缺陷。
+5. 完整读取 `../../rules/core/conversation-delivery-contract.md`。
+6. 仅读取与需求匹配的 `../../rules/profiles` 文件。
+7. 设计用例前读取 Requirement Analysis Model、可选的 Diff Impact Model 和可选的历史缺陷。
 
 ## 执行流程
 
@@ -39,6 +40,7 @@ description: 用于基于证据设计 QA 测试点和最小有效 XMind Markdown
 11. XMind Markdown 必须从 Testcase Model 渲染，并按语义精简规则去除重复背景；禁止硬字数门禁、自动截断或删除执行所需语义。
     - 拒绝“按已确认规则处理”“按系统现有逻辑处理”“按现有统计口径一致”“其他功能不受影响”等模糊预期；统计口径必须写明对象、来源和 Oracle，回归断言必须写明变更前基线、同条件比较对象和可观察字段。混合 `AND/OR` 使用括号明确优先级。
 12. 原始任务包含最终用例时，模型与 Markdown 校验通过后自动交接 `qa-artifact-validation`，继续 Workbook、Manifest 和索引链。
+13. 不自由编写最终聊天回复。正式模型交给 `qa-artifact-validation` 后，由确定性对话交付摘要渲染器生成最终回复主体；pending 时不得宣称正式测试用例或 XMind 已完成。
 
 ## 可选测试用例价值评估
 

@@ -73,8 +73,23 @@ class RuleContractTests(unittest.TestCase):
             "md_to_xmind.py",
             "validate_manifest.py",
             "build_testcase_index.py",
+            "render_delivery_summary.py",
+            "validate_delivery_summary.py",
         ):
             self.assertIn(script, readme)
+
+    def test_conversation_delivery_contract_is_loaded_by_all_qa_delivery_skills(self):
+        contract = ROOT / "rules/core/conversation-delivery-contract.md"
+        self.assertTrue(contract.is_file())
+        for skill_name in ("qa-requirement-analysis", "qa-testcase-design", "qa-artifact-validation"):
+            text = (ROOT / "skills" / skill_name / "SKILL.md").read_text(encoding="utf-8")
+            self.assertIn("conversation-delivery-contract.md", text)
+
+    def test_artifact_skill_runs_deterministic_delivery_renderer(self):
+        artifact = (ROOT / "skills/qa-artifact-validation/SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("render_delivery_summary.py", artifact)
+        self.assertIn("--check", artifact)
+        self.assertIn("最终聊天回复主体", artifact)
 
     def test_readme_has_two_valid_mermaid_flows_and_no_sort_dimension(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
