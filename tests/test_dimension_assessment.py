@@ -13,6 +13,7 @@ from qa_contracts import (  # noqa: E402
     DIMENSIONS, validate_model_links, validate_requirement_model,
     validate_testcase_model, validate_test_dimension_warnings,
 )
+import validate_manifest  # noqa: E402
 
 
 def load(name: str):
@@ -79,6 +80,51 @@ class DimensionAssessmentTests(unittest.TestCase):
         for i, case in enumerate(self.tc["cases"], 1): case["tc_id"] = f"TC{i:03d}"
         next(x for x in self.req["test_dimension_assessment"] if x["dimension"] == second)["status"] = "covered"
         self.assertTrue(any("SINGLE_PRIMARY_DIMENSION_REVIEW_REQUIRED" in e for e in validate_test_dimension_warnings(self.req, self.tc)))
+
+
+class CurrentRuleManifestDimensionGateTests(unittest.TestCase):
+    def setUp(self):
+        self.current = (ROOT / "RULE_VERSION").read_text(encoding="utf-8-sig").strip()
+        self.manifest = {
+            "validation_status": "passed", "testcase_model_path": "testcases/example/testcase-model.json",
+            "rule_version": self.current, "report_mode": "requirement",
+        }
+        self.requirement = {"test_dimension_assessment": [{"dimension": dim} for dim in DIMENSIONS]}
+
+    def errors(self, manifest=None, requirement=...):
+        requirement = self.requirement if requirement is ... else requirement
+        return validate_manifest.validate_current_rule_dimension_assessment(
+            manifest or self.manifest, requirement, self.current
+        )
+
+    def test_current_passed_without_any_new_fields_fails(self):
+        self.assertTrue(any("TEST_DIMENSION_ASSESSMENT_REQUIRED" in e for e in self.errors(requirement={})))
+
+    def test_current_passed_missing_only_assessment_fails(self):
+        requirement = {"condition_matrix_applicability": {"status": "not_required"}, "scope_dispositions": []}
+        self.assertTrue(any("TEST_DIMENSION_ASSESSMENT_REQUIRED" in e for e in self.errors(requirement=requirement)))
+
+    def test_complete_eight_dimensions_passes(self):
+        self.assertEqual([], self.errors())
+
+    def test_missing_or_duplicate_dimension_fails(self):
+        missing = {"test_dimension_assessment": self.requirement["test_dimension_assessment"][:-1]}
+        duplicate = {"test_dimension_assessment": self.requirement["test_dimension_assessment"] + [{"dimension": DIMENSIONS[0]}]}
+        self.assertTrue(self.errors(requirement=missing))
+        self.assertTrue(self.errors(requirement=duplicate))
+
+    def test_old_rule_version_is_compatible(self):
+        manifest = {**self.manifest, "rule_version": "2.10.0"}
+        self.assertEqual([], self.errors(manifest=manifest, requirement={}))
+
+    def test_pending_and_failed_are_not_forced(self):
+        for status in ("pending", "failed"):
+            with self.subTest(status=status):
+                self.assertEqual([], self.errors(manifest={**self.manifest, "validation_status": status}, requirement={}))
+
+    def test_diff_without_requirement_is_not_forced(self):
+        manifest = {**self.manifest, "report_mode": "diff"}
+        self.assertEqual([], self.errors(manifest=manifest, requirement=None))
 
 
 if __name__ == "__main__":

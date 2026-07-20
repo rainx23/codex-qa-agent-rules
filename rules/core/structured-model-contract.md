@@ -2,7 +2,7 @@
 
 结构化模型用于 Skills 内部交接和自动校验，不改变分析报告或固定 XMind Markdown 层级。可复用模型保存到版本化产物目录；只用于单次执行的模型保存到临时目录并在完成后清理。
 
-Requirement Analysis Model 的 `test_dimension_assessment` 对正式用例任务必填，固定且仅一次扫描功能、数据、异常、权限、导出、兼容性、回归和 SQL 八类测试分类维度。它与 `condition_matrix` 的业务条件维度是两个不同概念：前者决定风险覆盖状态，后者表达入口、角色、关系、操作、状态、日期、页位和数据形态等组合条件。`condition_matrix_applicability` 记录矩阵为何 required/not_required/blocked，`scope_dispositions` 记录正式范围项的有证据处置。
+当前 `RULE_VERSION` 下，`validation_status=passed`、具有正式 `testcase_model_path` 且模式为 `requirement` 或 `combined` 的 Manifest，其 Requirement Analysis Model 必须完整填写 `test_dimension_assessment`，固定且仅一次扫描功能、数据、异常、权限、导出、兼容性、回归和 SQL 八类测试分类维度；不得以其他新增字段是否出现作为启用门槛。旧 `rule_version` 历史产物保持兼容，pending/failed 产物以及没有 Requirement Analysis Model 的纯 diff 产物不被强制回写。它与 `condition_matrix` 的业务条件维度是两个不同概念：前者决定风险覆盖状态，后者表达入口、角色、关系、操作、状态、日期、页位和数据形态等组合条件。`condition_matrix_applicability` 记录矩阵为何 required/not_required/blocked，`scope_dispositions` 记录正式范围项的有证据处置。
 
 Testcase Model 的 `dimension` 是决定 XMind 一级节点的唯一主维度；`secondary_dimensions` 只参与风险追踪和覆盖统计，不得与主维度相同或重复，也不得导致同一 TC 在多个一级节点重复渲染。主维度依据核心风险与主要 Oracle 选择，不依据需求标题或模块名称机械归类。
 

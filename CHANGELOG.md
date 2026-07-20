@@ -13,7 +13,13 @@
 
 ### Changed
 
+- 当前规则版本的 passed requirement/combined 正式用例产物无条件要求八类 `test_dimension_assessment`；旧版本历史、pending/failed 与无 Requirement 的纯 diff 产物继续兼容。
+
 ### Fixed
+
+- Evidence `excerpt` 改为按物理行闭区间精确匹配，并补充 CRLF/LF、BOM、空行、偏移、越界和缺失快照回归。
+- 分析报告新增 FACT/RISK/CONF 主摘要重复门禁，并禁止 passed 报告残留草稿 TC/用例措辞。
+- 对话摘要测试运行目录迁移到系统临时目录，异常退出也不再向固定 Fixture 目录遗留随机文件夹。
 
 ## [2.11.0] - 2026-07-18
 

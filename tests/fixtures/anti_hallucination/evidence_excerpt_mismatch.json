@@ -1,1 +1,1 @@
-{"kind":"evidence","base":"tests/fixtures/models/requirement-analysis.json","evidence_path":"facts.0.evidence_references.0","valid":{},"invalid":{"excerpt":"不存在于指定范围的文本"},"expected_failure":"excerpt 不在指定行号范围","golden":{"valid":true,"invalid":false}}
+{"kind":"evidence","base":"tests/fixtures/models/requirement-analysis.json","evidence_path":"facts.0.evidence_references.0","valid":{},"invalid":{"excerpt":"不存在于指定范围的文本"},"expected_failure":"EVIDENCE_EXCERPT_LINE_RANGE_MISMATCH","golden":{"valid":true,"invalid":false}}

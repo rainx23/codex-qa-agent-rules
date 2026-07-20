@@ -292,7 +292,7 @@ flowchart TD
 
 完整规则见 [testcase-quality-rules.md](rules/core/testcase-quality-rules.md)。当前格式不增加独立“前置条件”或“优先级”层级，前置条件融入入口、测试点或步骤，优先级保留在分析报告和追踪矩阵中；`entry_branches` 只表达同一 TC 的入口分支，不增加 TC 或 Manifest 计数。
 
-明确列出两个及以上业务条件维度时，Requirement Analysis Model 必须先建立条件矩阵；每个 required combination 由行为型 `condition_coverage` 覆盖。业务条件维度与固定八类测试分类维度分开建模，正式新产物完整填写 `test_dimension_assessment`。TC 的 `dimension` 决定唯一 XMind 一级节点，`secondary_dimensions` 只用于追踪和统计。配置项存在性不计入行为覆盖。同规则多入口使用不含纯入口名称的 `core_deduplication_key` 合并为一个 TC 的平级入口分支。
+明确列出两个及以上业务条件维度时，Requirement Analysis Model 必须先建立条件矩阵；每个 required combination 由行为型 `condition_coverage` 覆盖。业务条件维度与固定八类测试分类维度分开建模；当前 `RULE_VERSION` 的 passed requirement/combined 正式用例产物必须完整填写 `test_dimension_assessment`，历史旧版本、pending/failed 与无 Requirement 的纯 diff 产物不强制回写。TC 的 `dimension` 决定唯一 XMind 一级节点，`secondary_dimensions` 只用于追踪和统计。配置项存在性不计入行为覆盖。同规则多入口使用不含纯入口名称的 `core_deduplication_key` 合并为一个 TC 的平级入口分支。
 
 XMind 节点采用无损语义精简：可删除父节点已表达的背景和说明性套话，并在无歧义时使用 `=`、`≠`、`∈`、`AND`、`OR`、`→`、集合和括号。规则不设置固定字符上限，不因文本较长报错或告警，也不允许截断、省略业务对象、条件、操作或可观察预期；混合 `AND/OR` 时必须用括号明确优先级。
 

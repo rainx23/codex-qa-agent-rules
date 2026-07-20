@@ -25,6 +25,7 @@
 
 - 发布前命令见 `docs/codex/rule-validation-checklist.md`。
 - `validate_schemas.py` 校验仓库契约和固定 Fixture；`validate_models.py` 校验本次真实模型；`validate_manifest.py` 最终复验全链路产物。
+- `validate_evidence.py` 按物理行闭区间精确比对文本 `excerpt`，只归一换行并移除开头 BOM；`validate_analysis_report.py` 校验主摘要 ID 唯一性，并禁止 passed 正式报告残留草稿用例措辞。
 - 可选用法：`python scripts/validate_testcase_quality.py path/to/case_xmind.md --value-assessment path/to/testcase-value-assessment.json`。该 CLI 只负责编排和稳定展示；评分内核、路径/Hash 校验和持久化重算均位于 `qa_contracts.py`。
 - Testcase Value Assessment 的 warning 和 suggestion 在阶段一非阻塞；只有 Assessment error 使该命令返回非零退出码。未传参数时不搜索默认 Assessment。
 - XMind 校验拒绝 `...`/`……` 截断标记，并对未加括号的混合 `AND/OR` 输出 warning；不设置任何节点长度 error 或 warning。

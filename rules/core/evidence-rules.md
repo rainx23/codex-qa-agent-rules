@@ -21,7 +21,7 @@
 截图必须指向真实文件或快照并具有内容哈希和稳定附件 ID；二进制截图允许空行号，但 excerpt 只能描述直接可观察内容，不得包含推断。用户确认必须保存聊天快照，粘贴文本必须保存原始文本快照，chat_snapshot 必须保存相关消息上下文而非助手总结。
 
 - UTF-8 文本证据必须定位到真实行号；Diff/代码证据必须包含 Commit、文件和变更位置。
-- `excerpt` 在统一换行和空白后必须真实包含于 `[line_start, line_end]`，不得用文件其他位置的文字冒充该行证据；一个 Fact 可引用多段精确证据。
+- 文本 Evidence 的 `line_start`/`line_end` 按原文件物理行计数，空行同样占一行。校验器仅统一 CRLF/CR 为 LF 并移除开头 UTF-8 BOM；`excerpt` 必须与闭区间 `[line_start, line_end]` 的原文切片逐字一致，不折叠空白、不做全文搜索，也不得用文件其他位置的相同文字冒充该行证据。一个 Fact 可引用多段精确证据。
 - 三个及以上 confirmed Fact 若机械地全部引用同一份多行来源的同一个首行区间，校验器输出证据过度集中 warning，要求人工复核，而不按 Fact 数量复制同一引用。
 - current 哈希必须与真实文件一致；stale 或 reconfirm_required 不得支撑 confirmed Fact，并必须说明重新确认原因。
 - confirmed Fact 至少需要一条通过全部真实性校验且状态为 current 的 Evidence；其他 Evidence 即使不承担 confirmed 支撑，也必须结构合法。

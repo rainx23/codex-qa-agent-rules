@@ -47,7 +47,7 @@ class AntiHallucinationContractTests(unittest.TestCase):
             "source_path": name if path_field == "source_path" else None,
             "snapshot_path": name if path_field == "snapshot_path" else None,
             "source_record_id": "attachment:SCREEN-001" if source_type == "screenshot" else "chat:CONV-1:MSG-1" if source_type == "user_confirmation" else "REQ-001",
-            "line_start": None if name.endswith(".png") else 1,
+            "line_start": None if name.endswith(".png") else 2,
             "line_end": None if name.endswith(".png") else 2,
             "commit_sha": "def456a" if source_type in {"diff", "code_context"} else None,
             "content_hash": "sha256:" + hashlib.sha256(raw).hexdigest(),
@@ -163,7 +163,7 @@ class AntiHallucinationContractTests(unittest.TestCase):
             for mutation, token in (
                 ({"line_start": 1, "line_end": 99}, "超出文件范围"),
                 ({"line_start": 2, "line_end": 1}, "行号范围非法"),
-                ({"excerpt": "not present"}, "excerpt 不在"),
+                ({"excerpt": "not present"}, "EVIDENCE_EXCERPT_LINE_RANGE_MISMATCH"),
                 ({"line_start": None, "line_end": None}, "必须同时提供"),
             ):
                 changed = copy.deepcopy(evidence)

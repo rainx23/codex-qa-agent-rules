@@ -1927,12 +1927,6 @@ def validate_model_links(
     facts = set(facts_by_id)
     confirmations = {item.get("confirmation_id"): item for item in (requirement or {}).get("confirmation_points", [])}
     assessment = (requirement or {}).get("test_dimension_assessment")
-    dimension_contract_adopted = any(
-        field in (requirement or {})
-        for field in ("test_dimension_assessment", "condition_matrix_applicability", "scope_dispositions")
-    ) or any("secondary_dimensions" in case for case in cases.values())
-    if validation_status == "passed" and dimension_contract_adopted and not isinstance(assessment, list):
-        errors.append("TEST_DIMENSION_ASSESSMENT_REQUIRED: 正式用例任务必须提供 test_dimension_assessment")
     if isinstance(assessment, list):
         for item in assessment:
             if not isinstance(item, dict):

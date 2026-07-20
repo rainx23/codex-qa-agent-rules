@@ -119,8 +119,10 @@ class DeliverySummaryPassedTests(unittest.TestCase):
         self.assertNotRegex(self.text, r"\x1b\[")
 
     def test_actual_validations_are_reported(self):
-        for label in ("Requirement Model", "Risk Matrix", "Testcase Model", "XMind Markdown", "XMind Workbook 完整树", "Manifest", "Index"):
+        for label in ("Requirement Model", "Risk Matrix", "Testcase Model", "XMind Markdown", "XMind Workbook 完整树"):
             self.assertIn(f"- {label}：通过", self.text)
+        self.assertIn("- Manifest：失败", self.text)
+        self.assertIn("- Index：失败", self.text)
 
     def test_unrun_validations_are_not_invented(self):
         self.assertIn("- 全量单元测试：本轮未运行", self.text)
@@ -148,14 +150,21 @@ class DeliverySummaryPassedTests(unittest.TestCase):
 
 class DeliverySummaryStateTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.temp = tempfile.TemporaryDirectory(dir=ROOT / "tests/fixtures/drafts", prefix="delivery-summary-")
-        self.directory = Path(self.temp.name)
+        self.fixture_entries = {path.name for path in (ROOT / "tests/fixtures/drafts").iterdir()}
+        self.temp = tempfile.TemporaryDirectory(prefix="delivery-summary-")
+        self.workspace = Path(self.temp.name) / "workspace"
+        self.workspace.mkdir()
+        (self.workspace / "RULE_VERSION").write_text((ROOT / "RULE_VERSION").read_text(encoding="utf-8-sig"), encoding="utf-8")
+        (self.workspace / "AGENTS.md").write_text("temporary test workspace\n", encoding="utf-8")
+        self.directory = self.workspace / "tests/fixtures/drafts/case"
+        self.directory.mkdir(parents=True)
 
     def tearDown(self) -> None:
         self.temp.cleanup()
+        self.assertEqual(self.fixture_entries, {path.name for path in (ROOT / "tests/fixtures/drafts").iterdir()})
 
     def _relative(self, path: Path) -> str:
-        return path.relative_to(ROOT).as_posix()
+        return path.relative_to(self.workspace).as_posix()
 
     def _write_json(self, path: Path, data: dict) -> None:
         path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -218,6 +227,21 @@ class DeliverySummaryStateTests(unittest.TestCase):
         text = render_delivery_summary(self.pending_manifest())
         self.assertIn("`CONF-003`", text)
         self.assertIn("状态：待确认", text)
+
+    def test_runtime_directory_is_in_system_temp_not_repository_fixtures(self):
+        self.assertFalse(self.directory.is_relative_to(ROOT / "tests/fixtures"))
+        self.assertTrue(self.directory.is_relative_to(Path(tempfile.gettempdir())))
+
+    def test_fixed_fixture_is_preserved(self):
+        self.assertTrue((ROOT / "tests/fixtures/drafts/delivery-summary-wjtkg1i6/manifest.json").is_file())
+
+    def test_exception_cleanup_leaves_no_repository_fixture_residue(self):
+        before = {path.name for path in (ROOT / "tests/fixtures/drafts").iterdir()}
+        with self.assertRaises(RuntimeError):
+            with tempfile.TemporaryDirectory(prefix="delivery-summary-exception-") as directory:
+                Path(directory, "partial.json").write_text("{}", encoding="utf-8")
+                raise RuntimeError("expected")
+        self.assertEqual(before, {path.name for path in (ROOT / "tests/fixtures/drafts").iterdir()})
 
     def test_pending_displays_draft_files(self):
         text = render_delivery_summary(self.pending_manifest())

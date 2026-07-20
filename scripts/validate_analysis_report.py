@@ -232,6 +232,30 @@ def _validate_line_evidence(bodies: dict[str, list[str]], resolved_mode: str) ->
     return errors
 
 
+def _validate_duplicate_primary_summaries(bodies: dict[str, list[str]]) -> list[str]:
+    errors: list[str] = []
+    checks = (
+        (("规则拆解",), r"\bFACT-[A-Za-z0-9_.-]+\b", "DUPLICATE_REPORT_FACT_SUMMARY"),
+        (("风险点", "疑似风险点"), r"\bRISK-[A-Za-z0-9_.-]+\b", "DUPLICATE_REPORT_RISK_SUMMARY"),
+        (("待确认点",), r"\bCONF-[A-Za-z0-9_.-]+\b", "DUPLICATE_REPORT_CONFIRMATION_SUMMARY"),
+    )
+    for section_names, pattern, code in checks:
+        seen: set[str] = set()
+        duplicates: set[str] = set()
+        for line in _body(bodies, *section_names).splitlines():
+            item = re.match(r"^ {0,3}-\s+(.+)", line)
+            if not item:
+                continue
+            for value in set(re.findall(pattern, item.group(1), re.I)):
+                normalized = value.upper()
+                if normalized in seen:
+                    duplicates.add(normalized)
+                seen.add(normalized)
+        for value in sorted(duplicates):
+            errors.append(f"{code}: {value} 在主摘要列表中重复出现")
+    return errors
+
+
 def _validate_strict_ids(
     text: str,
     bodies: dict[str, list[str]],
@@ -274,6 +298,7 @@ def validate(
     known_ids: dict[str, Any] | None = None,
     strict: bool = True,
     validation_status: str | None = None,
+    require_dimension_assessment: bool = False,
 ) -> list[str]:
     text = path.read_text(encoding="utf-8-sig")
     _, bodies = _section_map(text)
@@ -299,7 +324,7 @@ def validate(
             errors.append(f"缺少章节（{MODE_LABELS[resolved_mode]}）：{name}")
         elif not _body(bodies, name):
             errors.append(f"章节正文为空（{MODE_LABELS[resolved_mode]}）：{name}")
-    if validation_status == "passed_dimension_assessment":
+    if require_dimension_assessment:
         dimension_body = _body(bodies, "测试维度扫描")
         if not dimension_body:
             errors.append("缺少章节（正式用例任务）：测试维度扫描")
@@ -310,6 +335,9 @@ def validate(
             ):
                 if dimension not in dimension_body:
                     errors.append(f"测试维度扫描遗漏：{dimension}")
+    errors.extend(_validate_duplicate_primary_summaries(bodies))
+    if validation_status == "passed" and re.search(r"草稿\s*(?:TC|测试用例|用例)", text, re.I):
+        errors.append("PASSED_REPORT_CONTAINS_DRAFT_WORDING: passed 正式报告不得以草稿措辞描述 TC 或测试用例")
 
     evidence = _body(bodies, "证据来源")
     if evidence and not ALLOWED_EVIDENCE.search(evidence):

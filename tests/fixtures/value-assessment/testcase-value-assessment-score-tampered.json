@@ -10,12 +10,12 @@
   "risk_matrix_reference": {
     "matrix_id": "MATRIX-001",
     "path": "tests/fixtures/value-assessment/computed/risk-coverage-matrix.json",
-    "content_hash": "sha256:9c783f14b1d7c48f4dfb6c2f4af02cb0e2fdddb11bb5ba0585451d851ed73097"
+    "content_hash": "sha256:0ad8096fcbebac6fb0251cf286fbe487e01e12f02b81e9317695b2e47022bbfe"
   },
   "requirement_model_reference": {
     "analysis_id": "AN-REQ-001",
     "path": "tests/fixtures/value-assessment/computed/requirement-analysis.json",
-    "content_hash": "sha256:7d5efd801d30a638fdefb8d258a7f63c420a1a09b5fa9f5630923a7375b4637d"
+    "content_hash": "sha256:5f7f8b214ad67fc96c6b2d8aa48244c93d6a74d009a9e0aa70233d49f5815a68"
   },
   "maintenance_inputs": {
     "TC001": {

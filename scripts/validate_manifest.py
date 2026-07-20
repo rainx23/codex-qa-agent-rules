@@ -12,7 +12,7 @@ from typing import Any
 
 from heading_utils import parse_markdown_sections
 from qa_contracts import (
-    ALLOWED_TIMEZONES, RELATIONS, SCHEMA_VERSION, VALIDATION_STATUSES, SQL_EXECUTION_STATUSES,
+    ALLOWED_TIMEZONES, DIMENSIONS, RELATIONS, SCHEMA_VERSION, VALIDATION_STATUSES, SQL_EXECUTION_STATUSES,
     ZERO_HASH, build_model_id_index, load_json, manifest_schema, read_rule_version, stable_source_hash, valid_generated_at,
     summarize_confirmations, validate_diff_model, validate_model_links, validate_requirement_model,
     validate_risk_matrix, validate_testcase_model,
@@ -34,6 +34,36 @@ REQUIRED = {
     "blocking_pending_count", "nonblocking_pending_count", "suggested_pending_count",
     "validation_status", "relation", "supersedes", "failure_reason", "pending_reason",
 }
+
+
+def validate_current_rule_dimension_assessment(
+    manifest: dict[str, Any],
+    requirement_model: dict[str, Any] | None,
+    current_rule_version: str,
+) -> list[str]:
+    """Require the eight-dimension scan for current-rule formal Requirement deliveries."""
+
+    if not (
+        manifest.get("validation_status") == "passed"
+        and manifest.get("testcase_model_path")
+        and manifest.get("rule_version") == current_rule_version
+        and manifest.get("report_mode") in {"requirement", "combined"}
+        and isinstance(requirement_model, dict)
+    ):
+        return []
+    assessment = requirement_model.get("test_dimension_assessment")
+    if not isinstance(assessment, list):
+        return [
+            "TEST_DIMENSION_ASSESSMENT_REQUIRED: 当前规则版本正式 passed 测试用例产物必须提供 test_dimension_assessment"
+        ]
+    dimensions = [item.get("dimension") for item in assessment if isinstance(item, dict)]
+    expected = set(DIMENSIONS)
+    errors: list[str] = []
+    if set(dimensions) != expected or len(dimensions) != len(expected):
+        errors.append("TEST_DIMENSION_ASSESSMENT_INCOMPLETE: 当前规则版本正式产物必须完整扫描固定八类维度")
+    if len(dimensions) != len(set(dimensions)):
+        errors.append("DUPLICATE_TEST_DIMENSION_ASSESSMENT: 每个测试分类维度只能出现一次")
+    return errors
 
 
 def find_repo_root(start: Path) -> Path:
@@ -475,6 +505,7 @@ def validate_manifest_data(data: dict[str, Any], manifest_path: Path) -> list[st
         diff_model = next((model for model in models if "change_items" in model), None)
         if data.get("report_mode") in {"requirement", "combined"} and requirement_model is None:
             errors.append("需求分析交付缺少 Requirement Analysis Model")
+        errors.extend(validate_current_rule_dimension_assessment(data, requirement_model, current_version))
         summary = summarize_confirmations(requirement_model or {})
         manifest_summary = {
             key: data.get(key)
@@ -511,7 +542,8 @@ def validate_manifest_data(data: dict[str, Any], manifest_path: Path) -> list[st
                 risk_model=risk_matrix,
                 testcase_model=testcase_model,
             ),
-            validation_status=("passed_dimension_assessment" if isinstance((requirement_model or {}).get("test_dimension_assessment"), list) else "passed"),
+            validation_status="passed",
+            require_dimension_assessment=isinstance((requirement_model or {}).get("test_dimension_assessment"), list),
         )
         errors.extend(f"分析报告复验失败：{error}" for error in report_errors)
         outline = validate_markdown_file(paths["xmind_md_path"])

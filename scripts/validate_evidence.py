@@ -44,6 +44,13 @@ def normalize_evidence_text(value: str) -> str:
     return re.sub(r"\s+", " ", value.replace("\r\n", "\n").replace("\r", "\n")).strip()
 
 
+def normalize_evidence_excerpt_lines(value: str) -> str:
+    """Normalize only BOM and line endings for deterministic physical-line comparison."""
+
+    normalized = value.replace("\r\n", "\n").replace("\r", "\n")
+    return normalized.removeprefix("\ufeff")
+
+
 def evidence_reference_identity(evidence: dict[str, Any]) -> tuple[Any, ...]:
     return tuple(evidence.get(field) for field in EVIDENCE_IDENTITY_FIELDS)
 
@@ -191,10 +198,12 @@ def validate_evidence_reference(
                 if end > len(lines):
                     errors.append(f"Evidence line_end 超出文件范围：{end}/{len(lines)}")
                 else:
-                    selected = normalize_evidence_text("\n".join(lines[start - 1:end]))
-                    excerpt = normalize_evidence_text(str(evidence.get("excerpt", "")))
-                    if not excerpt or excerpt not in selected:
-                        errors.append("EVIDENCE_EXCERPT_OUTSIDE_RANGE: Evidence excerpt 不在指定行号范围")
+                    selected = normalize_evidence_excerpt_lines("\n".join(lines[start - 1:end]))
+                    excerpt = normalize_evidence_excerpt_lines(str(evidence.get("excerpt", "")))
+                    if excerpt != selected:
+                        errors.append(
+                            "EVIDENCE_EXCERPT_LINE_RANGE_MISMATCH: Evidence excerpt 与指定物理行范围不一致"
+                        )
         elif start is not None or end is not None:
             if not isinstance(start, int) or not isinstance(end, int) or start < 1 or end < start:
                 errors.append("二进制 Evidence 行号必须同时为 null 或合法范围")
