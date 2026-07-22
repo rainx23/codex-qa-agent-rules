@@ -47,7 +47,16 @@ def render_confirmation_summary(model: dict, *, evidence_root: Path | None = Non
     lines.extend(["", "## 回归范围", ""])
     lines.extend(f"- {item}" for item in model.get("regression_scope", []))
     lines.extend(["", "## 全部确认问题", ""])
-    for point in model.get("confirmation_points", []):
+    points = model.get("confirmation_points", [])
+    pending_points = [point for point in points if point.get("status") == "pending"]
+    processed_ids = [
+        point.get("confirmation_id")
+        for point in points
+        if point.get("status") in {"resolved", "skipped"}
+    ]
+    if processed_ids:
+        lines.extend([f"- 已处理确认 ID：{'、'.join(processed_ids)}", ""])
+    for point in pending_points:
         lines.extend([
             f"### {point['confirmation_id']}", "",
             f"- confirmation_id：{point['confirmation_id']}",
@@ -59,6 +68,8 @@ def render_confirmation_summary(model: dict, *, evidence_root: Path | None = Non
         if point.get("answer_options"):
             lines.append(f"- 可选答案：{'；'.join(point['answer_options'])}")
         lines.extend([f"- 当前处理状态：{point['status']}；{point['current_handling']}", ""])
+    if not pending_points:
+        lines.append("- 无待回答 Confirmation。")
     lines.extend([
         "## 当前暂停状态", "",
         "- 第一阶段扫描已完成；当前暂停在 confirmation_only。",

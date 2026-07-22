@@ -1439,8 +1439,6 @@ def validate_requirement_model(data: dict[str, Any], *, evidence_root: Path | No
             if not point.get("skip_reason") or not point.get("decision_evidence"):
                 errors.append(f"Confirmation {point_id} skipped 必须提供 skip_reason 和 decision_evidence")
             errors.extend(_validate_evidence_references(point.get("decision_evidence"), f"Confirmation {point_id} decision", evidence_root=evidence_root))
-    if workflow_stage == "confirmation_only" and summarize_confirmations(data)["blocking_pending_count"] == 0:
-        errors.append("CONFIRMATION_ONLY_MUST_AUTO_RESUME: 无 blocking Confirmation 时必须进入 formal_generation")
     for fact_id, category in categories.items():
         if category == "conflicting" and fact_id not in confirmation_fact_ids:
             errors.append(f"冲突事实 {fact_id} 未关联待确认点")

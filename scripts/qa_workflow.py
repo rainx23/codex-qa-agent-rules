@@ -5,13 +5,33 @@ from __future__ import annotations
 
 import copy
 import re
+from pathlib import Path
 from typing import Any
 
-from qa_contracts import DIMENSIONS, REQUIREMENT_ASPECTS, summarize_confirmations
+from qa_contracts import (
+    DIMENSIONS, REQUIREMENT_ASPECTS, summarize_confirmations,
+    validate_requirement_model,
+)
 
 
 class WorkflowError(ValueError):
     """Raised when a workflow transition would lose scope or invent a resolution."""
+
+
+def _formal_generation_readiness(
+    model: dict[str, Any], *, evidence_root: Path | None,
+) -> tuple[bool, dict[str, int], list[str]]:
+    """Require all delivery blockers to be zero and the updated model to be valid."""
+
+    summary = summarize_confirmations(model)
+    validation_errors = validate_requirement_model(model, evidence_root=evidence_root)
+    ready = (
+        summary["blocking_pending_count"] == 0
+        and summary["skipped_core_count"] == 0
+        and summary["unresolved_core_fact_count"] == 0
+        and not validation_errors
+    )
+    return ready, summary, validation_errors
 
 
 def parse_confirmation_answers(text: str) -> dict[str, dict[str, str]]:
@@ -36,6 +56,7 @@ def prepare_confirmation_checkpoint(
     *,
     checkpoint_id: str,
     created_at: str,
+    evidence_root: Path | None = None,
 ) -> tuple[dict[str, Any], bool]:
     """Save the complete first-stage scan and decide whether phase two starts now."""
 
@@ -71,9 +92,11 @@ def prepare_confirmation_checkpoint(
         summary = matrix.get("coverage_summary")
         if isinstance(summary, dict):
             summary["covered_combination_count"] = 0
-    blocking = summarize_confirmations(model)["blocking_pending_count"]
-    model["workflow_stage"] = "confirmation_only" if blocking else "formal_generation"
-    return model, blocking == 0
+    model["workflow_stage"] = "confirmation_only"
+    ready, _, _ = _formal_generation_readiness(model, evidence_root=evidence_root)
+    if ready:
+        model["workflow_stage"] = "formal_generation"
+    return model, ready
 
 
 def apply_confirmation_answers(
@@ -85,6 +108,7 @@ def apply_confirmation_answers(
     fact_updates: dict[str, dict[str, Any]] | None = None,
     acceptance_updates: dict[str, dict[str, Any]] | None = None,
     new_confirmations: list[dict[str, Any]] | None = None,
+    evidence_root: Path | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     """Apply only explicitly answered confirmations and return the minimal invalidation set."""
 
@@ -163,7 +187,10 @@ def apply_confirmation_answers(
             model.setdefault("confirmation_points", []).append(copy.deepcopy(point))
             existing_ids.add(confirmation_id)
 
-    ready = summarize_confirmations(model)["blocking_pending_count"] == 0
+    model["workflow_stage"] = "confirmation_only"
+    ready, summary, validation_errors = _formal_generation_readiness(
+        model, evidence_root=evidence_root,
+    )
     model["workflow_stage"] = "formal_generation" if ready else "confirmation_only"
     transition = {
         "answered_confirmation_ids": sorted(answers),
@@ -177,5 +204,7 @@ def apply_confirmation_answers(
         "invalidate_downstream_models": sorted(affected_scope),
         "auto_resume": ready,
         "next_stage": model["workflow_stage"],
+        "readiness_summary": summary,
+        "validation_errors": validation_errors,
     }
     return model, transition

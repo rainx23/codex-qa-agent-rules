@@ -6,6 +6,8 @@
 
 ## [Unreleased]
 
+## [2.14.0] - 2026-07-22
+
 ### Added
 
 - 新增“一次授权、两阶段执行、集中确认、确认后自动续跑”的 `confirmation_only` Requirement Checkpoint、批量 Confirmation 回复状态迁移和确定性聊天渲染器。
@@ -14,6 +16,11 @@
 ### Changed
 
 - 新任务发现 blocking 后停止 Risk/Testcase/XMind/Manifest 下游生成，但继续完整扫描剩余需求并一次性返回全部确认问题；历史 pending Manifest 和 passed 正式产物保持兼容。
+
+### Fixed
+
+- 自动续跑同时要求 blocking、核心跳过和未解决核心 Fact 计数归零，且更新后的 Requirement Analysis Model 校验通过；仅回答 Confirmation 而未同步核心 Fact 时继续停留在 `confirmation_only`。
+- `confirmation_only` 重复渲染时只展开仍为 pending 的 Confirmation，并用已处理 ID 摘要代替 resolved/skipped 问题全文。
 
 ## [2.13.0] - 2026-07-22
 

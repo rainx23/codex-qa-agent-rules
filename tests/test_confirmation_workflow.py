@@ -27,7 +27,13 @@ from validate_task import run_task_validation
 
 class ConfirmationWorkflowTests(unittest.TestCase):
     def base_model(self) -> dict:
-        return load_json(ROOT / "tests/fixtures/models/requirement-analysis.json")
+        data = load_json(ROOT / "tests/fixtures/models/requirement-analysis.json")
+        data["condition_matrix_applicability"] = {
+            "status": "not_required", "dimension_ids": [],
+            "reason": "通用 Fixture 未列出两个及以上组合条件维度",
+            "evidence_references": [],
+        }
+        return data
 
     def original_scope(self) -> dict:
         return {
@@ -110,6 +116,15 @@ class ConfirmationWorkflowTests(unittest.TestCase):
         self.assertTrue(ready)
         self.assertEqual("formal_generation", model["workflow_stage"])
 
+    def test_first_stage_does_not_resume_when_requirement_model_is_invalid(self):
+        data = self.base_model()
+        data["facts"][0]["evidence_references"][0]["content_hash"] = "sha256:" + "0" * 64
+        model, ready = prepare_confirmation_checkpoint(
+            data, self.original_scope(), checkpoint_id="RAC-INVALID", created_at="2026-07-22 10:01:00",
+        )
+        self.assertFalse(ready)
+        self.assertEqual("confirmation_only", model["workflow_stage"])
+
     def test_confirmation_only_has_no_risk_matrix(self):
         self.assertNotIn("risk_matrix_path", self.pending_model())
 
@@ -143,6 +158,16 @@ class ConfirmationWorkflowTests(unittest.TestCase):
         self.assertEqual("formal_generation", updated["workflow_stage"])
         self.assertEqual([], validate_requirement_model(updated))
 
+    def test_answer_without_core_fact_update_does_not_auto_resume(self):
+        updated, transition = apply_confirmation_answers(
+            self.pending_model(), parse_confirmation_answers("CONF-001=A；CONF-002=按产品口径；"),
+            reply_evidence=self.reply_evidence(), resolved_at="2026-07-22 10:05:00",
+        )
+        self.assertFalse(transition["auto_resume"])
+        self.assertEqual("confirmation_only", updated["workflow_stage"])
+        self.assertEqual(2, transition["readiness_summary"]["unresolved_core_fact_count"])
+        self.assertTrue(transition["validation_errors"])
+
     def test_partial_answer_leaves_omitted_confirmation_pending(self):
         model = self.pending_model()
         updated, transition = apply_confirmation_answers(
@@ -151,6 +176,30 @@ class ConfirmationWorkflowTests(unittest.TestCase):
         )
         self.assertFalse(transition["auto_resume"])
         self.assertEqual("pending", next(item for item in updated["confirmation_points"] if item["confirmation_id"] == "CONF-002")["status"])
+
+    def test_partial_answer_rerender_only_details_pending_confirmation(self):
+        updated, _ = apply_confirmation_answers(
+            self.pending_model(), parse_confirmation_answers("CONF-001=A"),
+            reply_evidence=self.reply_evidence(), resolved_at="2026-07-22 10:05:00",
+            fact_updates={"FACT-003": self.fact_updates()["FACT-003"]},
+        )
+        text = render_confirmation_summary(updated)
+        self.assertIn("已处理确认 ID：CONF-001", text)
+        self.assertNotIn("### CONF-001", text)
+        self.assertNotIn("核心入口是什么？", text)
+        self.assertIn("### CONF-002", text)
+        self.assertIn("状态以哪个口径为准？", text)
+
+    def test_skipped_confirmation_is_only_listed_in_processed_summary(self):
+        updated, transition = apply_confirmation_answers(
+            self.pending_model(), parse_confirmation_answers("CONF-001=跳过并保留风险"),
+            reply_evidence=self.reply_evidence(), resolved_at="2026-07-22 10:05:00",
+        )
+        text = render_confirmation_summary(updated)
+        self.assertFalse(transition["auto_resume"])
+        self.assertIn("已处理确认 ID：CONF-001", text)
+        self.assertNotIn("### CONF-001", text)
+        self.assertIn("### CONF-002", text)
 
     def test_answer_does_not_require_reauthorization(self):
         model = self.pending_model()
@@ -207,6 +256,9 @@ class ConfirmationWorkflowTests(unittest.TestCase):
         data, errors = validate_manifest_file(ROOT / "testcases/manifest.example.json")
         self.assertEqual("passed", data["validation_status"])
         self.assertEqual([], errors)
+
+    def test_rule_version_is_2_14_0(self):
+        self.assertEqual("2.14.0", read_rule_version(ROOT))
 
 
 if __name__ == "__main__":

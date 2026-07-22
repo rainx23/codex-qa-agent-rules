@@ -11,7 +11,7 @@
   "source_hash": "sha256:fefcfb2e7d7eda4042eb11cde4a4dfc107123f6f06efb145d75beae56e119d49",
   "requirement_id": "AN-STOCK-T0-GRAY-20260721",
   "commit_range": null,
-  "rule_version": "2.13.0",
+  "rule_version": "2.14.0",
   "generated_at": "2026-07-21 00:00:00",
   "generated_timezone": "Asia/Shanghai",
   "report_mode": "requirement",
