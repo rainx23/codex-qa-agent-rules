@@ -184,5 +184,87 @@
   "sql_generation_status": "partial",
   "validation_missing_information": [
     "完整指标口径和执行参数"
-  ]
+  ],
+  "test_dimension_assessment": [
+  {
+    "dimension": "功能测试",
+    "status": "covered",
+    "reason": "覆盖客户编号精确过滤行为",
+    "fact_ids": ["FACT-001"],
+    "risk_ids": ["RISK-001"],
+    "confirmation_ids": [],
+    "testcase_ids": ["TC001"],
+    "evidence_references": []
+  },
+  {
+    "dimension": "数据测试",
+    "status": "covered",
+    "reason": "覆盖翻页时筛选条件和排序字段保留",
+    "fact_ids": ["FACT-002"],
+    "risk_ids": ["RISK-002"],
+    "confirmation_ids": [],
+    "testcase_ids": ["TC002"],
+    "evidence_references": []
+  },
+  {
+    "dimension": "异常测试",
+    "status": "not_applicable",
+    "reason": "示例需求只定义正常查询和分页行为，未定义独立异常处理规则",
+    "fact_ids": ["FACT-001", "FACT-002"],
+    "risk_ids": [],
+    "confirmation_ids": [],
+    "testcase_ids": [],
+    "evidence_references": []
+  },
+  {
+    "dimension": "权限测试",
+    "status": "not_applicable",
+    "reason": "示例需求未涉及角色、数据可见范围或权限关系",
+    "fact_ids": ["FACT-001", "FACT-002"],
+    "risk_ids": [],
+    "confirmation_ids": [],
+    "testcase_ids": [],
+    "evidence_references": []
+  },
+  {
+    "dimension": "导出测试",
+    "status": "not_applicable",
+    "reason": "示例需求未包含文件导出行为",
+    "fact_ids": ["FACT-001", "FACT-002"],
+    "risk_ids": [],
+    "confirmation_ids": [],
+    "testcase_ids": [],
+    "evidence_references": []
+  },
+  {
+    "dimension": "兼容性测试",
+    "status": "not_applicable",
+    "reason": "示例需求未定义浏览器、设备或版本兼容范围",
+    "fact_ids": ["FACT-001", "FACT-002"],
+    "risk_ids": [],
+    "confirmation_ids": [],
+    "testcase_ids": [],
+    "evidence_references": []
+  },
+  {
+    "dimension": "回归测试",
+    "status": "not_applicable",
+    "reason": "示例模型未提供独立历史基线或关联模块回归 Oracle",
+    "fact_ids": ["FACT-001", "FACT-002"],
+    "risk_ids": [],
+    "confirmation_ids": [],
+    "testcase_ids": [],
+    "evidence_references": []
+  },
+  {
+    "dimension": "SQL验证",
+    "status": "not_applicable",
+    "reason": "示例用于展示查询与分页测试模型，不包含可执行数据库对账范围",
+    "fact_ids": ["FACT-001", "FACT-002"],
+    "risk_ids": [],
+    "confirmation_ids": [],
+    "testcase_ids": [],
+    "evidence_references": []
+  }
+]
 }
