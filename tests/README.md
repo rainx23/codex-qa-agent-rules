@@ -44,7 +44,7 @@
 - 回归测试覆盖 `validation_status=passed + sql_status=blocked`、证据精度与索引全量覆盖；这些规则均使用通用 Fixture，不绑定特定业务样例。
 - 对话摘要回归使用正式 passed 产物与临时 pending/failed Fixture，验证固定章节、文件用途、无 Confirmation 时的“无”、计数单一来源、跨平台路径和无 ANSI 输出。
 - 测试运行期工作区必须创建在系统临时目录并由测试生命周期清理；`tests/fixtures/` 只保存固定、可复用输入，不得在其中创建随机运行目录，即使测试异常也不得残留。
-- 条件矩阵、配置存在性/行为分离、多入口核心去重和正式产物统一扫描分别由对应 `test_condition_matrix_*`、`test_entry_branch_*` 与 `test_formal_artifact_scan.py` 覆盖。
+- 条件矩阵、配置存在性/行为分离、多入口核心去重和正式产物统一扫描分别由对应 `test_condition_matrix_*`、`test_entry_branch_*`、`test_shared_entry_scope.py` 与 `test_formal_artifact_scan.py` 覆盖；全局适用入口测试固定 6 个入口阈值、完整展开、禁用简称和模型/XMind 映射。
 - Golden 变化必须经过人工确认，测试运行时不得自动创建或覆盖 Golden，也不为不同操作系统或 Python 版本维护不同副本。
 - Fixture 和 Golden 只服务测试，不作为业务历史版本说明。
 

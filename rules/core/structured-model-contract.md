@@ -47,9 +47,13 @@ Requirement Model 校验只判断结构、Fact/Confirmation 引用、核心 miss
 
 ## 多入口 Testcase Model
 
-- Testcase Model 可选 `entry_branches`；每个分支严格包含 `entry_name`、`steps`、`expected_results`，可附带需求、Diff 和风险关联字段。
+- Testcase Model 可选 `entry_branches`；它只用于 2 至 5 个真实入口，每个分支严格包含 `entry_name`、`steps`、`expected_results`，可附带需求、Diff 和风险关联字段。
 - 单入口时 `entry_branches` 缺省或为空，顶层 `steps`、`expected_results` 必须非空；多入口时至少两个分支，顶层步骤和预期必须为空，禁止两种表达混用。
 - 分支顺序、入口名称、步骤和预期必须与 XMind Markdown 一一对应；校验器比较分支数量、顺序、名称、步骤和预期，不以分支数量替代 TC 数量。
+- 同一组步骤和预期适用于不少于 6 个完整入口时，Testcase Model 必须使用唯一 `shared_entry_scope`。范围包含稳定 `scope_id`、固定 `scope_title`、`applies_to_tc_ids` 以及“一级分组 → 二级分组 → 完整入口”的 `groups`；引用 TC 填写同名 `shared_entry_scope_id`、保留顶层公共 `steps`/`expected_results`，不得再填写 `entry_branches`。
+- `shared_entry_scope` 的完整入口叶子少于 6 个时校验失败；单个 TC 出现 6 个及以上 `entry_branches` 时同样失败。正式和模拟等范围组必须各自完整列出入口，禁止“上述”“同上”“前述”“等入口”“其余入口”“其他入口”“同前”和省略号。
+- XMind 根节点下允许唯一 `适用入口（以下全部TC均需逐项执行）` 范围节点；其分组、顺序和入口叶子必须与 Testcase Model 完全一致。范围树不是 TC、步骤或预期，不改变 TC 数量；所有 `applies_to_tc_ids` 必须真实存在且与 TC 的范围引用双向一致。
+- 共享范围下的条件组合使用 `condition_coverage.scope_path` 定位完整或分组路径，并引用 TC 顶层 `step_index`/`expected_index`；普通入口分支继续使用 `branch_id`。两种定位方式不得混用。
 - 可选 `execution_instances` 只建立执行契约，不改变 XMind 展示。每个实例使用稳定 `execution_instance_id`、`tc_id`、`branch_id`、执行状态、执行人/时间、缺陷引用、重跑引用和执行证据。
 - `execution_status` 仅允许 `not_run`、`passed`、`failed`、`blocked`、`skipped`；没有用户提供的实际执行证据时只能为 `not_run`。
 - `case_count` 只统计 TC；`branch_count` 与 `execution_instance_count` 独立统计，执行实例不得增加 TC 数量。
@@ -61,7 +65,7 @@ Requirement Model 校验只判断结构、Fact/Confirmation 引用、核心 miss
 - 每个 required combination 使用稳定 `combination_id`、完整 `dimension_values` 和 `covered_by_tc_ids`；排除项必须携带 `exclusion_reason`。Testcase Model 通过 `condition_coverage` 逐项声明 `behavior` 或 `configuration`，只有行为型覆盖可满足 required combination。condition matrix 正式模型中的每个行为覆盖还必须填写 `branch_id`、一基 `step_index` 和 `expected_index`，引用真实且入口一致的分支、独立步骤及对应预期；步骤与预期数量相等，多个高风险组合不得共用同一定位。
 - 未解决的 blocking Confirmation 可以保留完整 expected set 和草稿 TC 定位，但不得把未知 Oracle 标为 behavior coverage；pending 校验允许这些组合等待确认，passed 校验必须全部具有确定性行为覆盖。
 - Testcase Model 可选保存 `core_deduplication_factors` 与确定性 `core_deduplication_key`。因子不包含纯入口名称，至少包括业务对象、触发条件、核心动作、核心断言和风险语义；数据源、权限规则、计算口径及异常处理用于防止误合并。
-- 同核心键的多个 TC 为错误；多真实入口必须合并为一个 TC 的平级 `entry_branches`。确需拆分时，核心差异应反映在结构化因子中，并可补充 `split_reason` 与 `split_reason_detail` 供审计。
+- 同核心键的多个 TC 为错误；2 至 5 个真实入口合并为一个 TC 的平级 `entry_branches`，不少于 6 个同规则入口合并为 `shared_entry_scope` 加公共步骤。确需拆分时，核心差异应反映在结构化因子中，并可补充 `split_reason` 与 `split_reason_detail` 供审计。
 
 ## Testcase Value Assessment Model
 

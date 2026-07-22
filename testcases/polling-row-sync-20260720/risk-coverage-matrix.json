@@ -442,6 +442,21 @@
           "captured_at": "2026-07-20 00:00:00",
           "captured_timezone": "Asia/Shanghai",
           "evidence_status": "current"
+        },
+        {
+          "source_type": "user_confirmation",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/polling-row-sync-20260720/evidence/user-confirmation.md",
+          "source_record_id": "chat:CHAT-POLLING-ROW-SYNC-20260720",
+          "line_start": 8,
+          "line_end": 8,
+          "commit_sha": null,
+          "content_hash": "sha256:c9071c3aa2af6dbcdadf89668dfef548f645424206f57d3ab705cbba609dc980",
+          "excerpt": "用户补充：多股弹窗只有查询日期为当天且处于盘中时才轮询。",
+          "captured_at": "2026-07-20 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
         }
       ]
     },

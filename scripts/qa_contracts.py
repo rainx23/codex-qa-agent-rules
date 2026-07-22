@@ -54,6 +54,7 @@ KNOWLEDGE_STATUSES = ("active_confirmed", "candidate", "conflicting", "supersede
 SCHEMA_SCOPES = ("complete", "partial", "blocked")
 RISK_DISPOSITIONS = ("active", "covered", "merged", "deferred", "accepted", "blocked", "not_applicable", "resolved")
 CONDITION_COVERAGE_TYPES = ("behavior", "configuration")
+SHARED_ENTRY_SCOPE_MIN_ENTRIES = 6
 TC_SPLIT_REASONS = (
     "data_source", "permission_rule", "calculation_basis", "operation",
     "oracle", "exception_handling", "risk_diagnostic",
@@ -698,6 +699,34 @@ def testcase_schema(version: str) -> dict[str, Any]:
             "observable_result": _string(),
             "branch_id": _string(), "step_index": {"type": "integer", "minimum": 1},
             "expected_index": {"type": "integer", "minimum": 1},
+            "scope_path": _strings(1),
+        },
+    )
+    shared_scope_entry = _object(
+        ["entry_name"],
+        {"entry_name": _string()},
+    )
+    shared_scope_subgroup = _object(
+        ["subgroup_name", "entries"],
+        {
+            "subgroup_name": _string(),
+            "entries": {"type": "array", "items": shared_scope_entry, "minItems": 1},
+        },
+    )
+    shared_scope_group = _object(
+        ["group_name", "subgroups"],
+        {
+            "group_name": _string(),
+            "subgroups": {"type": "array", "items": shared_scope_subgroup, "minItems": 1},
+        },
+    )
+    shared_entry_scope = _object(
+        ["scope_id", "scope_title", "applies_to_tc_ids", "groups"],
+        {
+            "scope_id": _string(),
+            "scope_title": {"const": "适用入口（以下全部TC均需逐项执行）"},
+            "applies_to_tc_ids": {"type": "array", "items": _string(pattern=TC_PATTERN), "minItems": 1, "uniqueItems": True},
+            "groups": {"type": "array", "items": shared_scope_group, "minItems": 1},
         },
     )
     core_deduplication_factors = _object(
@@ -727,6 +756,7 @@ def testcase_schema(version: str) -> dict[str, Any]:
             "core_deduplication_key": _string(pattern=r"^sha256:[0-9a-fA-F]{64}$"),
             "split_reason": {"enum": list(TC_SPLIT_REASONS)}, "split_reason_detail": _string(),
             "condition_coverage": {"type": "array", "items": condition_coverage, "uniqueItems": True},
+            "shared_entry_scope_id": _string(),
         },
     )
     execution_instance = _object(
@@ -741,7 +771,8 @@ def testcase_schema(version: str) -> dict[str, Any]:
         ["schema_version", "root_title", "cases"],
         {"schema_version": {"const": SCHEMA_VERSION}, "model_id": _string(), "root_title": _string(), "cases": {"type": "array", "items": case, "minItems": 1},
          "branch_count": {"type": "integer", "minimum": 0}, "execution_instance_count": {"type": "integer", "minimum": 0},
-         "execution_instances": {"type": "array", "items": execution_instance}},
+         "execution_instances": {"type": "array", "items": execution_instance},
+         "shared_entry_scope": shared_entry_scope},
     )
     return _base_schema("Testcase Model", version, body)
 
@@ -1486,6 +1517,37 @@ def validate_testcase_model(data: dict[str, Any]) -> list[str]:
     cases = data.get("cases", []) if isinstance(data.get("cases"), list) else []
     tc_ids, id_errors = _unique_ids(cases, "tc_id")
     errors.extend(id_errors)
+    shared_scope = data.get("shared_entry_scope") if isinstance(data.get("shared_entry_scope"), dict) else None
+    shared_scope_id = shared_scope.get("scope_id") if shared_scope else None
+    shared_scope_paths: set[tuple[str, str, str]] = set()
+    if shared_scope:
+        group_names: list[str] = []
+        abbreviated_markers = ("上述", "同上", "前述", "等入口", "其余入口", "其他入口", "同前")
+        for group in shared_scope.get("groups", []):
+            group_name = str(group.get("group_name", ""))
+            group_names.append(group_name)
+            subgroup_names: list[str] = []
+            for subgroup in group.get("subgroups", []):
+                subgroup_name = str(subgroup.get("subgroup_name", ""))
+                subgroup_names.append(subgroup_name)
+                entry_names = [str(entry.get("entry_name", "")) for entry in subgroup.get("entries", [])]
+                if len(entry_names) != len(set(entry_names)):
+                    errors.append(f"SHARED_ENTRY_SCOPE_DUPLICATE_ENTRY: {group_name}/{subgroup_name} 入口名称重复")
+                for entry_name in entry_names:
+                    path = (group_name, subgroup_name, entry_name)
+                    if path in shared_scope_paths:
+                        errors.append(f"SHARED_ENTRY_SCOPE_DUPLICATE_PATH: {'/'.join(path)}")
+                    shared_scope_paths.add(path)
+                    if any(marker in entry_name for marker in abbreviated_markers):
+                        errors.append(f"SHARED_ENTRY_SCOPE_ABBREVIATED: {'/'.join(path)} 必须展开完整入口")
+            if len(subgroup_names) != len(set(subgroup_names)):
+                errors.append(f"SHARED_ENTRY_SCOPE_DUPLICATE_SUBGROUP: {group_name} 分组名称重复")
+        if len(group_names) != len(set(group_names)):
+            errors.append("SHARED_ENTRY_SCOPE_DUPLICATE_GROUP: 一级范围分组名称重复")
+        if len(shared_scope_paths) < SHARED_ENTRY_SCOPE_MIN_ENTRIES:
+            errors.append(
+                f"SHARED_ENTRY_SCOPE_REQUIRES_SIX_OR_MORE: 共享入口范围至少需要 {SHARED_ENTRY_SCOPE_MIN_ENTRIES} 个完整入口，实际 {len(shared_scope_paths)}"
+            )
     expected = {f"TC{index:03d}" for index in range(1, len(cases) + 1)}
     if tc_ids != expected:
         errors.append(f"TC 编号必须从 TC001 连续：{sorted(tc_ids)}")
@@ -1510,6 +1572,16 @@ def validate_testcase_model(data: dict[str, Any]) -> list[str]:
         if bool(common) == modules:
             errors.append(f"{tc_id} 必须在 common_entry 与两级模块结构中二选一")
         branches = case.get("entry_branches", [])
+        scope_reference = case.get("shared_entry_scope_id")
+        if branches and len(branches) >= SHARED_ENTRY_SCOPE_MIN_ENTRIES:
+            errors.append(
+                f"SIX_OR_MORE_ENTRIES_REQUIRE_SHARED_SCOPE: {tc_id} 有 {len(branches)} 个入口，必须使用 shared_entry_scope 公共步骤结构"
+            )
+        if scope_reference:
+            if not shared_scope or scope_reference != shared_scope_id:
+                errors.append(f"SHARED_ENTRY_SCOPE_REFERENCE_INVALID: {tc_id} 引用不存在的 {scope_reference}")
+            if branches:
+                errors.append(f"SHARED_ENTRY_SCOPE_MIXED_WITH_BRANCHES: {tc_id} 不得同时使用 shared_entry_scope 与 entry_branches")
         if branches:
             if case.get("steps") or case.get("expected_results"):
                 errors.append(f"{tc_id} 多入口模型顶层 steps 和 expected_results 必须为空")
@@ -1537,7 +1609,7 @@ def validate_testcase_model(data: dict[str, Any]) -> list[str]:
         steps_text = " ".join(str(step) for step in case.get("steps", []))
         entry_marker_count = sum(steps_text.count(marker) for marker in ("页面", "弹窗", "页签", "下钻", "入口"))
         explicit_multi_entry = bool(re.search(r"分别(?:打开|进入)|依次(?:打开|进入)|在多个|所有相关", steps_text))
-        if not branches and case.get("common_entry") and (
+        if not branches and not scope_reference and case.get("common_entry") and (
             entry_marker_count >= 2 and bool(re.search(r"[/、，,]|分别|以及|多个|三个|各个", steps_text))
             or entry_marker_count >= 1 and explicit_multi_entry
         ):
@@ -1575,6 +1647,16 @@ def validate_testcase_model(data: dict[str, Any]) -> list[str]:
         errors.append(
             f"IDENTICAL_RULE_NOT_MERGED_TO_ENTRY_BRANCHES: {duplicate_ids} 应合并为一个 TC 的平级 entry_branches"
         )
+    if shared_scope:
+        expected_scope_tcs = {str(item) for item in shared_scope.get("applies_to_tc_ids", [])}
+        actual_scope_tcs = {str(case.get("tc_id")) for case in cases if case.get("shared_entry_scope_id") == shared_scope_id}
+        if expected_scope_tcs != actual_scope_tcs:
+            errors.append(
+                f"SHARED_ENTRY_SCOPE_TC_MISMATCH: applies_to_tc_ids={sorted(expected_scope_tcs)} 实际引用={sorted(actual_scope_tcs)}"
+            )
+        unknown_scope_tcs = expected_scope_tcs - tc_ids
+        if unknown_scope_tcs:
+            errors.append(f"SHARED_ENTRY_SCOPE_UNKNOWN_TC: {sorted(unknown_scope_tcs)}")
     branches = {branch.get("branch_id") for case in cases for branch in case.get("entry_branches", [])}
     actual_branch_count = len(branches)
     if "branch_count" in data and data.get("branch_count") != actual_branch_count:
@@ -1923,6 +2005,17 @@ def validate_model_links(
     diff_risks = {item.get("risk_id"): item for item in (diff or {}).get("risks", [])}
     defect_ids = {item.get("defect_id") for item in (diff or {}).get("suspected_defects", [])}
     cases = {item.get("tc_id"): item for item in testcase_model.get("cases", [])}
+    shared_scope = testcase_model.get("shared_entry_scope") if isinstance(testcase_model.get("shared_entry_scope"), dict) else {}
+    shared_scope_paths = {
+        (
+            str(group.get("group_name", "")),
+            str(subgroup.get("subgroup_name", "")),
+            str(entry.get("entry_name", "")),
+        )
+        for group in shared_scope.get("groups", [])
+        for subgroup in group.get("subgroups", [])
+        for entry in subgroup.get("entries", [])
+    }
     facts_by_id = {item.get("fact_id"): item for item in (requirement or {}).get("facts", [])}
     facts = set(facts_by_id)
     confirmations = {item.get("confirmation_id"): item for item in (requirement or {}).get("confirmation_points", [])}
@@ -2138,8 +2231,52 @@ def validate_model_links(
                 for tc_id, coverage in behavior:
                     case = cases[tc_id]
                     branch_id = coverage.get("branch_id")
+                    scope_path = coverage.get("scope_path")
                     step_index = coverage.get("step_index")
                     expected_index = coverage.get("expected_index")
+                    if case.get("shared_entry_scope_id"):
+                        normalized_scope_path = tuple(str(item) for item in (scope_path or []))
+                        matching_scope_paths = [
+                            path for path in shared_scope_paths
+                            if path[:len(normalized_scope_path)] == normalized_scope_path
+                        ]
+                        if not normalized_scope_path or not matching_scope_paths:
+                            errors.append(
+                                f"CONDITION_COVERAGE_SCOPE_MISMATCH: {combination_id} 引用不存在 scope_path：{scope_path}"
+                            )
+                            continue
+                        steps = case.get("steps", [])
+                        expected_results = case.get("expected_results", [])
+                        if len(steps) != len(expected_results):
+                            errors.append(
+                                f"CONDITION_COVERAGE_STEP_REFERENCE_INVALID: {tc_id} 共享入口 steps 与 expected_results 必须一一对应"
+                            )
+                        if (
+                            not isinstance(step_index, int) or isinstance(step_index, bool)
+                            or not 1 <= step_index <= len(steps)
+                            or not isinstance(expected_index, int) or isinstance(expected_index, bool)
+                            or not 1 <= expected_index <= len(expected_results)
+                            or step_index != expected_index
+                        ):
+                            errors.append(
+                                f"CONDITION_COVERAGE_STEP_REFERENCE_INVALID: {combination_id} 的 step_index/expected_index 非法"
+                            )
+                            continue
+                        if coverage.get("observable_result") != expected_results[expected_index - 1]:
+                            errors.append(
+                                f"CONDITION_COVERAGE_STEP_REFERENCE_INVALID: {combination_id} observable_result "
+                                f"必须等于所引用 expected_results[{expected_index}]"
+                            )
+                        location = (tc_id, "/".join(normalized_scope_path), step_index)
+                        prior = behavior_locations.get(location)
+                        if prior and prior != combination_id:
+                            errors.append(
+                                f"CONDITION_COVERAGE_NOT_INDEPENDENT: {prior} 与 {combination_id} 全部指向 "
+                                f"{tc_id}.scope[{'/'.join(normalized_scope_path)}].step[{step_index}]"
+                            )
+                        else:
+                            behavior_locations[location] = str(combination_id)
+                        continue
                     branch = next(
                         (item for item in case.get("entry_branches", []) if item.get("branch_id") == branch_id),
                         None,
