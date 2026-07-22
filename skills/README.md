@@ -15,6 +15,7 @@
 ## 使用入口
 
 - 从根目录 `AGENTS.md` 的任务路由选择对应 `SKILL.md`。
+- 本目录实际包含 6 个 QA Skills：4 个核心交付链 Skills（Requirement、Diff、Testcase、Artifact）和 2 个按需支撑型 Skills（Knowledge、API Automation）。
 
 ## 维护约束
 

@@ -37,6 +37,10 @@
 
 第一轮不得展示或虚构正式产物路径，也不得宣称测试用例或 XMind 已完成。用户可用 `CONF-001=A；CONF-002=具体口径；CONF-003=跳过并保留风险。` 一次回答多项；未回答项保持 pending。回答后按 `confirmation-gate.md` 保存用户快照 Evidence、回写模型，并自动续跑原始任务。
 
+## pre_review 需求预审回复
+
+只有明确预审意图才使用，固定输出预审范围、需求理解、已明确内容、缺失/冲突/歧义、边界/异常/可测试性问题、待确认问题、风险影响和 `ready / conditionally_ready / not_ready` 结论。每个问题显示 `issue_id`、类型、严重性、陈述、当前证据、影响和确认问题。不得展示 Risk Matrix、Testcase、XMind、Manifest、Index、SQL 或 API 自动化路径，不得宣称正式交付完成，也不得自动进入正式流程。
+
 ## 最终摘要固定结构
 
 需求分析或完整用例任务结束时，使用 `scripts/render_delivery_summary.py --manifest <manifest.json> --check` 生成稳定 Markdown。不得自由删减固定章节：
@@ -87,3 +91,4 @@
 - `scripts/validate_delivery_summary.py --manifest <manifest> --summary <summary.md>` 校验章节、顺序、状态禁语、路径、计数和 Confirmation Summary；渲染器的 `--check` 使用同一校验入口。
 - Manifest 与 Requirement Model 的 Confirmation 数、Manifest 与 Risk/Testcase 模型的 P0/TC/分支数不一致时，必须失败，不得生成成功摘要。
 - 当前路径不存在时必须失败或明确标“未生成/不适用/被阻塞”，不得补写一个看似合理的路径。
+- 默认正式任务结束后不执行知识检索或候选提取。只有正式模型校验通过且存在明显可复用 confirmed/resolved 规则时，才可在最终回复末尾增加一次“本次存在可能可复用的已确认规则，是否提取为知识候选？”，不得在提示阶段执行 search、compare、extract 或 persist。

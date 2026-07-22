@@ -26,7 +26,8 @@ def _formal_generation_readiness(
     summary = summarize_confirmations(model)
     validation_errors = validate_requirement_model(model, evidence_root=evidence_root)
     ready = (
-        summary["blocking_pending_count"] == 0
+        model.get("workflow_stage") != "pre_review"
+        and summary["blocking_pending_count"] == 0
         and summary["skipped_core_count"] == 0
         and summary["unresolved_core_fact_count"] == 0
         and not validation_errors
@@ -59,6 +60,9 @@ def prepare_confirmation_checkpoint(
     evidence_root: Path | None = None,
 ) -> tuple[dict[str, Any], bool]:
     """Save the complete first-stage scan and decide whether phase two starts now."""
+
+    if requirement_model.get("workflow_stage") == "pre_review":
+        raise WorkflowError("pre_review 完成后不得自动进入正式用例流程")
 
     model = copy.deepcopy(requirement_model)
     risk_directions = [

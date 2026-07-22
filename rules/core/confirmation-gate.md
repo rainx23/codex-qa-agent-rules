@@ -2,6 +2,8 @@
 
 每个待确认点必须明确分类为 `blocking`、`nonblocking` 或 `suggested`，未分类即校验失败。新任务的确认前阶段使用独立 `workflow_stage=confirmation_only` Checkpoint，不生成 Manifest；历史 `pending` Manifest 继续按原契约兼容。用户明确跳过时状态写为 `skipped`，不得把假设升级为 confirmed；仍影响核心预期的跳过项继续阻止正式阶段。
 
+显式 `pre_review` 可复用 Confirmation 表达待确认问题，但它不是 confirmation_only 正式交付前置阶段；预审结论返回后停止，不因 blocking 归零而自动切换到 formal_generation。
+
 ## 一次授权与集中确认
 
 用户一次请求同时包含需求分析和测试用例时，即完成整个原始任务授权。执行固定分为两阶段：第一阶段完整分析并集中确认，第二阶段正式生成测试产物。无 blocking 时自动进入第二阶段；存在 blocking 时扫描完当前全部材料后一次性返回全部问题，用户回复后自动续跑，不要求重复规则路径、需求内容或“继续生成”。

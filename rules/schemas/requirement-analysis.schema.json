@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$comment": "Generated from scripts/qa_contracts.py; do not edit manually.",
-  "x-rule-version": "2.14.0",
+  "x-rule-version": "2.15.0",
   "title": "Requirement Analysis Model",
   "type": "object",
   "additionalProperties": false,
@@ -1769,9 +1769,70 @@
     },
     "workflow_stage": {
       "enum": [
+        "pre_review",
         "confirmation_only",
         "formal_generation",
         "completed"
+      ]
+    },
+    "pre_review_issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "issue_id",
+          "issue_type",
+          "severity",
+          "statement",
+          "current_evidence",
+          "impact",
+          "confirmation_question"
+        ],
+        "properties": {
+          "issue_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "issue_type": {
+            "enum": [
+              "missing",
+              "conflicting",
+              "ambiguous",
+              "untestable"
+            ]
+          },
+          "severity": {
+            "enum": [
+              "blocking",
+              "major",
+              "minor"
+            ]
+          },
+          "statement": {
+            "type": "string",
+            "minLength": 1
+          },
+          "current_evidence": {
+            "type": "string",
+            "minLength": 1
+          },
+          "impact": {
+            "type": "string",
+            "minLength": 1
+          },
+          "confirmation_question": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "pre_review_conclusion": {
+      "enum": [
+        "ready",
+        "conditionally_ready",
+        "not_ready"
       ]
     },
     "original_task_scope": {

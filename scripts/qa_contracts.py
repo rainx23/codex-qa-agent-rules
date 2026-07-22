@@ -35,7 +35,11 @@ EVIDENCE_STATES = ("已确认", "疑似", "待确认")
 REGRESSION_SCOPES = ("核心回归", "关联回归", "冒烟回归")
 BUSINESS_IMPACTS = ("critical", "high", "medium", "low")
 VALIDATION_STATUSES = ("passed", "failed", "pending")
-WORKFLOW_STAGES = ("confirmation_only", "formal_generation", "completed")
+WORKFLOW_STAGES = ("pre_review", "confirmation_only", "formal_generation", "completed")
+PRE_REVIEW_ISSUE_TYPES = ("missing", "conflicting", "ambiguous", "untestable")
+PRE_REVIEW_SEVERITIES = ("blocking", "major", "minor")
+PRE_REVIEW_CONCLUSIONS = ("ready", "conditionally_ready", "not_ready")
+KNOWLEDGE_CANDIDATE_ACTIONS = ("create", "merge", "reject_duplicate", "reconfirm", "supersede")
 RELATIONS = ("新增", "补充", "替代", "废弃")
 PENDING_SEVERITIES = ("blocking", "nonblocking", "suggested")
 PENDING_STATUSES = ("pending", "skipped", "resolved")
@@ -460,6 +464,14 @@ def requirement_schema(version: str) -> dict[str, Any]:
             "impact_scope": _strings(1), "answer_options": _strings(), "current_handling": _string(),
         },
     )
+    pre_review_issue = _object(
+        ["issue_id", "issue_type", "severity", "statement", "current_evidence", "impact", "confirmation_question"],
+        {
+            "issue_id": _string(), "issue_type": {"enum": list(PRE_REVIEW_ISSUE_TYPES)},
+            "severity": {"enum": list(PRE_REVIEW_SEVERITIES)}, "statement": _string(),
+            "current_evidence": _string(), "impact": _string(), "confirmation_question": _string(),
+        },
+    )
     risk = _object(
         ["risk_id", "statement", "test_priority", "evidence_state", "evidence_references"],
         {"risk_id": _string(), "statement": _string(), "test_priority": {"enum": list(TEST_PRIORITIES)}, "evidence_state": {"enum": list(EVIDENCE_STATES)}, "evidence_references": {"type": "array", "items": _evidence_reference(), "minItems": 1}},
@@ -487,12 +499,44 @@ def requirement_schema(version: str) -> dict[str, Any]:
             "condition_matrix_applicability": condition_matrix_applicability,
             "scope_dispositions": {"type": "array", "items": scope_disposition},
             "workflow_stage": {"enum": list(WORKFLOW_STAGES)},
+            "pre_review_issues": {"type": "array", "items": pre_review_issue},
+            "pre_review_conclusion": {"enum": list(PRE_REVIEW_CONCLUSIONS)},
             "original_task_scope": original_task_scope,
             "confirmation_checkpoint": confirmation_checkpoint,
             "risk_directions": _strings(),
         },
     )
     return _base_schema("Requirement Analysis Model", version, body)
+
+
+def knowledge_candidate_schema(version: str) -> dict[str, Any]:
+    candidate = _object(
+        [
+            "candidate_id", "knowledge_type", "statement", "source_fact_ids",
+            "source_confirmation_ids", "evidence_references", "applicable_scope",
+            "existing_knowledge_ids", "comparison_result", "recommended_action",
+            "conflict_reason", "status",
+        ],
+        {
+            "candidate_id": _string(pattern=r"^KC-\d{3}$"), "knowledge_type": _string(),
+            "statement": _string(), "source_fact_ids": _strings(),
+            "source_confirmation_ids": _strings(),
+            "evidence_references": {"type": "array", "items": _evidence_reference(), "minItems": 1},
+            "applicable_scope": _string(), "existing_knowledge_ids": _strings(),
+            "comparison_result": {"enum": ["missing", "consistent", "conflicting", "superseding"]},
+            "recommended_action": {"enum": list(KNOWLEDGE_CANDIDATE_ACTIONS)},
+            "conflict_reason": {"type": ["string", "null"]}, "status": {"const": "candidate"},
+        },
+    )
+    body = _object(
+        ["schema_version", "extraction_mode", "candidates"],
+        {
+            "schema_version": {"const": SCHEMA_VERSION},
+            "extraction_mode": {"const": "extract_candidate"},
+            "candidates": {"type": "array", "items": candidate},
+        },
+    )
+    return _base_schema("Knowledge Candidate Model", version, body)
 
 
 def diff_schema(version: str) -> dict[str, Any]:
@@ -995,6 +1039,7 @@ def schema_documents(root: Path) -> dict[str, dict[str, Any]]:
         "logic-version.schema.json": logic_version_schema(version),
         "metric.schema.json": metric_schema(version),
         "requirement-knowledge.schema.json": requirement_knowledge_schema(version),
+        "knowledge-candidate.schema.json": knowledge_candidate_schema(version),
         "data-validation.schema.json": data_validation_schema(version),
         "validation-sql.schema.json": validation_sql_schema(version),
         "reconciliation-plan.schema.json": reconciliation_schema(version),
@@ -1163,6 +1208,16 @@ def validate_requirement_model(data: dict[str, Any], *, evidence_root: Path | No
     confirmations = data.get("confirmation_points", []) if isinstance(data.get("confirmation_points"), list) else []
     fact_ids = {item.get("fact_id") for item in facts if isinstance(item, dict)}
     confirmation_ids = {item.get("confirmation_id") for item in confirmations if isinstance(item, dict)}
+    if workflow_stage == "pre_review":
+        if "pre_review_conclusion" not in data:
+            errors.append("PRE_REVIEW_CONCLUSION_REQUIRED: 预审必须给出 ready/conditionally_ready/not_ready 结论")
+        if not isinstance(data.get("pre_review_issues"), list):
+            errors.append("PRE_REVIEW_ISSUES_REQUIRED: 预审必须保存问题清单")
+        if data.get("risks"):
+            errors.append("PRE_REVIEW_DOWNSTREAM_FORBIDDEN: 预审不得生成正式 Risk")
+        for field in ("original_task_scope", "confirmation_checkpoint"):
+            if field in data:
+                errors.append(f"PRE_REVIEW_FORMAL_WORKFLOW_FORBIDDEN: 预审不得写入 {field}")
     if workflow_stage == "confirmation_only":
         scope = data.get("original_task_scope")
         checkpoint = data.get("confirmation_checkpoint")
@@ -1325,7 +1380,7 @@ def validate_requirement_model(data: dict[str, Any], *, evidence_root: Path | No
                     f"ENUMERATION_VALUE_UNCOVERED: {dimension_id}={value} 未进入 required/excluded combination"
                 )
         for combination in required:
-            if workflow_stage != "confirmation_only" and not combination.get("covered_by_tc_ids"):
+            if workflow_stage not in {"pre_review", "confirmation_only"} and not combination.get("covered_by_tc_ids"):
                 errors.append(
                     f"REQUIRED_COMBINATION_UNCOVERED: {combination.get('combination_id')} 未映射 TC"
                 )
@@ -1839,6 +1894,35 @@ def _validate_step_expectations(tc_id: Any, steps: Any, expected_results: Any, l
         quality_error = expectation_quality_error(str(result), " ".join(str(step) for step in steps))
         if quality_error:
             errors.append(f"{quality_error}: {tc_id} {location} 缺少可执行基线或 Oracle：{result}")
+    return errors
+
+
+def validate_knowledge_candidate(data: dict[str, Any], *, evidence_root: Path | None = None) -> list[str]:
+    errors = validate_schema_shape(data, knowledge_candidate_schema("0.0.0"))
+    candidates = data.get("candidates", []) if isinstance(data.get("candidates"), list) else []
+    _, id_errors = _unique_ids(candidates, "candidate_id")
+    errors.extend(id_errors)
+    action_by_result = {
+        "missing": {"create"},
+        "consistent": {"merge", "reject_duplicate"},
+        "conflicting": {"reconfirm"},
+        "superseding": {"supersede"},
+    }
+    for candidate in candidates:
+        if not isinstance(candidate, dict):
+            continue
+        candidate_id = candidate.get("candidate_id")
+        if not candidate.get("source_fact_ids") and not candidate.get("source_confirmation_ids"):
+            errors.append(f"KNOWLEDGE_CANDIDATE_SOURCE_REQUIRED: {candidate_id}")
+        result = candidate.get("comparison_result")
+        if candidate.get("recommended_action") not in action_by_result.get(result, set()):
+            errors.append(f"KNOWLEDGE_CANDIDATE_ACTION_MISMATCH: {candidate_id}")
+        if result == "conflicting" and not str(candidate.get("conflict_reason") or "").strip():
+            errors.append(f"KNOWLEDGE_CANDIDATE_CONFLICT_REASON_REQUIRED: {candidate_id}")
+        errors.extend(_validate_evidence_references(
+            candidate.get("evidence_references"), f"Knowledge Candidate {candidate_id}",
+            confirmed=True, evidence_root=evidence_root,
+        ))
     return errors
 
 
@@ -3187,6 +3271,7 @@ MODEL_VALIDATORS: dict[str, Callable[[dict[str, Any]], list[str]]] = {
     "logic": validate_logic_version,
     "metric": validate_metric,
     "requirement_knowledge": validate_requirement_knowledge,
+    "knowledge_candidate": validate_knowledge_candidate,
     "data_validation": validate_data_validation,
     "validation_sql": validate_validation_sql,
     "reconciliation": validate_reconciliation,

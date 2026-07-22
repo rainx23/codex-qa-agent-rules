@@ -19,6 +19,7 @@ README_HEADINGS = ("## 目录定位", "## 维护约束")
 CHANGELOG_ENTRY = re.compile(r"^## \[(?P<version>\d+\.\d+\.\d+)\] - (?P<date>.+)$")
 MARKDOWN_LINK = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 RULE_MARKERS = ("小内容修改豁免", "不得根据当前文件状态编造历史版本", "历史信息不足")
+README_SKILL_LINK = re.compile(r"skills/([a-z0-9][a-z0-9-]*)/SKILL\.md")
 
 
 def version_key(version: str) -> tuple[int, int, int]:
@@ -87,6 +88,32 @@ def validate_readmes(root: Path) -> list[str]:
     return errors
 
 
+def validate_skill_catalog(root: Path) -> list[str]:
+    """Derive the Skill catalog from disk and compare it with the root README."""
+
+    skills_root = root / "skills"
+    actual = {
+        path.parent.name for path in skills_root.glob("*/SKILL.md") if path.is_file()
+    } if skills_root.is_dir() else set()
+    if not actual:
+        return []
+    readme = root / "README.md"
+    if not readme.is_file():
+        return ["缺少根 README.md，无法校验 Skill 清单"]
+    text = readme.read_text(encoding="utf-8-sig")
+    listed = set(README_SKILL_LINK.findall(text))
+    errors: list[str] = []
+    if listed != actual:
+        errors.append(
+            "根 README Skill 清单与实际 skills/*/SKILL.md 不一致："
+            f"missing={sorted(actual - listed)} extra={sorted(listed - actual)}"
+        )
+    expected_count_phrase = f"{len(actual)} 个 QA Skills"
+    if expected_count_phrase not in text:
+        errors.append(f"根 README.md 未使用派生总数表述：{expected_count_phrase}")
+    return errors
+
+
 def validate_repository(root: Path) -> list[str]:
     errors: list[str] = []
     try:
@@ -95,6 +122,7 @@ def validate_repository(root: Path) -> list[str]:
         return [str(exc)]
     errors.extend(validate_changelog(root, version))
     errors.extend(validate_readmes(root))
+    errors.extend(validate_skill_catalog(root))
     rule_path = root / "rules/core/repository-documentation-rules.md"
     if not rule_path.is_file():
         errors.append("缺少正式规则 rules/core/repository-documentation-rules.md")

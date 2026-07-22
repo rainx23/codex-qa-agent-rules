@@ -23,7 +23,7 @@ confirmed Fact 必须有非 inference 的可验证来源，不能使用 low conf
 
 ## 执行流程
 
-0. 将用户一次提出的“按指定规则分析需求并编写测试用例”记录为一个完整原始任务范围，包含规则路径、来源、请求文本、已授权正式交付项和 `continuation_policy=auto_resume`。若本轮消息是在回答已有 Confirmation，则读取此前 Checkpoint，将消息作为确认回复处理，不把它误判为独立新需求，也不要求用户重复“继续生成”。
+0. 先判断显式意图。只有用户明确要求需求预审/评审、完整性检查、缺失冲突歧义检查或“只分析问题、暂不生成测试用例”时进入 `workflow_stage=pre_review`；普通“分析需求并编写测试用例”不得进入 pre_review，仍记录完整原始任务范围并执行 confirmation_only 两阶段链。若本轮消息是在回答已有 Confirmation，则读取此前 Checkpoint，将消息作为确认回复处理，不把它误判为独立新需求，也不要求用户重复“继续生成”。
 1. 确认每个需求来源均可读取，并说明本次分析范围。
 2. 分析禅道需求时，区分第一部分业务背景与第三部分产品实现规则；优先采用用户确认的范围，不把普通背景与计划差异直接判定为阻塞冲突。
 3. 提取业务目标、系统或页面入口、角色、主流程、字段规则、数据定义、验收标准、异常行为和明确排除项。
@@ -35,7 +35,7 @@ confirmed Fact 必须有非 inference 的可验证来源，不能使用 low conf
 6. 建立并校验 `../../rules/schemas/requirement-analysis.schema.json` 约束的最小 Requirement Analysis Checkpoint。保存完整 Evidence、原始任务范围、Fact、验收依据、八维扫描、条件维度、风险方向和全部 Confirmation；`downstream_artifacts_generated` 必须为空。不要创建 pending Manifest，也不要生成草稿报告、草稿 Risk、草稿 Testcase 或草稿 XMind。
 7. 只有需求输入时，输出纯需求分析契约：分析范围、需求理解、规则拆解、证据、待确认点、风险、测试点摘要和回归范围；不强制要求疑似缺陷章节。
 8. 存在 Diff 证据时，将 Requirement Analysis Model 交给 Diff Skill，并在设计用例前切换到联合分析契约。
-9. 定稿前必须调用 `qa-knowledge-management` 的 `search` 模式。记录 active/candidate/conflicting/superseded 命中，历史知识不得直接视为当前确认事实。
+9. 只有用户明确要求知识检索或任务确需历史知识/DDL/指标复用时，才按需调用 `qa-knowledge-management` 的 `search` 模式；默认正式任务完成后不自动搜索或提取知识。
 10. 填充数据影响与验证决策：`data_validation_required`、原因、推荐方式、SQL 生成状态、指标定义缺口和阻塞问题。指标准确性默认采用 SQL，除非用户提供明确且可信的对账依据。
 11. 用户粘贴完整 DDL 时，解析草稿并与知识库比较规范化哈希；只提供少量字段时标记为 partial，不创建或覆盖完整表 DDL。
 12. 扫描完成后使用 `../../scripts/render_confirmation_summary.py` 在一次聊天回复中集中展示全部 Confirmation。每项至少包含 `confirmation_id`、问题、当前证据、不确定点、影响范围、确有明确选项时的可选答案和当前处理状态；不得虚构正式或草稿产物路径。
@@ -48,3 +48,7 @@ confirmed Fact 必须有非 inference 的可验证来源，不能使用 low conf
 涉及接口或查询条件时，追加 `是否涉及接口`、`是否需要接口自动化`（均为 `yes/no/unknown`）、`自动化动作`（`create/update/none/blocked`）、判断依据、可能受影响的接口/参数、证据状态和待补充材料。新增查询条件但没有 Groovy、接口契约或 Diff 证据时只能提示“可能需要更新接口自动化”，不得虚构参数名、类型或传值格式；需要生成或维护自动化时交接给 `../qa-api-automation/SKILL.md`。
 
 本 Skill 不渲染 XMind；不得把模板、代码行为或推断升级为需求事实。
+
+## pre_review 边界
+
+pre_review 复用现有 Evidence、Fact、Confirmation 和验收依据，检查目标/范围/排除项、入口、角色权限、主分支流程与状态、字段枚举默认值计算时间口径、异常边界依赖以及验收标准的可观察性。每个问题至少填写 `issue_id`、`issue_type`、`severity`、`statement`、`current_evidence`、`impact`、`confirmation_question`，最终给出 `ready`、`conditionally_ready` 或 `not_ready`。该模式禁止生成 Risk Matrix、Testcase Model、测试用例、XMind、Manifest、Index、SQL 或 API 自动化产物，完成后不得自动进入正式用例流程；pre_review 结果也不得用于知识候选提取。

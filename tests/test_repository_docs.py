@@ -8,7 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from validate_repository_docs import REQUIRED_README_DIRECTORIES, validate_repository
+from validate_repository_docs import REQUIRED_README_DIRECTORIES, validate_repository, validate_skill_catalog
 
 
 def create_repository(root: Path) -> None:
@@ -73,6 +73,25 @@ class RepositoryDocumentationTests(unittest.TestCase):
 
     def test_governance_rule_contains_exemption_and_history_guards(self):
         self.assertTrue(any("缺少规则" in item for item in self.validate_fixture(lambda root: (root / "rules/core/repository-documentation-rules.md").write_text("", encoding="utf-8"))))
+
+    def test_root_readme_skill_catalog_matches_actual_directories(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            for name in ("qa-one", "qa-two"):
+                path = root / "skills" / name / "SKILL.md"
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(f"---\nname: {name}\n---\n", encoding="utf-8")
+            (root / "README.md").write_text(
+                "# Test\n\n## 2 个 QA Skills\n\n"
+                "- [one](skills/qa-one/SKILL.md)\n- [two](skills/qa-two/SKILL.md)\n",
+                encoding="utf-8",
+            )
+            self.assertEqual([], validate_skill_catalog(root))
+            (root / "README.md").write_text(
+                "# Test\n\n## 2 个 QA Skills\n\n- [one](skills/qa-one/SKILL.md)\n",
+                encoding="utf-8",
+            )
+            self.assertTrue(any("清单与实际" in item for item in validate_skill_catalog(root)))
 
 
 if __name__ == "__main__":
