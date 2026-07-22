@@ -12,34 +12,30 @@
 - 只有实际运行过的校验才能写“通过”。未运行时明确写“未执行”“本轮未运行”或“不适用”。
 - 不在聊天框复制大段 Requirement/Testcase JSON；JSON 只列路径、类型、用途和状态。
 
-## Blocking Confirmation 即时回复
+## confirmation_only 集中确认回复
 
-发现未解决的 blocking Confirmation 时，必须立即在聊天框逐项输出，不得只写入报告：
+发现首个 blocking Confirmation 时立即停止下游产物生成，但继续扫描剩余需求；扫描完成后在一次聊天回复中逐项输出全部问题，不得逐个追问。使用 `scripts/render_confirmation_summary.py --requirement <checkpoint>` 渲染以下固定内容：
 
 ```markdown
-## 需要确认后才能继续
-
-### 阻塞确认点
-
-#### CONF-001：确认点标题
-
+## 分析范围
+## 需求理解
+## 已确认规则
+## 缺失和冲突
+## 风险方向
+## 回归范围
+## 全部确认问题
+### CONF-001
+- confirmation_id：CONF-001
 - 问题：具体需要确认的内容
 - 当前证据：已有证据能够确认什么
 - 不确定点：不能确认什么
-- 影响范围：受影响的 Requirement、Risk、TC 或条件组合
-- 可选答案：仅在存在明确选项时列出
-- 当前处理：正式 XMind 暂停，保留的草稿文件及其路径
-
-## 当前已生成内容
-
-- 需求分析模型：`Manifest 中的路径`
-- 草稿分析报告：`Manifest 中的路径`
-- 草稿风险矩阵：`Manifest 中的路径`
-- 草稿测试用例模型：`Manifest 中的路径`
-- 正式 XMind：未生成；原因是对应 CONF 未解决
+- 影响范围：受影响的 Fact、验收标准、条件组合或未来 TC
+- 可选答案：仅在确有明确选项时列出
+- 当前处理状态：pending；下游正式产物未生成
+## 当前暂停状态
 ```
 
-用户回答后按 `confirmation-gate.md` 回写证据和模型，并自动续跑原始任务；不得要求用户重复授权同一范围。
+第一轮不得展示或虚构正式产物路径，也不得宣称测试用例或 XMind 已完成。用户可用 `CONF-001=A；CONF-002=具体口径；CONF-003=跳过并保留风险。` 一次回答多项；未回答项保持 pending。回答后按 `confirmation-gate.md` 保存用户快照 Evidence、回写模型，并自动续跑原始任务。
 
 ## 最终摘要固定结构
 
@@ -63,6 +59,8 @@
 ### pending
 
 必须列出 blocking Confirmation、`pending_reason`、Requirement Model、草稿报告、草稿 Risk Matrix、草稿 Testcase Model、可选草稿 XMind Markdown、正式 XMind 未生成、正式 Index 未登记、已完成/未完成内容及用户下一步需要回答的问题。不得宣称“正式交付完成”“完整交付”或 XMind 校验通过。
+
+此模板只用于历史或显式采用旧 pending Manifest 的产物；新 `confirmation_only` 阶段不得为了复用该模板生成 Manifest 或任何草稿测试产物。
 
 ### failed
 

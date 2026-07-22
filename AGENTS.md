@@ -41,10 +41,11 @@
 - 完整输出（默认）：分析报告、XMind Markdown、经校验的 .xmind、Manifest 和 testcases/index.md 记录。
 - 用例范围支持只列 P0 或完整用例；完整用例只覆盖有证据命中的 P0/P1/P2，不引入 P3。
 - 对话中输出分析范围、理解、待确认点、风险、测试点摘要、P0 重点、回归范围和路径；本地保存完整产物。
+- 用户一次请求同时要求需求分析和测试用例时，视为一次完整授权并按两阶段执行：先 `confirmation_only` 集中确认，再生成正式测试产物。无 blocking 时自动进入第二阶段；用户回答后自动续跑原始范围，不要求重复规则路径、需求或授权。
 
 ## 全局门禁
 
-- 待确认点按 rules/core/confirmation-gate.md 分级；仅阻塞类暂停最终用例，非阻塞类和建议确认类不得无差别阻塞。
+- 待确认点按 rules/core/confirmation-gate.md 分级；发现首个 blocking 后停止 Risk/Testcase/XMind/Manifest 下游生成，但继续扫描剩余需求并一次性集中返回全部问题。新流程不得为确认前状态生成草稿 Risk、Testcase 或 XMind。
 - 用户说跳过、不用管、继续生成或按默认处理时继续，但报告保留待确认点，未确认内容不得写成事实。
 - 需求与 Diff 并存时必须输出需求-Diff-测试点追踪矩阵；只有双重证据充分时才可称为疑似缺陷。
 - 分析报告先按 rules/core/analysis-report-contract.md 识别纯需求、纯 Diff 或联动模式，再执行对应章节门禁。
@@ -54,6 +55,6 @@
 - 需求分析和测试用例任务的聊天交付严格遵守 rules/core/conversation-delivery-contract.md；文件已写入不等于已完成交付说明，最终摘要由确定性渲染器生成。
 - 每次生成报告或用例后按 rules/core/artifact-governance-rules.md 校验 Manifest 并更新索引。
 - 规则相关同名文件在根目录与 codex-qa-agent-rules 中同步；历史索引行可不同，但编码和表结构必须一致。
-- 发布前完整执行 skills/qa-artifact-validation/SKILL.md 和 docs/codex/rule-validation-checklist.md。
+- 日常业务产物使用 `scripts/validate_task.py --manifest <current-manifest>` 做当前任务快速校验；修改 rules、skills、schemas、scripts、tests、RULE_VERSION、CHANGELOG 或 CI 时使用 `scripts/validate_release.py` 执行完整发布门禁。
 - 严禁新增数据库连接、数据库探测或 SQL 自动执行；SQL 只能生成和静态校验，没有用户执行结果不得标记 executed/passed/failed。
 - 公共规则仓库只保存脱敏 `qa-knowledge/examples`；真实 DDL、指标和历史需求应保存在业务项目 `qa-knowledge/`，不得把推断自动持久化。

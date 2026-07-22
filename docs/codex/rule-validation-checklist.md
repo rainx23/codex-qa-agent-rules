@@ -2,6 +2,8 @@
 
 本文件是发布入口；正式规则分别位于 rules/core、rules/profiles 和 skills。
 
+规则修改和版本发布统一运行 `python scripts/validate_release.py`；下列命令是该入口必须保留的展开清单。普通业务产物不得使用本清单代替 `python scripts/validate_task.py --manifest <current-manifest>` 的当前任务快速校验。
+
 ## 必须执行
 
 1. Python 语法：
@@ -41,9 +43,9 @@
 
 6. 三种分析报告模式：
 
-       python scripts/validate_analysis_report.py tests/fixtures/reports/requirement_only.md --mode requirement
-       python scripts/validate_analysis_report.py tests/fixtures/reports/diff_only.md --mode diff
-       python scripts/validate_analysis_report.py tests/fixtures/reports/requirement_diff_combined.md --mode combined
+       python scripts/validate_analysis_report.py tests/fixtures/reports/requirement_only.md --mode requirement --legacy
+       python scripts/validate_analysis_report.py tests/fixtures/reports/diff_only.md --mode diff --legacy
+       python scripts/validate_analysis_report.py tests/fixtures/reports/requirement_diff_combined.md --mode combined --legacy
 
 7. 逐行追踪和 XMind 样例：
 

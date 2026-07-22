@@ -15,7 +15,7 @@ Testcase Model 的 `dimension` 是决定 XMind 一级节点的唯一主维度；
 
 ## 交接顺序
 
-1. 需求 Skill 生成 Requirement Analysis Model，并从同一分析结果渲染需求报告。
+1. 需求 Skill 先生成 `workflow_stage=confirmation_only` 的最小 Requirement Analysis Checkpoint；若无 blocking，立即切换到 `formal_generation`。存在 blocking 时仅渲染集中确认聊天回复，不生成正式报告或下游测试模型。
 2. Diff Skill 接收可选 Requirement Analysis Model，生成 Diff Impact Model；存在需求模型时以其验收标准判断覆盖。
 3. 用例 Skill 接收需求模型、可选 Diff 模型和历史缺陷，先生成 Risk Coverage Matrix，再生成 Testcase Model。
 4. Testcase Model 渲染固定 XMind Markdown；模型字段不得成为新的 XMind 节点。
@@ -23,17 +23,19 @@ Testcase Model 的 `dimension` 是决定 XMind 一级节点的唯一主维度；
 
 Manifest `validation_status` 只描述测试设计产物完整性，`sql_status` 独立描述 SQL 生命周期。测试设计全链完整时允许 `validation_status=passed` 与 `sql_status=blocked` 并存；SQL 被阻塞不得迫使完整测试设计降级为 pending，也不得伪造 `validation_sql` 或 `execution_evidence`。
 
-原始任务范围是续跑依据。若任务同时要求需求分析和测试用例，blocking Confirmation 归零后必须从已更新的 Requirement Analysis Model 继续完成尚未生成或需要重算的下游产物，不得要求用户重复授权同一任务，也不得用阻塞期间的 Markdown 草稿替代结构化模型交接。
+原始任务范围是续跑依据，必须保存请求文本、规则路径、来源、已授权交付项和 `continuation_policy=auto_resume`。若任务同时要求需求分析和测试用例，blocking Confirmation 归零后必须从已更新的 Checkpoint 继续完成尚未生成或需要重算的下游产物，不得要求用户重复授权同一任务，也不得用确认前不存在的草稿 Risk/Testcase 替代结构化模型交接。
 
 报告与模型必须来自同一分析结果，不得在事实、待确认点、风险、模式或计数上互相矛盾。Risk Coverage Matrix 同时保存主 `business_entry` 和用于合并场景的 `business_entries` 覆盖入口列表。需求点、Diff 变更、风险和 TC 的 ID 必须双向一致；所有 P0 风险必须映射 TC；模型 TC 与 Markdown TC 集合、维度、公共入口/模块层级、测试点、步骤和预期必须一致。
 
-确认回复完成后必须先回写 Confirmation、Fact、风险和验收标准，再重新生成 Risk Coverage Matrix 与 Testcase Model，最后渲染 XMind。只修改报告或 XMind Markdown 而不同步 JSON 模型属于不完整状态迁移。
+确认回复完成后必须先回写被回答的 Confirmation、关联 Fact 和验收标准；未回答项不得自动 resolved。全部 blocking 归零后首次生成 Risk Coverage Matrix 与 Testcase Model，再渲染 XMind。正式阶段已有下游模型时只重算受影响部分并复验全链；只修改报告或 XMind Markdown 而不同步 JSON 模型属于不完整状态迁移。
 
 Evidence Reference 必须显式区分 `file` 与 `snapshot`，并统一通过 `scripts/validate_evidence.py` 复验路径、哈希、文本行号、excerpt、记录 ID 和状态。Schema 只描述字段形状，真实性由同一公共验证器执行；`qa_contracts.py` 和 `validate_models.py` 不得维护第二套文件校验。confirmed Fact 至少需要一条真实且 current 的同源 Evidence；stale/reconfirm_required 只能保留为历史或待确认依据。
 
 Evidence 不是可自由复制的说明文字：Acceptance Criteria 必须从关联 Fact 派生证据，Risk 必须从关联 Fact/Acceptance Criteria 派生证据，confirmed TC 的整条 Risk → Acceptance → Fact 链均须为 confirmed/current。字段结构证据不得越权确认运行时业务行为。
 
 ## Confirmation 与交付状态
+
+`workflow_stage` 可为 `confirmation_only`、`formal_generation` 或 `completed`，对历史模型为可选字段。`confirmation_only` 必须保存 `original_task_scope`、完整扫描 Checkpoint、八类测试维度和条件矩阵适用性；Confirmation 还必须保存问题、当前证据、不确定点、影响范围、可选答案和当前处理。该阶段的正式 Risk 列表为空，仅允许 `risk_directions`，且不得存在任何下游产物声明。
 
 Requirement Model 校验只判断结构、Fact/Confirmation 引用、核心 missing Fact 的 blocking 关联，以及 resolved/skipped 的证据完整性。未解决的 blocking Confirmation 本身不构成模型结构错误；它通过统一 Confirmation Summary 影响 Manifest 状态。
 

@@ -589,6 +589,40 @@
                 }
               }
             }
+          },
+          "question": {
+            "type": "string",
+            "minLength": 1
+          },
+          "current_evidence": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uncertainty": {
+            "type": "string",
+            "minLength": 1
+          },
+          "impact_scope": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "answer_options": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "current_handling": {
+            "type": "string",
+            "minLength": 1
           }
         }
       }
@@ -1732,6 +1766,174 @@
           }
         }
       }
+    },
+    "workflow_stage": {
+      "enum": [
+        "confirmation_only",
+        "formal_generation",
+        "completed"
+      ]
+    },
+    "original_task_scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "request_id",
+        "request_text",
+        "rule_paths",
+        "source_ids",
+        "requested_deliverables",
+        "authorized_at",
+        "continuation_policy"
+      ],
+      "properties": {
+        "request_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "request_text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rule_paths": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "source_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "requested_deliverables": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "requirement_analysis",
+              "risk_coverage_matrix",
+              "testcase_model",
+              "xmind_markdown",
+              "xmind_workbook",
+              "manifest",
+              "index"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "authorized_at": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$"
+        },
+        "continuation_policy": {
+          "const": "auto_resume"
+        }
+      }
+    },
+    "confirmation_checkpoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "checkpoint_id",
+        "created_at",
+        "scan_completed",
+        "evidence_saved",
+        "requirement_aspects_scanned",
+        "test_dimensions_scanned",
+        "condition_matrix_assessed",
+        "confirmation_scan_completed",
+        "downstream_artifacts_generated"
+      ],
+      "properties": {
+        "checkpoint_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "created_at": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$"
+        },
+        "scan_completed": {
+          "type": "boolean"
+        },
+        "evidence_saved": {
+          "type": "boolean"
+        },
+        "requirement_aspects_scanned": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "business_goal",
+              "entry",
+              "role",
+              "flow",
+              "field_rule",
+              "data_definition",
+              "state",
+              "operation",
+              "exclusion",
+              "acceptance_basis"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "test_dimensions_scanned": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "功能测试",
+              "数据测试",
+              "异常测试",
+              "权限测试",
+              "导出测试",
+              "兼容性测试",
+              "回归测试",
+              "SQL验证"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "condition_matrix_assessed": {
+          "type": "boolean"
+        },
+        "confirmation_scan_completed": {
+          "type": "boolean"
+        },
+        "downstream_artifacts_generated": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "risk_coverage_matrix",
+              "testcase_model",
+              "xmind_markdown",
+              "xmind_workbook",
+              "formal_report",
+              "manifest",
+              "index"
+            ]
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "risk_directions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0,
+      "uniqueItems": true
     }
   }
 }

@@ -24,6 +24,8 @@ Manifest 至少记录：
 
 ### Manifest 状态职责
 
+`confirmation_only` 是 Manifest 之前的独立工作流阶段：只保存 Requirement Analysis Checkpoint 和 Evidence，不创建正式或 pending Manifest，不写 Index，也不生成草稿报告、Risk Matrix、Testcase Model、XMind Markdown 或 Workbook。以下 `pending` 契约仅用于历史兼容或显式旧流程，不强制迁移。
+
 - `pending` 表示业务确认尚未完成，不表示模型可以无效。必须填写 `pending_reason`，正式 `report_path`、`risk_matrix_path`、`testcase_model_path`、`xmind_md_path`、`xmind_path` 必须为 null；Requirement 分析必须通过 `draft_report_path`、`draft_risk_matrix_path`、`draft_testcase_model_path` 和至少一个 Requirement `analysis_model_paths` 完整复验草稿。`draft_xmind_md_path` 可为 null，但 `pending_reason` 必须说明未生成原因。
 - `passed` 表示正式产物完成。必须使用正式路径并完整复验报告、模型、Markdown 和 Workbook；`blocking_pending_count`、`skipped_core_count`、`unresolved_core_fact_count` 必须均为 0，且不得存在核心 missing/conflicting Fact。
 - `failed` 表示模型结构、Schema、路径、哈希、文件或校验过程无效。必须填写 `failure_reason`，不得声明正式成功产物。正常等待业务确认必须使用 pending，不得使用 failed。

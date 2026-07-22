@@ -23,7 +23,7 @@ confirmed Fact 必须有非 inference 的可验证来源，不能使用 low conf
 
 ## 执行流程
 
-0. 记录用户原始任务范围。若本轮消息是在回答已有 Confirmation，则读取此前 Requirement Analysis Model 和草稿报告，将消息作为确认回复处理，不把它误判为独立新需求，也不要求用户重复“继续生成”。
+0. 将用户一次提出的“按指定规则分析需求并编写测试用例”记录为一个完整原始任务范围，包含规则路径、来源、请求文本、已授权正式交付项和 `continuation_policy=auto_resume`。若本轮消息是在回答已有 Confirmation，则读取此前 Checkpoint，将消息作为确认回复处理，不把它误判为独立新需求，也不要求用户重复“继续生成”。
 1. 确认每个需求来源均可读取，并说明本次分析范围。
 2. 分析禅道需求时，区分第一部分业务背景与第三部分产品实现规则；优先采用用户确认的范围，不把普通背景与计划差异直接判定为阻塞冲突。
 3. 提取业务目标、系统或页面入口、角色、主流程、字段规则、数据定义、验收标准、异常行为和明确排除项。
@@ -31,17 +31,17 @@ confirmed Fact 必须有非 inference 的可验证来源，不能使用 low conf
    - 每个 Fact 引用与其陈述直接对应的精确行号和 excerpt；验收标准只复用关联 Fact 的 Evidence。字段存在、字段清单或支持多值/可追加多个值只证明结构或容量，不得推导过滤、统计、自动去重、重复拒绝/合并、保存、删除、继承或唯一性等行为；confirmed 行为 Fact 必须有明确表达同类行为的 current Evidence。
    - 明确列出两个及以上条件维度时，在 Risk 之前建立结构化条件矩阵；按业务有效分组声明 fixed values、variable dimensions 和 expected count，由确定性 grouped cross product 生成 expected set，并要求 required + excluded 完整覆盖；配置存在性不得冒充行为覆盖。
    - 对正式用例任务固定扫描八个测试分类维度并填写 `test_dimension_assessment`；每类只能出现一次，未覆盖必须记录 not_applicable、explicitly_excluded、pending 或 blocked 的证据化原因。另用 `condition_matrix_applicability` 判断业务条件矩阵是否适用，并用 `scope_dispositions` 记录正式范围项处置。
-5. 应用确认门禁：只询问阻塞类待确认点；非阻塞类和建议确认类继续保留在报告中，不阻断已确定的分析。
-6. 建立并校验 `../../rules/schemas/requirement-analysis.schema.json` 约束的 Requirement Analysis Model。报告与模型必须来自同一组事实；验收标准引用已确认事实 ID，冲突事实引用对应确认点。
+5. 进入确认前置阶段 `workflow_stage=confirmation_only`。发现首个 blocking Confirmation 后立即停止 Risk Coverage Matrix、Testcase Model、XMind、正式报告、Manifest 和 Index 的生成，但不得停止剩余需求分析；继续完成全部来源、十类需求要素、八类测试维度、条件矩阵适用性和剩余 Confirmation 扫描。
+6. 建立并校验 `../../rules/schemas/requirement-analysis.schema.json` 约束的最小 Requirement Analysis Checkpoint。保存完整 Evidence、原始任务范围、Fact、验收依据、八维扫描、条件维度、风险方向和全部 Confirmation；`downstream_artifacts_generated` 必须为空。不要创建 pending Manifest，也不要生成草稿报告、草稿 Risk、草稿 Testcase 或草稿 XMind。
 7. 只有需求输入时，输出纯需求分析契约：分析范围、需求理解、规则拆解、证据、待确认点、风险、测试点摘要和回归范围；不强制要求疑似缺陷章节。
 8. 存在 Diff 证据时，将 Requirement Analysis Model 交给 Diff Skill，并在设计用例前切换到联合分析契约。
 9. 定稿前必须调用 `qa-knowledge-management` 的 `search` 模式。记录 active/candidate/conflicting/superseded 命中，历史知识不得直接视为当前确认事实。
 10. 填充数据影响与验证决策：`data_validation_required`、原因、推荐方式、SQL 生成状态、指标定义缺口和阻塞问题。指标准确性默认采用 SQL，除非用户提供明确且可信的对账依据。
 11. 用户粘贴完整 DDL 时，解析草稿并与知识库比较规范化哈希；只提供少量字段时标记为 partial，不创建或覆盖完整表 DDL。
-12. 处理确认回复时，只更新答案覆盖的 Confirmation，保存 resolution、resolution_evidence_references、resolved_at，并同步更新关联 Fact、风险和验收标准；随后重新校验 Requirement Analysis Model，不得只修改需求报告 Markdown。
-13. 重新计算统一 Confirmation Summary。若仍有 blocking，维持草稿链；若 `blocking_pending_count=0` 且原始任务要求测试用例，立即将更新后的正式 Requirement Analysis Model 自动交接给 `qa-testcase-design`，无需用户再次发送继续指令。
-14. 发现 blocking Confirmation 时，立即按对话交付契约在聊天框逐项展示问题、证据边界、影响范围、当前处理和已生成草稿路径；不得只写入 Requirement Model 或报告。
-15. requirement-only 任务结束时，使用对话交付契约展示分析状态、blocking/nonblocking/suggested 全部分组、报告和 Requirement Model 路径；没有待确认点也必须明确写“无”。
+12. 扫描完成后使用 `../../scripts/render_confirmation_summary.py` 在一次聊天回复中集中展示全部 Confirmation。每项至少包含 `confirmation_id`、问题、当前证据、不确定点、影响范围、确有明确选项时的可选答案和当前处理状态；不得虚构正式或草稿产物路径。
+13. 处理确认回复时，只更新答案覆盖的 Confirmation，保存用户原文快照为 `user_confirmation` Evidence，填写 resolution 或 skip 决策，并同步更新关联 Fact 和验收标准。未回答项保持 pending；新答案产生冲突时允许新增 Confirmation。
+14. 重新计算统一 Confirmation Summary。若仍有 blocking，保留 `confirmation_only` Checkpoint 并再次集中展示剩余问题；若 `blocking_pending_count=0` 且原始任务要求测试用例，切换到 `formal_generation` 并立即自动交接给 `qa-testcase-design`，无需用户再次发送继续指令、规则路径或需求内容。
+15. 没有 blocking Confirmation 时不暂停，自动进入第二阶段。requirement-only 任务结束时，使用对话交付契约展示分析状态、blocking/nonblocking/suggested 全部分组、报告和 Requirement Model 路径；没有待确认点也必须明确写“无”。
 
 ## 接口自动化影响评估
 

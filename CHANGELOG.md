@@ -6,6 +6,15 @@
 
 ## [Unreleased]
 
+### Added
+
+- 新增“一次授权、两阶段执行、集中确认、确认后自动续跑”的 `confirmation_only` Requirement Checkpoint、批量 Confirmation 回复状态迁移和确定性聊天渲染器。
+- 新增 `validate_task.py` 当前业务产物快速校验与 `validate_release.py` 规则发布全量校验入口。
+
+### Changed
+
+- 新任务发现 blocking 后停止 Risk/Testcase/XMind/Manifest 下游生成，但继续完整扫描剩余需求并一次性返回全部确认问题；历史 pending Manifest 和 passed 正式产物保持兼容。
+
 ## [2.13.0] - 2026-07-22
 
 ### Added
