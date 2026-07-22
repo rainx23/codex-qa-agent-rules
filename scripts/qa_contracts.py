@@ -35,12 +35,17 @@ EVIDENCE_STATES = ("已确认", "疑似", "待确认")
 REGRESSION_SCOPES = ("核心回归", "关联回归", "冒烟回归")
 BUSINESS_IMPACTS = ("critical", "high", "medium", "low")
 VALIDATION_STATUSES = ("passed", "failed", "pending")
+WORKFLOW_STAGES = ("confirmation_only", "formal_generation", "completed")
 RELATIONS = ("新增", "补充", "替代", "废弃")
 PENDING_SEVERITIES = ("blocking", "nonblocking", "suggested")
 PENDING_STATUSES = ("pending", "skipped", "resolved")
 DIMENSIONS = (
     "功能测试", "数据测试", "异常测试", "权限测试",
     "导出测试", "兼容性测试", "回归测试", "SQL验证",
+)
+REQUIREMENT_ASPECTS = (
+    "business_goal", "entry", "role", "flow", "field_rule",
+    "data_definition", "state", "operation", "exclusion", "acceptance_basis",
 )
 TEST_DIMENSION_STATUSES = ("covered", "not_applicable", "explicitly_excluded", "pending", "blocked")
 CONDITION_MATRIX_APPLICABILITY_STATUSES = ("required", "not_required", "blocked")
@@ -307,6 +312,57 @@ def validate_schema_shape(value: Any, schema: dict[str, Any], path: str = "$") -
 
 
 def requirement_schema(version: str) -> dict[str, Any]:
+    original_task_scope = _object(
+        [
+            "request_id", "request_text", "rule_paths", "source_ids",
+            "requested_deliverables", "authorized_at", "continuation_policy",
+        ],
+        {
+            "request_id": _string(), "request_text": _string(), "rule_paths": _strings(1),
+            "source_ids": _strings(1),
+            "requested_deliverables": {
+                "type": "array",
+                "items": {"enum": [
+                    "requirement_analysis", "risk_coverage_matrix", "testcase_model",
+                    "xmind_markdown", "xmind_workbook", "manifest", "index",
+                ]},
+                "minItems": 1,
+                "uniqueItems": True,
+            },
+            "authorized_at": _string(pattern=CAPTURED_AT_PATTERN),
+            "continuation_policy": {"const": "auto_resume"},
+        },
+    )
+    confirmation_checkpoint = _object(
+        [
+            "checkpoint_id", "created_at", "scan_completed", "evidence_saved",
+            "requirement_aspects_scanned", "test_dimensions_scanned",
+            "condition_matrix_assessed", "confirmation_scan_completed",
+            "downstream_artifacts_generated",
+        ],
+        {
+            "checkpoint_id": _string(), "created_at": _string(pattern=CAPTURED_AT_PATTERN),
+            "scan_completed": {"type": "boolean"}, "evidence_saved": {"type": "boolean"},
+            "requirement_aspects_scanned": {
+                "type": "array",
+                "items": {"enum": list(REQUIREMENT_ASPECTS)},
+                "uniqueItems": True,
+            },
+            "test_dimensions_scanned": {
+                "type": "array", "items": {"enum": list(DIMENSIONS)}, "uniqueItems": True,
+            },
+            "condition_matrix_assessed": {"type": "boolean"},
+            "confirmation_scan_completed": {"type": "boolean"},
+            "downstream_artifacts_generated": {
+                "type": "array",
+                "items": {"enum": [
+                    "risk_coverage_matrix", "testcase_model", "xmind_markdown",
+                    "xmind_workbook", "formal_report", "manifest", "index",
+                ]},
+                "uniqueItems": True,
+            },
+        },
+    )
     test_dimension_assessment = _object(
         ["dimension", "status", "reason", "fact_ids", "risk_ids", "confirmation_ids", "testcase_ids", "evidence_references"],
         {
@@ -400,6 +456,8 @@ def requirement_schema(version: str) -> dict[str, Any]:
             "resolution": {"type": ["string", "null"]}, "resolution_evidence_references": {"type": "array", "items": _evidence_reference()},
             "resolved_at": {"type": ["string", "null"], "pattern": CAPTURED_AT_PATTERN}, "skip_reason": {"type": ["string", "null"]},
             "decision_evidence": {"type": "array", "items": _evidence_reference()},
+            "question": _string(), "current_evidence": _string(), "uncertainty": _string(),
+            "impact_scope": _strings(1), "answer_options": _strings(), "current_handling": _string(),
         },
     )
     risk = _object(
@@ -428,6 +486,10 @@ def requirement_schema(version: str) -> dict[str, Any]:
             "test_dimension_assessment": {"type": "array", "items": test_dimension_assessment},
             "condition_matrix_applicability": condition_matrix_applicability,
             "scope_dispositions": {"type": "array", "items": scope_disposition},
+            "workflow_stage": {"enum": list(WORKFLOW_STAGES)},
+            "original_task_scope": original_task_scope,
+            "confirmation_checkpoint": confirmation_checkpoint,
+            "risk_directions": _strings(),
         },
     )
     return _base_schema("Requirement Analysis Model", version, body)
@@ -1096,10 +1158,52 @@ def _generate_expected_condition_combinations(
 
 def validate_requirement_model(data: dict[str, Any], *, evidence_root: Path | None = None) -> list[str]:
     errors = validate_schema_shape(data, requirement_schema("0.0.0"))
+    workflow_stage = data.get("workflow_stage")
     facts = data.get("facts", []) if isinstance(data.get("facts"), list) else []
     confirmations = data.get("confirmation_points", []) if isinstance(data.get("confirmation_points"), list) else []
     fact_ids = {item.get("fact_id") for item in facts if isinstance(item, dict)}
     confirmation_ids = {item.get("confirmation_id") for item in confirmations if isinstance(item, dict)}
+    if workflow_stage == "confirmation_only":
+        scope = data.get("original_task_scope")
+        checkpoint = data.get("confirmation_checkpoint")
+        if not isinstance(scope, dict):
+            errors.append("CONFIRMATION_ONLY_ORIGINAL_SCOPE_REQUIRED: 必须保存完整原始任务范围")
+        elif scope.get("continuation_policy") != "auto_resume":
+            errors.append("CONFIRMATION_ONLY_AUTO_RESUME_REQUIRED: 原始任务必须设置自动续跑")
+        if not isinstance(checkpoint, dict):
+            errors.append("CONFIRMATION_ONLY_CHECKPOINT_REQUIRED: 必须保存最小 Requirement Analysis Checkpoint")
+        else:
+            if checkpoint.get("scan_completed") is not True or checkpoint.get("confirmation_scan_completed") is not True:
+                errors.append("CONFIRMATION_SCAN_INCOMPLETE: 发现首个问题后仍必须完成剩余需求扫描")
+            if checkpoint.get("evidence_saved") is not True:
+                errors.append("CONFIRMATION_ONLY_EVIDENCE_REQUIRED: 必须保存可复验 Evidence")
+            if checkpoint.get("condition_matrix_assessed") is not True:
+                errors.append("CONFIRMATION_ONLY_CONDITION_ASSESSMENT_REQUIRED: 必须判断条件矩阵适用性")
+            if set(checkpoint.get("requirement_aspects_scanned", [])) != set(REQUIREMENT_ASPECTS):
+                errors.append("CONFIRMATION_ONLY_REQUIREMENT_SCAN_INCOMPLETE: 必须扫描十类需求要素")
+            if set(checkpoint.get("test_dimensions_scanned", [])) != set(DIMENSIONS):
+                errors.append("CONFIRMATION_ONLY_DIMENSION_SCAN_INCOMPLETE: 必须完整扫描八类测试维度")
+            if checkpoint.get("downstream_artifacts_generated") != []:
+                errors.append("CONFIRMATION_ONLY_DOWNSTREAM_ARTIFACT_FORBIDDEN: 确认前不得生成下游测试产物")
+        if data.get("risks"):
+            errors.append("CONFIRMATION_ONLY_FORMAL_RISK_FORBIDDEN: 确认前仅记录 risk_directions，不生成正式 Risk")
+        if not isinstance(data.get("risk_directions"), list):
+            errors.append("CONFIRMATION_ONLY_RISK_DIRECTIONS_REQUIRED: 必须记录风险方向")
+        if not isinstance(data.get("test_dimension_assessment"), list):
+            errors.append("CONFIRMATION_ONLY_DIMENSION_ASSESSMENT_REQUIRED: 必须保存八类测试维度扫描")
+        if not isinstance(data.get("condition_matrix_applicability"), dict):
+            errors.append("CONFIRMATION_ONLY_CONDITION_APPLICABILITY_REQUIRED: 必须保存条件矩阵适用性")
+        for point in confirmations:
+            missing_details = [
+                field for field in (
+                    "question", "current_evidence", "uncertainty", "impact_scope", "current_handling",
+                )
+                if not point.get(field)
+            ]
+            if missing_details:
+                errors.append(
+                    f"CONFIRMATION_DETAILS_INCOMPLETE: {point.get('confirmation_id')} 缺少 {missing_details}"
+                )
     assessment = data.get("test_dimension_assessment")
     if assessment is not None:
         items = assessment if isinstance(assessment, list) else []
@@ -1221,7 +1325,7 @@ def validate_requirement_model(data: dict[str, Any], *, evidence_root: Path | No
                     f"ENUMERATION_VALUE_UNCOVERED: {dimension_id}={value} 未进入 required/excluded combination"
                 )
         for combination in required:
-            if not combination.get("covered_by_tc_ids"):
+            if workflow_stage != "confirmation_only" and not combination.get("covered_by_tc_ids"):
                 errors.append(
                     f"REQUIRED_COMBINATION_UNCOVERED: {combination.get('combination_id')} 未映射 TC"
                 )

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$comment": "Generated from scripts/qa_contracts.py; do not edit manually.",
-  "x-rule-version": "2.13.0",
+  "x-rule-version": "2.14.0",
   "title": "Data Validation Model",
   "type": "object",
   "additionalProperties": false,

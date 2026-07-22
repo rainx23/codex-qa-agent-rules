@@ -21,11 +21,11 @@ description: 用于基于证据设计 QA 测试点和最小有效 XMind Markdown
 
 ## 执行流程
 
-1. 存在未解决的阻塞门禁时，停止生成最终 XMind；阻塞归零后接收已回写确认结果的正式 Requirement Analysis Model，并自动恢复原始用例任务。
+1. `workflow_stage=confirmation_only` 或存在未解决 blocking 时不得启动本 Skill，不得生成 Risk Coverage Matrix、Testcase Model、草稿用例或 XMind。阻塞归零并切换到 `formal_generation` 后，接收已回写确认结果的 Requirement Analysis Model，并在同一次原始授权下自动恢复用例任务。
 2. 先建立并校验 `../../rules/schemas/risk-coverage-matrix.schema.json` 约束的 Risk Coverage Matrix，不得从原始需求文本直接跳到用例。
    - Risk Evidence 只能从关联 Fact/Acceptance Criteria 派生；confirmed TC 的 Risk 与 Fact 链必须全部 confirmed/current。字段结构证据不得扩写为业务行为预期。
 3. 根据证据选择等价类、边界、决策表、状态流转、用户路径、Pairwise 或风险驱动等技术。
-   - Requirement Model 存在条件矩阵时，先复验 grouped cross product 生成集合，再逐项消费 required combination；每项必须生成行为型 `condition_coverage`，明确命中/不命中数据、可观察结果以及真实 `branch_id`、`step_index`、`expected_index`。配置选项存在性只作为独立结构/容量覆盖；blocking 未解决时保留草稿定位但不得伪造行为 Oracle。
+   - Requirement Model 存在条件矩阵时，先复验 grouped cross product 生成集合，再逐项消费 required combination；每项必须生成行为型 `condition_coverage`，明确命中/不命中数据、可观察结果以及真实 `branch_id`、`step_index`、`expected_index`。配置选项存在性只作为独立结构/容量覆盖；blocking 未解决时不得进入本步骤或生成草稿定位，更不得伪造行为 Oracle。
 4. 每个可独立诊断的风险原则上设计一个用例。仅当核心规则、触发条件、操作、数据来源/口径、断言、风险和保护上下文等价时合并；正式/模拟数据源、权限、数据类型、异常路径或不同 P0 风险会改变定位时必须拆分。同一规则覆盖多个真实入口时，只有上述维度完全一致才能保留一个 TC：完整入口为 2 至 5 个时，每个入口渲染为独立平级分支并各自包含步骤和预期；完整入口不少于 6 个时，在根节点下建立唯一全局适用入口范围，各 TC 只保留公共步骤和预期。入口差异导致数据源、权限、预期、异常路径、风险或失败定位不同则拆分 TC。
    - 使用不含纯入口名称的 `core_deduplication_key` 做确定性合并判断；模拟/正式仅入口不同必须合并。允许拆分时必须让真实差异进入核心去重因子，并记录拆分依据。
 5. 每个保留的 TC 都必须映射需求、Diff 或历史缺陷，并具有独立失败诊断。
@@ -37,7 +37,7 @@ description: 用于基于证据设计 QA 测试点和最小有效 XMind Markdown
 7. 使用 `../../scripts/validate_xmind_md.py` 和 `../../scripts/validate_testcase_quality.py` 校验报告、风险矩阵和用例模型。显式重复视为错误，警告必须人工复核，不得静默删除用例。
 8. 仅在校验通过后转换，并将模型与渲染产物交给 `../qa-artifact-validation/SKILL.md`。
 9. 消费 Knowledge Search 结果和 Data Validation Model 后再选风险。区分 UI 行为、业务数据断言、SQL 校验、对账和展示检查；XMind 引用 `SQLV###` 或 `REC###`，不嵌入大段 SQL。
-10. 阻塞解除后必须重新计算 Risk Coverage Matrix，并从新矩阵重新生成、校验 Testcase Model；不得沿用阻塞状态下的旧 Risk，也不得仅更新 `.xmind.md`。
+10. 阻塞解除后首次生成 Risk Coverage Matrix，并从该矩阵生成、校验 Testcase Model；确认前不存在可沿用的草稿 Risk/Testcase。若正式阶段后续确认影响已有模型，重新计算 Risk Coverage Matrix 中受影响的 Risk，并只重算受影响 Fact、条件组合和 TC，随后执行完整一致性门禁；不得仅更新 `.xmind.md`。
 11. XMind Markdown 必须从 Testcase Model 渲染，并按语义精简规则去除重复背景；禁止硬字数门禁、自动截断或删除执行所需语义。
     - 拒绝“按已确认规则处理”“按系统现有逻辑处理”“按现有统计口径一致”“其他功能不受影响”等模糊预期；统计口径必须写明对象、来源和 Oracle，回归断言必须写明变更前基线、同条件比较对象和可观察字段。混合 `AND/OR` 使用括号明确优先级。
 12. 原始任务包含最终用例时，模型与 Markdown 校验通过后自动交接 `qa-artifact-validation`，继续 Workbook、Manifest 和索引链。
