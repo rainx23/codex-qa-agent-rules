@@ -20,6 +20,7 @@
 ### Fixed
 
 - `extract_candidate` 独立复验 completed 正式模型、Confirmation Summary 与 resolved Confirmation 来源，提示上下文支持用户简短回复“提取”；混合“需求评审并生成用例”继续进入 delivery。
+- 知识候选请求在正向匹配前识别“不要/无需/暂不/先不/别提取”等明确否定意图，候选提示上下文中的否定短回复不再误触发提取。
 
 ## [2.14.0] - 2026-07-22
 

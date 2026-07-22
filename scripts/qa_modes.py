@@ -28,6 +28,9 @@ DELIVERY_PATTERNS = (
     r"XMind",
 )
 EXTRACT_CANDIDATE_PATTERNS = (r"提取(?:为)?知识候选", r"提取知识候选")
+EXTRACT_CANDIDATE_NEGATIVE_PATTERNS = (
+    r"(?:不要|不需要|无需|暂不|先不|别|不)\s*提取(?:为)?知识候选",
+)
 FORBIDDEN_REUSABLE_SOURCE_TOKENS = (
     "临时数据", "测试数据", "环境地址", "环境信息", "测试环境", "代码行为", "敏感信息",
 )
@@ -53,6 +56,12 @@ def detect_requirement_mode(request_text: str) -> str:
 def is_extract_candidate_requested(request_text: str, *, offer_pending: bool = False) -> bool:
     """Return true only for an explicit knowledge-candidate extraction request."""
 
+    if any(re.search(pattern, request_text) for pattern in EXTRACT_CANDIDATE_NEGATIVE_PATTERNS):
+        return False
+    if offer_pending and re.fullmatch(
+        r"\s*(?:不提取|不要|先不提取|暂不提取)[。！!]?\s*", request_text
+    ):
+        return False
     if any(re.search(pattern, request_text) for pattern in EXTRACT_CANDIDATE_PATTERNS):
         return True
     return offer_pending and re.fullmatch(r"\s*提取(?:这些)?[。！!]?\s*", request_text) is not None

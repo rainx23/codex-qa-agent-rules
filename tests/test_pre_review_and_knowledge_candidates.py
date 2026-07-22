@@ -98,6 +98,22 @@ class PreReviewAndKnowledgeCandidateTests(unittest.TestCase):
         with self.assertRaises(ModeError):
             extract_candidates(model, [self.candidate_spec()], explicitly_requested=False)
 
+    def test_extract_candidate_request_rejects_explicit_negative_intent(self):
+        for text in (
+            "不要提取知识候选", "不需要提取知识候选", "无需提取知识候选",
+            "暂不提取知识候选", "先不提取知识候选", "别提取知识候选",
+        ):
+            with self.subTest(text=text):
+                self.assertFalse(is_extract_candidate_requested(text))
+                self.assertFalse(is_extract_candidate_requested(text, offer_pending=True))
+        for text in ("不提取", "不要", "先不提取", "暂不提取"):
+            with self.subTest(offer_reply=text):
+                self.assertFalse(is_extract_candidate_requested(text, offer_pending=True))
+        self.assertTrue(is_extract_candidate_requested("提取", offer_pending=True))
+        self.assertTrue(is_extract_candidate_requested("提取这些", offer_pending=True))
+        self.assertFalse(is_extract_candidate_requested("提取", offer_pending=False))
+        self.assertTrue(is_extract_candidate_requested("提取知识候选", offer_pending=False))
+
     def test_offer_renders_short_rule_summaries_without_triggering_actions(self):
         model = self.completed_model()
         with patch("qa_modes.extract_candidates") as extract, \
