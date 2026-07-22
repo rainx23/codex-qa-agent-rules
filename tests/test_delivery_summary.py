@@ -122,7 +122,7 @@ class DeliverySummaryPassedTests(unittest.TestCase):
         for label in ("Requirement Model", "Risk Matrix", "Testcase Model", "XMind Markdown", "XMind Workbook 完整树"):
             self.assertIn(f"- {label}：通过", self.text)
         self.assertIn("- Manifest：通过", self.text)
-        self.assertIn("- Index：失败", self.text)
+        self.assertIn("- Index：通过", self.text)
 
     def test_unrun_validations_are_not_invented(self):
         self.assertIn("- 全量单元测试：本轮未运行", self.text)
