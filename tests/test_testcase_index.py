@@ -12,6 +12,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from build_testcase_index import HEADER, build_row
+from md_to_xmind import convert_file
+from qa_contracts import DIMENSIONS, read_rule_version, stable_source_hash
 from validate_testcase_index import _cells, validate_index
 
 
@@ -22,9 +24,65 @@ class TestcaseIndexTests(unittest.TestCase):
         shutil.copy2(ROOT / "RULE_VERSION", self.root / "RULE_VERSION")
         shutil.copy2(ROOT / "AGENTS.md", self.root / "AGENTS.md")
         self.testcases = self.root / "testcases"
-        self.directory = self.testcases / "clearance-permission-20260718"
-        shutil.copytree(ROOT / "testcases/clearance-permission-20260718", self.directory)
+        self.directory = self.testcases / "generic-contract-20260720"
+        self.directory.mkdir(parents=True)
+        fixture_root = self.root / "tests/fixtures"
+        (fixture_root / "sources").mkdir(parents=True)
+        (fixture_root / "models").mkdir(parents=True)
+        (fixture_root / "reports").mkdir(parents=True)
+        for name in ("requirement.md", "customer-query.java"):
+            shutil.copy2(ROOT / "tests/fixtures/sources" / name, fixture_root / "sources" / name)
+        for name in ("requirement-analysis.json", "diff-impact.json", "risk-coverage-matrix.json", "testcase-model.json"):
+            shutil.copy2(ROOT / "tests/fixtures/models" / name, fixture_root / "models" / name)
+        shutil.copy2(ROOT / "tests/fixtures/reports/combined_consistent.md", fixture_root / "reports/combined_consistent.md")
+        shutil.copy2(ROOT / "tests/fixtures/valid_case_xmind.md", fixture_root / "valid_case_xmind.md")
+        requirement_path = fixture_root / "models/requirement-analysis.json"
+        requirement = json.loads(requirement_path.read_text(encoding="utf-8"))
+        requirement["test_dimension_assessment"] = []
+        for dimension in DIMENSIONS:
+            covered = dimension in {"功能测试", "数据测试"}
+            suffix = "001" if dimension == "功能测试" else "002"
+            requirement["test_dimension_assessment"].append({
+                "dimension": dimension, "status": "covered" if covered else "not_applicable",
+                "reason": "通用 Fixture 已覆盖" if covered else "通用 Fixture 范围不涉及该维度",
+                "fact_ids": [f"FACT-{suffix}" if covered else "FACT-001"],
+                "risk_ids": [f"RISK-{suffix}"] if covered else [], "confirmation_ids": [],
+                "testcase_ids": [f"TC{suffix}"] if covered else [], "evidence_references": [],
+            })
+        requirement_path.write_text(json.dumps(requirement, ensure_ascii=False, indent=2), encoding="utf-8")
+        report_path = fixture_root / "reports/combined_consistent.md"
+        report_path.write_text(
+            report_path.read_text(encoding="utf-8") + "\n## 测试维度扫描\n\n" + "\n".join(f"- {item}" for item in DIMENSIONS) + "\n",
+            encoding="utf-8",
+        )
+        workbook = self.directory / "case.xmind"
+        convert_file(fixture_root / "valid_case_xmind.md", workbook)
         self.manifest = self.directory / "manifest.json"
+        source_files = ["tests/fixtures/sources/requirement.md"]
+        manifest_data = {
+            "schema_version": "2.0.0", "artifact_id": "QA-TEST-001", "source_type": "unit",
+            "source_id": "REQ-1", "source_files": source_files, "source_snapshot_path": None,
+            "source_hash_algorithm": "sha256", "source_hash": stable_source_hash(self.root, source_files),
+            "requirement_id": "REQ-1", "commit_range": "abc123..def456",
+            "rule_version": read_rule_version(self.root), "generated_at": "2026-07-20 00:00:00",
+            "generated_timezone": "Asia/Shanghai", "report_mode": "combined",
+            "report_path": "tests/fixtures/reports/combined_consistent.md",
+            "analysis_model_paths": ["tests/fixtures/models/requirement-analysis.json", "tests/fixtures/models/diff-impact.json"],
+            "risk_matrix_path": "tests/fixtures/models/risk-coverage-matrix.json",
+            "testcase_model_path": "tests/fixtures/models/testcase-model.json",
+            "xmind_md_path": "tests/fixtures/valid_case_xmind.md",
+            "xmind_path": self.directory.relative_to(self.root).as_posix() + "/case.xmind",
+            "draft_report_path": None, "draft_risk_matrix_path": None,
+            "draft_testcase_model_path": None, "draft_xmind_md_path": None,
+            "case_count": 2, "p0_count": 1, "p0_risk_count": 1, "p0_case_count": 1,
+            "pending_count": 0, "blocking_pending_count": 0, "nonblocking_pending_count": 0,
+            "suggested_pending_count": 0, "validation_status": "passed", "relation": "新增",
+            "supersedes": None, "failure_reason": None, "pending_reason": None,
+        }
+        self.manifest.write_text(
+            json.dumps(manifest_data, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
         self.index = self.testcases / "index.md"
 
     def tearDown(self):
@@ -78,9 +136,9 @@ class TestcaseIndexTests(unittest.TestCase):
 
     def test_note_counts_and_artifact_id_must_match_manifest(self):
         for token, replacement in (
-            ("artifact_id=QA-CLEARANCE-PERMISSION-20260718", "artifact_id=WRONG"),
-            ("cases=14", "cases=99"), ("P0_risks=5", "P0_risks=99"),
-            ("P0_cases=7", "P0_cases=99"), ("pending=0", "pending=99"),
+            ("artifact_id=QA-TEST-001", "artifact_id=WRONG"),
+            ("cases=2", "cases=99"), ("P0_risks=1", "P0_risks=99"),
+            ("P0_cases=1", "P0_cases=99"), ("pending=0", "pending=99"),
         ):
             with self.subTest(token=token):
                 self.write_index(self.row().replace(token, replacement))
@@ -116,8 +174,8 @@ class TestcaseIndexTests(unittest.TestCase):
 
     def test_windows_and_posix_manifest_paths_compare_equally(self):
         row = self.row().replace(
-            "testcases/clearance-permission-20260718/manifest.json",
-            r"testcases\clearance-permission-20260718\manifest.json",
+            "testcases/generic-contract-20260720/manifest.json",
+            r"testcases\generic-contract-20260720\manifest.json",
         )
         self.write_index(row)
         self.assertEqual([], validate_index(self.index))

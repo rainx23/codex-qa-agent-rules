@@ -47,7 +47,7 @@
         {
           "source_type": "requirement",
           "source_path": "tests/fixtures/sources/requirement.md",
-          "line_start": 1,
+          "line_start": 3,
           "line_end": 3,
           "commit_sha": null,
           "content_hash": "sha256:f18b428754d35a54896bca7fdc32d51291720d95731f614cda782bc6c30ef3a2",
@@ -101,7 +101,7 @@
         {
           "source_type": "requirement",
           "source_path": "tests/fixtures/sources/requirement.md",
-          "line_start": 1,
+          "line_start": 3,
           "line_end": 3,
           "commit_sha": null,
           "content_hash": "sha256:f18b428754d35a54896bca7fdc32d51291720d95731f614cda782bc6c30ef3a2",

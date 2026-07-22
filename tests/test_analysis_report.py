@@ -40,7 +40,8 @@ class StrictAnalysisReportTests(unittest.TestCase):
     def test_manifest_passes_known_model_ids_to_report_validator(self):
         manifest_path = ROOT / "testcases/manifest.example.json"
         manifest = load_json(manifest_path)
-        with patch("validate_manifest.validate_analysis_report", return_value=[]) as report_validator:
+        with patch("validate_manifest.validate_current_rule_dimension_assessment", return_value=[]), \
+                patch("validate_manifest.validate_analysis_report", return_value=[]) as report_validator:
             errors = validate_manifest_data(manifest, manifest_path)
         self.assertEqual([], errors)
         self.assertIn("known_ids", report_validator.call_args.kwargs)

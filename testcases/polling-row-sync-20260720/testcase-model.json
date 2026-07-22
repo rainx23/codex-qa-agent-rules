@@ -1,0 +1,2769 @@
+{
+  "schema_version": "2.0.0",
+  "model_id": "TC-MODEL-POLLING-ROW-SYNC-20260720",
+  "root_title": "PC弹窗轮询分页增删场景",
+  "branch_count": 42,
+  "execution_instance_count": 0,
+  "execution_instances": [],
+  "cases": [
+    {
+      "tc_id": "TC001",
+      "dimension": "数据测试",
+      "common_entry": "轮询数据弹窗",
+      "module_level_1": null,
+      "module_level_2": null,
+      "test_point": "当前非末页时全局末尾新增",
+      "steps": [],
+      "expected_results": [],
+      "risk_ids": [
+        "RISK-001"
+      ],
+      "requirement_ids": [
+        "REQ002"
+      ],
+      "change_ids": [],
+      "historical_defect_ids": [],
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "deduplication_key": "分页增删|非末页新增|RISK-001",
+      "entry_branches": [
+        {
+          "branch_id": "TC001-B01",
+          "entry_name": "清仓股弹窗",
+          "steps": [
+            "设置pageSize=10、共25行并停留第2页；全局末尾新增第26行后等待轮询，查看第1至3页"
+          ],
+          "expected_results": [
+            "第1页和当前第2页行集合及顺序不变；第3页由原21至25变为21至26；rowTotal=26、pageTotal=3；新增行全局序号=26"
+          ]
+        },
+        {
+          "branch_id": "TC001-B02",
+          "entry_name": "雷达预选股弹窗",
+          "steps": [
+            "设置pageSize=10、共25行并停留第2页；全局末尾新增第26行后等待轮询，查看第1至3页"
+          ],
+          "expected_results": [
+            "第1页和当前第2页行集合及顺序不变；第3页由原21至25变为21至26；rowTotal=26、pageTotal=3；新增行全局序号=26"
+          ]
+        }
+      ],
+      "secondary_dimensions": [
+        "功能测试"
+      ],
+      "condition_coverage": [
+        {
+          "combination_id": "CM-TC001-B01",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "新增分页",
+            "operation": "新增",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "非末页",
+            "page_fill_state": "不适用",
+            "change_page_position": "全局末尾",
+            "deletion_extent": "不适用",
+            "original_page_count": "常规多页",
+            "requested_page_state": "有效页码",
+            "expected_page_behavior": "当前页不变",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "清仓股弹窗"
+          },
+          "expected_match_state": "命中新增分页场景",
+          "observable_result": "第1页和当前第2页行集合及顺序不变；第3页由原21至25变为21至26；rowTotal=26、pageTotal=3；新增行全局序号=26",
+          "branch_id": "TC001-B01",
+          "step_index": 1,
+          "expected_index": 1
+        },
+        {
+          "combination_id": "CM-TC001-B02",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "新增分页",
+            "operation": "新增",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "非末页",
+            "page_fill_state": "不适用",
+            "change_page_position": "全局末尾",
+            "deletion_extent": "不适用",
+            "original_page_count": "常规多页",
+            "requested_page_state": "有效页码",
+            "expected_page_behavior": "当前页不变",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "雷达预选股弹窗"
+          },
+          "expected_match_state": "命中新增分页场景",
+          "observable_result": "第1页和当前第2页行集合及顺序不变；第3页由原21至25变为21至26；rowTotal=26、pageTotal=3；新增行全局序号=26",
+          "branch_id": "TC001-B02",
+          "step_index": 1,
+          "expected_index": 1
+        }
+      ]
+    },
+    {
+      "tc_id": "TC002",
+      "dimension": "数据测试",
+      "common_entry": "轮询数据弹窗",
+      "module_level_1": null,
+      "module_level_2": null,
+      "test_point": "当前末页未满时新增",
+      "steps": [],
+      "expected_results": [],
+      "risk_ids": [
+        "RISK-002"
+      ],
+      "requirement_ids": [
+        "REQ002"
+      ],
+      "change_ids": [],
+      "historical_defect_ids": [],
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "deduplication_key": "分页增删|末页未满新增|RISK-002",
+      "entry_branches": [
+        {
+          "branch_id": "TC002-B01",
+          "entry_name": "清仓股弹窗",
+          "steps": [
+            "设置pageSize=10、共15行并停留第2页；新增第16行后等待轮询"
+          ],
+          "expected_results": [
+            "第16行追加在当前第2页末尾；原11至15顺序不变；rowTotal=16、pageTotal=2；全局序号连续到16"
+          ]
+        },
+        {
+          "branch_id": "TC002-B02",
+          "entry_name": "雷达预选股弹窗",
+          "steps": [
+            "设置pageSize=10、共15行并停留第2页；新增第16行后等待轮询"
+          ],
+          "expected_results": [
+            "第16行追加在当前第2页末尾；原11至15顺序不变；rowTotal=16、pageTotal=2；全局序号连续到16"
+          ]
+        }
+      ],
+      "secondary_dimensions": [
+        "功能测试"
+      ],
+      "condition_coverage": [
+        {
+          "combination_id": "CM-TC002-B01",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "新增分页",
+            "operation": "新增",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "末页",
+            "page_fill_state": "未满",
+            "change_page_position": "全局末尾",
+            "deletion_extent": "不适用",
+            "original_page_count": "常规多页",
+            "requested_page_state": "有效页码",
+            "expected_page_behavior": "追加当前末页",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "清仓股弹窗"
+          },
+          "expected_match_state": "命中新增分页场景",
+          "observable_result": "第16行追加在当前第2页末尾；原11至15顺序不变；rowTotal=16、pageTotal=2；全局序号连续到16",
+          "branch_id": "TC002-B01",
+          "step_index": 1,
+          "expected_index": 1
+        },
+        {
+          "combination_id": "CM-TC002-B02",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "新增分页",
+            "operation": "新增",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "末页",
+            "page_fill_state": "未满",
+            "change_page_position": "全局末尾",
+            "deletion_extent": "不适用",
+            "original_page_count": "常规多页",
+            "requested_page_state": "有效页码",
+            "expected_page_behavior": "追加当前末页",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "雷达预选股弹窗"
+          },
+          "expected_match_state": "命中新增分页场景",
+          "observable_result": "第16行追加在当前第2页末尾；原11至15顺序不变；rowTotal=16、pageTotal=2；全局序号连续到16",
+          "branch_id": "TC002-B02",
+          "step_index": 1,
+          "expected_index": 1
+        }
+      ]
+    },
+    {
+      "tc_id": "TC003",
+      "dimension": "数据测试",
+      "common_entry": "轮询数据弹窗",
+      "module_level_1": null,
+      "module_level_2": null,
+      "test_point": "当前末页已满时新增",
+      "steps": [],
+      "expected_results": [],
+      "risk_ids": [
+        "RISK-002"
+      ],
+      "requirement_ids": [
+        "REQ002"
+      ],
+      "change_ids": [],
+      "historical_defect_ids": [],
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "deduplication_key": "分页增删|末页已满新增|RISK-002",
+      "entry_branches": [
+        {
+          "branch_id": "TC003-B01",
+          "entry_name": "清仓股弹窗",
+          "steps": [
+            "设置pageSize=10、共20行并停留已满的第2页；新增第21行后等待轮询并点击下一页"
+          ],
+          "expected_results": [
+            "当前第2页仍为11至20且顺序不变；pageTotal由2变3；下一页为第3页且仅显示第21行；rowTotal=21、全局序号=21"
+          ]
+        },
+        {
+          "branch_id": "TC003-B02",
+          "entry_name": "雷达预选股弹窗",
+          "steps": [
+            "设置pageSize=10、共20行并停留已满的第2页；新增第21行后等待轮询并点击下一页"
+          ],
+          "expected_results": [
+            "当前第2页仍为11至20且顺序不变；pageTotal由2变3；下一页为第3页且仅显示第21行；rowTotal=21、全局序号=21"
+          ]
+        }
+      ],
+      "secondary_dimensions": [
+        "功能测试"
+      ],
+      "condition_coverage": [
+        {
+          "combination_id": "CM-TC003-B01",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "新增分页",
+            "operation": "新增",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "末页",
+            "page_fill_state": "已满",
+            "change_page_position": "全局末尾",
+            "deletion_extent": "不适用",
+            "original_page_count": "常规多页",
+            "requested_page_state": "有效页码",
+            "expected_page_behavior": "新增下一页",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "清仓股弹窗"
+          },
+          "expected_match_state": "命中新增分页场景",
+          "observable_result": "当前第2页仍为11至20且顺序不变；pageTotal由2变3；下一页为第3页且仅显示第21行；rowTotal=21、全局序号=21",
+          "branch_id": "TC003-B01",
+          "step_index": 1,
+          "expected_index": 1
+        },
+        {
+          "combination_id": "CM-TC003-B02",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "新增分页",
+            "operation": "新增",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "末页",
+            "page_fill_state": "已满",
+            "change_page_position": "全局末尾",
+            "deletion_extent": "不适用",
+            "original_page_count": "常规多页",
+            "requested_page_state": "有效页码",
+            "expected_page_behavior": "新增下一页",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "雷达预选股弹窗"
+          },
+          "expected_match_state": "命中新增分页场景",
+          "observable_result": "当前第2页仍为11至20且顺序不变；pageTotal由2变3；下一页为第3页且仅显示第21行；rowTotal=21、全局序号=21",
+          "branch_id": "TC003-B02",
+          "step_index": 1,
+          "expected_index": 1
+        }
+      ]
+    },
+    {
+      "tc_id": "TC004",
+      "dimension": "数据测试",
+      "common_entry": "轮询数据弹窗",
+      "module_level_1": null,
+      "module_level_2": null,
+      "test_point": "删除当前非末页数据",
+      "steps": [],
+      "expected_results": [],
+      "risk_ids": [
+        "RISK-003"
+      ],
+      "requirement_ids": [
+        "REQ003"
+      ],
+      "change_ids": [],
+      "historical_defect_ids": [],
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "deduplication_key": "分页增删|删除当前页|RISK-003",
+      "entry_branches": [
+        {
+          "branch_id": "TC004-B01",
+          "entry_name": "清仓股弹窗",
+          "steps": [
+            "设置pageSize=10、共25行并停留第2页；删除原第15行后等待轮询，查看第2和第3页"
+          ],
+          "expected_results": [
+            "当前第2页显示原11至14和16至21，原第3页首行21补到当前页末尾；第3页显示原22至25；rowTotal=24、pageTotal=3；序号11至24连续且无重复漏行"
+          ]
+        },
+        {
+          "branch_id": "TC004-B02",
+          "entry_name": "雷达预选股弹窗",
+          "steps": [
+            "设置pageSize=10、共25行并停留第2页；删除原第15行后等待轮询，查看第2和第3页"
+          ],
+          "expected_results": [
+            "当前第2页显示原11至14和16至21，原第3页首行21补到当前页末尾；第3页显示原22至25；rowTotal=24、pageTotal=3；序号11至24连续且无重复漏行"
+          ]
+        }
+      ],
+      "secondary_dimensions": [
+        "功能测试"
+      ],
+      "condition_coverage": [
+        {
+          "combination_id": "CM-TC004-B01",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "删除补位",
+            "operation": "删除",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "非末页",
+            "page_fill_state": "不适用",
+            "change_page_position": "当前页",
+            "deletion_extent": "单行",
+            "original_page_count": "常规多页",
+            "requested_page_state": "有效页码",
+            "expected_page_behavior": "后页首行补位",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "清仓股弹窗"
+          },
+          "expected_match_state": "命中删除补位场景",
+          "observable_result": "当前第2页显示原11至14和16至21，原第3页首行21补到当前页末尾；第3页显示原22至25；rowTotal=24、pageTotal=3；序号11至24连续且无重复漏行",
+          "branch_id": "TC004-B01",
+          "step_index": 1,
+          "expected_index": 1
+        },
+        {
+          "combination_id": "CM-TC004-B02",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "删除补位",
+            "operation": "删除",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "非末页",
+            "page_fill_state": "不适用",
+            "change_page_position": "当前页",
+            "deletion_extent": "单行",
+            "original_page_count": "常规多页",
+            "requested_page_state": "有效页码",
+            "expected_page_behavior": "后页首行补位",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "雷达预选股弹窗"
+          },
+          "expected_match_state": "命中删除补位场景",
+          "observable_result": "当前第2页显示原11至14和16至21，原第3页首行21补到当前页末尾；第3页显示原22至25；rowTotal=24、pageTotal=3；序号11至24连续且无重复漏行",
+          "branch_id": "TC004-B02",
+          "step_index": 1,
+          "expected_index": 1
+        }
+      ]
+    },
+    {
+      "tc_id": "TC005",
+      "dimension": "数据测试",
+      "common_entry": "轮询数据弹窗",
+      "module_level_1": null,
+      "module_level_2": null,
+      "test_point": "删除当前页的前一页数据",
+      "steps": [],
+      "expected_results": [],
+      "risk_ids": [
+        "RISK-004"
+      ],
+      "requirement_ids": [
+        "REQ003"
+      ],
+      "change_ids": [],
+      "historical_defect_ids": [],
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "deduplication_key": "分页增删|删除前一页|RISK-004",
+      "entry_branches": [
+        {
+          "branch_id": "TC005-B01",
+          "entry_name": "清仓股弹窗",
+          "steps": [
+            "设置pageSize=10、共25行并停留第2页；删除第1页原第5行后等待轮询，查看第1至3页"
+          ],
+          "expected_results": [
+            "第1页显示原1至4和6至11；当前第2页由原11至20变为原12至21；第3页显示原22至25；当前页码仍为2；rowTotal=24且全局序号连续"
+          ]
+        },
+        {
+          "branch_id": "TC005-B02",
+          "entry_name": "雷达预选股弹窗",
+          "steps": [
+            "设置pageSize=10、共25行并停留第2页；删除第1页原第5行后等待轮询，查看第1至3页"
+          ],
+          "expected_results": [
+            "第1页显示原1至4和6至11；当前第2页由原11至20变为原12至21；第3页显示原22至25；当前页码仍为2；rowTotal=24且全局序号连续"
+          ]
+        }
+      ],
+      "secondary_dimensions": [
+        "功能测试"
+      ],
+      "condition_coverage": [
+        {
+          "combination_id": "CM-TC005-B01",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "删除补位",
+            "operation": "删除",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "非末页",
+            "page_fill_state": "不适用",
+            "change_page_position": "前一页",
+            "deletion_extent": "单行",
+            "original_page_count": "常规多页",
+            "requested_page_state": "有效页码",
+            "expected_page_behavior": "当前页整体前移",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "清仓股弹窗"
+          },
+          "expected_match_state": "命中删除补位场景",
+          "observable_result": "第1页显示原1至4和6至11；当前第2页由原11至20变为原12至21；第3页显示原22至25；当前页码仍为2；rowTotal=24且全局序号连续",
+          "branch_id": "TC005-B01",
+          "step_index": 1,
+          "expected_index": 1
+        },
+        {
+          "combination_id": "CM-TC005-B02",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "删除补位",
+            "operation": "删除",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "非末页",
+            "page_fill_state": "不适用",
+            "change_page_position": "前一页",
+            "deletion_extent": "单行",
+            "original_page_count": "常规多页",
+            "requested_page_state": "有效页码",
+            "expected_page_behavior": "当前页整体前移",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "雷达预选股弹窗"
+          },
+          "expected_match_state": "命中删除补位场景",
+          "observable_result": "第1页显示原1至4和6至11；当前第2页由原11至20变为原12至21；第3页显示原22至25；当前页码仍为2；rowTotal=24且全局序号连续",
+          "branch_id": "TC005-B02",
+          "step_index": 1,
+          "expected_index": 1
+        }
+      ]
+    },
+    {
+      "tc_id": "TC006",
+      "dimension": "数据测试",
+      "common_entry": "轮询数据弹窗",
+      "module_level_1": null,
+      "module_level_2": null,
+      "test_point": "删除当前页的后一页数据",
+      "steps": [],
+      "expected_results": [],
+      "risk_ids": [
+        "RISK-005"
+      ],
+      "requirement_ids": [
+        "REQ003"
+      ],
+      "change_ids": [],
+      "historical_defect_ids": [],
+      "test_priority": "P1",
+      "evidence_state": "已确认",
+      "regression_scope": "关联回归",
+      "deduplication_key": "分页增删|删除后一页|RISK-005",
+      "entry_branches": [
+        {
+          "branch_id": "TC006-B01",
+          "entry_name": "清仓股弹窗",
+          "steps": [
+            "设置pageSize=10、共25行并停留第2页；删除第3页原第23行后等待轮询，查看第2和第3页"
+          ],
+          "expected_results": [
+            "当前第2页仍显示原11至20且顺序不变；第3页显示原21、22、24、25；rowTotal=24、pageTotal=3；第3页序号21至24连续"
+          ]
+        },
+        {
+          "branch_id": "TC006-B02",
+          "entry_name": "雷达预选股弹窗",
+          "steps": [
+            "设置pageSize=10、共25行并停留第2页；删除第3页原第23行后等待轮询，查看第2和第3页"
+          ],
+          "expected_results": [
+            "当前第2页仍显示原11至20且顺序不变；第3页显示原21、22、24、25；rowTotal=24、pageTotal=3；第3页序号21至24连续"
+          ]
+        }
+      ],
+      "secondary_dimensions": [
+        "功能测试"
+      ],
+      "condition_coverage": [
+        {
+          "combination_id": "CM-TC006-B01",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "删除补位",
+            "operation": "删除",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "非末页",
+            "page_fill_state": "不适用",
+            "change_page_position": "后一页",
+            "deletion_extent": "单行",
+            "original_page_count": "常规多页",
+            "requested_page_state": "有效页码",
+            "expected_page_behavior": "当前页不变",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "清仓股弹窗"
+          },
+          "expected_match_state": "命中删除补位场景",
+          "observable_result": "当前第2页仍显示原11至20且顺序不变；第3页显示原21、22、24、25；rowTotal=24、pageTotal=3；第3页序号21至24连续",
+          "branch_id": "TC006-B01",
+          "step_index": 1,
+          "expected_index": 1
+        },
+        {
+          "combination_id": "CM-TC006-B02",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "删除补位",
+            "operation": "删除",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "非末页",
+            "page_fill_state": "不适用",
+            "change_page_position": "后一页",
+            "deletion_extent": "单行",
+            "original_page_count": "常规多页",
+            "requested_page_state": "有效页码",
+            "expected_page_behavior": "当前页不变",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "雷达预选股弹窗"
+          },
+          "expected_match_state": "命中删除补位场景",
+          "observable_result": "当前第2页仍显示原11至20且顺序不变；第3页显示原21、22、24、25；rowTotal=24、pageTotal=3；第3页序号21至24连续",
+          "branch_id": "TC006-B02",
+          "step_index": 1,
+          "expected_index": 1
+        }
+      ]
+    },
+    {
+      "tc_id": "TC007",
+      "dimension": "数据测试",
+      "common_entry": "轮询数据弹窗",
+      "module_level_1": null,
+      "module_level_2": null,
+      "test_point": "当前非末页时删除最后一页数据",
+      "steps": [],
+      "expected_results": [],
+      "risk_ids": [
+        "RISK-005"
+      ],
+      "requirement_ids": [
+        "REQ003"
+      ],
+      "change_ids": [],
+      "historical_defect_ids": [],
+      "test_priority": "P1",
+      "evidence_state": "已确认",
+      "regression_scope": "关联回归",
+      "deduplication_key": "分页增删|远端末页删除|RISK-005",
+      "entry_branches": [
+        {
+          "branch_id": "TC007-B01",
+          "entry_name": "清仓股弹窗",
+          "steps": [
+            "设置pageSize=10、共35行并停留第2页；删除末页原第35行后等待轮询",
+            "恢复35行并停留第2页；删除末页原31至35全部数据后等待轮询"
+          ],
+          "expected_results": [
+            "当前第2页仍为原11至20；末页保留原31至34；rowTotal=34、pageTotal=4",
+            "当前第2页仍为原11至20；原第4页消失且pageTotal=3；第3页仍为原21至30；全局序号连续"
+          ]
+        },
+        {
+          "branch_id": "TC007-B02",
+          "entry_name": "雷达预选股弹窗",
+          "steps": [
+            "设置pageSize=10、共35行并停留第2页；删除末页原第35行后等待轮询",
+            "恢复35行并停留第2页；删除末页原31至35全部数据后等待轮询"
+          ],
+          "expected_results": [
+            "当前第2页仍为原11至20；末页保留原31至34；rowTotal=34、pageTotal=4",
+            "当前第2页仍为原11至20；原第4页消失且pageTotal=3；第3页仍为原21至30；全局序号连续"
+          ]
+        }
+      ],
+      "secondary_dimensions": [
+        "功能测试"
+      ],
+      "condition_coverage": [
+        {
+          "combination_id": "CM-TC007-B01",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "删除补位",
+            "operation": "删除",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "非末页",
+            "page_fill_state": "不适用",
+            "change_page_position": "远端末页",
+            "deletion_extent": "部分删除",
+            "original_page_count": "常规多页",
+            "requested_page_state": "有效页码",
+            "expected_page_behavior": "当前页不变",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "清仓股弹窗"
+          },
+          "expected_match_state": "命中删除补位场景",
+          "observable_result": "当前第2页仍为原11至20；末页保留原31至34；rowTotal=34、pageTotal=4",
+          "branch_id": "TC007-B01",
+          "step_index": 1,
+          "expected_index": 1
+        },
+        {
+          "combination_id": "CM-TC007-B02",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "删除补位",
+            "operation": "删除",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "非末页",
+            "page_fill_state": "不适用",
+            "change_page_position": "远端末页",
+            "deletion_extent": "部分删除",
+            "original_page_count": "常规多页",
+            "requested_page_state": "有效页码",
+            "expected_page_behavior": "当前页不变",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "雷达预选股弹窗"
+          },
+          "expected_match_state": "命中删除补位场景",
+          "observable_result": "当前第2页仍为原11至20；末页保留原31至34；rowTotal=34、pageTotal=4",
+          "branch_id": "TC007-B02",
+          "step_index": 1,
+          "expected_index": 1
+        },
+        {
+          "combination_id": "CM-TC007-B01-FULL",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "删除补位",
+            "operation": "删除",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "非末页",
+            "page_fill_state": "不适用",
+            "change_page_position": "远端末页",
+            "deletion_extent": "整页删除",
+            "original_page_count": "常规多页",
+            "requested_page_state": "有效页码",
+            "expected_page_behavior": "总页数减少",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "清仓股弹窗"
+          },
+          "expected_match_state": "命中删除补位场景",
+          "observable_result": "当前第2页仍为原11至20；原第4页消失且pageTotal=3；第3页仍为原21至30；全局序号连续",
+          "branch_id": "TC007-B01",
+          "step_index": 2,
+          "expected_index": 2
+        },
+        {
+          "combination_id": "CM-TC007-B02-FULL",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "删除补位",
+            "operation": "删除",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "非末页",
+            "page_fill_state": "不适用",
+            "change_page_position": "远端末页",
+            "deletion_extent": "整页删除",
+            "original_page_count": "常规多页",
+            "requested_page_state": "有效页码",
+            "expected_page_behavior": "总页数减少",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "雷达预选股弹窗"
+          },
+          "expected_match_state": "命中删除补位场景",
+          "observable_result": "当前第2页仍为原11至20；原第4页消失且pageTotal=3；第3页仍为原21至30；全局序号连续",
+          "branch_id": "TC007-B02",
+          "step_index": 2,
+          "expected_index": 2
+        }
+      ]
+    },
+    {
+      "tc_id": "TC008",
+      "dimension": "数据测试",
+      "common_entry": "轮询数据弹窗",
+      "module_level_1": null,
+      "module_level_2": null,
+      "test_point": "当前最后一页部分删除",
+      "steps": [],
+      "expected_results": [],
+      "risk_ids": [
+        "RISK-006"
+      ],
+      "requirement_ids": [
+        "REQ004"
+      ],
+      "change_ids": [],
+      "historical_defect_ids": [],
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "deduplication_key": "分页增删|当前末页部分删除|RISK-006",
+      "entry_branches": [
+        {
+          "branch_id": "TC008-B01",
+          "entry_name": "清仓股弹窗",
+          "steps": [
+            "设置pageSize=10、共25行并停留第3页；删除原第23行后等待轮询"
+          ],
+          "expected_results": [
+            "仍停留第3页；本页显示原21、22、24、25；rowTotal=24、pageTotal=3；本页全局序号21至24连续"
+          ]
+        },
+        {
+          "branch_id": "TC008-B02",
+          "entry_name": "雷达预选股弹窗",
+          "steps": [
+            "设置pageSize=10、共25行并停留第3页；删除原第23行后等待轮询"
+          ],
+          "expected_results": [
+            "仍停留第3页；本页显示原21、22、24、25；rowTotal=24、pageTotal=3；本页全局序号21至24连续"
+          ]
+        }
+      ],
+      "secondary_dimensions": [
+        "功能测试"
+      ],
+      "condition_coverage": [
+        {
+          "combination_id": "CM-TC008-B01",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "删除补位",
+            "operation": "删除",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "末页",
+            "page_fill_state": "不适用",
+            "change_page_position": "当前页",
+            "deletion_extent": "部分删除",
+            "original_page_count": "常规多页",
+            "requested_page_state": "有效页码",
+            "expected_page_behavior": "停留本页",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "清仓股弹窗"
+          },
+          "expected_match_state": "命中删除补位场景",
+          "observable_result": "仍停留第3页；本页显示原21、22、24、25；rowTotal=24、pageTotal=3；本页全局序号21至24连续",
+          "branch_id": "TC008-B01",
+          "step_index": 1,
+          "expected_index": 1
+        },
+        {
+          "combination_id": "CM-TC008-B02",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "删除补位",
+            "operation": "删除",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "末页",
+            "page_fill_state": "不适用",
+            "change_page_position": "当前页",
+            "deletion_extent": "部分删除",
+            "original_page_count": "常规多页",
+            "requested_page_state": "有效页码",
+            "expected_page_behavior": "停留本页",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "雷达预选股弹窗"
+          },
+          "expected_match_state": "命中删除补位场景",
+          "observable_result": "仍停留第3页；本页显示原21、22、24、25；rowTotal=24、pageTotal=3；本页全局序号21至24连续",
+          "branch_id": "TC008-B02",
+          "step_index": 1,
+          "expected_index": 1
+        }
+      ]
+    },
+    {
+      "tc_id": "TC009",
+      "dimension": "数据测试",
+      "common_entry": "轮询数据弹窗",
+      "module_level_1": null,
+      "module_level_2": null,
+      "test_point": "当前最后一页全部删除",
+      "steps": [],
+      "expected_results": [],
+      "risk_ids": [
+        "RISK-006"
+      ],
+      "requirement_ids": [
+        "REQ004"
+      ],
+      "change_ids": [],
+      "historical_defect_ids": [],
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "deduplication_key": "分页增删|当前末页全部删除|RISK-006",
+      "entry_branches": [
+        {
+          "branch_id": "TC009-B01",
+          "entry_name": "清仓股弹窗",
+          "steps": [
+            "设置pageSize=10、共25行并停留第3页；删除本页原21至25全部数据后等待轮询"
+          ],
+          "expected_results": [
+            "自动回退到第2页并显示原11至20；rowTotal=20、pageTotal=2、当前页=2；不出现空白第3页；全局序号1至20连续"
+          ]
+        },
+        {
+          "branch_id": "TC009-B02",
+          "entry_name": "雷达预选股弹窗",
+          "steps": [
+            "设置pageSize=10、共25行并停留第3页；删除本页原21至25全部数据后等待轮询"
+          ],
+          "expected_results": [
+            "自动回退到第2页并显示原11至20；rowTotal=20、pageTotal=2、当前页=2；不出现空白第3页；全局序号1至20连续"
+          ]
+        }
+      ],
+      "secondary_dimensions": [
+        "功能测试"
+      ],
+      "condition_coverage": [
+        {
+          "combination_id": "CM-TC009-B01",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "删除补位",
+            "operation": "删除",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "末页",
+            "page_fill_state": "不适用",
+            "change_page_position": "当前页",
+            "deletion_extent": "整页删除",
+            "original_page_count": "常规多页",
+            "requested_page_state": "有效页码",
+            "expected_page_behavior": "自动回退",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "清仓股弹窗"
+          },
+          "expected_match_state": "命中删除补位场景",
+          "observable_result": "自动回退到第2页并显示原11至20；rowTotal=20、pageTotal=2、当前页=2；不出现空白第3页；全局序号1至20连续",
+          "branch_id": "TC009-B01",
+          "step_index": 1,
+          "expected_index": 1
+        },
+        {
+          "combination_id": "CM-TC009-B02",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "删除补位",
+            "operation": "删除",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "末页",
+            "page_fill_state": "不适用",
+            "change_page_position": "当前页",
+            "deletion_extent": "整页删除",
+            "original_page_count": "常规多页",
+            "requested_page_state": "有效页码",
+            "expected_page_behavior": "自动回退",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "雷达预选股弹窗"
+          },
+          "expected_match_state": "命中删除补位场景",
+          "observable_result": "自动回退到第2页并显示原11至20；rowTotal=20、pageTotal=2、当前页=2；不出现空白第3页；全局序号1至20连续",
+          "branch_id": "TC009-B02",
+          "step_index": 1,
+          "expected_index": 1
+        }
+      ]
+    },
+    {
+      "tc_id": "TC010",
+      "dimension": "异常测试",
+      "common_entry": "轮询数据弹窗",
+      "module_level_1": null,
+      "module_level_2": null,
+      "test_point": "第100页连续删除末两页",
+      "steps": [],
+      "expected_results": [],
+      "risk_ids": [
+        "RISK-007"
+      ],
+      "requirement_ids": [
+        "REQ004"
+      ],
+      "change_ids": [],
+      "historical_defect_ids": [],
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "deduplication_key": "分页增删|100页删除末两页|RISK-007",
+      "entry_branches": [
+        {
+          "branch_id": "TC010-B01",
+          "entry_name": "清仓股弹窗",
+          "steps": [
+            "在清仓股弹窗准备100页数据并停留第100页；连续删除第99页和第100页全部数据后等待轮询",
+            "观察轮询返回后的当前页码、pageTotal和当前页行集合",
+            "在回退后的第98页点击上一页"
+          ],
+          "expected_results": [
+            "请求页码大于实际总页数时，当前页重置为实际总页数第98页且pageTotal=98",
+            "返回最近有数据的第98页，页面显示数据且不保留空白第99页或第100页",
+            "进入第97页且显示数据，上一页不为空"
+          ]
+        },
+        {
+          "branch_id": "TC010-B02",
+          "entry_name": "雷达预选股弹窗",
+          "steps": [
+            "在雷达预选股弹窗准备100页数据并停留第100页；连续删除第99页和第100页全部数据后等待轮询",
+            "观察轮询返回后的当前页码、pageTotal和当前页行集合",
+            "在回退后的第98页点击上一页"
+          ],
+          "expected_results": [
+            "请求页码大于实际总页数时，当前页重置为实际总页数第98页且pageTotal=98",
+            "返回最近有数据的第98页，页面显示数据且不保留空白第99页或第100页",
+            "进入第97页且显示数据，上一页不为空"
+          ]
+        }
+      ],
+      "secondary_dimensions": [
+        "回归测试"
+      ],
+      "condition_coverage": [
+        {
+          "combination_id": "CM-TC010-B01",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "连续删页与页码重置",
+            "operation": "删除",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "第100页",
+            "page_fill_state": "不适用",
+            "change_page_position": "末两页",
+            "deletion_extent": "连续删除末两页",
+            "original_page_count": "100页",
+            "requested_page_state": "大于实际总页数",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "清仓股弹窗",
+            "expected_page_behavior": "不适用"
+          },
+          "expected_match_state": "命中连续删页与页码重置场景",
+          "branch_id": "TC010-B01",
+          "assertion_mappings": [
+            {
+              "step_index": 1,
+              "expected_index": 1,
+              "observable_result": "请求页码大于实际总页数时，当前页重置为实际总页数第98页且pageTotal=98"
+            },
+            {
+              "step_index": 2,
+              "expected_index": 2,
+              "observable_result": "返回最近有数据的第98页，页面显示数据且不保留空白第99页或第100页"
+            },
+            {
+              "step_index": 3,
+              "expected_index": 3,
+              "observable_result": "进入第97页且显示数据，上一页不为空"
+            }
+          ]
+        },
+        {
+          "combination_id": "CM-TC010-B02",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "连续删页与页码重置",
+            "operation": "删除",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "第100页",
+            "page_fill_state": "不适用",
+            "change_page_position": "末两页",
+            "deletion_extent": "连续删除末两页",
+            "original_page_count": "100页",
+            "requested_page_state": "大于实际总页数",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "雷达预选股弹窗",
+            "expected_page_behavior": "不适用"
+          },
+          "expected_match_state": "命中连续删页与页码重置场景",
+          "branch_id": "TC010-B02",
+          "assertion_mappings": [
+            {
+              "step_index": 1,
+              "expected_index": 1,
+              "observable_result": "请求页码大于实际总页数时，当前页重置为实际总页数第98页且pageTotal=98"
+            },
+            {
+              "step_index": 2,
+              "expected_index": 2,
+              "observable_result": "返回最近有数据的第98页，页面显示数据且不保留空白第99页或第100页"
+            },
+            {
+              "step_index": 3,
+              "expected_index": 3,
+              "observable_result": "进入第97页且显示数据，上一页不为空"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tc_id": "TC011",
+      "dimension": "功能测试",
+      "secondary_dimensions": [],
+      "common_entry": "轮询数据弹窗",
+      "module_level_1": null,
+      "module_level_2": null,
+      "test_point": "当日盘中启用轮询",
+      "steps": [],
+      "expected_results": [],
+      "risk_ids": [
+        "RISK-008"
+      ],
+      "requirement_ids": [
+        "REQ005"
+      ],
+      "change_ids": [],
+      "historical_defect_ids": [],
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "deduplication_key": "轮询同步|当日盘中启用轮询|RISK-008",
+      "entry_branches": [
+        {
+          "branch_id": "TC011-B01",
+          "entry_name": "清仓股弹窗",
+          "steps": [
+            "在清仓股弹窗设置查询开始和结束日期均为当天并处于盘中，发起查询"
+          ],
+          "expected_results": [
+            "请求使用 roundRobin=true 并按轮询规则更新当前页"
+          ]
+        },
+        {
+          "branch_id": "TC011-B02",
+          "entry_name": "雷达预选股弹窗",
+          "steps": [
+            "在雷达预选股弹窗设置查询开始和结束日期均为当天并处于盘中，发起查询"
+          ],
+          "expected_results": [
+            "请求使用 roundRobin=true 并按轮询规则更新当前页"
+          ]
+        }
+      ],
+      "condition_coverage": [
+        {
+          "combination_id": "CM-TC011-B01",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "轮询启停",
+            "operation": "查询",
+            "start_date_scope": "当天",
+            "end_date_scope": "当天",
+            "market_session": "盘中",
+            "expected_polling_state": "启用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "不适用",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "清仓股弹窗"
+          },
+          "expected_match_state": "命中轮询启停场景",
+          "observable_result": "请求使用 roundRobin=true 并按轮询规则更新当前页",
+          "branch_id": "TC011-B01",
+          "step_index": 1,
+          "expected_index": 1
+        },
+        {
+          "combination_id": "CM-TC011-B02",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "轮询启停",
+            "operation": "查询",
+            "start_date_scope": "当天",
+            "end_date_scope": "当天",
+            "market_session": "盘中",
+            "expected_polling_state": "启用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "不适用",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "雷达预选股弹窗"
+          },
+          "expected_match_state": "命中轮询启停场景",
+          "observable_result": "请求使用 roundRobin=true 并按轮询规则更新当前页",
+          "branch_id": "TC011-B02",
+          "step_index": 1,
+          "expected_index": 1
+        }
+      ]
+    },
+    {
+      "tc_id": "TC012",
+      "dimension": "功能测试",
+      "secondary_dimensions": [],
+      "common_entry": "轮询数据弹窗",
+      "module_level_1": null,
+      "module_level_2": null,
+      "test_point": "开始日期非当天不启用轮询",
+      "steps": [],
+      "expected_results": [],
+      "risk_ids": [
+        "RISK-008"
+      ],
+      "requirement_ids": [
+        "REQ005"
+      ],
+      "change_ids": [],
+      "historical_defect_ids": [],
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "关联回归",
+      "deduplication_key": "轮询同步|开始日期非当天不启用轮询|RISK-008",
+      "entry_branches": [
+        {
+          "branch_id": "TC012-B01",
+          "entry_name": "清仓股弹窗",
+          "steps": [
+            "在清仓股弹窗设置开始日期非当天、结束日期为当天并发起查询"
+          ],
+          "expected_results": [
+            "不启用轮询，不发送 roundRobin=true 的轮询请求"
+          ]
+        },
+        {
+          "branch_id": "TC012-B02",
+          "entry_name": "雷达预选股弹窗",
+          "steps": [
+            "在雷达预选股弹窗设置开始日期非当天、结束日期为当天并发起查询"
+          ],
+          "expected_results": [
+            "不启用轮询，不发送 roundRobin=true 的轮询请求"
+          ]
+        }
+      ],
+      "condition_coverage": [
+        {
+          "combination_id": "CM-TC012-B01",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "轮询启停",
+            "operation": "查询",
+            "start_date_scope": "非当天",
+            "end_date_scope": "当天",
+            "market_session": "盘中",
+            "expected_polling_state": "不启用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "不适用",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "清仓股弹窗"
+          },
+          "expected_match_state": "命中轮询启停场景",
+          "observable_result": "不启用轮询，不发送 roundRobin=true 的轮询请求",
+          "branch_id": "TC012-B01",
+          "step_index": 1,
+          "expected_index": 1
+        },
+        {
+          "combination_id": "CM-TC012-B02",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "轮询启停",
+            "operation": "查询",
+            "start_date_scope": "非当天",
+            "end_date_scope": "当天",
+            "market_session": "盘中",
+            "expected_polling_state": "不启用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "不适用",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "雷达预选股弹窗"
+          },
+          "expected_match_state": "命中轮询启停场景",
+          "observable_result": "不启用轮询，不发送 roundRobin=true 的轮询请求",
+          "branch_id": "TC012-B02",
+          "step_index": 1,
+          "expected_index": 1
+        }
+      ]
+    },
+    {
+      "tc_id": "TC013",
+      "dimension": "功能测试",
+      "secondary_dimensions": [],
+      "common_entry": "轮询数据弹窗",
+      "module_level_1": null,
+      "module_level_2": null,
+      "test_point": "结束日期非当天不启用轮询",
+      "steps": [],
+      "expected_results": [],
+      "risk_ids": [
+        "RISK-008"
+      ],
+      "requirement_ids": [
+        "REQ005"
+      ],
+      "change_ids": [],
+      "historical_defect_ids": [],
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "关联回归",
+      "deduplication_key": "轮询同步|结束日期非当天不启用轮询|RISK-008",
+      "entry_branches": [
+        {
+          "branch_id": "TC013-B01",
+          "entry_name": "清仓股弹窗",
+          "steps": [
+            "在清仓股弹窗设置开始日期为当天、结束日期非当天并发起查询"
+          ],
+          "expected_results": [
+            "不启用轮询，不发送 roundRobin=true 的轮询请求"
+          ]
+        },
+        {
+          "branch_id": "TC013-B02",
+          "entry_name": "雷达预选股弹窗",
+          "steps": [
+            "在雷达预选股弹窗设置开始日期为当天、结束日期非当天并发起查询"
+          ],
+          "expected_results": [
+            "不启用轮询，不发送 roundRobin=true 的轮询请求"
+          ]
+        }
+      ],
+      "condition_coverage": [
+        {
+          "combination_id": "CM-TC013-B01",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "轮询启停",
+            "operation": "查询",
+            "start_date_scope": "当天",
+            "end_date_scope": "非当天",
+            "market_session": "盘中",
+            "expected_polling_state": "不启用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "不适用",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "清仓股弹窗"
+          },
+          "expected_match_state": "命中轮询启停场景",
+          "observable_result": "不启用轮询，不发送 roundRobin=true 的轮询请求",
+          "branch_id": "TC013-B01",
+          "step_index": 1,
+          "expected_index": 1
+        },
+        {
+          "combination_id": "CM-TC013-B02",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "轮询启停",
+            "operation": "查询",
+            "start_date_scope": "当天",
+            "end_date_scope": "非当天",
+            "market_session": "盘中",
+            "expected_polling_state": "不启用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "不适用",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "雷达预选股弹窗"
+          },
+          "expected_match_state": "命中轮询启停场景",
+          "observable_result": "不启用轮询，不发送 roundRobin=true 的轮询请求",
+          "branch_id": "TC013-B02",
+          "step_index": 1,
+          "expected_index": 1
+        }
+      ]
+    },
+    {
+      "tc_id": "TC014",
+      "dimension": "功能测试",
+      "secondary_dimensions": [],
+      "common_entry": "轮询数据弹窗",
+      "module_level_1": null,
+      "module_level_2": null,
+      "test_point": "当日非盘中不启用轮询",
+      "steps": [],
+      "expected_results": [],
+      "risk_ids": [
+        "RISK-008"
+      ],
+      "requirement_ids": [
+        "REQ005"
+      ],
+      "change_ids": [],
+      "historical_defect_ids": [],
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "关联回归",
+      "deduplication_key": "轮询同步|当日非盘中不启用轮询|RISK-008",
+      "entry_branches": [
+        {
+          "branch_id": "TC014-B01",
+          "entry_name": "清仓股弹窗",
+          "steps": [
+            "在清仓股弹窗设置开始和结束日期均为当天但当前不处于盘中，发起查询"
+          ],
+          "expected_results": [
+            "不启用轮询，不发送 roundRobin=true 的轮询请求"
+          ]
+        },
+        {
+          "branch_id": "TC014-B02",
+          "entry_name": "雷达预选股弹窗",
+          "steps": [
+            "在雷达预选股弹窗设置开始和结束日期均为当天但当前不处于盘中，发起查询"
+          ],
+          "expected_results": [
+            "不启用轮询，不发送 roundRobin=true 的轮询请求"
+          ]
+        }
+      ],
+      "condition_coverage": [
+        {
+          "combination_id": "CM-TC014-B01",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "轮询启停",
+            "operation": "查询",
+            "start_date_scope": "当天",
+            "end_date_scope": "当天",
+            "market_session": "非盘中",
+            "expected_polling_state": "不启用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "不适用",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "清仓股弹窗"
+          },
+          "expected_match_state": "命中轮询启停场景",
+          "observable_result": "不启用轮询，不发送 roundRobin=true 的轮询请求",
+          "branch_id": "TC014-B01",
+          "step_index": 1,
+          "expected_index": 1
+        },
+        {
+          "combination_id": "CM-TC014-B02",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "轮询启停",
+            "operation": "查询",
+            "start_date_scope": "当天",
+            "end_date_scope": "当天",
+            "market_session": "非盘中",
+            "expected_polling_state": "不启用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "不适用",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "雷达预选股弹窗"
+          },
+          "expected_match_state": "命中轮询启停场景",
+          "observable_result": "不启用轮询，不发送 roundRobin=true 的轮询请求",
+          "branch_id": "TC014-B02",
+          "step_index": 1,
+          "expected_index": 1
+        }
+      ]
+    },
+    {
+      "tc_id": "TC015",
+      "dimension": "数据测试",
+      "secondary_dimensions": [
+        "功能测试"
+      ],
+      "common_entry": "轮询数据弹窗",
+      "module_level_1": null,
+      "module_level_2": null,
+      "test_point": "新增股票后汇总与全局列表范围一致",
+      "steps": [],
+      "expected_results": [],
+      "risk_ids": [
+        "RISK-009"
+      ],
+      "requirement_ids": [
+        "REQ006"
+      ],
+      "change_ids": [],
+      "historical_defect_ids": [],
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "deduplication_key": "轮询同步|新增股票后汇总与全局列表范围一致|RISK-009",
+      "entry_branches": [
+        {
+          "branch_id": "TC015-B01",
+          "entry_name": "清仓股弹窗",
+          "steps": [
+            "在清仓股弹窗记录全局股票集合和汇总可观察字段；轮询新增一只股票"
+          ],
+          "expected_results": [
+            "新增股票进入全局列表集合；汇总纳入该股票；当前页不含新增股票时仍按全局范围更新汇总"
+          ]
+        },
+        {
+          "branch_id": "TC015-B02",
+          "entry_name": "雷达预选股弹窗",
+          "steps": [
+            "在雷达预选股弹窗记录全局股票集合和汇总可观察字段；轮询新增一只股票"
+          ],
+          "expected_results": [
+            "新增股票进入全局列表集合；汇总纳入该股票；当前页不含新增股票时仍按全局范围更新汇总"
+          ]
+        }
+      ],
+      "condition_coverage": [
+        {
+          "combination_id": "CM-TC015-B01",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "汇总一致性",
+            "operation": "新增",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "全局列表",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "expected_consistency": "汇总纳入新增对象",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "清仓股弹窗"
+          },
+          "expected_match_state": "命中汇总一致性场景",
+          "observable_result": "新增股票进入全局列表集合；汇总纳入该股票；当前页不含新增股票时仍按全局范围更新汇总",
+          "branch_id": "TC015-B01",
+          "step_index": 1,
+          "expected_index": 1
+        },
+        {
+          "combination_id": "CM-TC015-B02",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "汇总一致性",
+            "operation": "新增",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "全局列表",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "expected_consistency": "汇总纳入新增对象",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "雷达预选股弹窗"
+          },
+          "expected_match_state": "命中汇总一致性场景",
+          "observable_result": "新增股票进入全局列表集合；汇总纳入该股票；当前页不含新增股票时仍按全局范围更新汇总",
+          "branch_id": "TC015-B02",
+          "step_index": 1,
+          "expected_index": 1
+        }
+      ]
+    },
+    {
+      "tc_id": "TC016",
+      "dimension": "数据测试",
+      "secondary_dimensions": [
+        "功能测试"
+      ],
+      "common_entry": "轮询数据弹窗",
+      "module_level_1": null,
+      "module_level_2": null,
+      "test_point": "删除股票后汇总与全局列表范围一致",
+      "steps": [],
+      "expected_results": [],
+      "risk_ids": [
+        "RISK-009"
+      ],
+      "requirement_ids": [
+        "REQ006"
+      ],
+      "change_ids": [],
+      "historical_defect_ids": [],
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "deduplication_key": "轮询同步|删除股票后汇总与全局列表范围一致|RISK-009",
+      "entry_branches": [
+        {
+          "branch_id": "TC016-B01",
+          "entry_name": "清仓股弹窗",
+          "steps": [
+            "在清仓股弹窗记录全局股票集合、rowTotal和汇总可观察字段；轮询删除一只股票"
+          ],
+          "expected_results": [
+            "删除股票移出全局列表且不再计入汇总；rowTotal与汇总范围同步减少"
+          ]
+        },
+        {
+          "branch_id": "TC016-B02",
+          "entry_name": "雷达预选股弹窗",
+          "steps": [
+            "在雷达预选股弹窗记录全局股票集合、rowTotal和汇总可观察字段；轮询删除一只股票"
+          ],
+          "expected_results": [
+            "删除股票移出全局列表且不再计入汇总；rowTotal与汇总范围同步减少"
+          ]
+        }
+      ],
+      "condition_coverage": [
+        {
+          "combination_id": "CM-TC016-B01",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "汇总一致性",
+            "operation": "删除",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "全局列表",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "expected_consistency": "汇总移除删除对象",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "清仓股弹窗"
+          },
+          "expected_match_state": "命中汇总一致性场景",
+          "observable_result": "删除股票移出全局列表且不再计入汇总；rowTotal与汇总范围同步减少",
+          "branch_id": "TC016-B01",
+          "step_index": 1,
+          "expected_index": 1
+        },
+        {
+          "combination_id": "CM-TC016-B02",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "汇总一致性",
+            "operation": "删除",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "全局列表",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "expected_consistency": "汇总移除删除对象",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "雷达预选股弹窗"
+          },
+          "expected_match_state": "命中汇总一致性场景",
+          "observable_result": "删除股票移出全局列表且不再计入汇总；rowTotal与汇总范围同步减少",
+          "branch_id": "TC016-B02",
+          "step_index": 1,
+          "expected_index": 1
+        }
+      ]
+    },
+    {
+      "tc_id": "TC017",
+      "dimension": "数据测试",
+      "secondary_dimensions": [],
+      "common_entry": "轮询数据弹窗",
+      "module_level_1": null,
+      "module_level_2": null,
+      "test_point": "同一轮轮询列表与汇总同步",
+      "steps": [],
+      "expected_results": [],
+      "risk_ids": [
+        "RISK-009"
+      ],
+      "requirement_ids": [
+        "REQ006"
+      ],
+      "change_ids": [],
+      "historical_defect_ids": [],
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "deduplication_key": "轮询同步|同一轮轮询列表与汇总同步|RISK-009",
+      "entry_branches": [
+        {
+          "branch_id": "TC017-B01",
+          "entry_name": "清仓股弹窗",
+          "steps": [
+            "在清仓股弹窗记录全局股票集合、rowTotal和汇总可观察字段；触发同一轮轮询中的股票新增或删除",
+            "在该轮返回时同时观察列表集合和汇总统计范围"
+          ],
+          "expected_results": [
+            "rowTotal与汇总统计范围同步纳入新增对象或移除删除对象",
+            "列表与汇总在同一轮使用同一统计范围，不出现一方采用新范围而另一方仍采用旧范围"
+          ]
+        },
+        {
+          "branch_id": "TC017-B02",
+          "entry_name": "雷达预选股弹窗",
+          "steps": [
+            "在雷达预选股弹窗记录全局股票集合、rowTotal和汇总可观察字段；触发同一轮轮询中的股票新增或删除",
+            "在该轮返回时同时观察列表集合和汇总统计范围"
+          ],
+          "expected_results": [
+            "rowTotal与汇总统计范围同步纳入新增对象或移除删除对象",
+            "列表与汇总在同一轮使用同一统计范围，不出现一方采用新范围而另一方仍采用旧范围"
+          ]
+        }
+      ],
+      "condition_coverage": [
+        {
+          "combination_id": "CM-TC017-B01-1",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "汇总一致性",
+            "operation": "同轮更新",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "全局列表",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "清仓股弹窗",
+            "expected_consistency": "rowTotal与汇总范围同步"
+          },
+          "expected_match_state": "命中汇总一致性场景",
+          "observable_result": "rowTotal与汇总统计范围同步纳入新增对象或移除删除对象",
+          "branch_id": "TC017-B01",
+          "step_index": 1,
+          "expected_index": 1
+        },
+        {
+          "combination_id": "CM-TC017-B01-2",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "汇总一致性",
+            "operation": "同轮更新",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "全局列表",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "清仓股弹窗",
+            "expected_consistency": "同一轮使用同一统计范围"
+          },
+          "expected_match_state": "命中汇总一致性场景",
+          "observable_result": "列表与汇总在同一轮使用同一统计范围，不出现一方采用新范围而另一方仍采用旧范围",
+          "branch_id": "TC017-B01",
+          "step_index": 2,
+          "expected_index": 2
+        },
+        {
+          "combination_id": "CM-TC017-B02-1",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "汇总一致性",
+            "operation": "同轮更新",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "全局列表",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "雷达预选股弹窗",
+            "expected_consistency": "rowTotal与汇总范围同步"
+          },
+          "expected_match_state": "命中汇总一致性场景",
+          "observable_result": "rowTotal与汇总统计范围同步纳入新增对象或移除删除对象",
+          "branch_id": "TC017-B02",
+          "step_index": 1,
+          "expected_index": 1
+        },
+        {
+          "combination_id": "CM-TC017-B02-2",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "汇总一致性",
+            "operation": "同轮更新",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "全局列表",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "雷达预选股弹窗",
+            "expected_consistency": "同一轮使用同一统计范围"
+          },
+          "expected_match_state": "命中汇总一致性场景",
+          "observable_result": "列表与汇总在同一轮使用同一统计范围，不出现一方采用新范围而另一方仍采用旧范围",
+          "branch_id": "TC017-B02",
+          "step_index": 2,
+          "expected_index": 2
+        }
+      ]
+    },
+    {
+      "tc_id": "TC018",
+      "dimension": "异常测试",
+      "secondary_dimensions": [],
+      "common_entry": "轮询数据弹窗",
+      "module_level_1": null,
+      "module_level_2": null,
+      "test_point": "冲突参数被拒绝",
+      "steps": [],
+      "expected_results": [],
+      "risk_ids": [
+        "RISK-010"
+      ],
+      "requirement_ids": [
+        "REQ007"
+      ],
+      "change_ids": [],
+      "historical_defect_ids": [],
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "deduplication_key": "轮询同步|冲突参数被拒绝|RISK-010",
+      "entry_branches": [
+        {
+          "branch_id": "TC018-B01",
+          "entry_name": "清仓股弹窗",
+          "steps": [
+            "在清仓股弹窗发送 rowKey 与 roundRobinRowKey 同时非空的请求",
+            "在清仓股弹窗发送 roundRobin=true 且 rowKey 非空的请求",
+            "在清仓股弹窗发送 roundRobin=false 或 null 且 roundRobinRowKey 非空的请求"
+          ],
+          "expected_results": [
+            "因 rowKey 与 roundRobinRowKey 同时非空而返回明确异常，不进入轮询数据更新分支",
+            "因 roundRobin=true 时 rowKey 非空而返回明确异常，不进入轮询数据更新分支",
+            "因 roundRobin=false 或 null 时 roundRobinRowKey 非空而返回明确异常，不进入轮询数据更新分支"
+          ]
+        },
+        {
+          "branch_id": "TC018-B02",
+          "entry_name": "雷达预选股弹窗",
+          "steps": [
+            "在雷达预选股弹窗发送 rowKey 与 roundRobinRowKey 同时非空的请求",
+            "在雷达预选股弹窗发送 roundRobin=true 且 rowKey 非空的请求",
+            "在雷达预选股弹窗发送 roundRobin=false 或 null 且 roundRobinRowKey 非空的请求"
+          ],
+          "expected_results": [
+            "因 rowKey 与 roundRobinRowKey 同时非空而返回明确异常，不进入轮询数据更新分支",
+            "因 roundRobin=true 时 rowKey 非空而返回明确异常，不进入轮询数据更新分支",
+            "因 roundRobin=false 或 null 时 roundRobinRowKey 非空而返回明确异常，不进入轮询数据更新分支"
+          ]
+        }
+      ],
+      "condition_coverage": [
+        {
+          "combination_id": "CM-TC018-B01-1",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "参数异常",
+            "operation": "参数校验",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "不适用",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "expected_consistency": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "清仓股弹窗",
+            "conflict_scenario": "rowKey与roundRobinRowKey同时非空"
+          },
+          "expected_match_state": "命中参数异常场景",
+          "observable_result": "因 rowKey 与 roundRobinRowKey 同时非空而返回明确异常，不进入轮询数据更新分支",
+          "branch_id": "TC018-B01",
+          "step_index": 1,
+          "expected_index": 1
+        },
+        {
+          "combination_id": "CM-TC018-B01-2",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "参数异常",
+            "operation": "参数校验",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "不适用",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "expected_consistency": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "清仓股弹窗",
+            "conflict_scenario": "roundRobin=true且rowKey非空"
+          },
+          "expected_match_state": "命中参数异常场景",
+          "observable_result": "因 roundRobin=true 时 rowKey 非空而返回明确异常，不进入轮询数据更新分支",
+          "branch_id": "TC018-B01",
+          "step_index": 2,
+          "expected_index": 2
+        },
+        {
+          "combination_id": "CM-TC018-B01-3",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "参数异常",
+            "operation": "参数校验",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "不适用",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "expected_consistency": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "清仓股弹窗",
+            "conflict_scenario": "roundRobin=false或null且roundRobinRowKey非空"
+          },
+          "expected_match_state": "命中参数异常场景",
+          "observable_result": "因 roundRobin=false 或 null 时 roundRobinRowKey 非空而返回明确异常，不进入轮询数据更新分支",
+          "branch_id": "TC018-B01",
+          "step_index": 3,
+          "expected_index": 3
+        },
+        {
+          "combination_id": "CM-TC018-B02-1",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "参数异常",
+            "operation": "参数校验",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "不适用",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "expected_consistency": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "雷达预选股弹窗",
+            "conflict_scenario": "rowKey与roundRobinRowKey同时非空"
+          },
+          "expected_match_state": "命中参数异常场景",
+          "observable_result": "因 rowKey 与 roundRobinRowKey 同时非空而返回明确异常，不进入轮询数据更新分支",
+          "branch_id": "TC018-B02",
+          "step_index": 1,
+          "expected_index": 1
+        },
+        {
+          "combination_id": "CM-TC018-B02-2",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "参数异常",
+            "operation": "参数校验",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "不适用",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "expected_consistency": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "雷达预选股弹窗",
+            "conflict_scenario": "roundRobin=true且rowKey非空"
+          },
+          "expected_match_state": "命中参数异常场景",
+          "observable_result": "因 roundRobin=true 时 rowKey 非空而返回明确异常，不进入轮询数据更新分支",
+          "branch_id": "TC018-B02",
+          "step_index": 2,
+          "expected_index": 2
+        },
+        {
+          "combination_id": "CM-TC018-B02-3",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "参数异常",
+            "operation": "参数校验",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "不适用",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "expected_consistency": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "雷达预选股弹窗",
+            "conflict_scenario": "roundRobin=false或null且roundRobinRowKey非空"
+          },
+          "expected_match_state": "命中参数异常场景",
+          "observable_result": "因 roundRobin=false 或 null 时 roundRobinRowKey 非空而返回明确异常，不进入轮询数据更新分支",
+          "branch_id": "TC018-B02",
+          "step_index": 3,
+          "expected_index": 3
+        }
+      ]
+    },
+    {
+      "tc_id": "TC019",
+      "dimension": "数据测试",
+      "secondary_dimensions": [],
+      "common_entry": "轮询数据弹窗",
+      "module_level_1": null,
+      "module_level_2": null,
+      "test_point": "rowKeyType驱动新增删除与补全识别",
+      "steps": [],
+      "expected_results": [],
+      "risk_ids": [
+        "RISK-011"
+      ],
+      "requirement_ids": [
+        "REQ007"
+      ],
+      "change_ids": [],
+      "historical_defect_ids": [],
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "deduplication_key": "轮询同步|rowKeyType驱动新增删除与补全识别|RISK-011",
+      "entry_branches": [
+        {
+          "branch_id": "TC019-B01",
+          "entry_name": "清仓股弹窗",
+          "steps": [
+            "在清仓股弹窗构造 rowKeyType=0 的可视有效行并观察页面行集合",
+            "在清仓股弹窗构造 rowKeyType=1 的补全行并观察不满一页时的补位",
+            "在清仓股弹窗构造 rowKeyType=2 的新增行并观察插入结果",
+            "在清仓股弹窗构造 rowKeyType=3 的删除行并观察移除结果"
+          ],
+          "expected_results": [
+            "rowKeyType=0 的行作为可视范围有效行保留在页面行集合中",
+            "rowKeyType=1 的行用于按 pageSize 补全有效行",
+            "rowKeyType=2 的行作为新增行插入，且不计入补全数量",
+            "rowKeyType=3 对应行从页面集合移除，且不计入补全数量"
+          ]
+        },
+        {
+          "branch_id": "TC019-B02",
+          "entry_name": "雷达预选股弹窗",
+          "steps": [
+            "在雷达预选股弹窗构造 rowKeyType=0 的可视有效行并观察页面行集合",
+            "在雷达预选股弹窗构造 rowKeyType=1 的补全行并观察不满一页时的补位",
+            "在雷达预选股弹窗构造 rowKeyType=2 的新增行并观察插入结果",
+            "在雷达预选股弹窗构造 rowKeyType=3 的删除行并观察移除结果"
+          ],
+          "expected_results": [
+            "rowKeyType=0 的行作为可视范围有效行保留在页面行集合中",
+            "rowKeyType=1 的行用于按 pageSize 补全有效行",
+            "rowKeyType=2 的行作为新增行插入，且不计入补全数量",
+            "rowKeyType=3 对应行从页面集合移除，且不计入补全数量"
+          ]
+        }
+      ],
+      "condition_coverage": [
+        {
+          "combination_id": "CM-TC019-B01-1",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "rowKeyType数据",
+            "operation": "rowKeyType识别",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "不适用",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "清仓股弹窗",
+            "row_key_type": "0-可视有效行"
+          },
+          "expected_match_state": "命中rowKeyType数据场景",
+          "observable_result": "rowKeyType=0 的行作为可视范围有效行保留在页面行集合中",
+          "branch_id": "TC019-B01",
+          "step_index": 1,
+          "expected_index": 1
+        },
+        {
+          "combination_id": "CM-TC019-B01-2",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "rowKeyType数据",
+            "operation": "rowKeyType识别",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "不适用",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "清仓股弹窗",
+            "row_key_type": "1-补全行"
+          },
+          "expected_match_state": "命中rowKeyType数据场景",
+          "observable_result": "rowKeyType=1 的行用于按 pageSize 补全有效行",
+          "branch_id": "TC019-B01",
+          "step_index": 2,
+          "expected_index": 2
+        },
+        {
+          "combination_id": "CM-TC019-B01-3",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "rowKeyType数据",
+            "operation": "rowKeyType识别",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "不适用",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "清仓股弹窗",
+            "row_key_type": "2-新增行"
+          },
+          "expected_match_state": "命中rowKeyType数据场景",
+          "observable_result": "rowKeyType=2 的行作为新增行插入，且不计入补全数量",
+          "branch_id": "TC019-B01",
+          "step_index": 3,
+          "expected_index": 3
+        },
+        {
+          "combination_id": "CM-TC019-B01-4",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "rowKeyType数据",
+            "operation": "rowKeyType识别",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "不适用",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "清仓股弹窗",
+            "row_key_type": "3-删除行"
+          },
+          "expected_match_state": "命中rowKeyType数据场景",
+          "observable_result": "rowKeyType=3 对应行从页面集合移除，且不计入补全数量",
+          "branch_id": "TC019-B01",
+          "step_index": 4,
+          "expected_index": 4
+        },
+        {
+          "combination_id": "CM-TC019-B02-1",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "rowKeyType数据",
+            "operation": "rowKeyType识别",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "不适用",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "雷达预选股弹窗",
+            "row_key_type": "0-可视有效行"
+          },
+          "expected_match_state": "命中rowKeyType数据场景",
+          "observable_result": "rowKeyType=0 的行作为可视范围有效行保留在页面行集合中",
+          "branch_id": "TC019-B02",
+          "step_index": 1,
+          "expected_index": 1
+        },
+        {
+          "combination_id": "CM-TC019-B02-2",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "rowKeyType数据",
+            "operation": "rowKeyType识别",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "不适用",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "雷达预选股弹窗",
+            "row_key_type": "1-补全行"
+          },
+          "expected_match_state": "命中rowKeyType数据场景",
+          "observable_result": "rowKeyType=1 的行用于按 pageSize 补全有效行",
+          "branch_id": "TC019-B02",
+          "step_index": 2,
+          "expected_index": 2
+        },
+        {
+          "combination_id": "CM-TC019-B02-3",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "rowKeyType数据",
+            "operation": "rowKeyType识别",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "不适用",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "雷达预选股弹窗",
+            "row_key_type": "2-新增行"
+          },
+          "expected_match_state": "命中rowKeyType数据场景",
+          "observable_result": "rowKeyType=2 的行作为新增行插入，且不计入补全数量",
+          "branch_id": "TC019-B02",
+          "step_index": 3,
+          "expected_index": 3
+        },
+        {
+          "combination_id": "CM-TC019-B02-4",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "rowKeyType数据",
+            "operation": "rowKeyType识别",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "不适用",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "compatibility_mode": "不适用",
+            "expected_behavior": "不适用",
+            "business_entry": "雷达预选股弹窗",
+            "row_key_type": "3-删除行"
+          },
+          "expected_match_state": "命中rowKeyType数据场景",
+          "observable_result": "rowKeyType=3 对应行从页面集合移除，且不计入补全数量",
+          "branch_id": "TC019-B02",
+          "step_index": 4,
+          "expected_index": 4
+        }
+      ]
+    },
+    {
+      "tc_id": "TC020",
+      "dimension": "兼容性测试",
+      "secondary_dimensions": [
+        "回归测试"
+      ],
+      "common_entry": "轮询数据弹窗",
+      "module_level_1": null,
+      "module_level_2": null,
+      "test_point": "非轮询动态列兼容",
+      "steps": [],
+      "expected_results": [],
+      "risk_ids": [
+        "RISK-012"
+      ],
+      "requirement_ids": [
+        "REQ008"
+      ],
+      "change_ids": [],
+      "historical_defect_ids": [],
+      "test_priority": "P1",
+      "evidence_state": "已确认",
+      "regression_scope": "关联回归",
+      "deduplication_key": "轮询同步|非轮询动态列兼容|RISK-012",
+      "entry_branches": [
+        {
+          "branch_id": "TC020-B01",
+          "entry_name": "清仓股弹窗",
+          "steps": [
+            "在清仓股弹窗以 roundRobin=false 或 null 按原动态列参数发起查询"
+          ],
+          "expected_results": [
+            "返回字段集合继续遵循非轮询动态列参数，不被轮询模式返回所有字段的规则覆盖"
+          ]
+        },
+        {
+          "branch_id": "TC020-B02",
+          "entry_name": "雷达预选股弹窗",
+          "steps": [
+            "在雷达预选股弹窗以 roundRobin=false 或 null 按原动态列参数发起查询"
+          ],
+          "expected_results": [
+            "返回字段集合继续遵循非轮询动态列参数，不被轮询模式返回所有字段的规则覆盖"
+          ]
+        }
+      ],
+      "condition_coverage": [
+        {
+          "combination_id": "CM-TC020-B01",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "兼容与回归",
+            "operation": "非轮询查询",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "不适用",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "非轮询动态列",
+            "expected_behavior": "动态列参数继续生效",
+            "business_entry": "清仓股弹窗"
+          },
+          "expected_match_state": "命中兼容与回归场景",
+          "observable_result": "返回字段集合继续遵循非轮询动态列参数，不被轮询模式返回所有字段的规则覆盖",
+          "branch_id": "TC020-B01",
+          "step_index": 1,
+          "expected_index": 1
+        },
+        {
+          "combination_id": "CM-TC020-B02",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "兼容与回归",
+            "operation": "非轮询查询",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "不适用",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "非轮询动态列",
+            "expected_behavior": "动态列参数继续生效",
+            "business_entry": "雷达预选股弹窗"
+          },
+          "expected_match_state": "命中兼容与回归场景",
+          "observable_result": "返回字段集合继续遵循非轮询动态列参数，不被轮询模式返回所有字段的规则覆盖",
+          "branch_id": "TC020-B02",
+          "step_index": 1,
+          "expected_index": 1
+        }
+      ]
+    },
+    {
+      "tc_id": "TC021",
+      "dimension": "回归测试",
+      "secondary_dimensions": [
+        "功能测试"
+      ],
+      "common_entry": "轮询数据弹窗",
+      "module_level_1": null,
+      "module_level_2": null,
+      "test_point": "两个原入口非轮询能力回归",
+      "steps": [],
+      "expected_results": [],
+      "risk_ids": [
+        "RISK-013"
+      ],
+      "requirement_ids": [
+        "REQ008"
+      ],
+      "change_ids": [],
+      "historical_defect_ids": [],
+      "test_priority": "P1",
+      "evidence_state": "已确认",
+      "regression_scope": "关联回归",
+      "deduplication_key": "轮询同步|两个原入口非轮询能力回归|RISK-013",
+      "entry_branches": [
+        {
+          "branch_id": "TC021-B01",
+          "entry_name": "清仓股弹窗",
+          "steps": [
+            "在清仓股弹窗关闭轮询并按原查询路径查询、翻页和查看动态列"
+          ],
+          "expected_results": [
+            "查询、翻页及动态列字段集合与同条件变更前基线一致"
+          ]
+        },
+        {
+          "branch_id": "TC021-B02",
+          "entry_name": "雷达预选股弹窗",
+          "steps": [
+            "在雷达预选股弹窗关闭轮询并按原查询路径查询、翻页和查看动态列"
+          ],
+          "expected_results": [
+            "查询、翻页及动态列字段集合与同条件变更前基线一致"
+          ]
+        }
+      ],
+      "condition_coverage": [
+        {
+          "combination_id": "CM-TC021-B01",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "兼容与回归",
+            "operation": "非轮询查询",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "不适用",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "原入口非轮询能力",
+            "expected_behavior": "查询翻页和字段集合保持基线",
+            "business_entry": "清仓股弹窗"
+          },
+          "expected_match_state": "命中兼容与回归场景",
+          "observable_result": "查询、翻页及动态列字段集合与同条件变更前基线一致",
+          "branch_id": "TC021-B01",
+          "step_index": 1,
+          "expected_index": 1
+        },
+        {
+          "combination_id": "CM-TC021-B02",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "behavior_group": "兼容与回归",
+            "operation": "非轮询查询",
+            "start_date_scope": "不适用",
+            "end_date_scope": "不适用",
+            "market_session": "不适用",
+            "expected_polling_state": "不适用",
+            "current_page_position": "不适用",
+            "page_fill_state": "不适用",
+            "change_page_position": "不适用",
+            "deletion_extent": "不适用",
+            "original_page_count": "不适用",
+            "requested_page_state": "不适用",
+            "expected_page_behavior": "不适用",
+            "expected_consistency": "不适用",
+            "conflict_scenario": "不适用",
+            "row_key_type": "不适用",
+            "compatibility_mode": "原入口非轮询能力",
+            "expected_behavior": "查询翻页和字段集合保持基线",
+            "business_entry": "雷达预选股弹窗"
+          },
+          "expected_match_state": "命中兼容与回归场景",
+          "observable_result": "查询、翻页及动态列字段集合与同条件变更前基线一致",
+          "branch_id": "TC021-B02",
+          "step_index": 1,
+          "expected_index": 1
+        }
+      ]
+    }
+  ]
+}

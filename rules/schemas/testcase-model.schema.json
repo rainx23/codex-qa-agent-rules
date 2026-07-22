@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$comment": "Generated from scripts/qa_contracts.py; do not edit manually.",
-  "x-rule-version": "2.10.0",
+  "x-rule-version": "2.13.0",
   "title": "Testcase Model",
   "type": "object",
   "additionalProperties": false,
@@ -62,6 +62,22 @@
               "回归测试",
               "SQL验证"
             ]
+          },
+          "secondary_dimensions": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "功能测试",
+                "数据测试",
+                "异常测试",
+                "权限测试",
+                "导出测试",
+                "兼容性测试",
+                "回归测试",
+                "SQL验证"
+              ]
+            },
+            "uniqueItems": true
           },
           "common_entry": {
             "type": [
@@ -303,6 +319,164 @@
           "deduplication_key": {
             "type": "string",
             "minLength": 1
+          },
+          "core_deduplication_factors": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "business_object",
+              "trigger_condition",
+              "core_action",
+              "core_assertion",
+              "risk_semantics"
+            ],
+            "properties": {
+              "business_object": {
+                "type": "string",
+                "minLength": 1
+              },
+              "trigger_condition": {
+                "type": "string",
+                "minLength": 1
+              },
+              "core_action": {
+                "type": "string",
+                "minLength": 1
+              },
+              "core_assertion": {
+                "type": "string",
+                "minLength": 1
+              },
+              "risk_semantics": {
+                "type": "string",
+                "minLength": 1
+              },
+              "data_source": {
+                "type": "string",
+                "minLength": 1
+              },
+              "permission_rule": {
+                "type": "string",
+                "minLength": 1
+              },
+              "calculation_basis": {
+                "type": "string",
+                "minLength": 1
+              },
+              "exception_handling": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "core_deduplication_key": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^sha256:[0-9a-fA-F]{64}$"
+          },
+          "split_reason": {
+            "enum": [
+              "data_source",
+              "permission_rule",
+              "calculation_basis",
+              "operation",
+              "oracle",
+              "exception_handling",
+              "risk_diagnostic"
+            ]
+          },
+          "split_reason_detail": {
+            "type": "string",
+            "minLength": 1
+          },
+          "condition_coverage": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "combination_id",
+                "coverage_type",
+                "dimension_values",
+                "expected_match_state"
+              ],
+              "properties": {
+                "combination_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "coverage_type": {
+                  "enum": [
+                    "behavior",
+                    "configuration"
+                  ]
+                },
+                "dimension_values": {
+                  "type": "object"
+                },
+                "expected_match_state": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "observable_result": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "branch_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "step_index": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "expected_index": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "assertion_mappings": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "step_index",
+                      "expected_index",
+                      "observable_result"
+                    ],
+                    "properties": {
+                      "step_index": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "expected_index": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "observable_result": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  }
+                },
+                "scope_path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "minItems": 1,
+                  "uniqueItems": true
+                }
+              }
+            },
+            "uniqueItems": true
+          },
+          "shared_entry_scope_id": {
+            "type": "string",
+            "minLength": 1
           }
         }
       },
@@ -413,6 +587,88 @@
               "null"
             ]
           }
+        }
+      }
+    },
+    "shared_entry_scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope_id",
+        "scope_title",
+        "applies_to_tc_ids",
+        "groups"
+      ],
+      "properties": {
+        "scope_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scope_title": {
+          "const": "适用入口（以下全部TC均需逐项执行）"
+        },
+        "applies_to_tc_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^TC\\d{3}$"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "group_name",
+              "subgroups"
+            ],
+            "properties": {
+              "group_name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "subgroups": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "subgroup_name",
+                    "entries"
+                  ],
+                  "properties": {
+                    "subgroup_name": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "entries": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "entry_name"
+                        ],
+                        "properties": {
+                          "entry_name": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        }
+                      },
+                      "minItems": 1
+                    }
+                  }
+                },
+                "minItems": 1
+              }
+            }
+          },
+          "minItems": 1
         }
       }
     }

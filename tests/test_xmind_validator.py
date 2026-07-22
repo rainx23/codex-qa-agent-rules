@@ -62,6 +62,20 @@ class XMindValidatorTests(unittest.TestCase):
         self.assert_invalid(VALID.replace(expected, "各统计项按现有统计口径一致"), "VAGUE_EXISTING_RULE_ASSERTION")
         self.assert_invalid(VALID.replace(expected, "其他功能不受影响"), "VAGUE_BASELINE_ASSERTION")
 
+    def test_vague_relation_oracles_are_rejected(self):
+        expected = "返回集合仅包含该客户编号对应记录"
+        for vague in (
+            "按关系判断", "按关系得到可观察结果", "根据关系判断可见性",
+            "根据对应关系处理", "关系生效", "权限结果正确", "按配置结果展示",
+        ):
+            with self.subTest(vague=vague):
+                self.assert_invalid(VALID.replace(expected, vague), "VAGUE_RELATION_ORACLE")
+
+    def test_explicit_relation_oracle_is_allowed(self):
+        expected = "返回集合仅包含该客户编号对应记录"
+        text = VALID.replace(expected, "任一角色属于目标集合时股票可见；全部角色均不属于目标集合时股票不可见")
+        self.assertEqual(2, len(validate_markdown_text(text).tc_nodes))
+
     def test_explicit_baseline_and_field_oracle_are_allowed(self):
         step = "输入已确认的客户编号并查询"
         expected = "返回集合仅包含该客户编号对应记录"
@@ -158,6 +172,17 @@ class XMindValidatorTests(unittest.TestCase):
         outline = validate_markdown_text(path.read_text(encoding="utf-8"), path)
         self.assertEqual(["TC001"], [node.title for node in outline.tc_nodes])
         self.assertEqual(3, len(outline.tc_nodes[0].children[0].children))
+
+    def test_multi_entry_branch_allows_multiple_step_expected_pairs(self):
+        text = (ROOT / "tests/fixtures/multi_entry_valid_xmind.md").read_text(encoding="utf-8")
+        marker = "                        - 打开模拟交易清仓股弹窗"
+        addition = (
+            "                        - 在模拟入口执行第二个独立组合\n"
+            "                            - 第二个组合返回明确可见股票集合\n"
+        )
+        text = text.replace(marker, addition + marker, 1)
+        outline = validate_markdown_text(text)
+        self.assertEqual(["TC001"], [node.title for node in outline.tc_nodes])
 
     def test_multi_entry_direct_structure_is_valid(self):
         path = ROOT / "tests/fixtures/multi_entry_direct_valid_xmind.md"

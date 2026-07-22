@@ -1,0 +1,423 @@
+{
+  "schema_version": "2.0.0",
+  "model_id": "TCM-STOCK-T0-GRAY-20260721",
+  "root_title": "股票1000支限制外置灰与K线保留",
+  "branch_count": 0,
+  "execution_instance_count": 0,
+  "execution_instances": [],
+  "cases": [
+    {
+      "tc_id": "TC001",
+      "dimension": "功能测试",
+      "common_entry": "股票展示弹窗",
+      "module_level_1": null,
+      "module_level_2": null,
+      "test_point": "选股有效性决定股票名称代码标签和关联字段展示",
+      "steps": [
+        "打开当前入口，加载不在 pe_data.stock_t0_selected 表内且四个关联字段查不到的股票",
+        "在当前入口加载表内 enabled_flag=0 的股票",
+        "在当前入口加载表内 enabled_flag=1 且四个关联字段有值的股票"
+      ],
+      "expected_results": [
+        "股票名称、股票代码及标签均置灰；行业名称、热点名称、行业总数、行业股票数均显示“-”",
+        "股票名称、股票代码及标签均置灰",
+        "股票名称、股票代码及标签均不置灰；四个关联字段显示准备数据的对应值，不因本需求统一替换为“-”"
+      ],
+      "risk_ids": [
+        "RISK-001"
+      ],
+      "requirement_ids": [
+        "REQ001",
+        "REQ002",
+        "REQ003"
+      ],
+      "change_ids": [],
+      "historical_defect_ids": [],
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "deduplication_key": "选股有效性决定股票名称代码标签和关联字段展示|RISK-001",
+      "secondary_dimensions": [
+        "数据测试",
+        "回归测试"
+      ],
+      "core_deduplication_factors": {
+        "business_object": "股票名称、代码、标签和关联字段",
+        "trigger_condition": "记录不存在或 enabled_flag∈{0,1}",
+        "core_action": "加载股票行",
+        "core_assertion": "按三态逐行置灰并展示字段",
+        "risk_semantics": "有效性判定错误",
+        "data_source": "pe_data.stock_t0_selected",
+        "calculation_basis": "记录存在性与 enabled_flag",
+        "exception_handling": "未定义额外异常兜底"
+      },
+      "core_deduplication_key": "sha256:209e1346f7016cbd6629b97db6b94bf3d2aecb09607424e8825ee8389d310171",
+      "condition_coverage": [
+        {
+          "combination_id": "CM001",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "trade_environment": "模拟交易",
+            "selection_state": "不在表内",
+            "expected_gray_state": "置灰"
+          },
+          "expected_match_state": "不在表内",
+          "observable_result": "股票名称、股票代码及标签均置灰；行业名称、热点名称、行业总数、行业股票数均显示“-”",
+          "step_index": 1,
+          "expected_index": 1,
+          "scope_path": [
+            "模拟交易"
+          ]
+        },
+        {
+          "combination_id": "CM002",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "trade_environment": "正式交易",
+            "selection_state": "不在表内",
+            "expected_gray_state": "置灰"
+          },
+          "expected_match_state": "不在表内",
+          "observable_result": "股票名称、股票代码及标签均置灰；行业名称、热点名称、行业总数、行业股票数均显示“-”",
+          "step_index": 1,
+          "expected_index": 1,
+          "scope_path": [
+            "正式交易"
+          ]
+        },
+        {
+          "combination_id": "CM003",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "trade_environment": "模拟交易",
+            "selection_state": "在表内且enabled_flag=0",
+            "expected_gray_state": "置灰"
+          },
+          "expected_match_state": "在表内且enabled_flag=0",
+          "observable_result": "股票名称、股票代码及标签均置灰",
+          "step_index": 2,
+          "expected_index": 2,
+          "scope_path": [
+            "模拟交易"
+          ]
+        },
+        {
+          "combination_id": "CM004",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "trade_environment": "正式交易",
+            "selection_state": "在表内且enabled_flag=0",
+            "expected_gray_state": "置灰"
+          },
+          "expected_match_state": "在表内且enabled_flag=0",
+          "observable_result": "股票名称、股票代码及标签均置灰",
+          "step_index": 2,
+          "expected_index": 2,
+          "scope_path": [
+            "正式交易"
+          ]
+        },
+        {
+          "combination_id": "CM005",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "trade_environment": "模拟交易",
+            "selection_state": "在表内且enabled_flag=1",
+            "expected_gray_state": "不置灰"
+          },
+          "expected_match_state": "在表内且enabled_flag=1",
+          "observable_result": "股票名称、股票代码及标签均不置灰；四个关联字段显示准备数据的对应值，不因本需求统一替换为“-”",
+          "step_index": 3,
+          "expected_index": 3,
+          "scope_path": [
+            "模拟交易"
+          ]
+        },
+        {
+          "combination_id": "CM006",
+          "coverage_type": "behavior",
+          "dimension_values": {
+            "trade_environment": "正式交易",
+            "selection_state": "在表内且enabled_flag=1",
+            "expected_gray_state": "不置灰"
+          },
+          "expected_match_state": "在表内且enabled_flag=1",
+          "observable_result": "股票名称、股票代码及标签均不置灰；四个关联字段显示准备数据的对应值，不因本需求统一替换为“-”",
+          "step_index": 3,
+          "expected_index": 3,
+          "scope_path": [
+            "正式交易"
+          ]
+        }
+      ],
+      "shared_entry_scope_id": "SCOPE-STOCK-T0-GRAY-001"
+    },
+    {
+      "tc_id": "TC002",
+      "dimension": "功能测试",
+      "common_entry": "股票展示弹窗",
+      "module_level_1": null,
+      "module_level_2": null,
+      "test_point": "置灰股票保留K线下钻",
+      "steps": [
+        "打开当前入口，对不在 pe_data.stock_t0_selected 表内的置灰股票触发原有K线下钻",
+        "在当前入口对 enabled_flag=0 的置灰股票触发原有K线下钻"
+      ],
+      "expected_results": [
+        "表外置灰股票进入对应K线页面或视图，股票对象与来源行一致",
+        "enabled_flag=0 的置灰股票进入对应K线页面或视图，股票对象与来源行一致"
+      ],
+      "risk_ids": [
+        "RISK-002"
+      ],
+      "requirement_ids": [
+        "REQ001",
+        "REQ004"
+      ],
+      "change_ids": [],
+      "historical_defect_ids": [],
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "regression_scope": "核心回归",
+      "deduplication_key": "置灰股票保留K线下钻|RISK-002",
+      "secondary_dimensions": [
+        "回归测试"
+      ],
+      "core_deduplication_factors": {
+        "business_object": "置灰股票K线入口",
+        "trigger_condition": "记录不存在或 enabled_flag=0",
+        "core_action": "触发原有K线下钻",
+        "core_assertion": "进入来源股票对应K线",
+        "risk_semantics": "置灰误禁用下钻",
+        "data_source": "pe_data.stock_t0_selected",
+        "calculation_basis": "记录存在性与 enabled_flag",
+        "exception_handling": "未定义额外异常兜底"
+      },
+      "core_deduplication_key": "sha256:10d52fc86e94d847e8367735bcebbf53ceb1de9f38322f46c562b99741954b54",
+      "shared_entry_scope_id": "SCOPE-STOCK-T0-GRAY-001"
+    },
+    {
+      "tc_id": "TC003",
+      "dimension": "数据测试",
+      "common_entry": "股票展示弹窗",
+      "module_level_1": null,
+      "module_level_2": null,
+      "test_point": "混合股票逐行独立展示",
+      "steps": [
+        "打开当前入口，同屏加载表外、enabled_flag=0 和 enabled_flag=1 三类股票，记录名称、代码、标签及四个关联字段后刷新"
+      ],
+      "expected_results": [
+        "刷新前后三行均只按自身选股有效性展示；表外行置灰且四字段为“-”，无效行置灰，有效行不置灰且保留准备数据值；相邻行不串色"
+      ],
+      "risk_ids": [
+        "RISK-003"
+      ],
+      "requirement_ids": [
+        "REQ002",
+        "REQ003"
+      ],
+      "change_ids": [],
+      "historical_defect_ids": [],
+      "test_priority": "P1",
+      "evidence_state": "已确认",
+      "regression_scope": "关联回归",
+      "deduplication_key": "混合股票逐行独立展示|RISK-003",
+      "secondary_dimensions": [
+        "功能测试",
+        "回归测试"
+      ],
+      "core_deduplication_factors": {
+        "business_object": "同屏混合股票行",
+        "trigger_condition": "三种有效性同屏",
+        "core_action": "刷新并逐行核对",
+        "core_assertion": "三行展示互不污染",
+        "risk_semantics": "行状态串色",
+        "data_source": "pe_data.stock_t0_selected",
+        "calculation_basis": "记录存在性与 enabled_flag",
+        "exception_handling": "未定义额外异常兜底"
+      },
+      "core_deduplication_key": "sha256:b0028265df92644a84c1363402d229895acfe2b6633f4cfd286f65d8abded091",
+      "shared_entry_scope_id": "SCOPE-STOCK-T0-GRAY-001"
+    },
+    {
+      "tc_id": "TC004",
+      "dimension": "数据测试",
+      "common_entry": "股票展示弹窗",
+      "module_level_1": null,
+      "module_level_2": null,
+      "test_point": "1000支有效股票与限制外股票边界",
+      "steps": [
+        "打开当前入口，准备1000支表内 enabled_flag=1 股票和1支表外股票，定位第1000支与额外表外股票并分别触发K线下钻"
+      ],
+      "expected_results": [
+        "第1000支有效股票名称、代码和标签不置灰；额外表外股票名称、代码和标签置灰且四字段为“-”；两行均可进入各自股票K线"
+      ],
+      "risk_ids": [
+        "RISK-004"
+      ],
+      "requirement_ids": [
+        "REQ005"
+      ],
+      "change_ids": [],
+      "historical_defect_ids": [],
+      "test_priority": "P1",
+      "evidence_state": "已确认",
+      "regression_scope": "关联回归",
+      "deduplication_key": "1000支有效股票与限制外股票边界|RISK-004",
+      "secondary_dimensions": [
+        "功能测试",
+        "回归测试"
+      ],
+      "core_deduplication_factors": {
+        "business_object": "1000支有效股票和1支表外股票",
+        "trigger_condition": "1000+1边界",
+        "core_action": "定位边界股票并下钻",
+        "core_assertion": "有效边界不灰且表外行灰并可下钻",
+        "risk_semantics": "边界误判",
+        "data_source": "pe_data.stock_t0_selected",
+        "calculation_basis": "记录存在性与 enabled_flag",
+        "exception_handling": "未定义额外异常兜底"
+      },
+      "core_deduplication_key": "sha256:28794e5d596ab4074a01679ca395f211d340a5f0d716e14f01ef56be145bb11f",
+      "shared_entry_scope_id": "SCOPE-STOCK-T0-GRAY-001"
+    }
+  ],
+  "shared_entry_scope": {
+    "scope_id": "SCOPE-STOCK-T0-GRAY-001",
+    "scope_title": "适用入口（以下全部TC均需逐项执行）",
+    "applies_to_tc_ids": [
+      "TC001",
+      "TC002",
+      "TC003",
+      "TC004"
+    ],
+    "groups": [
+      {
+        "group_name": "模拟交易",
+        "subgroups": [
+          {
+            "subgroup_name": "汇总卡片",
+            "entries": [
+              {
+                "entry_name": "建加仓股弹窗"
+              },
+              {
+                "entry_name": "清仓股弹窗"
+              },
+              {
+                "entry_name": "T0股/底仓股、持/清‘底+T’合盈弹窗"
+              },
+              {
+                "entry_name": "欠股弹窗"
+              },
+              {
+                "entry_name": "多买股弹窗"
+              },
+              {
+                "entry_name": "雷达预选股弹窗"
+              },
+              {
+                "entry_name": "雷达股弹窗"
+              },
+              {
+                "entry_name": "观察股弹窗"
+              }
+            ]
+          },
+          {
+            "subgroup_name": "主列表",
+            "entries": [
+              {
+                "entry_name": "预选股弹窗"
+              },
+              {
+                "entry_name": "成交股弹窗"
+              },
+              {
+                "entry_name": "已买股弹窗"
+              },
+              {
+                "entry_name": "买失败股弹窗"
+              },
+              {
+                "entry_name": "已卖股弹窗"
+              },
+              {
+                "entry_name": "卖失败股弹窗"
+              },
+              {
+                "entry_name": "欠股弹窗"
+              },
+              {
+                "entry_name": "多买股弹窗"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "group_name": "正式交易",
+        "subgroups": [
+          {
+            "subgroup_name": "汇总卡片",
+            "entries": [
+              {
+                "entry_name": "建加仓股弹窗"
+              },
+              {
+                "entry_name": "清仓股弹窗"
+              },
+              {
+                "entry_name": "T0股/底仓股、持/清‘底+T’合盈弹窗"
+              },
+              {
+                "entry_name": "欠股弹窗"
+              },
+              {
+                "entry_name": "多买股弹窗"
+              },
+              {
+                "entry_name": "雷达预选股弹窗"
+              },
+              {
+                "entry_name": "雷达股弹窗"
+              },
+              {
+                "entry_name": "观察股弹窗"
+              }
+            ]
+          },
+          {
+            "subgroup_name": "主列表",
+            "entries": [
+              {
+                "entry_name": "预选股弹窗"
+              },
+              {
+                "entry_name": "成交股弹窗"
+              },
+              {
+                "entry_name": "已买股弹窗"
+              },
+              {
+                "entry_name": "买失败股弹窗"
+              },
+              {
+                "entry_name": "已卖股弹窗"
+              },
+              {
+                "entry_name": "卖失败股弹窗"
+              },
+              {
+                "entry_name": "欠股弹窗"
+              },
+              {
+                "entry_name": "多买股弹窗"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

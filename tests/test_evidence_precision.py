@@ -46,6 +46,56 @@ class EvidencePrecisionTests(unittest.TestCase):
             item["stale_reason"] = "等待重新确认"
         return item
 
+    def snapshot_evidence(self, start: int, end: int, excerpt: str, *, path: str = "snapshot.md") -> dict:
+        snapshot = self.root / path
+        if not snapshot.exists() and path == "snapshot.md":
+            snapshot.write_bytes("\ufeff第一行\r\n\r\n第三行\r\n第四行\r\n".encode("utf-8"))
+        return {
+            "source_type": "pasted_text", "storage_type": "snapshot", "source_path": None,
+            "snapshot_path": path, "source_record_id": "snapshot:LINE-RANGE",
+            "line_start": start, "line_end": end, "commit_sha": None,
+            "content_hash": stable_file_content_hash(snapshot, normalize_text_newlines=True) if snapshot.exists() else "sha256:" + "0" * 64,
+            "excerpt": excerpt, "captured_at": "2026-07-20 00:00:00",
+            "captured_timezone": "Asia/Shanghai", "evidence_status": "current",
+        }
+
+    def test_exact_snapshot_line_range_passes(self):
+        self.assertEqual([], validate_evidence_reference(
+            self.snapshot_evidence(1, 3, "第一行\n\n第三行"), root=self.root
+        ))
+
+    def test_line_start_offset_fails_with_stable_code(self):
+        errors = validate_evidence_reference(self.snapshot_evidence(2, 3, "第一行\n\n第三行"), root=self.root)
+        self.assertTrue(any("EVIDENCE_EXCERPT_LINE_RANGE_MISMATCH" in error for error in errors), errors)
+
+    def test_line_end_offset_fails_with_stable_code(self):
+        errors = validate_evidence_reference(self.snapshot_evidence(1, 2, "第一行\n\n第三行"), root=self.root)
+        self.assertTrue(any("EVIDENCE_EXCERPT_LINE_RANGE_MISMATCH" in error for error in errors), errors)
+
+    def test_excerpt_content_mismatch_fails_with_stable_code(self):
+        errors = validate_evidence_reference(self.snapshot_evidence(1, 1, "不是第一行"), root=self.root)
+        self.assertTrue(any("EVIDENCE_EXCERPT_LINE_RANGE_MISMATCH" in error for error in errors), errors)
+
+    def test_crlf_lf_difference_is_normalized(self):
+        self.assertEqual([], validate_evidence_reference(
+            self.snapshot_evidence(1, 3, "第一行\r\n\r\n第三行"), root=self.root
+        ))
+
+    def test_blank_line_participates_in_physical_line_numbers(self):
+        self.assertEqual([], validate_evidence_reference(self.snapshot_evidence(2, 3, "\n第三行"), root=self.root))
+
+    def test_invalid_and_overflow_ranges_fail(self):
+        for start, end, marker in ((0, 1, "行号范围非法"), (3, 2, "行号范围非法"), (1, 99, "line_end 超出")):
+            with self.subTest(start=start, end=end):
+                errors = validate_evidence_reference(self.snapshot_evidence(start, end, "第一行"), root=self.root)
+                self.assertTrue(any(marker in error for error in errors), errors)
+
+    def test_missing_snapshot_path_fails(self):
+        errors = validate_evidence_reference(
+            self.snapshot_evidence(1, 1, "第一行", path="missing.md"), root=self.root
+        )
+        self.assertTrue(any("snapshot_path 文件不存在" in error for error in errors), errors)
+
     def requirement(self) -> dict:
         data = self.load("requirement-analysis.json")
         refs = [self.evidence(1, "客户编号支持精确查询。"), self.evidence(2, "分页保留筛选条件。")]
@@ -71,7 +121,7 @@ class EvidencePrecisionTests(unittest.TestCase):
 
     def test_excerpt_outside_range_and_range_overflow_fail(self):
         item = self.evidence(1, "分页保留筛选条件。")
-        self.assertTrue(any("EVIDENCE_EXCERPT_OUTSIDE_RANGE" in error for error in validate_evidence_reference(item, root=self.root)))
+        self.assertTrue(any("EVIDENCE_EXCERPT_LINE_RANGE_MISMATCH" in error for error in validate_evidence_reference(item, root=self.root)))
         item = self.evidence(1, "客户编号支持精确查询。")
         item["line_end"] = 99
         self.assertTrue(any("line_end 超出" in error for error in validate_evidence_reference(item, root=self.root)))

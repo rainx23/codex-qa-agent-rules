@@ -12,7 +12,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from build_testcase_index import migrate_index_text, update
 from md_to_xmind import convert_file
-from qa_contracts import read_rule_version, stable_source_hash
+from qa_contracts import DIMENSIONS, read_rule_version, stable_source_hash
 from repair_text_encoding import merge_reference_index, repair_text
 from validate_manifest import artifact_workspace_root, resolve_safe_path, validate_manifest_file
 from validate_models import _evidence_root
@@ -45,6 +45,29 @@ class ArtifactGovernanceTests(unittest.TestCase):
     def _relative(self, path: Path) -> str:
         return path.relative_to(ROOT).as_posix()
 
+    def _add_current_dimension_contract(self, requirement: Path, report: Path) -> None:
+        data = json.loads(requirement.read_text(encoding="utf-8"))
+        data["test_dimension_assessment"] = []
+        for dimension in DIMENSIONS:
+            covered = dimension in {"功能测试", "数据测试"}
+            suffix = "001" if dimension == "功能测试" else "002"
+            data["test_dimension_assessment"].append({
+                "dimension": dimension,
+                "status": "covered" if covered else "not_applicable",
+                "reason": "通用 Fixture 已覆盖" if covered else "通用 Fixture 范围不涉及该维度",
+                "fact_ids": [f"FACT-{suffix}" if covered else "FACT-001"],
+                "risk_ids": [f"RISK-{suffix}"] if covered else [],
+                "confirmation_ids": [],
+                "testcase_ids": [f"TC{suffix}"] if covered else [],
+                "evidence_references": [],
+            })
+        requirement.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+        table = "\n## 测试维度扫描\n\n| 维度 | 状态 |\n| --- | --- |\n" + "".join(
+            f"| {dimension} | {'covered' if dimension in {'功能测试', '数据测试'} else 'not_applicable'} |\n"
+            for dimension in DIMENSIONS
+        )
+        report.write_text(report.read_text(encoding="utf-8") + table, encoding="utf-8")
+
     def make_passed_manifest(self) -> tuple[Path, dict]:
         report = self._copy(ROOT / "tests/fixtures/reports/combined_consistent.md", "report.md")
         markdown = self._copy(ROOT / "tests/fixtures/valid_case_xmind.md", "case_xmind.md")
@@ -53,6 +76,7 @@ class ArtifactGovernanceTests(unittest.TestCase):
         diff = self._copy(ROOT / "tests/fixtures/models/diff-impact.json", "diff-impact.json")
         risk = self._copy(ROOT / "tests/fixtures/models/risk-coverage-matrix.json", "risk-coverage-matrix.json")
         testcase = self._copy(ROOT / "tests/fixtures/models/testcase-model.json", "testcase-model.json")
+        self._add_current_dimension_contract(requirement, report)
         workbook = self.directory / "case_workbook.xmind"
         workbook.unlink(missing_ok=True)
         convert_file(markdown, workbook)

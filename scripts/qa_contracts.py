@@ -4,8 +4,10 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import re
 from datetime import datetime
+from itertools import product
 from pathlib import Path
 from typing import Any, Callable
 
@@ -40,6 +42,9 @@ DIMENSIONS = (
     "功能测试", "数据测试", "异常测试", "权限测试",
     "导出测试", "兼容性测试", "回归测试", "SQL验证",
 )
+TEST_DIMENSION_STATUSES = ("covered", "not_applicable", "explicitly_excluded", "pending", "blocked")
+CONDITION_MATRIX_APPLICABILITY_STATUSES = ("required", "not_required", "blocked")
+SCOPE_DISPOSITION_STATUSES = TEST_DIMENSION_STATUSES
 TC_PATTERN = r"^TC\d{3}$"
 SEMVER_PATTERN = r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$"
 GENERATED_AT_FORMAT = "%Y-%m-%d %H:%M:%S"
@@ -48,6 +53,12 @@ ZERO_HASH = "sha256:" + "0" * 64
 KNOWLEDGE_STATUSES = ("active_confirmed", "candidate", "conflicting", "superseded", "deprecated", "missing")
 SCHEMA_SCOPES = ("complete", "partial", "blocked")
 RISK_DISPOSITIONS = ("active", "covered", "merged", "deferred", "accepted", "blocked", "not_applicable", "resolved")
+CONDITION_COVERAGE_TYPES = ("behavior", "configuration")
+SHARED_ENTRY_SCOPE_MIN_ENTRIES = 6
+TC_SPLIT_REASONS = (
+    "data_source", "permission_rule", "calculation_basis", "operation",
+    "oracle", "exception_handling", "risk_diagnostic",
+)
 FIXED_API_ASSERTION_SCOPE = "parameter_health"
 FIXED_API_HEALTH_CHECKS = (
     {"path": "content.code", "operator": "equals", "expected": 0},
@@ -158,6 +169,22 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 
 def stable_normalized_file_hash(path: Path) -> str:
     return stable_file_content_hash(path, normalize_text_newlines=True)
+
+
+def compute_core_deduplication_key(factors: dict[str, Any]) -> str:
+    """Return a deterministic entry-agnostic key for testcase merge decisions."""
+
+    ordered_fields = (
+        "business_object", "trigger_condition", "core_action", "core_assertion",
+        "risk_semantics", "data_source", "permission_rule", "calculation_basis",
+        "exception_handling",
+    )
+    normalized = {
+        field: re.sub(r"\s+", " ", str(factors.get(field, ""))).strip().casefold()
+        for field in ordered_fields
+    }
+    payload = json.dumps(normalized, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return "sha256:" + hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
 def read_rule_version(root: Path) -> str:
@@ -280,6 +307,81 @@ def validate_schema_shape(value: Any, schema: dict[str, Any], path: str = "$") -
 
 
 def requirement_schema(version: str) -> dict[str, Any]:
+    test_dimension_assessment = _object(
+        ["dimension", "status", "reason", "fact_ids", "risk_ids", "confirmation_ids", "testcase_ids", "evidence_references"],
+        {
+            "dimension": {"enum": list(DIMENSIONS)},
+            "status": {"enum": list(TEST_DIMENSION_STATUSES)},
+            "reason": _string(), "fact_ids": _strings(), "risk_ids": _strings(),
+            "confirmation_ids": _strings(), "testcase_ids": _strings(),
+            "evidence_references": {"type": "array", "items": _evidence_reference()},
+        },
+    )
+    condition_matrix_applicability = _object(
+        ["status", "dimension_ids", "reason", "evidence_references"],
+        {
+            "status": {"enum": list(CONDITION_MATRIX_APPLICABILITY_STATUSES)},
+            "dimension_ids": _strings(), "reason": _string(),
+            "evidence_references": {"type": "array", "items": _evidence_reference()},
+            "confirmation_ids": _strings(), "missing_fact_ids": _strings(),
+        },
+    )
+    scope_disposition = _object(
+        ["scope_item", "status", "reason", "evidence_references"],
+        {
+            "scope_item": _string(), "status": {"enum": list(SCOPE_DISPOSITION_STATUSES)},
+            "reason": _string(), "evidence_references": {"type": "array", "items": _evidence_reference()},
+            "fact_ids": _strings(), "confirmation_ids": _strings(),
+        },
+    )
+    condition_dimension = _object(
+        ["dimension_id", "dimension_name", "values"],
+        {"dimension_id": _string(), "dimension_name": _string(), "values": _strings(1)},
+    )
+    required_combination = _object(
+        ["combination_id", "dimension_values", "covered_by_tc_ids"],
+        {
+            "combination_id": _string(), "dimension_values": {"type": "object"},
+            "covered_by_tc_ids": {"type": "array", "items": _string(pattern=TC_PATTERN), "uniqueItems": True},
+        },
+    )
+    excluded_combination = _object(
+        ["combination_id", "dimension_values", "exclusion_reason"],
+        {
+            "combination_id": _string(), "dimension_values": {"type": "object"},
+            "exclusion_reason": _string(),
+        },
+    )
+    variable_dimension = _object(
+        ["dimension_id", "values"],
+        {"dimension_id": _string(), "values": _strings(1)},
+    )
+    combination_group = _object(
+        ["group_id", "fixed_values", "variable_dimensions", "expected_combination_count"],
+        {
+            "group_id": _string(), "fixed_values": {"type": "object"},
+            "variable_dimensions": {"type": "array", "items": variable_dimension, "minItems": 1},
+            "expected_combination_count": {"type": "integer", "minimum": 1},
+            "constraints": _strings(),
+        },
+    )
+    combination_generation = _object(
+        ["mode", "groups"],
+        {
+            "mode": {"const": "grouped_cross_product"},
+            "groups": {"type": "array", "items": combination_group, "minItems": 1},
+        },
+    )
+    condition_matrix = _object(
+        ["dimensions", "combination_generation", "required_combinations", "excluded_combinations", "coverage_summary"],
+        {
+            "dimensions": {"type": "array", "items": condition_dimension, "minItems": 2},
+            "combination_generation": combination_generation,
+            "required_combinations": {"type": "array", "items": required_combination},
+            "excluded_combinations": {"type": "array", "items": excluded_combination},
+            "coverage_summary": {"type": "object"},
+        },
+    )
     fact = _object(
         ["fact_id", "category", "statement", "source_type", "source_reference", "confidence", "affects_core_expectation", "evidence_references"],
         {
@@ -321,6 +423,11 @@ def requirement_schema(version: str) -> dict[str, Any]:
             "data_validation_required": {"enum": list(DATA_VALIDATION_REQUIREMENTS)}, "data_validation_reason": _string(),
             "recommended_validation_method": {"enum": list(VALIDATION_METHODS)}, "sql_generation_status": {"enum": list(SQL_GENERATION_STATUSES)},
             "validation_missing_information": _strings(),
+            "condition_matrix_required": {"type": "boolean"},
+            "condition_matrix": condition_matrix,
+            "test_dimension_assessment": {"type": "array", "items": test_dimension_assessment},
+            "condition_matrix_applicability": condition_matrix_applicability,
+            "scope_dispositions": {"type": "array", "items": scope_disposition},
         },
     )
     return _base_schema("Requirement Analysis Model", version, body)
@@ -584,10 +691,67 @@ def testcase_schema(version: str) -> dict[str, Any]:
             "steps": _strings(1), "expected_results": _strings(1),
         },
     )
+    assertion_mapping = _object(
+        ["step_index", "expected_index", "observable_result"],
+        {
+            "step_index": {"type": "integer", "minimum": 1},
+            "expected_index": {"type": "integer", "minimum": 1},
+            "observable_result": _string(),
+        },
+    )
+    condition_coverage = _object(
+        ["combination_id", "coverage_type", "dimension_values", "expected_match_state"],
+        {
+            "combination_id": _string(), "coverage_type": {"enum": list(CONDITION_COVERAGE_TYPES)},
+            "dimension_values": {"type": "object"}, "expected_match_state": _string(),
+            "observable_result": _string(),
+            "branch_id": _string(), "step_index": {"type": "integer", "minimum": 1},
+            "expected_index": {"type": "integer", "minimum": 1},
+            "assertion_mappings": {"type": "array", "minItems": 1, "items": assertion_mapping},
+            "scope_path": _strings(1),
+        },
+    )
+    shared_scope_entry = _object(
+        ["entry_name"],
+        {"entry_name": _string()},
+    )
+    shared_scope_subgroup = _object(
+        ["subgroup_name", "entries"],
+        {
+            "subgroup_name": _string(),
+            "entries": {"type": "array", "items": shared_scope_entry, "minItems": 1},
+        },
+    )
+    shared_scope_group = _object(
+        ["group_name", "subgroups"],
+        {
+            "group_name": _string(),
+            "subgroups": {"type": "array", "items": shared_scope_subgroup, "minItems": 1},
+        },
+    )
+    shared_entry_scope = _object(
+        ["scope_id", "scope_title", "applies_to_tc_ids", "groups"],
+        {
+            "scope_id": _string(),
+            "scope_title": {"const": "适用入口（以下全部TC均需逐项执行）"},
+            "applies_to_tc_ids": {"type": "array", "items": _string(pattern=TC_PATTERN), "minItems": 1, "uniqueItems": True},
+            "groups": {"type": "array", "items": shared_scope_group, "minItems": 1},
+        },
+    )
+    core_deduplication_factors = _object(
+        ["business_object", "trigger_condition", "core_action", "core_assertion", "risk_semantics"],
+        {
+            "business_object": _string(), "trigger_condition": _string(), "core_action": _string(),
+            "core_assertion": _string(), "risk_semantics": _string(), "data_source": _string(),
+            "permission_rule": _string(), "calculation_basis": _string(),
+            "exception_handling": _string(),
+        },
+    )
     case = _object(
         ["tc_id", "dimension", "common_entry", "module_level_1", "module_level_2", "test_point", "steps", "expected_results", "risk_ids", "requirement_ids", "change_ids", "historical_defect_ids", "test_priority", "evidence_state", "regression_scope", "deduplication_key"],
         {
             "tc_id": _string(pattern=TC_PATTERN), "dimension": {"enum": list(DIMENSIONS)},
+            "secondary_dimensions": {"type": "array", "items": {"enum": list(DIMENSIONS)}, "uniqueItems": True},
             "common_entry": {"type": ["string", "null"]}, "module_level_1": {"type": ["string", "null"]},
             "module_level_2": {"type": ["string", "null"]}, "test_point": _string(),
             "steps": _strings(), "expected_results": _strings(), "actions": {"type": "array", "items": action}, "risk_ids": _strings(1),
@@ -597,6 +761,11 @@ def testcase_schema(version: str) -> dict[str, Any]:
             "cleanup_steps": _strings(), "oracle_sources": _strings(), "automation_candidate": {"enum": ["yes", "no", "unknown"]}, "automation_reason": _string(),
             "test_priority": {"enum": list(TEST_PRIORITIES)}, "evidence_state": {"enum": list(EVIDENCE_STATES)},
             "regression_scope": {"enum": list(REGRESSION_SCOPES)}, "deduplication_key": _string(),
+            "core_deduplication_factors": core_deduplication_factors,
+            "core_deduplication_key": _string(pattern=r"^sha256:[0-9a-fA-F]{64}$"),
+            "split_reason": {"enum": list(TC_SPLIT_REASONS)}, "split_reason_detail": _string(),
+            "condition_coverage": {"type": "array", "items": condition_coverage, "uniqueItems": True},
+            "shared_entry_scope_id": _string(),
         },
     )
     execution_instance = _object(
@@ -611,7 +780,8 @@ def testcase_schema(version: str) -> dict[str, Any]:
         ["schema_version", "root_title", "cases"],
         {"schema_version": {"const": SCHEMA_VERSION}, "model_id": _string(), "root_title": _string(), "cases": {"type": "array", "items": case, "minItems": 1},
          "branch_count": {"type": "integer", "minimum": 0}, "execution_instance_count": {"type": "integer", "minimum": 0},
-         "execution_instances": {"type": "array", "items": execution_instance}},
+         "execution_instances": {"type": "array", "items": execution_instance},
+         "shared_entry_scope": shared_entry_scope},
     )
     return _base_schema("Testcase Model", version, body)
 
@@ -730,6 +900,8 @@ def manifest_schema(version: str) -> dict[str, Any]:
         "analysis_model_paths": _strings(), "risk_matrix_path": {"type": ["string", "null"]},
         "testcase_model_path": {"type": ["string", "null"]}, "xmind_md_path": {"type": ["string", "null"]},
         "xmind_path": {"type": ["string", "null"]}, "case_count": {"type": "integer", "minimum": 0},
+        "branch_count": {"type": "integer", "minimum": 0},
+        "execution_instance_count": {"type": "integer", "minimum": 0},
         "draft_report_path": {"type": ["string", "null"]}, "draft_risk_matrix_path": {"type": ["string", "null"]},
         "draft_testcase_model_path": {"type": ["string", "null"]}, "draft_xmind_md_path": {"type": ["string", "null"]},
         "p0_count": {"type": "integer", "minimum": 0, "description": "Compatibility alias of p0_case_count."},
@@ -743,6 +915,7 @@ def manifest_schema(version: str) -> dict[str, Any]:
         "validation_status": {"enum": list(VALIDATION_STATUSES)}, "relation": {"enum": list(RELATIONS)},
         "supersedes": {"type": ["string", "null"]}, "failure_reason": {"type": ["string", "null"]},
         "pending_reason": {"type": ["string", "null"]},
+        "lifecycle_status": {"enum": ["active", "superseded", "archived"]},
     }
     return _base_schema("QA Artifact Manifest", version, _object(required, properties))
 
@@ -845,8 +1018,229 @@ def summarize_confirmations(requirement_model: dict[str, Any]) -> dict[str, int]
     }
 
 
+def _condition_key(values: Any) -> str | None:
+    if not isinstance(values, dict) or not all(isinstance(key, str) for key in values):
+        return None
+    return json.dumps(values, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+
+
+def _generate_expected_condition_combinations(
+    condition_matrix: dict[str, Any],
+    dimension_ids: set[str],
+    dimension_values: dict[str, set[str]],
+) -> tuple[dict[str, dict[str, Any]], list[str]]:
+    generation = condition_matrix.get("combination_generation")
+    if not isinstance(generation, dict):
+        return {}, ["CONDITION_MATRIX_REQUIRED: condition_matrix_required=true 时必须提供 combination_generation"]
+    if generation.get("mode") != "grouped_cross_product":
+        return {}, ["CONDITION_MATRIX_REQUIRED: combination_generation.mode 必须为 grouped_cross_product"]
+    groups = generation.get("groups", []) if isinstance(generation.get("groups"), list) else []
+    _, group_errors = _unique_ids(groups, "group_id")
+    errors = [f"CONDITION_MATRIX_REQUIRED: {item}" for item in group_errors]
+    generated: dict[str, dict[str, Any]] = {}
+    for group in groups:
+        group_id = group.get("group_id")
+        fixed = group.get("fixed_values") if isinstance(group.get("fixed_values"), dict) else {}
+        variables = group.get("variable_dimensions") if isinstance(group.get("variable_dimensions"), list) else []
+        variable_ids = [item.get("dimension_id") for item in variables if isinstance(item, dict)]
+        if len(variable_ids) != len(set(variable_ids)):
+            errors.append(f"CONDITION_MATRIX_REQUIRED: group {group_id} variable_dimensions 重复")
+        declared_ids = set(fixed) | set(variable_ids)
+        if declared_ids != dimension_ids:
+            errors.append(
+                f"CONDITION_MATRIX_REQUIRED: group {group_id} 必须用 fixed_values + variable_dimensions 完整覆盖全部维度"
+            )
+            continue
+        if set(fixed) & set(variable_ids):
+            errors.append(f"CONDITION_MATRIX_REQUIRED: group {group_id} 固定维度与可变维度重复")
+            continue
+        invalid_group = False
+        for dimension_id, value in fixed.items():
+            if not isinstance(value, str) or value not in dimension_values.get(dimension_id, set()):
+                errors.append(
+                    f"CONDITION_MATRIX_REQUIRED: group {group_id} fixed_values.{dimension_id} 枚举值非法：{value}"
+                )
+                invalid_group = True
+        variable_values: list[list[str]] = []
+        for variable in variables:
+            dimension_id = variable.get("dimension_id")
+            values = variable.get("values", []) if isinstance(variable.get("values"), list) else []
+            if not values or any(value not in dimension_values.get(dimension_id, set()) for value in values):
+                errors.append(
+                    f"CONDITION_MATRIX_REQUIRED: group {group_id} variable_dimensions.{dimension_id} 包含非法或空枚举"
+                )
+                invalid_group = True
+            variable_values.append(values)
+        if invalid_group:
+            continue
+        generated_count = 1
+        for values in variable_values:
+            generated_count *= len(values)
+        if group.get("expected_combination_count") != generated_count:
+            errors.append(
+                f"CONDITION_GENERATION_COUNT_MISMATCH: group {group_id} expected_combination_count="
+                f"{group.get('expected_combination_count')} 与生成数量 {generated_count} 不一致"
+            )
+        for selected in product(*variable_values):
+            values = dict(fixed)
+            values.update(dict(zip(variable_ids, selected)))
+            key = _condition_key(values)
+            if key in generated:
+                errors.append(
+                    f"CONDITION_COMBINATION_DUPLICATED: group {group_id} 与其他分组生成相同组合 {key}"
+                )
+            elif key is not None:
+                generated[key] = values
+    return generated, errors
+
+
 def validate_requirement_model(data: dict[str, Any], *, evidence_root: Path | None = None) -> list[str]:
     errors = validate_schema_shape(data, requirement_schema("0.0.0"))
+    facts = data.get("facts", []) if isinstance(data.get("facts"), list) else []
+    confirmations = data.get("confirmation_points", []) if isinstance(data.get("confirmation_points"), list) else []
+    fact_ids = {item.get("fact_id") for item in facts if isinstance(item, dict)}
+    confirmation_ids = {item.get("confirmation_id") for item in confirmations if isinstance(item, dict)}
+    assessment = data.get("test_dimension_assessment")
+    if assessment is not None:
+        items = assessment if isinstance(assessment, list) else []
+        dimensions = [item.get("dimension") for item in items if isinstance(item, dict)]
+        if len(dimensions) != len(set(dimensions)):
+            errors.append("DUPLICATE_TEST_DIMENSION_ASSESSMENT: 每个测试分类维度只能出现一次")
+        if set(dimensions) != set(DIMENSIONS):
+            errors.append("TEST_DIMENSION_ASSESSMENT_INCOMPLETE: 必须完整扫描固定八个测试分类维度")
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            dimension, status = item.get("dimension"), item.get("status")
+            reason = str(item.get("reason", "")).strip()
+            evidence = item.get("evidence_references", [])
+            if status not in TEST_DIMENSION_STATUSES:
+                errors.append(f"INVALID_TEST_DIMENSION_STATUS: {dimension} status={status}")
+            if status == "not_applicable" and not reason:
+                errors.append(f"NOT_APPLICABLE_DIMENSION_WITHOUT_REASON: {dimension}")
+            if status == "not_applicable" and not (set(item.get("fact_ids", [])) & fact_ids or evidence):
+                errors.append(f"NOT_APPLICABLE_DIMENSION_WITHOUT_REASON: {dimension} 缺少范围 Fact 或 Evidence")
+            if status == "explicitly_excluded" and not evidence:
+                errors.append(f"EXCLUDED_DIMENSION_WITHOUT_EVIDENCE: {dimension}")
+            if status == "pending" and not (set(item.get("confirmation_ids", [])) & confirmation_ids):
+                errors.append(f"PENDING_DIMENSION_WITHOUT_CONFIRMATION: {dimension}")
+            if status == "blocked" and not reason:
+                errors.append(f"BLOCKED_DIMENSION_WITHOUT_REASON: {dimension}")
+            if status == "blocked" and not (
+                set(item.get("confirmation_ids", [])) & confirmation_ids
+                or set(item.get("fact_ids", [])) & fact_ids
+            ):
+                errors.append(f"BLOCKED_DIMENSION_WITHOUT_REASON: {dimension} 缺少 Confirmation 或 Missing Fact")
+    applicability = data.get("condition_matrix_applicability")
+    if isinstance(applicability, dict):
+        status = applicability.get("status")
+        if status == "required" and not isinstance(data.get("condition_matrix"), dict):
+            errors.append("CONDITION_MATRIX_REQUIRED_FOR_MULTI_DIMENSION_REQUIREMENT: required 时必须提供 condition_matrix")
+        if status == "required" and not applicability.get("dimension_ids"):
+            errors.append("CONDITION_MATRIX_REQUIRED_FOR_MULTI_DIMENSION_REQUIREMENT: required 时必须提供 dimension_ids")
+        if status == "not_required" and not str(applicability.get("reason", "")).strip():
+            errors.append("CONDITION_MATRIX_REQUIRED_FOR_MULTI_DIMENSION_REQUIREMENT: not_required 必须说明无组合差异的依据")
+        if status == "blocked" and not (
+            set(applicability.get("confirmation_ids", [])) & confirmation_ids
+            or set(applicability.get("missing_fact_ids", [])) & fact_ids
+        ):
+            errors.append("CONDITION_MATRIX_REQUIRED_FOR_MULTI_DIMENSION_REQUIREMENT: blocked 必须关联 Confirmation 或 Missing Fact")
+    for disposition in data.get("scope_dispositions", []) if isinstance(data.get("scope_dispositions"), list) else []:
+        if not isinstance(disposition, dict):
+            continue
+        status = disposition.get("status")
+        evidence = disposition.get("evidence_references", [])
+        if status == "explicitly_excluded" and not evidence:
+            errors.append(f"TEST_SCOPE_EXCLUDED_WITHOUT_EVIDENCE: {disposition.get('scope_item')}")
+        if status == "pending" and not (set(disposition.get("confirmation_ids", [])) & confirmation_ids):
+            errors.append(f"TEST_SCOPE_EXCLUDED_WITHOUT_EVIDENCE: {disposition.get('scope_item')} pending 未关联 Confirmation")
+        if status == "blocked" and not str(disposition.get("reason", "")).strip():
+            errors.append(f"TEST_SCOPE_EXCLUDED_WITHOUT_EVIDENCE: {disposition.get('scope_item')} blocked 缺少原因")
+    condition_matrix = data.get("condition_matrix")
+    if data.get("condition_matrix_required") is True and not isinstance(condition_matrix, dict):
+        errors.append("CONDITION_MATRIX_REQUIRED: 明确列出两个及以上条件维度时必须建立 condition_matrix")
+    if isinstance(condition_matrix, dict):
+        dimensions = condition_matrix.get("dimensions", []) if isinstance(condition_matrix.get("dimensions"), list) else []
+        dimension_ids, dimension_errors = _unique_ids(dimensions, "dimension_id")
+        errors.extend(f"CONDITION_MATRIX_REQUIRED: {item}" for item in dimension_errors)
+        dimension_values = {
+            item.get("dimension_id"): set(item.get("values", []))
+            for item in dimensions if isinstance(item, dict) and isinstance(item.get("dimension_id"), str)
+        }
+        required = condition_matrix.get("required_combinations", []) if isinstance(condition_matrix.get("required_combinations"), list) else []
+        excluded = condition_matrix.get("excluded_combinations", []) if isinstance(condition_matrix.get("excluded_combinations"), list) else []
+        combination_ids, combination_errors = _unique_ids([*required, *excluded], "combination_id")
+        errors.extend(f"CONDITION_MATRIX_REQUIRED: {item}" for item in combination_errors)
+        used_values = {dimension_id: set() for dimension_id in dimension_ids}
+        required_keys: dict[str, str] = {}
+        excluded_keys: dict[str, str] = {}
+        for collection_name, combination in [
+            *(("required", item) for item in required),
+            *(("excluded", item) for item in excluded),
+        ]:
+            combination_id = combination.get("combination_id")
+            values = combination.get("dimension_values")
+            if not isinstance(values, dict) or set(values) != dimension_ids:
+                errors.append(
+                    f"CONDITION_MATRIX_REQUIRED: {combination_id} dimension_values 必须完整对应全部维度"
+                )
+                continue
+            for dimension_id, value in values.items():
+                if not isinstance(value, str) or value not in dimension_values.get(dimension_id, set()):
+                    errors.append(
+                        f"CONDITION_MATRIX_REQUIRED: {combination_id}.{dimension_id} 枚举值非法：{value}"
+                    )
+                else:
+                    used_values[dimension_id].add(value)
+            key = _condition_key(values)
+            if key is not None:
+                target = required_keys if collection_name == "required" else excluded_keys
+                if key in target:
+                    errors.append(
+                        f"CONDITION_COMBINATION_DUPLICATED: {combination_id} 与 {target[key]} 的 dimension_values 重复"
+                    )
+                else:
+                    target[key] = str(combination_id)
+        for key in sorted(set(required_keys) & set(excluded_keys)):
+            errors.append(
+                f"CONDITION_COMBINATION_DUPLICATED: {required_keys[key]} 同时出现在 required 和 excluded：{key}"
+            )
+        expected, generation_errors = _generate_expected_condition_combinations(
+            condition_matrix, dimension_ids, dimension_values
+        )
+        errors.extend(generation_errors)
+        actual_keys = set(required_keys) | set(excluded_keys)
+        for key in sorted(set(expected) - actual_keys):
+            errors.append(f"REQUIRED_COMBINATION_UNCOVERED: grouped_cross_product 缺少组合 {key}")
+        for key in sorted(actual_keys - set(expected)):
+            combination_id = required_keys.get(key) or excluded_keys.get(key)
+            errors.append(f"UNEXPECTED_CONDITION_COMBINATION: {combination_id} 不在 grouped_cross_product 生成集合：{key}")
+        for dimension_id, values in dimension_values.items():
+            for value in sorted(values - used_values.get(dimension_id, set())):
+                errors.append(
+                    f"ENUMERATION_VALUE_UNCOVERED: {dimension_id}={value} 未进入 required/excluded combination"
+                )
+        for combination in required:
+            if not combination.get("covered_by_tc_ids"):
+                errors.append(
+                    f"REQUIRED_COMBINATION_UNCOVERED: {combination.get('combination_id')} 未映射 TC"
+                )
+        for combination in excluded:
+            if not str(combination.get("exclusion_reason", "")).strip():
+                errors.append(
+                    f"COMBINATION_EXCLUSION_WITHOUT_REASON: {combination.get('combination_id')} 缺少 exclusion_reason"
+                )
+        summary = condition_matrix.get("coverage_summary", {})
+        expected_summary = {
+            "required_combination_count": len(required),
+            "covered_combination_count": sum(bool(item.get("covered_by_tc_ids")) for item in required),
+            "excluded_combination_count": len(excluded),
+        }
+        for field, expected_count in expected_summary.items():
+            if summary.get(field) != expected_count:
+                errors.append(
+                    f"CONDITION_MATRIX_REQUIRED: coverage_summary.{field}={summary.get(field)} 与实际 {expected_count} 不一致"
+                )
     requirement = data.get("data_validation_required")
     method = data.get("recommended_validation_method")
     reason = str(data.get("data_validation_reason", ""))
@@ -1133,6 +1527,37 @@ def validate_testcase_model(data: dict[str, Any]) -> list[str]:
     cases = data.get("cases", []) if isinstance(data.get("cases"), list) else []
     tc_ids, id_errors = _unique_ids(cases, "tc_id")
     errors.extend(id_errors)
+    shared_scope = data.get("shared_entry_scope") if isinstance(data.get("shared_entry_scope"), dict) else None
+    shared_scope_id = shared_scope.get("scope_id") if shared_scope else None
+    shared_scope_paths: set[tuple[str, str, str]] = set()
+    if shared_scope:
+        group_names: list[str] = []
+        abbreviated_markers = ("上述", "同上", "前述", "等入口", "其余入口", "其他入口", "同前")
+        for group in shared_scope.get("groups", []):
+            group_name = str(group.get("group_name", ""))
+            group_names.append(group_name)
+            subgroup_names: list[str] = []
+            for subgroup in group.get("subgroups", []):
+                subgroup_name = str(subgroup.get("subgroup_name", ""))
+                subgroup_names.append(subgroup_name)
+                entry_names = [str(entry.get("entry_name", "")) for entry in subgroup.get("entries", [])]
+                if len(entry_names) != len(set(entry_names)):
+                    errors.append(f"SHARED_ENTRY_SCOPE_DUPLICATE_ENTRY: {group_name}/{subgroup_name} 入口名称重复")
+                for entry_name in entry_names:
+                    path = (group_name, subgroup_name, entry_name)
+                    if path in shared_scope_paths:
+                        errors.append(f"SHARED_ENTRY_SCOPE_DUPLICATE_PATH: {'/'.join(path)}")
+                    shared_scope_paths.add(path)
+                    if any(marker in entry_name for marker in abbreviated_markers):
+                        errors.append(f"SHARED_ENTRY_SCOPE_ABBREVIATED: {'/'.join(path)} 必须展开完整入口")
+            if len(subgroup_names) != len(set(subgroup_names)):
+                errors.append(f"SHARED_ENTRY_SCOPE_DUPLICATE_SUBGROUP: {group_name} 分组名称重复")
+        if len(group_names) != len(set(group_names)):
+            errors.append("SHARED_ENTRY_SCOPE_DUPLICATE_GROUP: 一级范围分组名称重复")
+        if len(shared_scope_paths) < SHARED_ENTRY_SCOPE_MIN_ENTRIES:
+            errors.append(
+                f"SHARED_ENTRY_SCOPE_REQUIRES_SIX_OR_MORE: 共享入口范围至少需要 {SHARED_ENTRY_SCOPE_MIN_ENTRIES} 个完整入口，实际 {len(shared_scope_paths)}"
+            )
     expected = {f"TC{index:03d}" for index in range(1, len(cases) + 1)}
     if tc_ids != expected:
         errors.append(f"TC 编号必须从 TC001 连续：{sorted(tc_ids)}")
@@ -1144,11 +1569,29 @@ def validate_testcase_model(data: dict[str, Any]) -> list[str]:
             errors.append(f"{tc_id} 未关联风险")
         if not any(case.get(field) for field in ("requirement_ids", "change_ids", "historical_defect_ids")):
             errors.append(f"{tc_id} 未关联需求、Diff 或历史缺陷")
+        secondary = case.get("secondary_dimensions", [])
+        if case.get("dimension") in secondary:
+            errors.append(f"SECONDARY_DIMENSION_DUPLICATES_PRIMARY: {tc_id}")
+        if len(secondary) != len(set(secondary)):
+            errors.append(f"DUPLICATE_SECONDARY_DIMENSION: {tc_id}")
+        for dimension in secondary:
+            if dimension not in DIMENSIONS:
+                errors.append(f"UNKNOWN_SECONDARY_DIMENSION: {tc_id} {dimension}")
         common = case.get("common_entry")
         modules = bool(case.get("module_level_1") and case.get("module_level_2"))
         if bool(common) == modules:
             errors.append(f"{tc_id} 必须在 common_entry 与两级模块结构中二选一")
         branches = case.get("entry_branches", [])
+        scope_reference = case.get("shared_entry_scope_id")
+        if branches and len(branches) >= SHARED_ENTRY_SCOPE_MIN_ENTRIES:
+            errors.append(
+                f"SIX_OR_MORE_ENTRIES_REQUIRE_SHARED_SCOPE: {tc_id} 有 {len(branches)} 个入口，必须使用 shared_entry_scope 公共步骤结构"
+            )
+        if scope_reference:
+            if not shared_scope or scope_reference != shared_scope_id:
+                errors.append(f"SHARED_ENTRY_SCOPE_REFERENCE_INVALID: {tc_id} 引用不存在的 {scope_reference}")
+            if branches:
+                errors.append(f"SHARED_ENTRY_SCOPE_MIXED_WITH_BRANCHES: {tc_id} 不得同时使用 shared_entry_scope 与 entry_branches")
         if branches:
             if case.get("steps") or case.get("expected_results"):
                 errors.append(f"{tc_id} 多入口模型顶层 steps 和 expected_results 必须为空")
@@ -1160,17 +1603,23 @@ def validate_testcase_model(data: dict[str, Any]) -> list[str]:
                 errors.append(f"{tc_id} 入口分支 branch_id 必须唯一")
             for branch in branches:
                 if re.fullmatch(r"(?:入口|页面|弹窗)[A-Z一二三四五六七八九十0-9]+", str(branch.get("entry_name"))):
-                    errors.append(f"{tc_id} 入口名称缺少业务语义：{branch.get('entry_name')}")
+                    errors.append(f"ENTRY_BRANCH_WITHOUT_REAL_ENTRY: {tc_id} 入口名称缺少业务语义：{branch.get('entry_name')}")
                 if not str(branch.get("branch_id", "")).startswith(f"{tc_id}-B"):
                     errors.append(f"{tc_id} 分支 branch_id 必须使用 {tc_id}-B 前缀")
                 errors.extend(_validate_step_expectations(tc_id, branch.get("steps", []), branch.get("expected_results", []), "entry_branches"))
+                if case.get("core_deduplication_key") and not any(
+                    str(branch.get("entry_name", "")) in str(step) for step in branch.get("steps", [])
+                ):
+                    errors.append(
+                        f"ENTRY_BRANCH_DIAGNOSTIC_NOT_INDEPENDENT: {tc_id} 的 {branch.get('branch_id')} 步骤未标明真实入口"
+                    )
         else:
             if not case.get("test_point") or not case.get("steps") or not case.get("expected_results"):
                 errors.append(f"{tc_id} 缺少唯一测试点、步骤或预期")
         steps_text = " ".join(str(step) for step in case.get("steps", []))
         entry_marker_count = sum(steps_text.count(marker) for marker in ("页面", "弹窗", "页签", "下钻", "入口"))
         explicit_multi_entry = bool(re.search(r"分别(?:打开|进入)|依次(?:打开|进入)|在多个|所有相关", steps_text))
-        if not branches and case.get("common_entry") and (
+        if not branches and not scope_reference and case.get("common_entry") and (
             entry_marker_count >= 2 and bool(re.search(r"[/、，,]|分别|以及|多个|三个|各个", steps_text))
             or entry_marker_count >= 1 and explicit_multi_entry
         ):
@@ -1178,6 +1627,46 @@ def validate_testcase_model(data: dict[str, Any]) -> list[str]:
         errors.extend(_validate_step_expectations(tc_id, case.get("steps", []), case.get("expected_results", []), "expected_results"))
         for action in case.get("actions", []):
             errors.extend(_validate_step_expectations(tc_id, [action.get("action")], action.get("expected_results", []), f"actions.{action.get('step_id')}"))
+        factors = case.get("core_deduplication_factors")
+        core_key = case.get("core_deduplication_key")
+        if bool(factors) != bool(core_key):
+            errors.append(f"{tc_id} core_deduplication_factors 与 core_deduplication_key 必须同时提供")
+        if isinstance(factors, dict) and core_key:
+            expected_core_key = compute_core_deduplication_key(factors)
+            if core_key != expected_core_key:
+                errors.append(f"{tc_id} core_deduplication_key 与确定性计算结果不一致")
+        if bool(case.get("split_reason")) != bool(case.get("split_reason_detail")):
+            errors.append(f"{tc_id} 拆分 TC 时必须同时提供 split_reason 与 split_reason_detail")
+        coverage_ids = [
+            item.get("combination_id") for item in case.get("condition_coverage", [])
+            if isinstance(item, dict)
+        ]
+        if len(coverage_ids) != len(set(coverage_ids)):
+            errors.append(f"{tc_id} condition_coverage.combination_id 重复")
+    cases_by_core_key: dict[str, list[dict[str, Any]]] = {}
+    for case in cases:
+        if case.get("core_deduplication_key"):
+            cases_by_core_key.setdefault(str(case["core_deduplication_key"]), []).append(case)
+    for same_core_cases in cases_by_core_key.values():
+        if len(same_core_cases) < 2:
+            continue
+        duplicate_ids = [str(case.get("tc_id")) for case in same_core_cases]
+        errors.append(
+            f"DUPLICATE_TC_SPLIT_BY_ENTRY_ONLY: {duplicate_ids} 的 core_deduplication_key 相同"
+        )
+        errors.append(
+            f"IDENTICAL_RULE_NOT_MERGED_TO_ENTRY_BRANCHES: {duplicate_ids} 应合并为一个 TC 的平级 entry_branches"
+        )
+    if shared_scope:
+        expected_scope_tcs = {str(item) for item in shared_scope.get("applies_to_tc_ids", [])}
+        actual_scope_tcs = {str(case.get("tc_id")) for case in cases if case.get("shared_entry_scope_id") == shared_scope_id}
+        if expected_scope_tcs != actual_scope_tcs:
+            errors.append(
+                f"SHARED_ENTRY_SCOPE_TC_MISMATCH: applies_to_tc_ids={sorted(expected_scope_tcs)} 实际引用={sorted(actual_scope_tcs)}"
+            )
+        unknown_scope_tcs = expected_scope_tcs - tc_ids
+        if unknown_scope_tcs:
+            errors.append(f"SHARED_ENTRY_SCOPE_UNKNOWN_TC: {sorted(unknown_scope_tcs)}")
     branches = {branch.get("branch_id") for case in cases for branch in case.get("entry_branches", [])}
     actual_branch_count = len(branches)
     if "branch_count" in data and data.get("branch_count") != actual_branch_count:
@@ -1526,9 +2015,43 @@ def validate_model_links(
     diff_risks = {item.get("risk_id"): item for item in (diff or {}).get("risks", [])}
     defect_ids = {item.get("defect_id") for item in (diff or {}).get("suspected_defects", [])}
     cases = {item.get("tc_id"): item for item in testcase_model.get("cases", [])}
+    shared_scope = testcase_model.get("shared_entry_scope") if isinstance(testcase_model.get("shared_entry_scope"), dict) else {}
+    shared_scope_paths = {
+        (
+            str(group.get("group_name", "")),
+            str(subgroup.get("subgroup_name", "")),
+            str(entry.get("entry_name", "")),
+        )
+        for group in shared_scope.get("groups", [])
+        for subgroup in group.get("subgroups", [])
+        for entry in subgroup.get("entries", [])
+    }
     facts_by_id = {item.get("fact_id"): item for item in (requirement or {}).get("facts", [])}
     facts = set(facts_by_id)
     confirmations = {item.get("confirmation_id"): item for item in (requirement or {}).get("confirmation_points", [])}
+    assessment = (requirement or {}).get("test_dimension_assessment")
+    if isinstance(assessment, list):
+        for item in assessment:
+            if not isinstance(item, dict):
+                continue
+            dimension = item.get("dimension")
+            risk_ids = set(item.get("risk_ids", []))
+            testcase_ids = set(item.get("testcase_ids", []))
+            if item.get("status") == "covered":
+                if not testcase_ids:
+                    errors.append(f"COVERED_DIMENSION_WITHOUT_TESTCASE: {dimension}")
+                if not risk_ids:
+                    errors.append(f"COVERED_DIMENSION_WITHOUT_RISK: {dimension}")
+            if validation_status == "passed" and item.get("status") == "pending":
+                errors.append(f"PENDING_DIMENSION_WITHOUT_CONFIRMATION: passed 产物不得保留 pending 维度 {dimension}")
+            if risk_ids - set(risks):
+                errors.append(f"COVERED_DIMENSION_WITHOUT_RISK: {dimension} 引用不存在 Risk {sorted(risk_ids - set(risks))}")
+            if testcase_ids - set(cases):
+                errors.append(f"COVERED_DIMENSION_WITHOUT_TESTCASE: {dimension} 引用不存在 TC {sorted(testcase_ids - set(cases))}")
+            for tc_id in testcase_ids & set(cases):
+                case_dimensions = {cases[tc_id].get("dimension"), *cases[tc_id].get("secondary_dimensions", [])}
+                if dimension not in case_dimensions:
+                    errors.append(f"TESTCASE_PRIMARY_DIMENSION_MISMATCH: {tc_id} 未声明评估维度 {dimension}")
     for risk_id in set(risks) & set(diff_risks):
         left, right = risks[risk_id], diff_risks[risk_id]
         if left.get("disposition_status") != right.get("disposition_status", "covered"):
@@ -1672,7 +2195,242 @@ def validate_model_links(
             unknown = set(risk.get("requirement_fact_ids", [])) - confirmed_fact_ids
             if unknown:
                 errors.append(f"Diff 风险 {risk_id} 引用不存在 confirmed Fact：{sorted(unknown)}")
+    condition_matrix = (requirement or {}).get("condition_matrix")
+    if isinstance(condition_matrix, dict):
+        required_combinations = condition_matrix.get("required_combinations", [])
+        required_by_id = {
+            item.get("combination_id"): item
+            for item in required_combinations if isinstance(item, dict)
+        }
+        coverage_by_id: dict[str, list[tuple[str, dict[str, Any]]]] = {}
+        behavior_locations: dict[tuple[str, str, int], str] = {}
+        for tc_id, case in cases.items():
+            for coverage in case.get("condition_coverage", []):
+                if isinstance(coverage, dict) and isinstance(coverage.get("combination_id"), str):
+                    coverage_by_id.setdefault(coverage["combination_id"], []).append((tc_id, coverage))
+        for combination_id, combination in required_by_id.items():
+            mapped_tcs = set(combination.get("covered_by_tc_ids", []))
+            unknown_tcs = mapped_tcs - cases.keys()
+            if unknown_tcs:
+                errors.append(
+                    f"REQUIRED_COMBINATION_UNCOVERED: {combination_id} 引用不存在 TC：{sorted(unknown_tcs)}"
+                )
+            linked = [
+                (tc_id, coverage) for tc_id, coverage in coverage_by_id.get(str(combination_id), [])
+                if tc_id in mapped_tcs
+            ]
+            behavior = [item for item in linked if item[1].get("coverage_type") == "behavior"]
+            if not behavior:
+                if validation_status == "pending":
+                    continue
+                if linked and all(item[1].get("coverage_type") == "configuration" for item in linked):
+                    errors.append(
+                        f"CONFIG_EXISTENCE_IS_NOT_BEHAVIOR_COVERAGE: {combination_id} 只有配置存在性覆盖"
+                    )
+                else:
+                    errors.append(
+                        f"REQUIRED_COMBINATION_UNCOVERED: {combination_id} 缺少行为型 condition_coverage"
+                    )
+                continue
+            expected_values = combination.get("dimension_values")
+            if any(coverage.get("dimension_values") != expected_values for _, coverage in behavior):
+                errors.append(
+                    f"REQUIRED_COMBINATION_UNCOVERED: {combination_id} condition_coverage 与矩阵维度值不一致"
+                )
+            if (requirement or {}).get("condition_matrix_required") is True:
+                for tc_id, coverage in behavior:
+                    case = cases[tc_id]
+                    branch_id = coverage.get("branch_id")
+                    scope_path = coverage.get("scope_path")
+                    mappings = coverage.get("assertion_mappings")
+                    legacy_mapping = {
+                        "step_index": coverage.get("step_index"),
+                        "expected_index": coverage.get("expected_index"),
+                        "observable_result": coverage.get("observable_result"),
+                    }
+                    has_legacy_mapping = any(value is not None for value in legacy_mapping.values())
+                    if mappings is not None and has_legacy_mapping:
+                        errors.append(
+                            f"CONDITION_COVERAGE_MAPPING_CONFLICT: {combination_id} 不得同时使用单断言和 assertion_mappings"
+                        )
+                        continue
+                    if mappings is None:
+                        mappings = [legacy_mapping]
+                        uses_multi_mapping = False
+                    else:
+                        uses_multi_mapping = True
+                    if not isinstance(mappings, list) or not mappings:
+                        errors.append(f"CONDITION_COVERAGE_ASSERTION_MAPPING_REQUIRED: {combination_id}")
+                        continue
+                    if case.get("shared_entry_scope_id"):
+                        normalized_scope_path = tuple(str(item) for item in (scope_path or []))
+                        matching_scope_paths = [
+                            path for path in shared_scope_paths
+                            if path[:len(normalized_scope_path)] == normalized_scope_path
+                        ]
+                        if not normalized_scope_path or not matching_scope_paths:
+                            errors.append(
+                                f"CONDITION_COVERAGE_SCOPE_MISMATCH: {combination_id} 引用不存在 scope_path：{scope_path}"
+                            )
+                            continue
+                        steps = case.get("steps", [])
+                        expected_results = case.get("expected_results", [])
+                        if len(steps) != len(expected_results):
+                            errors.append(
+                                f"CONDITION_COVERAGE_STEP_REFERENCE_INVALID: {tc_id} 共享入口 steps 与 expected_results 必须一一对应"
+                            )
+                        if uses_multi_mapping:
+                            mapping_keys = [
+                                (item.get("step_index"), item.get("expected_index"), item.get("observable_result"))
+                                for item in mappings if isinstance(item, dict)
+                            ]
+                            if len(mapping_keys) != len(mappings) or len(mapping_keys) != len(set(mapping_keys)):
+                                errors.append(f"CONDITION_COVERAGE_ASSERTION_MAPPING_DUPLICATED: {combination_id}")
+                            if {item[1] for item in mapping_keys} != set(range(1, len(expected_results) + 1)):
+                                errors.append(f"CONDITION_COVERAGE_ASSERTION_MAPPING_INCOMPLETE: {combination_id}")
+                        for mapping in mappings:
+                            step_index = mapping.get("step_index") if isinstance(mapping, dict) else None
+                            expected_index = mapping.get("expected_index") if isinstance(mapping, dict) else None
+                            if (not isinstance(step_index, int) or isinstance(step_index, bool) or not 1 <= step_index <= len(steps)
+                                    or not isinstance(expected_index, int) or isinstance(expected_index, bool) or not 1 <= expected_index <= len(expected_results)):
+                                errors.append(f"CONDITION_COVERAGE_STEP_REFERENCE_INVALID: {combination_id} 的 step_index/expected_index 非法")
+                                continue
+                            if mapping.get("observable_result") != expected_results[expected_index - 1]:
+                                errors.append(f"CONDITION_COVERAGE_STEP_REFERENCE_INVALID: {combination_id} observable_result 必须等于所引用 expected_results[{expected_index}]")
+                            if not uses_multi_mapping:
+                                location = (tc_id, "/".join(normalized_scope_path), step_index)
+                                prior = behavior_locations.get(location)
+                                if prior and prior != combination_id:
+                                    errors.append(f"CONDITION_COVERAGE_NOT_INDEPENDENT: {prior} 与 {combination_id}")
+                                else:
+                                    behavior_locations[location] = str(combination_id)
+                        continue
+                    branch = next(
+                        (item for item in case.get("entry_branches", []) if item.get("branch_id") == branch_id),
+                        None,
+                    )
+                    if branch is None:
+                        errors.append(
+                            f"CONDITION_COVERAGE_BRANCH_MISMATCH: {combination_id} 引用不存在 branch_id：{branch_id}"
+                        )
+                        continue
+                    business_entry = (coverage.get("dimension_values") or {}).get("business_entry")
+                    if business_entry and branch.get("entry_name") != business_entry:
+                        errors.append(
+                            f"CONDITION_COVERAGE_BRANCH_MISMATCH: {combination_id} 的 business_entry={business_entry} "
+                            f"与 {branch_id} 的 entry_name={branch.get('entry_name')} 不一致"
+                        )
+                    steps = branch.get("steps", [])
+                    expected_results = branch.get("expected_results", [])
+                    if len(steps) != len(expected_results):
+                        errors.append(
+                            f"CONDITION_COVERAGE_STEP_REFERENCE_INVALID: {tc_id}.{branch_id} steps 与 expected_results 必须一一对应"
+                        )
+                    if uses_multi_mapping:
+                        mapping_keys = [
+                            (item.get("step_index"), item.get("expected_index"), item.get("observable_result"))
+                            for item in mappings if isinstance(item, dict)
+                        ]
+                        if len(mapping_keys) != len(mappings) or len(mapping_keys) != len(set(mapping_keys)):
+                            errors.append(f"CONDITION_COVERAGE_ASSERTION_MAPPING_DUPLICATED: {combination_id}")
+                        if {item[1] for item in mapping_keys} != set(range(1, len(expected_results) + 1)):
+                            errors.append(f"CONDITION_COVERAGE_ASSERTION_MAPPING_INCOMPLETE: {combination_id}")
+                    for mapping in mappings:
+                        step_index = mapping.get("step_index") if isinstance(mapping, dict) else None
+                        expected_index = mapping.get("expected_index") if isinstance(mapping, dict) else None
+                        if (not isinstance(step_index, int) or isinstance(step_index, bool) or not 1 <= step_index <= len(steps)
+                                or not isinstance(expected_index, int) or isinstance(expected_index, bool) or not 1 <= expected_index <= len(expected_results)):
+                            errors.append(f"CONDITION_COVERAGE_STEP_REFERENCE_INVALID: {combination_id} 的 step_index/expected_index 非法")
+                            continue
+                        if mapping.get("observable_result") != expected_results[expected_index - 1]:
+                            errors.append(f"CONDITION_COVERAGE_STEP_REFERENCE_INVALID: {combination_id} observable_result 必须等于所引用 expected_results[{expected_index}]")
+                        if not uses_multi_mapping:
+                            location = (tc_id, str(branch_id), step_index)
+                            prior = behavior_locations.get(location)
+                            if prior and prior != combination_id:
+                                errors.append(f"CONDITION_COVERAGE_NOT_INDEPENDENT: {prior} 与 {combination_id}")
+                            else:
+                                behavior_locations[location] = str(combination_id)
+        unknown_coverage = set(coverage_by_id) - set(required_by_id)
+        if unknown_coverage:
+            errors.append(
+                f"REQUIRED_COMBINATION_UNCOVERED: testcase 引用不存在 required combination：{sorted(unknown_coverage)}"
+            )
+        behavior_coverages = [
+            coverage for entries in coverage_by_id.values() for _, coverage in entries
+            if coverage.get("coverage_type") == "behavior"
+        ]
+        relation_oracles: dict[tuple[str, str, str], dict[str, str]] = {}
+        for coverage in behavior_coverages:
+            values = coverage.get("dimension_values", {})
+            relation = values.get("relation")
+            if relation not in {"包含于", "不包含"}:
+                continue
+            comparison_key = (
+                str(values.get("permission_type")), str(values.get("business_entry")),
+                str(values.get("expected_match_state")),
+            )
+            relation_oracles.setdefault(comparison_key, {})[str(relation)] = str(coverage.get("observable_result"))
+        for comparison_key, oracles in relation_oracles.items():
+            if len(oracles) == 2 and oracles.get("包含于") == oracles.get("不包含"):
+                errors.append(
+                    f"RELATION_ORACLE_NOT_DISTINCT: {comparison_key} 的包含于与不包含使用相同 Oracle"
+                )
+        relation_scenarios: dict[tuple[str, str], set[str]] = {}
+        for coverage in behavior_coverages:
+            values = coverage.get("dimension_values", {})
+            key = (str(values.get("permission_type")), str(values.get("relation")))
+            relation_scenarios.setdefault(key, set()).add(
+                f"{values.get('expected_match_state', '')} {coverage.get('expected_match_state', '')} {coverage.get('observable_result', '')}"
+            )
+        for (permission_type, relation), scenario_texts in relation_scenarios.items():
+            combined = " ".join(sorted(scenario_texts))
+            missing_markers: list[str] = []
+            if relation == "包含于":
+                if not any(marker in combined for marker in ("任一满足", "任一角色", "一个命中", "至少一个命中")):
+                    missing_markers.append("任一满足")
+                if not any(marker in combined for marker in ("全部不满足", "全部不命中", "所有角色均不属于")):
+                    missing_markers.append("全部不满足")
+            if relation == "完全包含于":
+                for label, markers in (
+                    ("全部满足", ("全部满足", "全部命中", "全部角色均属于")),
+                    ("部分满足", ("部分满足", "部分命中", "只有部分")),
+                    ("全部不满足", ("全部不满足", "全部不命中", "所有角色均不属于")),
+                ):
+                    if not any(marker in combined for marker in markers):
+                        missing_markers.append(label)
+            if "指定用户" in permission_type:
+                for label, markers in (
+                    ("单用户命中", ("单用户命中",)), ("单用户不命中", ("单用户不命中",)),
+                    ("多用户一个命中", ("多用户一个命中", "多用户至少一个命中")),
+                    ("多用户全部不命中", ("多用户全部不命中",)),
+                ):
+                    if not any(marker in combined for marker in markers):
+                        missing_markers.append(label)
+            if missing_markers and validation_status != "pending":
+                errors.append(
+                    f"RELATION_SCENARIO_INCOMPLETE: {permission_type}/{relation} 缺少 {sorted(set(missing_markers))}"
+                )
     return list(dict.fromkeys(errors))
+
+
+def validate_test_dimension_warnings(
+    requirement: dict[str, Any] | None,
+    testcase_model: dict[str, Any],
+) -> list[str]:
+    """Return review-only warnings that must not block unless strict is requested."""
+    cases = [item for item in testcase_model.get("cases", []) if isinstance(item, dict)]
+    assessment = (requirement or {}).get("test_dimension_assessment", [])
+    covered = {
+        item.get("dimension") for item in assessment
+        if isinstance(item, dict) and item.get("status") == "covered"
+    }
+    primary = {item.get("dimension") for item in cases}
+    if len(cases) >= 5 and len(primary) == 1 and len(covered) >= 2:
+        return [
+            "SINGLE_PRIMARY_DIMENSION_REVIEW_REQUIRED: TC>=5、主维度集中且需求评估识别出多个 covered 风险类型，需人工复核"
+        ]
+    return []
 
 
 _VALUE_IMPACT_SCORES = {"critical": 5, "high": 4, "medium": 2, "low": 1}

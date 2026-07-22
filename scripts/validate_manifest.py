@@ -12,7 +12,7 @@ from typing import Any
 
 from heading_utils import parse_markdown_sections
 from qa_contracts import (
-    ALLOWED_TIMEZONES, RELATIONS, SCHEMA_VERSION, VALIDATION_STATUSES, SQL_EXECUTION_STATUSES,
+    ALLOWED_TIMEZONES, DIMENSIONS, RELATIONS, SCHEMA_VERSION, VALIDATION_STATUSES, SQL_EXECUTION_STATUSES,
     ZERO_HASH, build_model_id_index, load_json, manifest_schema, read_rule_version, stable_source_hash, valid_generated_at,
     summarize_confirmations, validate_diff_model, validate_model_links, validate_requirement_model,
     validate_risk_matrix, validate_testcase_model,
@@ -34,6 +34,38 @@ REQUIRED = {
     "blocking_pending_count", "nonblocking_pending_count", "suggested_pending_count",
     "validation_status", "relation", "supersedes", "failure_reason", "pending_reason",
 }
+
+LIFECYCLE_STATUSES = {"active", "superseded", "archived"}
+
+
+def validate_current_rule_dimension_assessment(
+    manifest: dict[str, Any],
+    requirement_model: dict[str, Any] | None,
+    current_rule_version: str,
+) -> list[str]:
+    """Require the eight-dimension scan for current-rule formal Requirement deliveries."""
+
+    if not (
+        manifest.get("validation_status") == "passed"
+        and manifest.get("testcase_model_path")
+        and manifest.get("rule_version") == current_rule_version
+        and manifest.get("report_mode") in {"requirement", "combined"}
+        and isinstance(requirement_model, dict)
+    ):
+        return []
+    assessment = requirement_model.get("test_dimension_assessment")
+    if not isinstance(assessment, list):
+        return [
+            "TEST_DIMENSION_ASSESSMENT_REQUIRED: 当前规则版本正式 passed 测试用例产物必须提供 test_dimension_assessment"
+        ]
+    dimensions = [item.get("dimension") for item in assessment if isinstance(item, dict)]
+    expected = set(DIMENSIONS)
+    errors: list[str] = []
+    if set(dimensions) != expected or len(dimensions) != len(expected):
+        errors.append("TEST_DIMENSION_ASSESSMENT_INCOMPLETE: 当前规则版本正式产物必须完整扫描固定八类维度")
+    if len(dimensions) != len(set(dimensions)):
+        errors.append("DUPLICATE_TEST_DIMENSION_ASSESSMENT: 每个测试分类维度只能出现一次")
+    return errors
 
 
 def find_repo_root(start: Path) -> Path:
@@ -155,6 +187,34 @@ def _artifact_registry(root: Path, current: Path) -> tuple[set[str], dict[str, s
     return ids, graph
 
 
+def _is_superseded_by_current_rule(
+    root: Path, artifact_id: str, current_rule_version: str, current_path: Path
+) -> bool:
+    for path in (root / "testcases").glob("**/manifest.json") if (root / "testcases").is_dir() else []:
+        if path.resolve() == current_path.resolve() or "drafts" in path.parts:
+            continue
+        try:
+            candidate = load_json(path)
+        except (OSError, ValueError, json.JSONDecodeError):
+            continue
+        if (
+            candidate.get("validation_status") in {"passed", "pending"}
+            and candidate.get("relation") == "替代"
+            and candidate.get("supersedes") == artifact_id
+            and candidate.get("rule_version") == current_rule_version
+            and (
+                candidate.get("validation_status") == "passed"
+                or (
+                    isinstance(candidate.get("pending_reason"), str)
+                    and bool(candidate.get("pending_reason").strip())
+                    and int(candidate.get("blocking_pending_count", 0)) > 0
+                )
+            )
+        ):
+            return True
+    return False
+
+
 def _validate_supersedes(data: dict[str, Any], manifest_path: Path) -> list[str]:
     relation = data.get("relation")
     supersedes = data.get("supersedes")
@@ -215,11 +275,24 @@ def validate_manifest_data(data: dict[str, Any], manifest_path: Path) -> list[st
     except (OSError, ValueError) as exc:
         errors.append(str(exc))
         current_version = None
-    if current_version is not None:
-        errors.extend(f"Manifest Schema：{error}" for error in validate_schema_shape(data, manifest_schema(current_version)))
+    historical_superseded = bool(
+        current_version
+        and data.get("rule_version") != current_version
+        and _is_superseded_by_current_rule(root, str(data.get("artifact_id", "")), current_version, manifest_path)
+    )
+    lifecycle_status = data.get("lifecycle_status")
+    if lifecycle_status is None and historical_superseded:
+        lifecycle_status = "superseded"
+    if lifecycle_status is not None and lifecycle_status not in LIFECYCLE_STATUSES:
+        errors.append(f"lifecycle_status 非法：{lifecycle_status}")
+    if lifecycle_status == "active" and data.get("rule_version") != current_version:
+        errors.append("active 产物必须使用当前 RULE_VERSION")
+    contract_version = str(data.get("rule_version")) if historical_superseded else current_version
+    if contract_version is not None:
+        errors.extend(f"Manifest Schema：{error}" for error in validate_schema_shape(data, manifest_schema(contract_version)))
     if data.get("schema_version") != SCHEMA_VERSION:
         errors.append(f"schema_version 必须为 {SCHEMA_VERSION}")
-    if data.get("rule_version") != current_version:
+    if data.get("rule_version") != current_version and not historical_superseded:
         errors.append(f"rule_version={data.get('rule_version')} 与 RULE_VERSION={current_version} 不一致")
     if data.get("source_hash_algorithm") != "sha256":
         errors.append("source_hash_algorithm 只允许 sha256")
@@ -233,7 +306,7 @@ def validate_manifest_data(data: dict[str, Any], manifest_path: Path) -> list[st
         errors.append(f"validation_status 非法：{data.get('validation_status')}")
     if data.get("relation") not in RELATIONS:
         errors.append(f"relation 非法：{data.get('relation')}")
-    for key in ("case_count", "p0_count", "p0_risk_count", "p0_case_count", "pending_count", "blocking_pending_count", "nonblocking_pending_count", "suggested_pending_count", "sql_count", "reconciliation_count"):
+    for key in ("case_count", "branch_count", "execution_instance_count", "p0_count", "p0_risk_count", "p0_case_count", "pending_count", "blocking_pending_count", "nonblocking_pending_count", "suggested_pending_count", "sql_count", "reconciliation_count"):
         value = data.get(key)
         if value is not None and (not isinstance(value, int) or isinstance(value, bool) or value < 0):
             errors.append(f"{key} 必须是非负整数")
@@ -251,6 +324,26 @@ def validate_manifest_data(data: dict[str, Any], manifest_path: Path) -> list[st
     if not data.get("requirement_id") and not data.get("commit_range"):
         errors.append("requirement_id 和 commit_range 至少填写一个")
     errors.extend(_validate_supersedes(data, manifest_path))
+
+    if lifecycle_status in {"superseded", "archived"}:
+        hash_inputs = list(data.get("source_files") or [])
+        if not hash_inputs and data.get("source_snapshot_path"):
+            hash_inputs = [data["source_snapshot_path"]]
+        if not hash_inputs:
+            errors.append("历史产物必须提供 source_files 或 source_snapshot_path")
+        else:
+            try:
+                if stable_source_hash(root, hash_inputs) != data.get("source_hash"):
+                    errors.append("历史产物 source_hash 与来源内容不一致")
+            except (OSError, ValueError) as exc:
+                errors.append(str(exc))
+        for field in ("report_path", "risk_matrix_path", "testcase_model_path", "xmind_md_path", "xmind_path"):
+            path, path_error = resolve_safe_path(data.get(field), manifest_path)
+            if path_error:
+                errors.append(f"{field}: {path_error}")
+            elif path is None or not path.is_file():
+                errors.append(f"{field} 历史路径不存在：{data.get(field)}")
+        return list(dict.fromkeys(errors))
 
     status = data.get("validation_status")
     formal_path_fields = ("report_path", "risk_matrix_path", "testcase_model_path", "xmind_md_path", "xmind_path")
@@ -441,6 +534,7 @@ def validate_manifest_data(data: dict[str, Any], manifest_path: Path) -> list[st
         diff_model = next((model for model in models if "change_items" in model), None)
         if data.get("report_mode") in {"requirement", "combined"} and requirement_model is None:
             errors.append("需求分析交付缺少 Requirement Analysis Model")
+        errors.extend(validate_current_rule_dimension_assessment(data, requirement_model, current_version))
         summary = summarize_confirmations(requirement_model or {})
         manifest_summary = {
             key: data.get(key)
@@ -478,6 +572,7 @@ def validate_manifest_data(data: dict[str, Any], manifest_path: Path) -> list[st
                 testcase_model=testcase_model,
             ),
             validation_status="passed",
+            require_dimension_assessment=isinstance((requirement_model or {}).get("test_dimension_assessment"), list),
         )
         errors.extend(f"分析报告复验失败：{error}" for error in report_errors)
         outline = validate_markdown_file(paths["xmind_md_path"])
@@ -511,6 +606,10 @@ def validate_manifest_data(data: dict[str, Any], manifest_path: Path) -> list[st
             errors.append(f"P0 风险映射 TC 未全部存在于 XMind：{sorted(p0_risk_tc_ids - xmind_tc_ids)}")
         if len(testcase_model.get("cases", [])) != data["case_count"] or len(outline.tc_nodes) != data["case_count"]:
             errors.append("case_count 与 Testcase Model 或 Markdown TC 数不一致")
+        if "branch_count" in data and data.get("branch_count") != testcase_model.get("branch_count", 0):
+            errors.append("branch_count 与 Testcase Model 不一致")
+        if "execution_instance_count" in data and data.get("execution_instance_count") != testcase_model.get("execution_instance_count", 0):
+            errors.append("execution_instance_count 与 Testcase Model 不一致")
         validate_xmind_archive(
             paths["xmind_path"], outline.root.title, len(outline.tc_nodes), count_tree_nodes(outline.root),
             markdown_tree(outline.root),

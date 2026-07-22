@@ -51,6 +51,7 @@
 - Skills 按 rules/core/structured-model-contract.md 交接 Requirement Analysis、Diff Impact、Risk Coverage Matrix 和 Testcase Model；结构化模型不得改变最终 XMind 层级。
 - 仓库行为由 rules-repository.json 显式区分 standalone 与 integrated；只有 integrated 模式执行双目录一致性门禁。
 - 最终用例严格遵守 rules/core/testcase-quality-rules.md；转换或校验失败不得宣称产物完成。
+- 需求分析和测试用例任务的聊天交付严格遵守 rules/core/conversation-delivery-contract.md；文件已写入不等于已完成交付说明，最终摘要由确定性渲染器生成。
 - 每次生成报告或用例后按 rules/core/artifact-governance-rules.md 校验 Manifest 并更新索引。
 - 规则相关同名文件在根目录与 codex-qa-agent-rules 中同步；历史索引行可不同，但编码和表结构必须一致。
 - 发布前完整执行 skills/qa-artifact-validation/SKILL.md 和 docs/codex/rule-validation-checklist.md。

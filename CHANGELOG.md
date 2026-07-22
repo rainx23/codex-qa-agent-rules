@@ -6,11 +6,61 @@
 
 ## [Unreleased]
 
+## [2.13.0] - 2026-07-22
+
 ### Added
+
+- 新增八类 `test_dimension_assessment`、`condition_matrix_applicability`、`scope_dispositions` 与 Testcase `secondary_dimensions` 的兼容 Schema 和确定性交叉校验。
+- 新增对话“测试维度覆盖”固定章节及维度完整性、范围排除证据、主辅维度和单主维度复核错误码。
 
 ### Changed
 
+- 当前规则版本的 passed requirement/combined 正式用例产物无条件要求八类 `test_dimension_assessment`；旧版本历史、pending/failed 与无 Requirement 的纯 diff 产物继续兼容。
+
 ### Fixed
+
+- Evidence `excerpt` 改为按物理行闭区间精确匹配，并补充 CRLF/LF、BOM、空行、偏移、越界和缺失快照回归。
+- 分析报告新增 FACT/RISK/CONF 主摘要重复门禁，并禁止 passed 报告残留草稿 TC/用例措辞。
+- 对话摘要测试运行目录迁移到系统临时目录，异常退出也不再向固定 Fixture 目录遗留随机文件夹。
+
+## [2.12.0] - 2026-07-22
+
+### Added
+
+- 新增不少于 6 个同规则入口的全局 `shared_entry_scope` 模型、固定 XMind 范围树和模型/XMind 追踪校验。
+- 新增多入口阈值、完整入口展开、简称拒绝及全局范围 TC 引用一致性回归测试。
+
+### Changed
+
+- 规则版本从 2.11.0 升级到 2.12.0；2 至 5 个入口继续逐入口写操作步骤和预期，不少于 6 个同规则入口改为全局适用入口范围加 TC 公共步骤。
+- 模拟交易、正式交易等范围都必须逐项列出完整入口，禁止“上述入口”“同上”“等入口”、省略号或外部入口清单代替。
+
+### Fixed
+
+- 修复大量同规则入口重复复制步骤和预期导致用例树冗长，同时又可能因简称遗漏正式交易真实入口的问题。
+
+## [2.11.0] - 2026-07-18
+
+### Added
+
+- 新增枚举条件矩阵、required/excluded combination、行为型 `condition_coverage` 与稳定错误码门禁。
+- 新增不含纯入口名称的 `core_deduplication_key`，以及正式产物统一扫描校验入口。
+- 新增统一对话交付契约、Confirmation 聊天摘要、文件名称与固定用途展示，以及 passed/pending/failed 三种回复模板。
+- 新增确定性 `render_delivery_summary.py` 与 `validate_delivery_summary.py`，从 Manifest 和结构化模型读取路径、数量、版本和状态并校验摘要一致性。
+- 新增 47 项对话摘要回归测试，覆盖当前清仓权限 passed Manifest、临时 pending/failed Fixture、跨平台路径和无 ANSI 输出。
+
+### Changed
+
+- 规则版本从 2.10.0 升级到 2.11.0；配置存在性与配置行为覆盖分离，多入口同规则 TC 强制合并为平级入口分支。
+- 权限组合覆盖按关系、目标范围、命中状态和指定用户数据形态确定性校验；CI 不再硬编码单一业务产物目录。
+- 三个 QA Skill 接入对话交付契约；产物校验后使用渲染器生成最终聊天回复主体，并分开显示 `validation_status` 与 `sql_status`。
+
+### Fixed
+
+- 修复 XMind 按主维度分组时把合法的全局连续 TC 集合误判为必须按树遍历顺序递增，以及权限/分页需求被机械归入单一主维度的问题。
+
+- 修复模拟/正式入口名称进入唯一键导致等价 TC 被拆分，以及明确枚举只生成配置项存在性用例而遗漏真实行为组合的问题。
+- 修复 required combinations 自身漏项无法发现、多个组合共用同一超长步骤以及模糊关系 Oracle 可通过的问题；增加分组笛卡尔积复算和 branch/step/expected 定位，并在关系证据不足时保持 pending。
 
 ## [2.10.0] - 2026-07-18
 

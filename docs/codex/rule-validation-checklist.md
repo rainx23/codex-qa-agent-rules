@@ -35,8 +35,9 @@
 5. Manifest 示例和索引编码：
 
        python scripts/validate_manifest.py testcases/manifest.example.json
+       python scripts/render_delivery_summary.py --manifest testcases/clearance-permission-20260718-v2/manifest.json --check
        python scripts/repair_text_encoding.py testcases/index.md --check
-       python scripts/validate_testcase_index.py testcases/index.md
+       python scripts/validate_formal_artifacts.py
 
 6. 三种分析报告模式：
 
@@ -107,8 +108,9 @@
 - Manifest `validation_status`/`sql_status` 独立状态、passed+blocked、pending draft 契约，以及 passed Manifest 索引唯一登记和正式路径存在性。
 - 输出文件已存在、两份批量成功加一份局部失败、失败无伪 Workbook、索引 artifact_id 重复。
 - 真实历史 XMind Markdown 原样识别，迁移样例合并重复、移除模糊预期且不降低 P0 业务覆盖。
-- 多入口有效分支、无公共入口多入口、单入口多余层级、混合直接步骤、单分支、占位入口名和拼接入口步骤；普通组合操作不得被误报。
-- 多入口转换后 TC 数保持不变，分支顺序和 golden topic 顺序保持不变，Testcase Model 与 XMind 的分支数量、顺序、名称、步骤和预期一致。
+- 2 至 5 个入口的有效分支、无公共入口多入口、单入口多余层级、混合直接步骤、单分支、占位入口名和拼接入口步骤；普通组合操作不得被误报。
+- 不少于 6 个同规则入口必须使用唯一全局适用入口范围；模拟/正式等范围逐项完整展开，禁止“上述”“同上”“等入口”、省略号和外部清单代替；5 个及以下不得使用该结构。
+- 多入口转换后 TC 数保持不变，分支或全局范围的顺序和 golden topic 顺序保持不变；Testcase Model 与 XMind 的分支或范围树数量、顺序、名称、步骤、预期和 TC 引用一致。
 - 单/多张完整 DDL 拆分、规范化哈希去重、格式变化、字段/类型/主键/唯一键/Duplicate Key/Aggregate Key/分区/分桶/索引/Engine/Properties 变化、显式结构解析失败降级、partial 不覆盖 complete、解析 warning、敏感信息拒绝。
 - 知识按表/字段/逻辑/指标检索、默认 active、历史按需加载、active 重复、supersedes 循环、索引漂移和同 DDL 重复引用。
 - 数据验证 required/optional/not_required/blocked、指标默认 SQL、明确 REC、禁止猜测对数、mixed、SQL 信息不足和 SQL/REC/TC 追踪失败。

@@ -42,6 +42,8 @@ Manifest 至少记录：
 6. 运行 `scripts/validate_testcase_index.py testcases/index.md`，确认每个 `testcases/**/manifest.json` 下的 passed Manifest 按 artifact_id 和 Manifest 路径唯一登记，且正式路径真实存在。
 7. 记录新增、补充、替代或废弃关系。
 
+CI 和发布前校验统一调用 `scripts/validate_formal_artifacts.py` 扫描 `testcases/**/manifest.json`，跳过 `testcases/drafts/`，并对每个 `validation_status=passed` 的 Manifest 复用完整 Manifest、Requirement/Risk/Testcase Model、XMind Markdown、Workbook 树和索引校验。不得为每个业务目录追加硬编码校验命令。
+
 任一步失败都不得宣称完整产物完成。失败时保留可用的 Markdown 和报告，不伪造 Workbook 路径。
 
 原始任务同时要求需求分析和测试用例时，缺少 Requirement Analysis Model、Risk Coverage Matrix、Testcase Model、XMind Markdown、Workbook 或 Manifest 任一项均不得宣称完整交付；正式索引只能在 passed Manifest 全链路复验后更新。
@@ -55,5 +57,6 @@ pending/failed Manifest 不要求登记为“已校验”正式行；passed Mani
 ## 历史产物兼容
 
 - 新规则校验失败只表示历史产物不符合当前规范，不推翻原业务周期的测试结论。
+- 当前规则版本的替代产物因真实 blocking Confirmation 保持 pending 时，旧 passed 产物仍按其历史规则版本复验并保留索引；pending 替代本身必须通过草稿、证据、Confirmation 和 Manifest 校验，但不得冒充当前 passed 正式产物。
 - 禁止覆盖旧报告、Markdown 或 Workbook；实际迁移必须生成版本化新产物，并以 `relation=替代`、`supersedes` 和索引记录建立关系。
 - 本批工程化改造不具备重新确认历史需求事实和补齐结构化追踪模型的证据，因此不改生产历史产物。`tests/fixtures/legacy` 使用真实旧版 Markdown 的固定哈希副本演示迁移：保留原副本，合并重复场景，改写模糊预期，校验 P0 业务覆盖，并在临时目录转换和复验 Workbook。该测试 Fixture 不冒充正式业务 Manifest 或索引迁移记录。

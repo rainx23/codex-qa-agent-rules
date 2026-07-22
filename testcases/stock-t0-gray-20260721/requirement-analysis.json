@@ -1,0 +1,1890 @@
+{
+  "schema_version": "2.0.0",
+  "analysis_id": "AN-STOCK-T0-GRAY-20260721",
+  "report_mode": "requirement",
+  "source_type": "pasted_text",
+  "source_ids": [
+    "CHAT-STOCK-T0-GRAY-20260721"
+  ],
+  "analysis_scope": "模拟交易和正式交易中汇总卡片及主列表的16类具名弹窗，覆盖选股表三态、名称代码标签置灰、四个关联字段兜底和K线下钻保留",
+  "business_goal": "让1000支选股范围以外或已失效股票在交易页面可识别，同时不阻断原K线分析路径",
+  "acceptance_basis": "以用户粘贴的产品实现方案和规则为当前验收基准；未明确细节仅进入非阻塞或建议确认点",
+  "facts": [
+    {
+      "fact_id": "FACT-001",
+      "category": "confirmed",
+      "statement": "本次覆盖模拟交易和正式交易",
+      "source_type": "pasted_text",
+      "source_reference": "CHAT-STOCK-T0-GRAY-20260721",
+      "confidence": "high",
+      "affects_core_expectation": true,
+      "handling": null,
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 9,
+          "line_end": 9,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "涉及模块：模拟交易、正式交易。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "fact_id": "FACT-002",
+      "category": "confirmed",
+      "statement": "汇总卡片与主列表共16个具名弹窗位置纳入范围；同名欠股和多买股分别属于两个模块入口",
+      "source_type": "pasted_text",
+      "source_reference": "CHAT-STOCK-T0-GRAY-20260721",
+      "confidence": "high",
+      "affects_core_expectation": true,
+      "handling": null,
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 10,
+          "line_end": 11,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "汇总卡片弹窗位置：建加仓股弹窗、清仓股弹窗、T0股/底仓股、持/清‘底+T’合盈弹窗、欠股弹窗、多买股弹窗、雷达预选股弹窗、雷达股弹窗、观察股弹窗。\n主列表弹窗位置：预选股弹窗、成交股弹窗、已买股弹窗、买失败股弹窗、已卖股弹窗、卖失败股弹窗、欠股弹窗、多买股弹窗。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "fact_id": "FACT-003",
+      "category": "confirmed",
+      "statement": "选股有效性由 pe_data.stock_t0_selected 的记录存在性及 enabled_flag 决定",
+      "source_type": "pasted_text",
+      "source_reference": "CHAT-STOCK-T0-GRAY-20260721",
+      "confidence": "high",
+      "affects_core_expectation": true,
+      "handling": null,
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 8,
+          "line_end": 8,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "库表：pe_data.stock_t0_selected；enabled_flag 是否有效（1：有效，0：无效）。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "fact_id": "FACT-004",
+      "category": "confirmed",
+      "statement": "不在表内或在表内且 enabled_flag=0 的股票置灰",
+      "source_type": "pasted_text",
+      "source_reference": "CHAT-STOCK-T0-GRAY-20260721",
+      "confidence": "high",
+      "affects_core_expectation": true,
+      "handling": null,
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 12,
+          "line_end": 12,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "置灰：不在表里的股票，或者在表里的股票 enabled_flag=0。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "fact_id": "FACT-005",
+      "category": "confirmed",
+      "statement": "在表内且 enabled_flag=1 的股票不置灰",
+      "source_type": "pasted_text",
+      "source_reference": "CHAT-STOCK-T0-GRAY-20260721",
+      "confidence": "high",
+      "affects_core_expectation": true,
+      "handling": null,
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 13,
+          "line_end": 13,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "不置灰：在表里的股票 enabled_flag=1。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "fact_id": "FACT-006",
+      "category": "confirmed",
+      "statement": "置灰对象包括股票名称、股票代码及股票代码标签",
+      "source_type": "pasted_text",
+      "source_reference": "CHAT-STOCK-T0-GRAY-20260721",
+      "confidence": "high",
+      "affects_core_expectation": true,
+      "handling": null,
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 5,
+          "line_end": 5,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "股票名称、股票代码（含标签）都置灰。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "fact_id": "FACT-007",
+      "category": "confirmed",
+      "statement": "置灰股票仍保留下钻K线功能",
+      "source_type": "pasted_text",
+      "source_reference": "CHAT-STOCK-T0-GRAY-20260721",
+      "confidence": "high",
+      "affects_core_expectation": true,
+      "handling": null,
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 6,
+          "line_end": 6,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "下钻K线功能保留。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "fact_id": "FACT-008",
+      "category": "confirmed",
+      "statement": "股票不在选股信息T0表且行业名称、热点名称、行业总数、行业股票数查不到时展示‘-’",
+      "source_type": "pasted_text",
+      "source_reference": "CHAT-STOCK-T0-GRAY-20260721",
+      "confidence": "high",
+      "affects_core_expectation": true,
+      "handling": null,
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 7,
+          "line_end": 7,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "影响字段：行业名称、热点名称、行业总数、行业股票数，查不到展示“-”；如发现其他影响点，告知产品评估。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "fact_id": "FACT-009",
+      "category": "confirmed",
+      "statement": "需求关注1000支限制以外股票的展示处理",
+      "source_type": "pasted_text",
+      "source_reference": "CHAT-STOCK-T0-GRAY-20260721",
+      "confidence": "high",
+      "affects_core_expectation": false,
+      "handling": null,
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 3,
+          "line_end": 3,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "需求标题：【模拟/正式】股票1000支限制以外的股票名称及字段置灰。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "fact_id": "FACT-010",
+      "category": "confirmed",
+      "statement": "测试发现其他受影响点时需要告知产品评估",
+      "source_type": "pasted_text",
+      "source_reference": "CHAT-STOCK-T0-GRAY-20260721",
+      "confidence": "high",
+      "affects_core_expectation": false,
+      "handling": null,
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 7,
+          "line_end": 7,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "影响字段：行业名称、热点名称、行业总数、行业股票数，查不到展示“-”；如发现其他影响点，告知产品评估。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "fact_id": "FACT-012",
+      "category": "missing",
+      "statement": "需求未给出置灰色值及悬停、选中、访问后等交互态样式",
+      "source_type": "pasted_text",
+      "source_reference": "CHAT-STOCK-T0-GRAY-20260721",
+      "confidence": "medium",
+      "affects_core_expectation": false,
+      "handling": "保留为待确认点；未确认前不写入确定性预期",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 5,
+          "line_end": 5,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "股票名称、股票代码（含标签）都置灰。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "fact_id": "FACT-013",
+      "category": "missing",
+      "statement": "需求未给出支持浏览器和分辨率矩阵",
+      "source_type": "pasted_text",
+      "source_reference": "CHAT-STOCK-T0-GRAY-20260721",
+      "confidence": "medium",
+      "affects_core_expectation": false,
+      "handling": "保留为待确认点；未确认前不写入确定性预期",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 9,
+          "line_end": 9,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "涉及模块：模拟交易、正式交易。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    }
+  ],
+  "confirmation_points": [
+    {
+      "confirmation_id": "CONF-002",
+      "severity": "suggested",
+      "statement": "确认股票名称、代码和标签的具体灰色色值及悬停、选中、访问后样式",
+      "fact_ids": [
+        "FACT-012"
+      ],
+      "status": "pending",
+      "resolution": null,
+      "resolution_evidence_references": [],
+      "resolved_at": null,
+      "skip_reason": null,
+      "decision_evidence": []
+    },
+    {
+      "confirmation_id": "CONF-003",
+      "severity": "suggested",
+      "statement": "确认本需求需覆盖的浏览器和分辨率范围",
+      "fact_ids": [
+        "FACT-013"
+      ],
+      "status": "pending",
+      "resolution": null,
+      "resolution_evidence_references": [],
+      "resolved_at": null,
+      "skip_reason": null,
+      "decision_evidence": []
+    }
+  ],
+  "risks": [
+    {
+      "risk_id": "RISK-001",
+      "statement": "选股有效性判定或置灰范围错误",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 5,
+          "line_end": 5,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "股票名称、股票代码（含标签）都置灰。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 7,
+          "line_end": 7,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "影响字段：行业名称、热点名称、行业总数、行业股票数，查不到展示“-”；如发现其他影响点，告知产品评估。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 8,
+          "line_end": 8,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "库表：pe_data.stock_t0_selected；enabled_flag 是否有效（1：有效，0：无效）。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 12,
+          "line_end": 12,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "置灰：不在表里的股票，或者在表里的股票 enabled_flag=0。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 13,
+          "line_end": 13,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "不置灰：在表里的股票 enabled_flag=1。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-002",
+      "statement": "置灰样式误禁用K线下钻",
+      "test_priority": "P0",
+      "evidence_state": "已确认",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 6,
+          "line_end": 6,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "下钻K线功能保留。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 12,
+          "line_end": 12,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "置灰：不在表里的股票，或者在表里的股票 enabled_flag=0。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-003",
+      "statement": "同屏混合股票相互污染展示状态",
+      "test_priority": "P1",
+      "evidence_state": "已确认",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 5,
+          "line_end": 5,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "股票名称、股票代码（含标签）都置灰。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 7,
+          "line_end": 7,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "影响字段：行业名称、热点名称、行业总数、行业股票数，查不到展示“-”；如发现其他影响点，告知产品评估。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 8,
+          "line_end": 8,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "库表：pe_data.stock_t0_selected；enabled_flag 是否有效（1：有效，0：无效）。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 12,
+          "line_end": 12,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "置灰：不在表里的股票，或者在表里的股票 enabled_flag=0。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 13,
+          "line_end": 13,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "不置灰：在表里的股票 enabled_flag=1。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "risk_id": "RISK-004",
+      "statement": "1000支边界外股票未按有效性置灰",
+      "test_priority": "P1",
+      "evidence_state": "已确认",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 3,
+          "line_end": 3,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "需求标题：【模拟/正式】股票1000支限制以外的股票名称及字段置灰。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 8,
+          "line_end": 8,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "库表：pe_data.stock_t0_selected；enabled_flag 是否有效（1：有效，0：无效）。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 12,
+          "line_end": 12,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "置灰：不在表里的股票，或者在表里的股票 enabled_flag=0。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 13,
+          "line_end": 13,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "不置灰：在表里的股票 enabled_flag=1。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    }
+  ],
+  "acceptance_criteria": [
+    {
+      "criterion_id": "REQ001",
+      "statement": "模拟交易和正式交易的所有明确弹窗入口均执行同一选股有效性规则",
+      "fact_ids": [
+        "FACT-001",
+        "FACT-002"
+      ],
+      "risk_ids": [
+        "RISK-001"
+      ],
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 9,
+          "line_end": 9,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "涉及模块：模拟交易、正式交易。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 10,
+          "line_end": 11,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "汇总卡片弹窗位置：建加仓股弹窗、清仓股弹窗、T0股/底仓股、持/清‘底+T’合盈弹窗、欠股弹窗、多买股弹窗、雷达预选股弹窗、雷达股弹窗、观察股弹窗。\n主列表弹窗位置：预选股弹窗、成交股弹窗、已买股弹窗、买失败股弹窗、已卖股弹窗、卖失败股弹窗、欠股弹窗、多买股弹窗。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "criterion_id": "REQ002",
+      "statement": "不在表内或 enabled_flag=0 时股票名称、股票代码及标签置灰；enabled_flag=1 时不置灰",
+      "fact_ids": [
+        "FACT-003",
+        "FACT-004",
+        "FACT-005",
+        "FACT-006"
+      ],
+      "risk_ids": [
+        "RISK-001",
+        "RISK-003"
+      ],
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 8,
+          "line_end": 8,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "库表：pe_data.stock_t0_selected；enabled_flag 是否有效（1：有效，0：无效）。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 12,
+          "line_end": 12,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "置灰：不在表里的股票，或者在表里的股票 enabled_flag=0。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 13,
+          "line_end": 13,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "不置灰：在表里的股票 enabled_flag=1。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 5,
+          "line_end": 5,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "股票名称、股票代码（含标签）都置灰。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "criterion_id": "REQ003",
+      "statement": "不在表内且关联字段查不到时，行业名称、热点名称、行业总数、行业股票数展示‘-’",
+      "fact_ids": [
+        "FACT-008"
+      ],
+      "risk_ids": [
+        "RISK-001",
+        "RISK-003"
+      ],
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 7,
+          "line_end": 7,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "影响字段：行业名称、热点名称、行业总数、行业股票数，查不到展示“-”；如发现其他影响点，告知产品评估。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "criterion_id": "REQ004",
+      "statement": "被置灰的股票仍可按原入口下钻K线",
+      "fact_ids": [
+        "FACT-007"
+      ],
+      "risk_ids": [
+        "RISK-002"
+      ],
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 6,
+          "line_end": 6,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "下钻K线功能保留。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "criterion_id": "REQ005",
+      "statement": "1000支有效股票与限制外股票并存时按表记录及 enabled_flag 逐行判定",
+      "fact_ids": [
+        "FACT-003",
+        "FACT-004",
+        "FACT-005",
+        "FACT-009"
+      ],
+      "risk_ids": [
+        "RISK-004"
+      ],
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 8,
+          "line_end": 8,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "库表：pe_data.stock_t0_selected；enabled_flag 是否有效（1：有效，0：无效）。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 12,
+          "line_end": 12,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "置灰：不在表里的股票，或者在表里的股票 enabled_flag=0。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 13,
+          "line_end": 13,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "不置灰：在表里的股票 enabled_flag=1。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 3,
+          "line_end": 3,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "需求标题：【模拟/正式】股票1000支限制以外的股票名称及字段置灰。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    }
+  ],
+  "regression_scope": [
+    "核心回归：三态置灰决策、所有明确弹窗入口、K线下钻",
+    "关联回归：混合行独立展示、1000+1边界、有效股票原展示"
+  ],
+  "matched_profiles": [
+    "finance-trading",
+    "web-ui"
+  ],
+  "data_validation_required": "required",
+  "data_validation_reason": "展示结果直接依赖 pe_data.stock_t0_selected 的记录存在性和 enabled_flag",
+  "recommended_validation_method": "sql",
+  "sql_generation_status": "blocked",
+  "validation_missing_information": [
+    "完整DDL",
+    "股票关联键",
+    "各弹窗查询表及过滤口径",
+    "可用测试数据库执行证据"
+  ],
+  "condition_matrix_required": true,
+  "condition_matrix_applicability": {
+    "status": "required",
+    "dimension_ids": [
+      "trade_environment",
+      "selection_state",
+      "expected_gray_state"
+    ],
+    "reason": "32个真实入口已在全局适用入口范围中逐项展开；行为决策只随交易环境和三种选股有效性状态变化",
+    "evidence_references": [
+      {
+        "source_type": "pasted_text",
+        "storage_type": "snapshot",
+        "source_path": null,
+        "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+        "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+        "line_start": 9,
+        "line_end": 13,
+        "commit_sha": null,
+        "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+        "excerpt": "涉及模块：模拟交易、正式交易。\n汇总卡片弹窗位置：建加仓股弹窗、清仓股弹窗、T0股/底仓股、持/清‘底+T’合盈弹窗、欠股弹窗、多买股弹窗、雷达预选股弹窗、雷达股弹窗、观察股弹窗。\n主列表弹窗位置：预选股弹窗、成交股弹窗、已买股弹窗、买失败股弹窗、已卖股弹窗、卖失败股弹窗、欠股弹窗、多买股弹窗。\n置灰：不在表里的股票，或者在表里的股票 enabled_flag=0。\n不置灰：在表里的股票 enabled_flag=1。",
+        "captured_at": "2026-07-21 00:00:00",
+        "captured_timezone": "Asia/Shanghai",
+        "evidence_status": "current"
+      }
+    ],
+    "confirmation_ids": [],
+    "missing_fact_ids": []
+  },
+  "condition_matrix": {
+    "dimensions": [
+      {
+        "dimension_id": "trade_environment",
+        "dimension_name": "交易环境",
+        "values": [
+          "模拟交易",
+          "正式交易"
+        ]
+      },
+      {
+        "dimension_id": "selection_state",
+        "dimension_name": "选股有效性",
+        "values": [
+          "不在表内",
+          "在表内且enabled_flag=0",
+          "在表内且enabled_flag=1"
+        ]
+      },
+      {
+        "dimension_id": "expected_gray_state",
+        "dimension_name": "预期置灰状态",
+        "values": [
+          "置灰",
+          "不置灰"
+        ]
+      }
+    ],
+    "combination_generation": {
+      "mode": "grouped_cross_product",
+      "groups": [
+        {
+          "group_id": "GROUP-CM001",
+          "fixed_values": {
+            "selection_state": "不在表内",
+            "expected_gray_state": "置灰"
+          },
+          "variable_dimensions": [
+            {
+              "dimension_id": "trade_environment",
+              "values": [
+                "模拟交易",
+                "正式交易"
+              ]
+            }
+          ],
+          "expected_combination_count": 2,
+          "constraints": [
+            "不在表内→置灰"
+          ]
+        },
+        {
+          "group_id": "GROUP-CM002",
+          "fixed_values": {
+            "selection_state": "在表内且enabled_flag=0",
+            "expected_gray_state": "置灰"
+          },
+          "variable_dimensions": [
+            {
+              "dimension_id": "trade_environment",
+              "values": [
+                "模拟交易",
+                "正式交易"
+              ]
+            }
+          ],
+          "expected_combination_count": 2,
+          "constraints": [
+            "在表内且enabled_flag=0→置灰"
+          ]
+        },
+        {
+          "group_id": "GROUP-CM003",
+          "fixed_values": {
+            "selection_state": "在表内且enabled_flag=1",
+            "expected_gray_state": "不置灰"
+          },
+          "variable_dimensions": [
+            {
+              "dimension_id": "trade_environment",
+              "values": [
+                "模拟交易",
+                "正式交易"
+              ]
+            }
+          ],
+          "expected_combination_count": 2,
+          "constraints": [
+            "在表内且enabled_flag=1→不置灰"
+          ]
+        }
+      ]
+    },
+    "required_combinations": [
+      {
+        "combination_id": "CM001",
+        "dimension_values": {
+          "trade_environment": "模拟交易",
+          "selection_state": "不在表内",
+          "expected_gray_state": "置灰"
+        },
+        "covered_by_tc_ids": [
+          "TC001"
+        ]
+      },
+      {
+        "combination_id": "CM002",
+        "dimension_values": {
+          "trade_environment": "正式交易",
+          "selection_state": "不在表内",
+          "expected_gray_state": "置灰"
+        },
+        "covered_by_tc_ids": [
+          "TC001"
+        ]
+      },
+      {
+        "combination_id": "CM003",
+        "dimension_values": {
+          "trade_environment": "模拟交易",
+          "selection_state": "在表内且enabled_flag=0",
+          "expected_gray_state": "置灰"
+        },
+        "covered_by_tc_ids": [
+          "TC001"
+        ]
+      },
+      {
+        "combination_id": "CM004",
+        "dimension_values": {
+          "trade_environment": "正式交易",
+          "selection_state": "在表内且enabled_flag=0",
+          "expected_gray_state": "置灰"
+        },
+        "covered_by_tc_ids": [
+          "TC001"
+        ]
+      },
+      {
+        "combination_id": "CM005",
+        "dimension_values": {
+          "trade_environment": "模拟交易",
+          "selection_state": "在表内且enabled_flag=1",
+          "expected_gray_state": "不置灰"
+        },
+        "covered_by_tc_ids": [
+          "TC001"
+        ]
+      },
+      {
+        "combination_id": "CM006",
+        "dimension_values": {
+          "trade_environment": "正式交易",
+          "selection_state": "在表内且enabled_flag=1",
+          "expected_gray_state": "不置灰"
+        },
+        "covered_by_tc_ids": [
+          "TC001"
+        ]
+      }
+    ],
+    "excluded_combinations": [],
+    "coverage_summary": {
+      "required_combination_count": 6,
+      "covered_combination_count": 6,
+      "excluded_combination_count": 0
+    }
+  },
+  "scope_dispositions": [
+    {
+      "scope_item": "汇总卡片-建加仓股弹窗",
+      "status": "covered",
+      "reason": "该真实入口已在全局适用入口范围中独立列出，TC001-TC004均须在此入口单独执行和记录结果",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 10,
+          "line_end": 10,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "汇总卡片弹窗位置：建加仓股弹窗、清仓股弹窗、T0股/底仓股、持/清‘底+T’合盈弹窗、欠股弹窗、多买股弹窗、雷达预选股弹窗、雷达股弹窗、观察股弹窗。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ],
+      "fact_ids": [
+        "FACT-001",
+        "FACT-002"
+      ],
+      "confirmation_ids": []
+    },
+    {
+      "scope_item": "汇总卡片-清仓股弹窗",
+      "status": "covered",
+      "reason": "该真实入口已在全局适用入口范围中独立列出，TC001-TC004均须在此入口单独执行和记录结果",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 10,
+          "line_end": 10,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "汇总卡片弹窗位置：建加仓股弹窗、清仓股弹窗、T0股/底仓股、持/清‘底+T’合盈弹窗、欠股弹窗、多买股弹窗、雷达预选股弹窗、雷达股弹窗、观察股弹窗。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ],
+      "fact_ids": [
+        "FACT-001",
+        "FACT-002"
+      ],
+      "confirmation_ids": []
+    },
+    {
+      "scope_item": "汇总卡片-T0股/底仓股、持/清‘底+T’合盈弹窗",
+      "status": "covered",
+      "reason": "该真实入口已在全局适用入口范围中独立列出，TC001-TC004均须在此入口单独执行和记录结果",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 10,
+          "line_end": 10,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "汇总卡片弹窗位置：建加仓股弹窗、清仓股弹窗、T0股/底仓股、持/清‘底+T’合盈弹窗、欠股弹窗、多买股弹窗、雷达预选股弹窗、雷达股弹窗、观察股弹窗。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ],
+      "fact_ids": [
+        "FACT-001",
+        "FACT-002"
+      ],
+      "confirmation_ids": []
+    },
+    {
+      "scope_item": "汇总卡片-欠股弹窗",
+      "status": "covered",
+      "reason": "该真实入口已在全局适用入口范围中独立列出，TC001-TC004均须在此入口单独执行和记录结果",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 10,
+          "line_end": 10,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "汇总卡片弹窗位置：建加仓股弹窗、清仓股弹窗、T0股/底仓股、持/清‘底+T’合盈弹窗、欠股弹窗、多买股弹窗、雷达预选股弹窗、雷达股弹窗、观察股弹窗。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ],
+      "fact_ids": [
+        "FACT-001",
+        "FACT-002"
+      ],
+      "confirmation_ids": []
+    },
+    {
+      "scope_item": "汇总卡片-多买股弹窗",
+      "status": "covered",
+      "reason": "该真实入口已在全局适用入口范围中独立列出，TC001-TC004均须在此入口单独执行和记录结果",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 10,
+          "line_end": 10,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "汇总卡片弹窗位置：建加仓股弹窗、清仓股弹窗、T0股/底仓股、持/清‘底+T’合盈弹窗、欠股弹窗、多买股弹窗、雷达预选股弹窗、雷达股弹窗、观察股弹窗。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ],
+      "fact_ids": [
+        "FACT-001",
+        "FACT-002"
+      ],
+      "confirmation_ids": []
+    },
+    {
+      "scope_item": "汇总卡片-雷达预选股弹窗",
+      "status": "covered",
+      "reason": "该真实入口已在全局适用入口范围中独立列出，TC001-TC004均须在此入口单独执行和记录结果",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 10,
+          "line_end": 10,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "汇总卡片弹窗位置：建加仓股弹窗、清仓股弹窗、T0股/底仓股、持/清‘底+T’合盈弹窗、欠股弹窗、多买股弹窗、雷达预选股弹窗、雷达股弹窗、观察股弹窗。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ],
+      "fact_ids": [
+        "FACT-001",
+        "FACT-002"
+      ],
+      "confirmation_ids": []
+    },
+    {
+      "scope_item": "汇总卡片-雷达股弹窗",
+      "status": "covered",
+      "reason": "该真实入口已在全局适用入口范围中独立列出，TC001-TC004均须在此入口单独执行和记录结果",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 10,
+          "line_end": 10,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "汇总卡片弹窗位置：建加仓股弹窗、清仓股弹窗、T0股/底仓股、持/清‘底+T’合盈弹窗、欠股弹窗、多买股弹窗、雷达预选股弹窗、雷达股弹窗、观察股弹窗。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ],
+      "fact_ids": [
+        "FACT-001",
+        "FACT-002"
+      ],
+      "confirmation_ids": []
+    },
+    {
+      "scope_item": "汇总卡片-观察股弹窗",
+      "status": "covered",
+      "reason": "该真实入口已在全局适用入口范围中独立列出，TC001-TC004均须在此入口单独执行和记录结果",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 10,
+          "line_end": 10,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "汇总卡片弹窗位置：建加仓股弹窗、清仓股弹窗、T0股/底仓股、持/清‘底+T’合盈弹窗、欠股弹窗、多买股弹窗、雷达预选股弹窗、雷达股弹窗、观察股弹窗。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ],
+      "fact_ids": [
+        "FACT-001",
+        "FACT-002"
+      ],
+      "confirmation_ids": []
+    },
+    {
+      "scope_item": "主列表-预选股弹窗",
+      "status": "covered",
+      "reason": "该真实入口已在全局适用入口范围中独立列出，TC001-TC004均须在此入口单独执行和记录结果",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 11,
+          "line_end": 11,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "主列表弹窗位置：预选股弹窗、成交股弹窗、已买股弹窗、买失败股弹窗、已卖股弹窗、卖失败股弹窗、欠股弹窗、多买股弹窗。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ],
+      "fact_ids": [
+        "FACT-001",
+        "FACT-002"
+      ],
+      "confirmation_ids": []
+    },
+    {
+      "scope_item": "主列表-成交股弹窗",
+      "status": "covered",
+      "reason": "该真实入口已在全局适用入口范围中独立列出，TC001-TC004均须在此入口单独执行和记录结果",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 11,
+          "line_end": 11,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "主列表弹窗位置：预选股弹窗、成交股弹窗、已买股弹窗、买失败股弹窗、已卖股弹窗、卖失败股弹窗、欠股弹窗、多买股弹窗。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ],
+      "fact_ids": [
+        "FACT-001",
+        "FACT-002"
+      ],
+      "confirmation_ids": []
+    },
+    {
+      "scope_item": "主列表-已买股弹窗",
+      "status": "covered",
+      "reason": "该真实入口已在全局适用入口范围中独立列出，TC001-TC004均须在此入口单独执行和记录结果",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 11,
+          "line_end": 11,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "主列表弹窗位置：预选股弹窗、成交股弹窗、已买股弹窗、买失败股弹窗、已卖股弹窗、卖失败股弹窗、欠股弹窗、多买股弹窗。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ],
+      "fact_ids": [
+        "FACT-001",
+        "FACT-002"
+      ],
+      "confirmation_ids": []
+    },
+    {
+      "scope_item": "主列表-买失败股弹窗",
+      "status": "covered",
+      "reason": "该真实入口已在全局适用入口范围中独立列出，TC001-TC004均须在此入口单独执行和记录结果",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 11,
+          "line_end": 11,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "主列表弹窗位置：预选股弹窗、成交股弹窗、已买股弹窗、买失败股弹窗、已卖股弹窗、卖失败股弹窗、欠股弹窗、多买股弹窗。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ],
+      "fact_ids": [
+        "FACT-001",
+        "FACT-002"
+      ],
+      "confirmation_ids": []
+    },
+    {
+      "scope_item": "主列表-已卖股弹窗",
+      "status": "covered",
+      "reason": "该真实入口已在全局适用入口范围中独立列出，TC001-TC004均须在此入口单独执行和记录结果",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 11,
+          "line_end": 11,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "主列表弹窗位置：预选股弹窗、成交股弹窗、已买股弹窗、买失败股弹窗、已卖股弹窗、卖失败股弹窗、欠股弹窗、多买股弹窗。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ],
+      "fact_ids": [
+        "FACT-001",
+        "FACT-002"
+      ],
+      "confirmation_ids": []
+    },
+    {
+      "scope_item": "主列表-卖失败股弹窗",
+      "status": "covered",
+      "reason": "该真实入口已在全局适用入口范围中独立列出，TC001-TC004均须在此入口单独执行和记录结果",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 11,
+          "line_end": 11,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "主列表弹窗位置：预选股弹窗、成交股弹窗、已买股弹窗、买失败股弹窗、已卖股弹窗、卖失败股弹窗、欠股弹窗、多买股弹窗。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ],
+      "fact_ids": [
+        "FACT-001",
+        "FACT-002"
+      ],
+      "confirmation_ids": []
+    },
+    {
+      "scope_item": "主列表-欠股弹窗",
+      "status": "covered",
+      "reason": "该真实入口已在全局适用入口范围中独立列出，TC001-TC004均须在此入口单独执行和记录结果",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 11,
+          "line_end": 11,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "主列表弹窗位置：预选股弹窗、成交股弹窗、已买股弹窗、买失败股弹窗、已卖股弹窗、卖失败股弹窗、欠股弹窗、多买股弹窗。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ],
+      "fact_ids": [
+        "FACT-001",
+        "FACT-002"
+      ],
+      "confirmation_ids": []
+    },
+    {
+      "scope_item": "主列表-多买股弹窗",
+      "status": "covered",
+      "reason": "该真实入口已在全局适用入口范围中独立列出，TC001-TC004均须在此入口单独执行和记录结果",
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 11,
+          "line_end": 11,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "主列表弹窗位置：预选股弹窗、成交股弹窗、已买股弹窗、买失败股弹窗、已卖股弹窗、卖失败股弹窗、欠股弹窗、多买股弹窗。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ],
+      "fact_ids": [
+        "FACT-001",
+        "FACT-002"
+      ],
+      "confirmation_ids": []
+    }
+  ],
+  "test_dimension_assessment": [
+    {
+      "dimension": "功能测试",
+      "status": "covered",
+      "reason": "覆盖三态置灰决策及K线下钻保留",
+      "fact_ids": [
+        "FACT-004",
+        "FACT-005",
+        "FACT-006",
+        "FACT-007"
+      ],
+      "risk_ids": [
+        "RISK-001",
+        "RISK-002"
+      ],
+      "confirmation_ids": [],
+      "testcase_ids": [
+        "TC001",
+        "TC002",
+        "TC003",
+        "TC004"
+      ],
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 5,
+          "line_end": 5,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "股票名称、股票代码（含标签）都置灰。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 6,
+          "line_end": 6,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "下钻K线功能保留。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 12,
+          "line_end": 12,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "置灰：不在表里的股票，或者在表里的股票 enabled_flag=0。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 13,
+          "line_end": 13,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "不置灰：在表里的股票 enabled_flag=1。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "dimension": "数据测试",
+      "status": "covered",
+      "reason": "覆盖表记录存在性、enabled_flag、混合行和1000+1边界",
+      "fact_ids": [
+        "FACT-003",
+        "FACT-008",
+        "FACT-009"
+      ],
+      "risk_ids": [
+        "RISK-001",
+        "RISK-003",
+        "RISK-004"
+      ],
+      "confirmation_ids": [],
+      "testcase_ids": [
+        "TC001",
+        "TC003",
+        "TC004"
+      ],
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 3,
+          "line_end": 3,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "需求标题：【模拟/正式】股票1000支限制以外的股票名称及字段置灰。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 7,
+          "line_end": 7,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "影响字段：行业名称、热点名称、行业总数、行业股票数，查不到展示“-”；如发现其他影响点，告知产品评估。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 8,
+          "line_end": 8,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "库表：pe_data.stock_t0_selected；enabled_flag 是否有效（1：有效，0：无效）。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "dimension": "异常测试",
+      "status": "not_applicable",
+      "reason": "需求未定义异常输入、错误码或降级行为",
+      "fact_ids": [],
+      "risk_ids": [],
+      "confirmation_ids": [],
+      "testcase_ids": [],
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 4,
+          "line_end": 8,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "功能规则：不在【选股信息-T0】表内的股票需要特殊处理。\n股票名称、股票代码（含标签）都置灰。\n下钻K线功能保留。\n影响字段：行业名称、热点名称、行业总数、行业股票数，查不到展示“-”；如发现其他影响点，告知产品评估。\n库表：pe_data.stock_t0_selected；enabled_flag 是否有效（1：有效，0：无效）。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "dimension": "权限测试",
+      "status": "not_applicable",
+      "reason": "需求未改变角色、权限或数据隔离规则",
+      "fact_ids": [],
+      "risk_ids": [],
+      "confirmation_ids": [],
+      "testcase_ids": [],
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 9,
+          "line_end": 13,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "涉及模块：模拟交易、正式交易。\n汇总卡片弹窗位置：建加仓股弹窗、清仓股弹窗、T0股/底仓股、持/清‘底+T’合盈弹窗、欠股弹窗、多买股弹窗、雷达预选股弹窗、雷达股弹窗、观察股弹窗。\n主列表弹窗位置：预选股弹窗、成交股弹窗、已买股弹窗、买失败股弹窗、已卖股弹窗、卖失败股弹窗、欠股弹窗、多买股弹窗。\n置灰：不在表里的股票，或者在表里的股票 enabled_flag=0。\n不置灰：在表里的股票 enabled_flag=1。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "dimension": "导出测试",
+      "status": "explicitly_excluded",
+      "reason": "明确范围仅列页面弹窗展示与下钻，未包含导出",
+      "fact_ids": [
+        "FACT-002"
+      ],
+      "risk_ids": [],
+      "confirmation_ids": [],
+      "testcase_ids": [],
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 10,
+          "line_end": 11,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "汇总卡片弹窗位置：建加仓股弹窗、清仓股弹窗、T0股/底仓股、持/清‘底+T’合盈弹窗、欠股弹窗、多买股弹窗、雷达预选股弹窗、雷达股弹窗、观察股弹窗。\n主列表弹窗位置：预选股弹窗、成交股弹窗、已买股弹窗、买失败股弹窗、已卖股弹窗、卖失败股弹窗、欠股弹窗、多买股弹窗。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "dimension": "兼容性测试",
+      "status": "explicitly_excluded",
+      "reason": "当前范围未给出浏览器和分辨率矩阵；CONF-003 仅作为后续扩展建议，不进入本次正式组合",
+      "fact_ids": [
+        "FACT-013"
+      ],
+      "risk_ids": [],
+      "confirmation_ids": [
+        "CONF-003"
+      ],
+      "testcase_ids": [],
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 9,
+          "line_end": 9,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "涉及模块：模拟交易、正式交易。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "dimension": "回归测试",
+      "status": "covered",
+      "reason": "覆盖有效股票原展示、混合行刷新及原K线下钻",
+      "fact_ids": [
+        "FACT-005",
+        "FACT-007"
+      ],
+      "risk_ids": [
+        "RISK-002",
+        "RISK-003",
+        "RISK-004"
+      ],
+      "confirmation_ids": [],
+      "testcase_ids": [
+        "TC001",
+        "TC002",
+        "TC003",
+        "TC004"
+      ],
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 6,
+          "line_end": 6,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "下钻K线功能保留。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        },
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 13,
+          "line_end": 13,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "不置灰：在表里的股票 enabled_flag=1。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    },
+    {
+      "dimension": "SQL验证",
+      "status": "blocked",
+      "reason": "仅有表名和 enabled_flag 语义，缺少完整DDL、股票关联键和各弹窗查询口径，不能生成可信SQL",
+      "fact_ids": [
+        "FACT-003"
+      ],
+      "risk_ids": [
+        "RISK-001",
+        "RISK-004"
+      ],
+      "confirmation_ids": [],
+      "testcase_ids": [],
+      "evidence_references": [
+        {
+          "source_type": "pasted_text",
+          "storage_type": "snapshot",
+          "source_path": null,
+          "snapshot_path": "testcases/stock-t0-gray-20260721/evidence/user-requirement.md",
+          "source_record_id": "chat:CHAT-STOCK-T0-GRAY-20260721",
+          "line_start": 8,
+          "line_end": 8,
+          "commit_sha": null,
+          "content_hash": "sha256:498d48c536093b433a66f6da33bec08f919a331f8f143d1bb7a8b793b5c0bbbd",
+          "excerpt": "库表：pe_data.stock_t0_selected；enabled_flag 是否有效（1：有效，0：无效）。",
+          "captured_at": "2026-07-21 00:00:00",
+          "captured_timezone": "Asia/Shanghai",
+          "evidence_status": "current"
+        }
+      ]
+    }
+  ]
+}
