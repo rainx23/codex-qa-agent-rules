@@ -316,6 +316,65 @@ class ConditionMatrixCoverageTests(unittest.TestCase):
         requirement, _, _ = self.models()
         self.assertEqual([], validate_requirement_model(requirement))
 
+    def test_assertion_mappings_count_one_combination_and_require_all_expectations(self):
+        requirement, risk, testcase = self.models()
+        self.add_matrix(requirement, testcase)
+        case = testcase["cases"][0]
+        coverage = case["condition_coverage"][0]
+        expected = ["断言一", "断言二", "断言三"]
+        case["entry_branches"][0].update(steps=["步骤一", "步骤二", "步骤三"], expected_results=expected)
+        coverage.pop("step_index")
+        coverage.pop("expected_index")
+        coverage.pop("observable_result")
+        coverage["assertion_mappings"] = [
+            {"step_index": index, "expected_index": index, "observable_result": result}
+            for index, result in enumerate(expected, 1)
+        ]
+        requirement["condition_matrix"]["dimensions"] = [
+            {"dimension_id": key, "dimension_name": key, "values": [value]}
+            for key, value in coverage["dimension_values"].items()
+        ]
+        requirement["condition_matrix"]["combination_generation"]["groups"] = [{
+            "group_id": "single", "fixed_values": {"target_scope": coverage["dimension_values"]["target_scope"]},
+            "variable_dimensions": [{"dimension_id": "relation", "values": [coverage["dimension_values"]["relation"]]}],
+            "expected_combination_count": 1, "constraints": [],
+        }]
+        requirement["condition_matrix"]["required_combinations"] = [requirement["condition_matrix"]["required_combinations"][0]]
+        requirement["condition_matrix"]["coverage_summary"] = {
+            "required_combination_count": 1, "covered_combination_count": 1, "excluded_combination_count": 0,
+        }
+        case["condition_coverage"] = [coverage]
+        self.assertEqual([], self.errors(requirement, risk, testcase))
+        coverage["assertion_mappings"].pop()
+        self.assertTrue(any("ASSERTION_MAPPING_INCOMPLETE" in item for item in self.errors(requirement, risk, testcase)))
+
+    def test_assertion_mapping_conflict_duplicate_and_out_of_range_fail(self):
+        requirement, risk, testcase = self.models()
+        self.add_matrix(requirement, testcase)
+        coverage = testcase["cases"][0]["condition_coverage"][0]
+        original = {key: coverage.pop(key) for key in ("step_index", "expected_index", "observable_result")}
+        coverage["assertion_mappings"] = [dict(original)]
+        coverage.update(original)
+        self.assertTrue(any("MAPPING_CONFLICT" in item for item in self.errors(requirement, risk, testcase)))
+        for key in original:
+            coverage.pop(key)
+        coverage["assertion_mappings"] = [dict(original), dict(original)]
+        self.assertTrue(any("ASSERTION_MAPPING_DUPLICATED" in item for item in self.errors(requirement, risk, testcase)))
+        coverage["assertion_mappings"] = [{"step_index": 99, "expected_index": 1, "observable_result": original["observable_result"]}]
+        self.assertTrue(any("STEP_REFERENCE_INVALID" in item for item in self.errors(requirement, risk, testcase)))
+
+    def test_polling_tc010_uses_two_combinations_and_six_assertions(self):
+        artifact = ROOT / "testcases" / "polling-row-sync-20260720"
+        requirement = json.loads((artifact / "requirement-analysis.json").read_text(encoding="utf-8"))
+        testcase = json.loads((artifact / "testcase-model.json").read_text(encoding="utf-8"))
+        tc010 = next(case for case in testcase["cases"] if case["tc_id"] == "TC010")
+        coverage = [item for item in tc010["condition_coverage"] if item["combination_id"].startswith("CM-TC010-")]
+        self.assertEqual(2, len(coverage))
+        self.assertEqual([3, 3], [len(item["assertion_mappings"]) for item in coverage])
+        self.assertEqual(56, len(requirement["condition_matrix"]["required_combinations"]))
+        self.assertEqual(21, len(testcase["cases"]))
+        self.assertEqual(42, testcase["branch_count"])
+
 
 if __name__ == "__main__":
     unittest.main()

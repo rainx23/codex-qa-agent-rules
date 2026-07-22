@@ -232,8 +232,9 @@ class DeliverySummaryStateTests(unittest.TestCase):
         self.assertFalse(self.directory.is_relative_to(ROOT / "tests/fixtures"))
         self.assertTrue(self.directory.is_relative_to(Path(tempfile.gettempdir())))
 
-    def test_fixed_fixture_is_preserved(self):
-        self.assertTrue((ROOT / "tests/fixtures/drafts/delivery-summary-wjtkg1i6/manifest.json").is_file())
+    def test_random_delivery_summary_fixture_is_not_committed(self):
+        drafts = ROOT / "tests/fixtures/drafts"
+        self.assertFalse(any(path.is_dir() and path.name.startswith("delivery-summary-") for path in drafts.iterdir()))
 
     def test_exception_cleanup_leaves_no_repository_fixture_residue(self):
         before = {path.name for path in (ROOT / "tests/fixtures/drafts").iterdir()}

@@ -35,6 +35,8 @@ REQUIRED = {
     "validation_status", "relation", "supersedes", "failure_reason", "pending_reason",
 }
 
+LIFECYCLE_STATUSES = {"active", "superseded", "archived"}
+
 
 def validate_current_rule_dimension_assessment(
     manifest: dict[str, Any],
@@ -278,6 +280,13 @@ def validate_manifest_data(data: dict[str, Any], manifest_path: Path) -> list[st
         and data.get("rule_version") != current_version
         and _is_superseded_by_current_rule(root, str(data.get("artifact_id", "")), current_version, manifest_path)
     )
+    lifecycle_status = data.get("lifecycle_status")
+    if lifecycle_status is None and historical_superseded:
+        lifecycle_status = "superseded"
+    if lifecycle_status is not None and lifecycle_status not in LIFECYCLE_STATUSES:
+        errors.append(f"lifecycle_status 非法：{lifecycle_status}")
+    if lifecycle_status == "active" and data.get("rule_version") != current_version:
+        errors.append("active 产物必须使用当前 RULE_VERSION")
     contract_version = str(data.get("rule_version")) if historical_superseded else current_version
     if contract_version is not None:
         errors.extend(f"Manifest Schema：{error}" for error in validate_schema_shape(data, manifest_schema(contract_version)))
@@ -315,6 +324,26 @@ def validate_manifest_data(data: dict[str, Any], manifest_path: Path) -> list[st
     if not data.get("requirement_id") and not data.get("commit_range"):
         errors.append("requirement_id 和 commit_range 至少填写一个")
     errors.extend(_validate_supersedes(data, manifest_path))
+
+    if lifecycle_status in {"superseded", "archived"}:
+        hash_inputs = list(data.get("source_files") or [])
+        if not hash_inputs and data.get("source_snapshot_path"):
+            hash_inputs = [data["source_snapshot_path"]]
+        if not hash_inputs:
+            errors.append("历史产物必须提供 source_files 或 source_snapshot_path")
+        else:
+            try:
+                if stable_source_hash(root, hash_inputs) != data.get("source_hash"):
+                    errors.append("历史产物 source_hash 与来源内容不一致")
+            except (OSError, ValueError) as exc:
+                errors.append(str(exc))
+        for field in ("report_path", "risk_matrix_path", "testcase_model_path", "xmind_md_path", "xmind_path"):
+            path, path_error = resolve_safe_path(data.get(field), manifest_path)
+            if path_error:
+                errors.append(f"{field}: {path_error}")
+            elif path is None or not path.is_file():
+                errors.append(f"{field} 历史路径不存在：{data.get(field)}")
+        return list(dict.fromkeys(errors))
 
     status = data.get("validation_status")
     formal_path_fields = ("report_path", "risk_matrix_path", "testcase_model_path", "xmind_md_path", "xmind_path")

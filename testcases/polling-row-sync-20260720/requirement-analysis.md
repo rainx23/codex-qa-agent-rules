@@ -29,7 +29,7 @@ Rule Version: 2.12.0
 8. FACT-008：roundRobin、rowKey、roundRobinRowKey、visibleStartIdx、visibleEndIdx 及三类冲突参数规则来自正式方案。
 9. FACT-009：rowKeyType=0/1/2/3 分别表示可视有效行、补全行、新增行和删除行。
 10. FACT-010：轮询模式动态列返回所有字段，非轮询模式继续兼容动态列参数。
-11. FACT-011：盘中状态动态切换规则缺失，不进入确定性 TC。
+11. FACT-011：当前资料只定义静态启用条件，未定义盘前进入盘中或盘中进入盘后的动态启停行为；不进入确定性 TC。
 12. FACT-012：缺少两个弹窗对应的业务表、稳定 rowKey 字段和排序字段，SQL 对账保持 blocked。
 
 ## 证据来源
@@ -40,7 +40,7 @@ Rule Version: 2.12.0
 
 ## 待确认点
 
-- CONF-001 FACT-011 severity=nonblocking status=pending：Evidence 未定义从非盘中进入盘中或从盘中进入盘后是否动态切换轮询，本次不写死该行为。
+- CONF-001 FACT-011 severity=nonblocking status=pending：正式方案只定义查询日期为当天的静态启用条件，用户补充只定义当天且盘中才轮询；资料未定义动态启停行为，本次不写死且不视为用户确认。
 - CONF-002 FACT-012 severity=nonblocking status=pending：如需生成 SQL 对账，请补充两个弹窗对应的数据表、稳定 rowKey 字段和排序字段；测试设计继续交付，SQL 保持 blocked。
 
 无阻塞项。全局所有数据均被删除时页码显示0还是1、空态文案如何展示也未说明。

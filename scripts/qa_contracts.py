@@ -691,14 +691,23 @@ def testcase_schema(version: str) -> dict[str, Any]:
             "steps": _strings(1), "expected_results": _strings(1),
         },
     )
+    assertion_mapping = _object(
+        ["step_index", "expected_index", "observable_result"],
+        {
+            "step_index": {"type": "integer", "minimum": 1},
+            "expected_index": {"type": "integer", "minimum": 1},
+            "observable_result": _string(),
+        },
+    )
     condition_coverage = _object(
-        ["combination_id", "coverage_type", "dimension_values", "expected_match_state", "observable_result"],
+        ["combination_id", "coverage_type", "dimension_values", "expected_match_state"],
         {
             "combination_id": _string(), "coverage_type": {"enum": list(CONDITION_COVERAGE_TYPES)},
             "dimension_values": {"type": "object"}, "expected_match_state": _string(),
             "observable_result": _string(),
             "branch_id": _string(), "step_index": {"type": "integer", "minimum": 1},
             "expected_index": {"type": "integer", "minimum": 1},
+            "assertion_mappings": {"type": "array", "minItems": 1, "items": assertion_mapping},
             "scope_path": _strings(1),
         },
     )
@@ -906,6 +915,7 @@ def manifest_schema(version: str) -> dict[str, Any]:
         "validation_status": {"enum": list(VALIDATION_STATUSES)}, "relation": {"enum": list(RELATIONS)},
         "supersedes": {"type": ["string", "null"]}, "failure_reason": {"type": ["string", "null"]},
         "pending_reason": {"type": ["string", "null"]},
+        "lifecycle_status": {"enum": ["active", "superseded", "archived"]},
     }
     return _base_schema("QA Artifact Manifest", version, _object(required, properties))
 
@@ -2232,8 +2242,26 @@ def validate_model_links(
                     case = cases[tc_id]
                     branch_id = coverage.get("branch_id")
                     scope_path = coverage.get("scope_path")
-                    step_index = coverage.get("step_index")
-                    expected_index = coverage.get("expected_index")
+                    mappings = coverage.get("assertion_mappings")
+                    legacy_mapping = {
+                        "step_index": coverage.get("step_index"),
+                        "expected_index": coverage.get("expected_index"),
+                        "observable_result": coverage.get("observable_result"),
+                    }
+                    has_legacy_mapping = any(value is not None for value in legacy_mapping.values())
+                    if mappings is not None and has_legacy_mapping:
+                        errors.append(
+                            f"CONDITION_COVERAGE_MAPPING_CONFLICT: {combination_id} 不得同时使用单断言和 assertion_mappings"
+                        )
+                        continue
+                    if mappings is None:
+                        mappings = [legacy_mapping]
+                        uses_multi_mapping = False
+                    else:
+                        uses_multi_mapping = True
+                    if not isinstance(mappings, list) or not mappings:
+                        errors.append(f"CONDITION_COVERAGE_ASSERTION_MAPPING_REQUIRED: {combination_id}")
+                        continue
                     if case.get("shared_entry_scope_id"):
                         normalized_scope_path = tuple(str(item) for item in (scope_path or []))
                         matching_scope_paths = [
@@ -2251,31 +2279,31 @@ def validate_model_links(
                             errors.append(
                                 f"CONDITION_COVERAGE_STEP_REFERENCE_INVALID: {tc_id} 共享入口 steps 与 expected_results 必须一一对应"
                             )
-                        if (
-                            not isinstance(step_index, int) or isinstance(step_index, bool)
-                            or not 1 <= step_index <= len(steps)
-                            or not isinstance(expected_index, int) or isinstance(expected_index, bool)
-                            or not 1 <= expected_index <= len(expected_results)
-                            or step_index != expected_index
-                        ):
-                            errors.append(
-                                f"CONDITION_COVERAGE_STEP_REFERENCE_INVALID: {combination_id} 的 step_index/expected_index 非法"
-                            )
-                            continue
-                        if coverage.get("observable_result") != expected_results[expected_index - 1]:
-                            errors.append(
-                                f"CONDITION_COVERAGE_STEP_REFERENCE_INVALID: {combination_id} observable_result "
-                                f"必须等于所引用 expected_results[{expected_index}]"
-                            )
-                        location = (tc_id, "/".join(normalized_scope_path), step_index)
-                        prior = behavior_locations.get(location)
-                        if prior and prior != combination_id:
-                            errors.append(
-                                f"CONDITION_COVERAGE_NOT_INDEPENDENT: {prior} 与 {combination_id} 全部指向 "
-                                f"{tc_id}.scope[{'/'.join(normalized_scope_path)}].step[{step_index}]"
-                            )
-                        else:
-                            behavior_locations[location] = str(combination_id)
+                        if uses_multi_mapping:
+                            mapping_keys = [
+                                (item.get("step_index"), item.get("expected_index"), item.get("observable_result"))
+                                for item in mappings if isinstance(item, dict)
+                            ]
+                            if len(mapping_keys) != len(mappings) or len(mapping_keys) != len(set(mapping_keys)):
+                                errors.append(f"CONDITION_COVERAGE_ASSERTION_MAPPING_DUPLICATED: {combination_id}")
+                            if {item[1] for item in mapping_keys} != set(range(1, len(expected_results) + 1)):
+                                errors.append(f"CONDITION_COVERAGE_ASSERTION_MAPPING_INCOMPLETE: {combination_id}")
+                        for mapping in mappings:
+                            step_index = mapping.get("step_index") if isinstance(mapping, dict) else None
+                            expected_index = mapping.get("expected_index") if isinstance(mapping, dict) else None
+                            if (not isinstance(step_index, int) or isinstance(step_index, bool) or not 1 <= step_index <= len(steps)
+                                    or not isinstance(expected_index, int) or isinstance(expected_index, bool) or not 1 <= expected_index <= len(expected_results)):
+                                errors.append(f"CONDITION_COVERAGE_STEP_REFERENCE_INVALID: {combination_id} 的 step_index/expected_index 非法")
+                                continue
+                            if mapping.get("observable_result") != expected_results[expected_index - 1]:
+                                errors.append(f"CONDITION_COVERAGE_STEP_REFERENCE_INVALID: {combination_id} observable_result 必须等于所引用 expected_results[{expected_index}]")
+                            if not uses_multi_mapping:
+                                location = (tc_id, "/".join(normalized_scope_path), step_index)
+                                prior = behavior_locations.get(location)
+                                if prior and prior != combination_id:
+                                    errors.append(f"CONDITION_COVERAGE_NOT_INDEPENDENT: {prior} 与 {combination_id}")
+                                else:
+                                    behavior_locations[location] = str(combination_id)
                         continue
                     branch = next(
                         (item for item in case.get("entry_branches", []) if item.get("branch_id") == branch_id),
@@ -2298,31 +2326,31 @@ def validate_model_links(
                         errors.append(
                             f"CONDITION_COVERAGE_STEP_REFERENCE_INVALID: {tc_id}.{branch_id} steps 与 expected_results 必须一一对应"
                         )
-                    if (
-                        not isinstance(step_index, int) or isinstance(step_index, bool)
-                        or not 1 <= step_index <= len(steps)
-                        or not isinstance(expected_index, int) or isinstance(expected_index, bool)
-                        or not 1 <= expected_index <= len(expected_results)
-                        or step_index != expected_index
-                    ):
-                        errors.append(
-                            f"CONDITION_COVERAGE_STEP_REFERENCE_INVALID: {combination_id} 的 step_index/expected_index 非法"
-                        )
-                        continue
-                    if coverage.get("observable_result") != expected_results[expected_index - 1]:
-                        errors.append(
-                            f"CONDITION_COVERAGE_STEP_REFERENCE_INVALID: {combination_id} observable_result "
-                            f"必须等于所引用 expected_results[{expected_index}]"
-                        )
-                    location = (tc_id, str(branch_id), step_index)
-                    prior = behavior_locations.get(location)
-                    if prior and prior != combination_id:
-                        errors.append(
-                            f"CONDITION_COVERAGE_NOT_INDEPENDENT: {prior} 与 {combination_id} 全部指向 "
-                            f"{tc_id}.{branch_id}.step[{step_index}]"
-                        )
-                    else:
-                        behavior_locations[location] = str(combination_id)
+                    if uses_multi_mapping:
+                        mapping_keys = [
+                            (item.get("step_index"), item.get("expected_index"), item.get("observable_result"))
+                            for item in mappings if isinstance(item, dict)
+                        ]
+                        if len(mapping_keys) != len(mappings) or len(mapping_keys) != len(set(mapping_keys)):
+                            errors.append(f"CONDITION_COVERAGE_ASSERTION_MAPPING_DUPLICATED: {combination_id}")
+                        if {item[1] for item in mapping_keys} != set(range(1, len(expected_results) + 1)):
+                            errors.append(f"CONDITION_COVERAGE_ASSERTION_MAPPING_INCOMPLETE: {combination_id}")
+                    for mapping in mappings:
+                        step_index = mapping.get("step_index") if isinstance(mapping, dict) else None
+                        expected_index = mapping.get("expected_index") if isinstance(mapping, dict) else None
+                        if (not isinstance(step_index, int) or isinstance(step_index, bool) or not 1 <= step_index <= len(steps)
+                                or not isinstance(expected_index, int) or isinstance(expected_index, bool) or not 1 <= expected_index <= len(expected_results)):
+                            errors.append(f"CONDITION_COVERAGE_STEP_REFERENCE_INVALID: {combination_id} 的 step_index/expected_index 非法")
+                            continue
+                        if mapping.get("observable_result") != expected_results[expected_index - 1]:
+                            errors.append(f"CONDITION_COVERAGE_STEP_REFERENCE_INVALID: {combination_id} observable_result 必须等于所引用 expected_results[{expected_index}]")
+                        if not uses_multi_mapping:
+                            location = (tc_id, str(branch_id), step_index)
+                            prior = behavior_locations.get(location)
+                            if prior and prior != combination_id:
+                                errors.append(f"CONDITION_COVERAGE_NOT_INDEPENDENT: {prior} 与 {combination_id}")
+                            else:
+                                behavior_locations[location] = str(combination_id)
         unknown_coverage = set(coverage_by_id) - set(required_by_id)
         if unknown_coverage:
             errors.append(

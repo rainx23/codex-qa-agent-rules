@@ -1107,7 +1107,7 @@
       ],
       "condition_coverage": [
         {
-          "combination_id": "CM-TC010-B01-1",
+          "combination_id": "CM-TC010-B01",
           "coverage_type": "behavior",
           "dimension_values": {
             "behavior_group": "连续删页与页码重置",
@@ -1128,76 +1128,30 @@
             "compatibility_mode": "不适用",
             "expected_behavior": "不适用",
             "business_entry": "清仓股弹窗",
-            "expected_page_behavior": "重置为实际总页数"
+            "expected_page_behavior": "不适用"
           },
           "expected_match_state": "命中连续删页与页码重置场景",
-          "observable_result": "请求页码大于实际总页数时，当前页重置为实际总页数第98页且pageTotal=98",
           "branch_id": "TC010-B01",
-          "step_index": 1,
-          "expected_index": 1
+          "assertion_mappings": [
+            {
+              "step_index": 1,
+              "expected_index": 1,
+              "observable_result": "请求页码大于实际总页数时，当前页重置为实际总页数第98页且pageTotal=98"
+            },
+            {
+              "step_index": 2,
+              "expected_index": 2,
+              "observable_result": "返回最近有数据的第98页，页面显示数据且不保留空白第99页或第100页"
+            },
+            {
+              "step_index": 3,
+              "expected_index": 3,
+              "observable_result": "进入第97页且显示数据，上一页不为空"
+            }
+          ]
         },
         {
-          "combination_id": "CM-TC010-B01-2",
-          "coverage_type": "behavior",
-          "dimension_values": {
-            "behavior_group": "连续删页与页码重置",
-            "operation": "删除",
-            "start_date_scope": "不适用",
-            "end_date_scope": "不适用",
-            "market_session": "不适用",
-            "expected_polling_state": "不适用",
-            "current_page_position": "第100页",
-            "page_fill_state": "不适用",
-            "change_page_position": "末两页",
-            "deletion_extent": "连续删除末两页",
-            "original_page_count": "100页",
-            "requested_page_state": "大于实际总页数",
-            "expected_consistency": "不适用",
-            "conflict_scenario": "不适用",
-            "row_key_type": "不适用",
-            "compatibility_mode": "不适用",
-            "expected_behavior": "不适用",
-            "business_entry": "清仓股弹窗",
-            "expected_page_behavior": "返回最近有数据页"
-          },
-          "expected_match_state": "命中连续删页与页码重置场景",
-          "observable_result": "返回最近有数据的第98页，页面显示数据且不保留空白第99页或第100页",
-          "branch_id": "TC010-B01",
-          "step_index": 2,
-          "expected_index": 2
-        },
-        {
-          "combination_id": "CM-TC010-B01-3",
-          "coverage_type": "behavior",
-          "dimension_values": {
-            "behavior_group": "连续删页与页码重置",
-            "operation": "删除",
-            "start_date_scope": "不适用",
-            "end_date_scope": "不适用",
-            "market_session": "不适用",
-            "expected_polling_state": "不适用",
-            "current_page_position": "第100页",
-            "page_fill_state": "不适用",
-            "change_page_position": "末两页",
-            "deletion_extent": "连续删除末两页",
-            "original_page_count": "100页",
-            "requested_page_state": "大于实际总页数",
-            "expected_consistency": "不适用",
-            "conflict_scenario": "不适用",
-            "row_key_type": "不适用",
-            "compatibility_mode": "不适用",
-            "expected_behavior": "不适用",
-            "business_entry": "清仓股弹窗",
-            "expected_page_behavior": "上一页有数据"
-          },
-          "expected_match_state": "命中连续删页与页码重置场景",
-          "observable_result": "进入第97页且显示数据，上一页不为空",
-          "branch_id": "TC010-B01",
-          "step_index": 3,
-          "expected_index": 3
-        },
-        {
-          "combination_id": "CM-TC010-B02-1",
+          "combination_id": "CM-TC010-B02",
           "coverage_type": "behavior",
           "dimension_values": {
             "behavior_group": "连续删页与页码重置",
@@ -1218,73 +1172,27 @@
             "compatibility_mode": "不适用",
             "expected_behavior": "不适用",
             "business_entry": "雷达预选股弹窗",
-            "expected_page_behavior": "重置为实际总页数"
+            "expected_page_behavior": "不适用"
           },
           "expected_match_state": "命中连续删页与页码重置场景",
-          "observable_result": "请求页码大于实际总页数时，当前页重置为实际总页数第98页且pageTotal=98",
           "branch_id": "TC010-B02",
-          "step_index": 1,
-          "expected_index": 1
-        },
-        {
-          "combination_id": "CM-TC010-B02-2",
-          "coverage_type": "behavior",
-          "dimension_values": {
-            "behavior_group": "连续删页与页码重置",
-            "operation": "删除",
-            "start_date_scope": "不适用",
-            "end_date_scope": "不适用",
-            "market_session": "不适用",
-            "expected_polling_state": "不适用",
-            "current_page_position": "第100页",
-            "page_fill_state": "不适用",
-            "change_page_position": "末两页",
-            "deletion_extent": "连续删除末两页",
-            "original_page_count": "100页",
-            "requested_page_state": "大于实际总页数",
-            "expected_consistency": "不适用",
-            "conflict_scenario": "不适用",
-            "row_key_type": "不适用",
-            "compatibility_mode": "不适用",
-            "expected_behavior": "不适用",
-            "business_entry": "雷达预选股弹窗",
-            "expected_page_behavior": "返回最近有数据页"
-          },
-          "expected_match_state": "命中连续删页与页码重置场景",
-          "observable_result": "返回最近有数据的第98页，页面显示数据且不保留空白第99页或第100页",
-          "branch_id": "TC010-B02",
-          "step_index": 2,
-          "expected_index": 2
-        },
-        {
-          "combination_id": "CM-TC010-B02-3",
-          "coverage_type": "behavior",
-          "dimension_values": {
-            "behavior_group": "连续删页与页码重置",
-            "operation": "删除",
-            "start_date_scope": "不适用",
-            "end_date_scope": "不适用",
-            "market_session": "不适用",
-            "expected_polling_state": "不适用",
-            "current_page_position": "第100页",
-            "page_fill_state": "不适用",
-            "change_page_position": "末两页",
-            "deletion_extent": "连续删除末两页",
-            "original_page_count": "100页",
-            "requested_page_state": "大于实际总页数",
-            "expected_consistency": "不适用",
-            "conflict_scenario": "不适用",
-            "row_key_type": "不适用",
-            "compatibility_mode": "不适用",
-            "expected_behavior": "不适用",
-            "business_entry": "雷达预选股弹窗",
-            "expected_page_behavior": "上一页有数据"
-          },
-          "expected_match_state": "命中连续删页与页码重置场景",
-          "observable_result": "进入第97页且显示数据，上一页不为空",
-          "branch_id": "TC010-B02",
-          "step_index": 3,
-          "expected_index": 3
+          "assertion_mappings": [
+            {
+              "step_index": 1,
+              "expected_index": 1,
+              "observable_result": "请求页码大于实际总页数时，当前页重置为实际总页数第98页且pageTotal=98"
+            },
+            {
+              "step_index": 2,
+              "expected_index": 2,
+              "observable_result": "返回最近有数据的第98页，页面显示数据且不保留空白第99页或第100页"
+            },
+            {
+              "step_index": 3,
+              "expected_index": 3,
+              "observable_result": "进入第97页且显示数据，上一页不为空"
+            }
+          ]
         }
       ]
     },

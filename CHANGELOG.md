@@ -6,6 +6,8 @@
 
 ## [Unreleased]
 
+## [2.13.0] - 2026-07-22
+
 ### Added
 
 - 新增八类 `test_dimension_assessment`、`condition_matrix_applicability`、`scope_dispositions` 与 Testcase `secondary_dimensions` 的兼容 Schema 和确定性交叉校验。
