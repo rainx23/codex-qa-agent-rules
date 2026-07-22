@@ -177,7 +177,7 @@ class ArtifactGovernanceTests(unittest.TestCase):
 
     def test_manifest_example_is_valid_passed(self):
         _, errors = validate_manifest_file(ROOT / "testcases/manifest.example.json")
-        self.assertTrue(any("TEST_DIMENSION_ASSESSMENT_REQUIRED" in error for error in errors), errors)
+        self.assertEqual([], errors)
 
     def test_external_workspace_root_artifacts_and_evidence_resolve_locally(self):
         with tempfile.TemporaryDirectory() as directory:
