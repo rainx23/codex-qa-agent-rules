@@ -18,7 +18,14 @@ PRE_REVIEW_PATTERNS = (
     r"需求(?:预审|评审)",
     r"检查需求(?:是否)?完整",
     r"检查.{0,12}(?:缺失|冲突|歧义)",
-    r"只分析需求问题.{0,12}(?:暂不|不要|不)(?:生成|编写)测试用例",
+)
+REVIEW_ONLY_PATTERNS = (
+    r"只(?:做|进行|分析)?.{0,12}(?:需求)?(?:预审|评审|分析).{0,16}(?:暂不|不要|不)(?:生成|编写|输出|制作).{0,6}(?:测试)?用例",
+    r"只分析需求问题.{0,12}(?:暂不|不要|不)(?:生成|编写).{0,6}(?:测试)?用例",
+)
+DELIVERY_PATTERNS = (
+    r"(?:生成|编写|输出|制作).{0,8}(?:测试)?用例",
+    r"XMind",
 )
 EXTRACT_CANDIDATE_PATTERNS = (r"提取(?:为)?知识候选", r"提取知识候选")
 FORBIDDEN_REUSABLE_SOURCE_TOKENS = (
@@ -34,13 +41,21 @@ class ModeError(ValueError):
 def detect_requirement_mode(request_text: str) -> str:
     """Enter pre_review only for an explicit review-only intent."""
 
-    return "pre_review" if any(re.search(pattern, request_text) for pattern in PRE_REVIEW_PATTERNS) else "delivery"
+    if any(re.search(pattern, request_text, flags=re.IGNORECASE) for pattern in REVIEW_ONLY_PATTERNS):
+        return "pre_review"
+    delivery_requested = any(
+        re.search(pattern, request_text, flags=re.IGNORECASE) for pattern in DELIVERY_PATTERNS
+    )
+    review_requested = any(re.search(pattern, request_text) for pattern in PRE_REVIEW_PATTERNS)
+    return "pre_review" if review_requested and not delivery_requested else "delivery"
 
 
-def is_extract_candidate_requested(request_text: str) -> bool:
+def is_extract_candidate_requested(request_text: str, *, offer_pending: bool = False) -> bool:
     """Return true only for an explicit knowledge-candidate extraction request."""
 
-    return any(re.search(pattern, request_text) for pattern in EXTRACT_CANDIDATE_PATTERNS)
+    if any(re.search(pattern, request_text) for pattern in EXTRACT_CANDIDATE_PATTERNS):
+        return True
+    return offer_pending and re.fullmatch(r"\s*提取(?:这些)?[。！!]?\s*", request_text) is not None
 
 
 def prepare_pre_review(
@@ -137,8 +152,48 @@ def _selected_sources(
         confirmation = confirmations.get(confirmation_id)
         if confirmation is None or confirmation.get("status") != "resolved":
             raise ModeError(f"{confirmation_id} 不是 resolved Confirmation，不能形成知识候选")
+        evidence = confirmation.get("resolution_evidence_references")
+        if not isinstance(evidence, list) or not evidence:
+            raise ModeError(f"{confirmation_id} 缺少 resolution_evidence_references")
+        if any(not isinstance(item, dict) or item.get("evidence_status") != "current" for item in evidence):
+            raise ModeError(f"{confirmation_id} 的 resolution Evidence 必须全部为 current")
+        if all(item.get("source_type") == "code_context" for item in evidence):
+            raise ModeError(f"{confirmation_id} 不得仅由 code_context 支撑知识候选")
+        source_text = " ".join([
+            str(confirmation.get("statement", "")), str(confirmation.get("resolution", "")),
+            *(str(item.get("excerpt", "")) for item in evidence),
+        ])
+        if any(token in source_text for token in FORBIDDEN_REUSABLE_SOURCE_TOKENS):
+            raise ModeError(f"{confirmation_id} 属于禁止的临时、环境或敏感来源")
+        unresolved = [
+            fact_id for fact_id in confirmation.get("fact_ids", [])
+            if facts.get(fact_id, {}).get("category") in {"inferred", "missing", "conflicting"}
+        ]
+        if unresolved:
+            raise ModeError(f"{confirmation_id} 关联业务 Fact 尚未 confirmed：{sorted(unresolved)}")
         selected_confirmations.append(confirmation)
     return selected_facts, selected_confirmations
+
+
+def _ensure_candidate_extraction_ready(
+    requirement_model: dict[str, Any], *, evidence_root: Path | None,
+) -> None:
+    """Enforce formal delivery gates independently from the optional offer."""
+
+    stage = requirement_model.get("workflow_stage")
+    if stage != "completed":
+        raise ModeError(f"extract_candidate 要求 workflow_stage=completed，当前为 {stage}")
+    validation_errors = validate_requirement_model(requirement_model, evidence_root=evidence_root)
+    if validation_errors:
+        raise ModeError(f"Requirement Analysis Model 校验失败：{'；'.join(validation_errors)}")
+    summary = summarize_confirmations(requirement_model)
+    blockers = [
+        f"{field}={summary[field]}"
+        for field in ("blocking_pending_count", "skipped_core_count", "unresolved_core_fact_count")
+        if summary[field] != 0
+    ]
+    if blockers:
+        raise ModeError(f"extract_candidate 正式门禁未通过：{', '.join(blockers)}")
 
 
 def should_offer_candidate_extraction(
@@ -169,6 +224,42 @@ def should_offer_candidate_extraction(
     return True
 
 
+def render_candidate_extraction_offer(
+    requirement_model: dict[str, Any], *, reusable_fact_ids: list[str] | None = None,
+    reusable_confirmation_ids: list[str] | None = None, formal_validation_passed: bool,
+    prompt_already_shown: bool = False, user_opted_out: bool = False,
+    evidence_root: Path | None = None, max_summaries: int = 5,
+) -> str:
+    """Render a compact offer only; never search, extract, compare or persist."""
+
+    fact_ids = reusable_fact_ids or []
+    confirmation_ids = reusable_confirmation_ids or []
+    if not should_offer_candidate_extraction(
+        requirement_model, reusable_fact_ids=fact_ids,
+        reusable_confirmation_ids=confirmation_ids,
+        formal_validation_passed=formal_validation_passed,
+        prompt_already_shown=prompt_already_shown, user_opted_out=user_opted_out,
+        evidence_root=evidence_root,
+    ):
+        return ""
+    facts, confirmations = _selected_sources(requirement_model, fact_ids, confirmation_ids)
+    summaries = [str(item.get("statement", "")).strip() for item in facts]
+    summaries.extend(
+        str(item.get("resolution") or item.get("statement") or "").strip()
+        for item in confirmations
+    )
+    summaries = list(dict.fromkeys(item for item in summaries if item))
+    if not summaries:
+        return ""
+    visible = summaries[:max(1, max_summaries)]
+    lines = [f"本次发现 {len(summaries)} 条可能可复用的已确认规则："]
+    lines.extend(f"- {item[:80]}" for item in visible)
+    if len(visible) < len(summaries):
+        lines.append(f"- 另有 {len(summaries) - len(visible)} 条规则未展开")
+    lines.extend(["", "是否提取为知识候选？"])
+    return "\n".join(lines)
+
+
 def extract_candidates(
     requirement_model: dict[str, Any], candidate_specs: list[dict[str, Any]], *,
     explicitly_requested: bool, evidence_root: Path | None = None,
@@ -177,8 +268,7 @@ def extract_candidates(
 
     if not explicitly_requested:
         raise ModeError("未明确要求提取知识候选")
-    if requirement_model.get("workflow_stage") == "pre_review":
-        raise ModeError("pre_review 结果禁止形成知识候选")
+    _ensure_candidate_extraction_ready(requirement_model, evidence_root=evidence_root)
     action_by_result = {
         "missing": "create", "consistent": "merge", "conflicting": "reconfirm",
         "superseding": "supersede",

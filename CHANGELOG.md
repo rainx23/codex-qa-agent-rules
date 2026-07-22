@@ -17,6 +17,10 @@
 
 - 文档统一为“6 个 QA Skills / 4 个核心交付链 Skills”，仓库文档校验器从实际 `skills/*/SKILL.md` 派生清单并与根 README 比对。
 
+### Fixed
+
+- `extract_candidate` 独立复验 completed 正式模型、Confirmation Summary 与 resolved Confirmation 来源，提示上下文支持用户简短回复“提取”；混合“需求评审并生成用例”继续进入 delivery。
+
 ## [2.14.0] - 2026-07-22
 
 ### Added
