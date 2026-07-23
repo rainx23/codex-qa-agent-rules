@@ -24,7 +24,7 @@
 ## 任务路由
 
 - 本仓库共 6 个 QA Skills：4 个核心交付链 Skills（Requirement → Diff → Testcase → Artifact）和 2 个按需支撑型 Skills（Knowledge、API Automation）。支撑型 Skill 不作为每次任务都执行的主链步骤。
-- 禅道、OpenSpec、Markdown、截图、新需求或需求分析：执行 skills/qa-requirement-analysis/SKILL.md。
+- 禅道、Markdown、截图、新需求或需求分析：执行 skills/qa-requirement-analysis/SKILL.md。
 - 只有用户明确要求需求预审/评审、完整性检查、缺失冲突歧义检查或“只分析问题、暂不生成用例”时进入 `pre_review`；普通“分析需求并编写测试用例”继续执行 confirmation_only 两阶段正式交付链。
 - diff、commit、变更评审或影响分析：执行 skills/qa-diff-impact-analysis/SKILL.md。
 - 测试点、测试用例、XMind Markdown、P0/P1/P2：执行 skills/qa-testcase-design/SKILL.md。

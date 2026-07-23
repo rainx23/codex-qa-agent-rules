@@ -34,7 +34,7 @@ class SkillLocalizationTests(unittest.TestCase):
 
     def test_chinese_and_english_trigger_words_are_retained(self):
         expected = {
-            "qa-requirement-analysis": (("需求", "分析"), ("Requirement analysis", "OpenSpec")),
+            "qa-requirement-analysis": (("需求", "分析"), ("Requirement analysis", "Markdown")),
             "qa-diff-impact-analysis": (("Diff", "影响"), ("Diff impact analysis", "commit")),
             "qa-testcase-design": (("测试用例", "XMind"), ("Testcase design", "XMind Markdown")),
             "qa-artifact-validation": (("校验", "产物"), ("Artifact validation", "manifest")),

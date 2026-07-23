@@ -25,7 +25,7 @@ REPORT_MODES = ("requirement", "diff", "combined")
 FACT_CATEGORIES = ("confirmed", "conflicting", "inferred", "missing")
 SOURCE_TYPES = (
     "user_confirmation", "requirement", "zentao_section_3",
-    "openspec", "markdown", "screenshot", "diff", "code_context",
+    "markdown", "screenshot", "diff", "code_context",
     "acceptance_criteria", "formal_change_record", "api_document", "sql_definition",
     "complete_ddl", "knowledge_table", "historical_defect", "pasted_text", "chat_snapshot",
 )
@@ -484,7 +484,8 @@ def requirement_schema(version: str) -> dict[str, Any]:
         ["schema_version", "analysis_id", "report_mode", "source_type", "source_ids", "analysis_scope", "business_goal", "acceptance_basis", "facts", "confirmation_points", "risks", "acceptance_criteria", "regression_scope", "matched_profiles", "data_validation_required", "data_validation_reason", "recommended_validation_method", "sql_generation_status", "validation_missing_information"],
         {
             "schema_version": {"const": SCHEMA_VERSION}, "analysis_id": _string(),
-            "report_mode": {"enum": ["requirement", "combined"]}, "source_type": _string(),
+            "report_mode": {"enum": ["requirement", "combined"]},
+            "source_type": {"enum": list(SOURCE_TYPES)},
             "source_ids": _strings(1), "analysis_scope": _string(), "business_goal": _string(),
             "acceptance_basis": _string(), "facts": {"type": "array", "items": fact, "minItems": 1},
             "confirmation_points": {"type": "array", "items": confirmation},

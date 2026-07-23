@@ -6,6 +6,13 @@
 
 ## [Unreleased]
 
+## [2.16.0] - 2026-07-23
+
+### Removed
+
+- 移除未使用的 OpenSpec 需求来源支持；当前正式历史产物未使用 `openspec`，无需迁移。
+- 保留 Markdown、`pasted_text`、`requirement`、禅道、截图及其他既有来源，不修改正式 QA 工作流、Evidence 机制或历史 Git 提交。
+
 ## [2.15.0] - 2026-07-22
 
 ### Added

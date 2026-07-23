@@ -24,6 +24,7 @@
 | `test_delivery_summary.py` | passed/pending/failed 对话摘要、Confirmation、路径、计数、顺序和 CLI 契约 | 是 |
 | `test_confirmation_workflow.py` | 一次授权、confirmation_only、集中确认、部分/批量回复、自动续跑和快慢校验分层 | 是 |
 | `test_pre_review_and_knowledge_candidates.py` | 显式 pre_review 路由/禁产物/不续跑，以及知识候选提示、来源边界和不自动持久化 | 是 |
+| `test_openspec_removal.py` | OpenSpec 来源硬删除、保留来源、当前路由/Skill、生成 Schema 与历史 JSON 无依赖 | 是 |
 | `test_dimension_assessment.py` | 八类测试维度扫描、主辅维度、covered 引用和单主维度复核 warning | 是 |
 | `test_analysis_report_validation.py` | 分析报告主摘要 ID 唯一性与 passed 正式用例措辞门禁 | 是 |
 | `fixtures/value-assessment/` | computed 合法模型组、Golden、Hash 错误、评分篡改和未知 TC 的独立 Assessment Fixture | 是 |
