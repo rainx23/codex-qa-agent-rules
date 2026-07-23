@@ -11,6 +11,7 @@
 - [Tests](tests/README.md)：规则、脚本和契约的自动化测试。
 - [Testcases](testcases/README.md)：可追踪的测试产物与 Manifest。
 - [Codex 文档](docs/codex/README.md)：使用说明和发布检查清单。
+- [CodeBuddy 适配](.codebuddy/README.md)：CodeBuddy 总入口与原生 Skill 包装层。
 - [QA Knowledge](qa-knowledge/README.md)：脱敏、可复用的业务知识示例。
  
 ## 版本与变更历史
@@ -21,7 +22,7 @@
 
 [![QA Rules Validation](https://github.com/rainx23/codex-qa-agent-rules/actions/workflows/qa-rules-validation.yml/badge.svg)](https://github.com/rainx23/codex-qa-agent-rules/actions/workflows/qa-rules-validation.yml)
 
-`codex-qa-agent-rules` 是一套面向软件测试工作的 Codex QA 规则与 Skills 框架。它把需求分析、Diff 影响分析、风险识别、测试用例设计、XMind 产物生成、自动质量校验和测试产物治理串成一条可复用工作流。
+`codex-qa-agent-rules` 是一套面向软件测试工作的 Codex QA 规则与 Skills 框架，并通过轻量适配层支持 CodeBuddy。它把需求分析、Diff 影响分析、风险识别、测试用例设计、XMind 产物生成、自动质量校验和测试产物治理串成一条可复用工作流。
 
 当前规则版本以根目录 [RULE_VERSION](RULE_VERSION) 为唯一来源；Schema、Manifest、CI 和产物索引都校验该版本，禁止在多个脚本中分别维护版本号。
 
@@ -42,6 +43,14 @@
 测试用例价值评估可识别高价值核心用例、回归保留用例、低价值冒烟、诊断不足、疑似重复和高维护成本。该阶段一能力可选且非阻塞，不自动删除、合并或降级用例，也不改变 XMind 结构、Manifest 计数或 Execution Model。
 
 第一次使用建议先阅读本 README，再看 [AGENTS.md](AGENTS.md) 和当前任务对应的 `SKILL.md`。
+
+## CodeBuddy 使用
+
+CodeBuddy 使用仓库根目录的 [CODEBUDDY.md](CODEBUDDY.md) 作为显式适配入口，并通过 `@AGENTS.md` 导入 [AGENTS.md](AGENTS.md)。`AGENTS.md` 仍是角色边界、任务路由、规则优先级和全局门禁的唯一权威来源。
+
+CodeBuddy 原生 Skill 包装入口位于 [.codebuddy/skills](.codebuddy/skills/)。包装文件仅负责引用根目录 `skills/*/SKILL.md`，不复制正式工作流、核心规则、业务 Profile、Schema 或校验脚本。
+
+日常优化仍只维护根目录的 `AGENTS.md`、`skills/`、`rules/`、`scripts/` 和 `tests/`。只有新增、删除、重命名 Skill，或者明显调整 Skill 触发场景时，才需要同步维护 `.codebuddy/skills/` 中对应的包装入口。
 
 ## 适用场景
 
@@ -469,34 +478,221 @@ python scripts/repair_text_encoding.py testcases/index.md --check
 
 ## Codex 使用示例
 
-需求分析：
+Codex 在当前项目中已能读取 `AGENTS.md` 时，直接描述任务即可，不需要重复 Skill 路径、测试维度或校验命令。任务路由、待确认门禁和产物流程由 `AGENTS.md` 与对应 Skill 自动处理。
+
+需求预审：
 
 ```text
-请使用 qa-requirement-analysis 分析该禅道需求，优先分析第三部分产品实现方案和规则，输出需求理解、待确认点、风险和回归范围。
+预审这个禅道需求，优先分析第三部分产品实现方案和规则，只输出问题、风险、待确认点和 ready/conditionally_ready/not_ready 结论，不生成测试用例。
 ```
 
-Diff 分析：
+分析需求并编写完整测试用例：
 
 ```text
-请使用 qa-diff-impact-analysis 分析当前 Commit 与父提交的差异，重点检查接口、SQL、公共逻辑、调用链和已有自动化测试影响。
+分析这个禅道需求并编写完整测试用例，默认以第三部分产品实现方案和规则作为主要验收依据，生成并校验正式 XMind 产物。
 ```
 
-生成完整测试用例：
+该请求视为一次完整授权。存在阻塞类待确认点时先集中提问；用户直接回答后自动恢复原任务，不需要再次发送规则路径或“继续生成”。
+
+只分析需求：
 
 ```text
-请基于已经确认的需求分析结果，使用 qa-testcase-design 生成最小有效 XMind Markdown 测试用例，按固定格式输出并去除重复用例。
+分析以下需求，输出需求理解、已确认规则、风险、待确认点和回归范围，本轮不生成测试用例。
 ```
 
-完整输出：
+单 Commit Diff 分析：
 
 ```text
-请完成需求分析、Diff 影响分析、测试用例设计和产物校验，生成分析报告、Requirement Analysis Model、Diff Impact Model、Risk Coverage Matrix、Testcase Model、XMind Markdown、.xmind、Manifest，并更新测试产物索引。
+分析当前 Commit 与父提交的差异，重点检查接口、SQL、公共逻辑、调用链和已有自动化测试影响。
+```
+
+指定 Commit：
+
+```text
+分析提交 <commit-sha>，默认与其父提交比较，输出核心变更、测试点、疑似风险和回归范围。
+```
+
+Commit 范围分析：
+
+```text
+分析 <old-sha>..<new-sha> 的代码差异，输出核心变更、调用链影响、测试点、疑似风险和回归范围。
+```
+
+需求与 Diff 联动分析：
+
+```text
+结合以下需求和代码 Diff 做联动分析，建立需求-Diff-测试点追踪，输出实现覆盖、遗漏、风险、疑似缺陷和回归范围，本轮不生成最终用例。
+```
+
+需求与 Diff 联动并生成完整用例：
+
+```text
+结合需求和代码 Diff 完成联动分析，并生成、校验完整测试用例和正式 XMind 产物。
 ```
 
 只列 P0：
 
 ```text
-请只生成 P0 核心链路和关键数据风险测试用例，不生成 P1、P2。
+分析以下需求并只生成 P0 核心链路和关键数据风险测试用例。
+```
+
+检查已有测试用例：
+
+```text
+检查以下测试用例的需求覆盖、风险覆盖、重复项、遗漏场景、模糊预期和回归价值，并给出优化建议。
+```
+
+完整交付：
+
+```text
+完成需求分析、Diff 影响分析、测试用例设计和产物校验，生成正式分析报告、结构化模型、XMind Markdown、.xmind、Manifest，并更新测试产物索引。
+```
+
+# CodeBuddy QA 快捷提示词
+
+## 使用说明
+
+工作区根目录：
+
+`D:\qa-test-workspace`
+
+QA 规则入口：
+
+`rule/codex-qa-agent-rules/AGENTS.md`
+
+以下提示词只保留任务目标和必要参数。测试维度、Skill 路由、待确认门禁、产物格式和校验流程均由 `AGENTS.md` 及对应 Skill 决定，不需要在提示词中重复枚举。
+
+---
+
+## 1. 需求预审
+
+仅检查需求问题，不生成测试用例：
+
+```text
+按 rule/codex-qa-agent-rules/AGENTS.md 执行：预审以下需求，只输出需求理解、缺失冲突、风险、待确认点和就绪结论，暂不生成测试用例。
+
+【粘贴需求或选择需求文件】
+```
+
+---
+
+## 2. 分析需求并编写测试用例
+
+```text
+按 rule/codex-qa-agent-rules/AGENTS.md 执行：分析以下需求并编写完整测试用例，生成并校验正式 XMind 产物。
+
+【粘贴需求或选择需求文件】
+```
+
+存在阻塞类待确认点时，CodeBuddy 应先集中提问。直接回答问题即可，不需要再次粘贴规则路径或重复发送“继续生成”。
+
+---
+
+## 3. 只生成 P0 用例
+
+```text
+按 rule/codex-qa-agent-rules/AGENTS.md 执行：分析以下需求并只生成 P0 核心链路和关键数据风险测试用例。
+
+【粘贴需求或选择需求文件】
+```
+
+---
+
+## 4. 分析单个 Commit
+
+```text
+按 rule/codex-qa-agent-rules/AGENTS.md 执行：分析 <代码目录> 提交 <commit-sha>，默认与其父提交比较，输出变更影响、测试点、疑似风险和回归范围。
+```
+
+示例：
+
+```text
+按 rule/codex-qa-agent-rules/AGENTS.md 执行：分析 backend 提交 abc123，默认与其父提交比较，同时检查 frontend 调用影响。
+```
+
+---
+
+## 5. 分析 Commit 范围
+
+```text
+按 rule/codex-qa-agent-rules/AGENTS.md 执行：分析 <代码目录> 的 <old-sha>..<new-sha>，输出核心变更、调用链影响、测试点、疑似风险和回归范围。
+```
+
+---
+
+## 6. 同时分析前后端 Diff
+
+```text
+按 rule/codex-qa-agent-rules/AGENTS.md 执行：分析前后端代码变更，检查接口、字段、SQL、公共逻辑、调用链和回归影响。
+
+frontend：<old-sha>..<new-sha>
+backend：<old-sha>..<new-sha>
+```
+
+---
+
+## 7. 需求与 Diff 联动并生成用例
+
+```text
+按 rule/codex-qa-agent-rules/AGENTS.md 执行：完成需求与前后端 Diff 联动分析，建立需求-Diff-测试点追踪，并生成、校验完整测试用例。
+
+需求：
+【粘贴需求或选择需求文件】
+
+frontend：<old-sha>..<new-sha>
+backend：<old-sha>..<new-sha>
+```
+
+存在阻塞类待确认点时先集中提问；问题解除后自动继续原任务。
+
+---
+
+## 8. 只输出测试点
+
+```text
+按 rule/codex-qa-agent-rules/AGENTS.md 执行：分析以下需求或代码变更，只输出测试点、优先级、变更依据、风险和回归范围，不生成 XMind。
+
+【粘贴需求、Diff 或 Commit】
+```
+
+---
+
+## 9. 检查已有测试用例
+
+```text
+按 rule/codex-qa-agent-rules/AGENTS.md 执行：检查以下测试用例的需求覆盖、风险覆盖、重复项、遗漏场景、模糊预期和回归价值，并给出优化建议。
+
+@测试用例文件
+```
+
+---
+
+## 10. 校验已有 QA 产物
+
+```text
+按 rule/codex-qa-agent-rules/AGENTS.md 执行：校验以下 QA 产物，发现问题后说明失败原因和修复建议。
+
+@Manifest 或产物目录
+```
+
+---
+
+## 最常用的四句话
+
+```text
+按 rule/codex-qa-agent-rules/AGENTS.md 执行：预审以下需求，只分析问题，暂不生成测试用例。【需求】
+```
+
+```text
+按 rule/codex-qa-agent-rules/AGENTS.md 执行：分析以下需求并编写完整测试用例，生成并校验正式 XMind 产物。【需求】
+```
+
+```text
+按 rule/codex-qa-agent-rules/AGENTS.md 执行：分析 backend 提交 <sha>，默认与父提交比较，同时检查 frontend 调用影响。
+```
+
+```text
+按 rule/codex-qa-agent-rules/AGENTS.md 执行：完成需求与前后端 Diff 联动分析，并生成、校验完整测试用例。
 ```
 
 ## 目录结构
@@ -610,40 +806,74 @@ codex-qa-agent-rules/
 
 ### 1. 这个项目会自动修改业务代码吗？
 
-默认不会。只有用户明确授权修改或修复业务代码时才允许进入相应范围。
+默认不会。它主要负责需求、Diff、风险、测试点和测试产物分析。只有用户明确要求修改或修复业务代码时，才允许在授权范围内修改。
 
-### 2. 它会自动执行测试吗？
+### 2. 它会自动执行页面、接口、SQL 或性能测试吗？
 
-不会。它负责分析、用例设计和产物校验，不等同于 UI、接口或性能自动化执行框架。
+不会。项目负责分析、用例设计、静态校验和产物治理，不等同于 UI、接口或性能自动化执行框架。SQL 只能生成和静态校验，没有用户提供的执行证据时不得标记为已执行、通过或失败。
 
-### 3. 为什么存在待确认点时有时还能继续生成用例？
+### 3. 为什么“分析需求并编写测试用例”没有立即生成 XMind？
 
-只有阻塞类待确认点暂停最终用例；非阻塞类和建议确认类可以继续生成已经明确的部分。
+该请求会按两阶段执行：先完成需求分析和待确认扫描，再进入正式用例生成。存在阻塞类待确认点时，先集中返回全部问题，确认前不生成 Risk、Testcase、XMind、Manifest 或 Index。
 
-### 4. 为什么不允许使用“功能正常”作为预期？
+### 4. 回答待确认点后，还需要再次发送“继续生成”吗？
 
-因为该表达不能形成明确、可观察、可复现的测试判定。
+不需要。原始请求已经包含测试用例授权时，阻塞问题解除后应自动恢复原任务，继续生成并校验正式产物。只需直接回答待确认问题。
 
-### 5. 为什么相同弹窗可能被合并成一条用例？
+### 5. “需求预审”和“分析需求并编写测试用例”有什么区别？
 
-项目采用最小有效用例集；规则、数据来源、步骤、预期和风险相同时优先合并。
+“需求预审、只分析问题、暂不生成测试用例”进入 `pre_review`，只输出问题、风险和就绪结论，结束后不会自动生成用例。
 
-### 6. 为什么 Markdown 和 `.xmind` 都要保留？
+“分析需求并编写测试用例”进入正式两阶段交付流程，无阻塞时自动生成用例；有阻塞时确认后自动续跑。
 
-Markdown 便于审阅、Diff 和版本管理，`.xmind` 用于查看和交付。
+### 6. 为什么不是每个测试维度都会生成测试用例？
 
-### 7. 排序测试放在哪里？
+规则会扫描适用维度和风险，但只有证据明确命中的内容才生成测试用例。未命中的检查项只记录为不适用、明确排除、待确认或阻塞，不能为了目录完整机械补用例。
 
-排序属于“功能测试”，不单独建立一级维度。
+### 7. 为什么多个页面、弹窗或正式/模拟入口可能只保留一条 TC？
 
-### 8. 禅道需求为什么优先看第三部分？
+项目采用最小有效用例集。核心规则、触发条件、数据来源、步骤、预期、权限、异常处理和风险相同时，应合并为一条 TC，并通过独立入口分支或全局适用入口范围表达执行位置。只有影响失败定位的真实差异才拆分。
 
-第一部分主要描述业务背景和目标，第三部分通常记录最终产品实现和验收规则。
+### 8. 禅道需求是否只分析第三部分？
 
-### 9. 没有第三部分怎么办？
+不是。第一部分用于理解业务背景和目标，第三部分产品实现方案和规则默认作为主要验收依据。用户明确指定其他范围时按用户要求执行；不同部分存在影响核心预期的冲突时列为待确认点。
 
-先查找验收标准、数据口径或其他明确产品方案；核心预期仍无法确定时列为阻塞类待确认。
+### 9. 禅道需求没有第三部分怎么办？
 
-### 10. 如何确认规则修改没有造成回退？
+继续查找明确的验收标准、产品方案、字段规则、数据口径或用户补充证据。核心目标或预期仍无法确定时，列为阻塞类待确认，不根据名称或当前代码猜测业务规则。
 
-运行 [发布验收清单](docs/codex/rule-validation-checklist.md) 和全部单元测试，并确认规则副本同步。
+### 10. 单个 Commit 默认怎么比较？
+
+默认与该 Commit 的第一个父提交比较。两个 Commit 或明确提供 `old..new`、`old...new` 时，按用户给出的比较表达式执行。合并提交、浅克隆、空 Diff 或 Commit 不存在时必须明确说明。
+
+### 11. 只有文档、注释、日志文案或格式变化时会生成业务测试用例吗？
+
+不会。只有存在真实业务语义变化和可验证风险时才生成业务测试点或测试用例。纯格式、锁文件、无语义重命名等变更只记录变更结论。
+
+### 12. 为什么有些问题只能标记为风险，不能直接判定为疑似缺陷？
+
+疑似缺陷需要需求事实和代码变更两侧证据同时充分，并建立可追踪关系。只有代码行为、字段名称或低置信度推断时，只能记录风险或待确认点。
+
+### 13. 日常产物校验和规则发布校验有什么区别？
+
+日常业务产物使用：
+
+`python scripts/validate_task.py --manifest <current-manifest>`
+
+修改规则、Skill、Schema、脚本、测试、版本、CHANGELOG、目录或 CI 时使用：
+
+`python scripts/validate_release.py`
+
+前者只校验当前任务相关产物，后者执行完整仓库发布门禁。
+
+### 14. 为什么 Markdown 和 `.xmind` 都要保留？
+
+Markdown 便于审阅、Diff、版本管理和确定性校验；`.xmind` 用于可视化查看和正式交付。两者还需要通过 Manifest 保持路径、计数和内容一致。
+
+### 15. CodeBuddy 打开的工作区根目录不是规则仓库时怎么使用？
+
+在提示词中显式指定规则入口，例如：
+
+`按 rule/codex-qa-agent-rules/AGENTS.md 执行`
+
+CodeBuddy 应先读取该入口，再根据任务路由加载对应 Skill。需要自动加载时，应在当前工作区根目录维护 CodeBuddy 入口文件或项目级 Skill 包装。

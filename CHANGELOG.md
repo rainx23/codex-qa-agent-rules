@@ -6,6 +6,25 @@
 
 ## [Unreleased]
 
+## [2.17.0] - 2026-07-23
+
+### Added
+
+- 新增 CodeBuddy 兼容入口 `CODEBUDDY.md`，引导 CodeBuddy 继续使用根目录 `AGENTS.md`、正式 QA Skills、规则和校验脚本。
+- 新增 `.codebuddy/skills/` 原生 Skill 包装层，使 CodeBuddy 可以发现和路由现有 6 个 QA Skills。
+- 新增 `.codebuddy/README.md`，明确适配层的目录定位、使用入口和维护约束。
+- 新增 CodeBuddy 适配自动化测试，覆盖入口缺失、包装清单漂移、描述不一致和错误正式 Skill 引用。
+
+### Changed
+
+- CodeBuddy 包装 Skill 仅引用根目录正式 `skills/*/SKILL.md`，不复制规则正文，避免形成 Codex 与 CodeBuddy 两套规则。
+- 现有 Codex 使用方式、QA 工作流、规则路径、Schema、脚本和测试产物结构保持不变。
+- 仓库文档校验器新增 CodeBuddy 适配门禁，校验总入口、包装 Skill 清单、Frontmatter 描述和正式 Skill 引用一致性。
+- 将当前 active 正式测试产物重新校验并同步到 RULE_VERSION 2.17.0；保留已被替代产物的原始历史版本。
+- CodeBuddy 总入口改为通过 `@AGENTS.md` 显式导入正式全局规则，包装 Skill 改为使用 `${CODEBUDDY_SKILL_DIR}` 和 `@file` 加载根目录正式 Skill。
+- 更新 Codex 与 CodeBuddy 使用示例，新增需求预审提示词，明确正式需求用例任务的一次授权、集中确认和阻塞解除后自动续跑机制。
+- 更新 README FAQ，移除已不适用的独立排序测试说明，并补充测试维度按证据生成、用例去重、Diff 比较和日常/发布校验说明。
+
 ## [2.16.0] - 2026-07-23
 
 ### Removed
