@@ -41,8 +41,24 @@
       ]
     },
     "source_type": {
-      "type": "string",
-      "minLength": 1
+      "enum": [
+        "user_confirmation",
+        "requirement",
+        "zentao_section_3",
+        "markdown",
+        "screenshot",
+        "diff",
+        "code_context",
+        "acceptance_criteria",
+        "formal_change_record",
+        "api_document",
+        "sql_definition",
+        "complete_ddl",
+        "knowledge_table",
+        "historical_defect",
+        "pasted_text",
+        "chat_snapshot"
+      ]
     },
     "source_ids": {
       "type": "array",

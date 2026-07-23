@@ -9,7 +9,12 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from qa_contracts import SOURCE_TYPES, schema_documents
+from qa_contracts import (
+    SOURCE_TYPES,
+    load_json,
+    schema_documents,
+    validate_requirement_model,
+)
 
 
 def source_type_enums(value: Any) -> list[list[str]]:
@@ -69,6 +74,24 @@ class OpenSpecRemovalTests(unittest.TestCase):
                 with self.subTest(path=path.relative_to(ROOT)):
                     data = json.loads(path.read_text(encoding="utf-8-sig"))
                     self.assertFalse(find_source_type(data, "openspec"))
+
+    def test_requirement_top_level_source_type_rejects_openspec(self):
+        schema = schema_documents(ROOT)["requirement-analysis.schema.json"]
+
+        self.assertEqual(
+            list(SOURCE_TYPES),
+            schema["properties"]["source_type"]["enum"],
+        )
+
+        model = load_json(
+            ROOT / "tests/fixtures/models/requirement-analysis.json"
+        )
+        model["source_type"] = "openspec"
+
+        self.assertNotEqual(
+            [],
+            validate_requirement_model(model, evidence_root=ROOT),
+        )
 
 
 if __name__ == "__main__":
