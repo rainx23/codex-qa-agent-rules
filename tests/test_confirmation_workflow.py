@@ -257,8 +257,8 @@ class ConfirmationWorkflowTests(unittest.TestCase):
         self.assertEqual("passed", data["validation_status"])
         self.assertEqual([], errors)
 
-    def test_rule_version_is_2_16_0(self):
-        self.assertEqual("2.16.0", read_rule_version(ROOT))
+    def test_rule_version_is_2_17_0(self):
+        self.assertEqual("2.17.0", read_rule_version(ROOT))
 
 
 if __name__ == "__main__":

@@ -25,6 +25,7 @@
 | `test_confirmation_workflow.py` | 一次授权、confirmation_only、集中确认、部分/批量回复、自动续跑和快慢校验分层 | 是 |
 | `test_pre_review_and_knowledge_candidates.py` | 显式 pre_review 路由/禁产物/不续跑，以及知识候选提示、来源边界和不自动持久化 | 是 |
 | `test_openspec_removal.py` | OpenSpec 来源硬删除、保留来源、当前路由/Skill、生成 Schema 与历史 JSON 无依赖 | 是 |
+| `test_codebuddy_adapter.py` | CodeBuddy 总入口、包装 Skill 清单、名称、描述和正式 Skill 引用一致性 | 是 |
 | `test_dimension_assessment.py` | 八类测试维度扫描、主辅维度、covered 引用和单主维度复核 warning | 是 |
 | `test_analysis_report_validation.py` | 分析报告主摘要 ID 唯一性与 passed 正式用例措辞门禁 | 是 |
 | `fixtures/value-assessment/` | computed 合法模型组、Golden、Hash 错误、评分篡改和未知 TC 的独立 Assessment Fixture | 是 |
@@ -52,5 +53,6 @@
 - 条件矩阵、配置存在性/行为分离、多入口核心去重和正式产物统一扫描分别由对应 `test_condition_matrix_*`、`test_entry_branch_*`、`test_shared_entry_scope.py` 与 `test_formal_artifact_scan.py` 覆盖；全局适用入口测试固定 6 个入口阈值、完整展开、禁用简称和模型/XMind 映射。
 - Golden 变化必须经过人工确认，测试运行时不得自动创建或覆盖 Golden，也不为不同操作系统或 Python 版本维护不同副本。
 - Fixture 和 Golden 只服务测试，不作为业务历史版本说明。
+- CodeBuddy 适配回归必须覆盖总入口缺失、包装 Skill 缺失、Frontmatter 描述漂移和正式 Skill 引用错误；测试只验证薄包装一致性，不复制正式 QA 工作流测试。
 
 版本与完整变更历史统一见 [CHANGELOG.md](../CHANGELOG.md)。

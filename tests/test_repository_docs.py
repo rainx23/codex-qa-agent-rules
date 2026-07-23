@@ -28,6 +28,15 @@ def create_repository(root: Path) -> None:
         extra = "\n自动生成\n" if relative == "rules/schemas" else ""
         path.write_text("# Test\n\n## 目录定位\n\nTest.\n\n## 维护约束\n\nTest.\n" + extra, encoding="utf-8")
 
+    (root / ".codebuddy/skills").mkdir(parents=True, exist_ok=True)
+    (root / "CODEBUDDY.md").write_text(
+        "# CodeBuddy\n\n"
+        "读取 AGENTS.md。\n\n"
+        "包装入口位于 .codebuddy/skills/。\n\n"
+        "发布前运行 scripts/validate_release.py。\n",
+        encoding="utf-8",
+    )
+
 
 class RepositoryDocumentationTests(unittest.TestCase):
     def validate_fixture(self, mutate=None) -> list[str]:

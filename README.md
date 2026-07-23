@@ -11,6 +11,7 @@
 - [Tests](tests/README.md)：规则、脚本和契约的自动化测试。
 - [Testcases](testcases/README.md)：可追踪的测试产物与 Manifest。
 - [Codex 文档](docs/codex/README.md)：使用说明和发布检查清单。
+- [CodeBuddy 适配](.codebuddy/README.md)：CodeBuddy 总入口与原生 Skill 包装层。
 - [QA Knowledge](qa-knowledge/README.md)：脱敏、可复用的业务知识示例。
  
 ## 版本与变更历史
@@ -21,7 +22,7 @@
 
 [![QA Rules Validation](https://github.com/rainx23/codex-qa-agent-rules/actions/workflows/qa-rules-validation.yml/badge.svg)](https://github.com/rainx23/codex-qa-agent-rules/actions/workflows/qa-rules-validation.yml)
 
-`codex-qa-agent-rules` 是一套面向软件测试工作的 Codex QA 规则与 Skills 框架。它把需求分析、Diff 影响分析、风险识别、测试用例设计、XMind 产物生成、自动质量校验和测试产物治理串成一条可复用工作流。
+`codex-qa-agent-rules` 是一套面向软件测试工作的 Codex QA 规则与 Skills 框架，并通过轻量适配层支持 CodeBuddy。它把需求分析、Diff 影响分析、风险识别、测试用例设计、XMind 产物生成、自动质量校验和测试产物治理串成一条可复用工作流。
 
 当前规则版本以根目录 [RULE_VERSION](RULE_VERSION) 为唯一来源；Schema、Manifest、CI 和产物索引都校验该版本，禁止在多个脚本中分别维护版本号。
 
@@ -42,6 +43,14 @@
 测试用例价值评估可识别高价值核心用例、回归保留用例、低价值冒烟、诊断不足、疑似重复和高维护成本。该阶段一能力可选且非阻塞，不自动删除、合并或降级用例，也不改变 XMind 结构、Manifest 计数或 Execution Model。
 
 第一次使用建议先阅读本 README，再看 [AGENTS.md](AGENTS.md) 和当前任务对应的 `SKILL.md`。
+
+## CodeBuddy 使用
+
+CodeBuddy 使用仓库根目录的 [CODEBUDDY.md](CODEBUDDY.md) 作为显式适配入口，并继续以 [AGENTS.md](AGENTS.md) 作为角色边界、任务路由、规则优先级和全局门禁的唯一权威来源。
+
+CodeBuddy 原生 Skill 包装入口位于 [.codebuddy/skills](.codebuddy/skills/)。包装文件仅负责引用根目录 `skills/*/SKILL.md`，不复制正式工作流、核心规则、业务 Profile、Schema 或校验脚本。
+
+日常优化仍只维护根目录的 `AGENTS.md`、`skills/`、`rules/`、`scripts/` 和 `tests/`。只有新增、删除、重命名 Skill，或者明显调整 Skill 触发场景时，才需要同步维护 `.codebuddy/skills/` 中对应的包装入口。
 
 ## 适用场景
 

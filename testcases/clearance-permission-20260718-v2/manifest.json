@@ -12,7 +12,7 @@
   "source_hash": "sha256:4f0e54c36c337ae197bd8008f3ccd68153c1923b84e28a82dbcccabc11177f9b",
   "requirement_id": "AN-CLEARANCE-PERMISSION-20260718-V2",
   "commit_range": null,
-  "rule_version": "2.16.0",
+  "rule_version": "2.17.0",
   "generated_at": "2026-07-22 11:08:47",
   "generated_timezone": "Asia/Shanghai",
   "report_mode": "requirement",
