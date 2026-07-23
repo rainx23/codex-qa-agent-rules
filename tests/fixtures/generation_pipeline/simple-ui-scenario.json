@@ -1,0 +1,37 @@
+{
+  "scenario_id": "SIMPLE-UI-MULTI-SCOPE-001",
+  "requirement": "三类指标在模拟和正式环境的卡片标题使用加粗样式，不改变指标数值或业务计算。",
+  "environments": [
+    "模拟环境",
+    "正式环境"
+  ],
+  "metrics": [
+    "指标A",
+    "指标B",
+    "指标C"
+  ],
+  "shared_entry_scopes": [
+    {
+      "scope_id": "SCOPE-METRIC-A",
+      "leaf_entries": 6
+    },
+    {
+      "scope_id": "SCOPE-METRIC-B",
+      "leaf_entries": 6
+    },
+    {
+      "scope_id": "SCOPE-METRIC-C",
+      "leaf_entries": 6
+    }
+  ],
+  "required_combinations": [
+    "模拟环境|指标A",
+    "模拟环境|指标B",
+    "模拟环境|指标C",
+    "正式环境|指标A",
+    "正式环境|指标B",
+    "正式环境|指标C"
+  ],
+  "condition_coverage_required": true,
+  "production_index_update": false
+}

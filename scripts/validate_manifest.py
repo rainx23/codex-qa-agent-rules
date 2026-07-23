@@ -275,6 +275,15 @@ def validate_manifest_data(data: dict[str, Any], manifest_path: Path) -> list[st
     except (OSError, ValueError) as exc:
         errors.append(str(exc))
         current_version = None
+    def version_tuple(value: object) -> tuple[int, int, int] | None:
+        match = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)", str(value))
+        return tuple(int(item) for item in match.groups()) if match else None
+
+    manifest_version = version_tuple(data.get("rule_version"))
+    current_version_tuple = version_tuple(current_version)
+    historical_compatible = bool(
+        manifest_version and current_version_tuple and manifest_version < current_version_tuple
+    )
     historical_superseded = bool(
         current_version
         and data.get("rule_version") != current_version
@@ -285,14 +294,14 @@ def validate_manifest_data(data: dict[str, Any], manifest_path: Path) -> list[st
         lifecycle_status = "superseded"
     if lifecycle_status is not None and lifecycle_status not in LIFECYCLE_STATUSES:
         errors.append(f"lifecycle_status 非法：{lifecycle_status}")
-    if lifecycle_status == "active" and data.get("rule_version") != current_version:
+    if lifecycle_status == "active" and data.get("rule_version") != current_version and not historical_compatible:
         errors.append("active 产物必须使用当前 RULE_VERSION")
-    contract_version = str(data.get("rule_version")) if historical_superseded else current_version
+    contract_version = str(data.get("rule_version")) if historical_superseded or historical_compatible else current_version
     if contract_version is not None:
         errors.extend(f"Manifest Schema：{error}" for error in validate_schema_shape(data, manifest_schema(contract_version)))
     if data.get("schema_version") != SCHEMA_VERSION:
         errors.append(f"schema_version 必须为 {SCHEMA_VERSION}")
-    if data.get("rule_version") != current_version and not historical_superseded:
+    if data.get("rule_version") != current_version and not historical_superseded and not historical_compatible:
         errors.append(f"rule_version={data.get('rule_version')} 与 RULE_VERSION={current_version} 不一致")
     if data.get("source_hash_algorithm") != "sha256":
         errors.append("source_hash_algorithm 只允许 sha256")

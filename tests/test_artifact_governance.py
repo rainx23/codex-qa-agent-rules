@@ -385,7 +385,8 @@ class ArtifactGovernanceTests(unittest.TestCase):
         manifest, _ = self.make_passed_manifest()
         index = self.directory / "index.md"
         update(index, manifest)
-        update(index, manifest)
+        with self.assertRaisesRegex(ValueError, "artifact_id 已存在"):
+            update(index, manifest)
         text = index.read_text(encoding="utf-8")
         self.assertIn("已校验", text)
         self.assertEqual(1, text.count("artifact_id=QA-TEST-001"))

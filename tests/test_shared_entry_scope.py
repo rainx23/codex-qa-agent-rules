@@ -11,7 +11,10 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from qa_contracts import validate_testcase_model
-from qa_validation import ValidationError, shared_entry_scope_details, validate_markdown_text
+from qa_validation import (
+    ValidationError, shared_entry_scope_details, shared_entry_scopes_details,
+    validate_markdown_text,
+)
 
 
 VALID_MARKDOWN = """- 股票展示规则
@@ -36,6 +39,29 @@ VALID_MARKDOWN = """- 股票展示规则
 
 
 class SharedEntryScopeTests(unittest.TestCase):
+    def scope(self, scope_id: str, title: str, tc_id: str, prefix: str) -> dict:
+        return {
+            "scope_id": scope_id,
+            "scope_title": title,
+            "applies_to_tc_ids": [tc_id],
+            "groups": [
+                {
+                    "group_name": f"{prefix}模拟环境",
+                    "subgroups": [{
+                        "subgroup_name": "指标卡",
+                        "entries": [{"entry_name": f"{prefix}模拟入口{i}"} for i in range(1, 4)],
+                    }],
+                },
+                {
+                    "group_name": f"{prefix}正式环境",
+                    "subgroups": [{
+                        "subgroup_name": "指标卡",
+                        "entries": [{"entry_name": f"{prefix}正式入口{i}"} for i in range(1, 4)],
+                    }],
+                },
+            ],
+        }
+
     def model(self) -> dict:
         data = json.loads((ROOT / "tests/fixtures/models/testcase-model.json").read_text(encoding="utf-8"))
         data["cases"] = [data["cases"][0]]
@@ -118,6 +144,77 @@ class SharedEntryScopeTests(unittest.TestCase):
         data = self.model()
         data["shared_entry_scope"]["applies_to_tc_ids"] = ["TC002"]
         errors = validate_testcase_model(data)
+        self.assertTrue(any("SHARED_ENTRY_SCOPE_TC_MISMATCH" in item for item in errors))
+
+    def test_multiple_independent_shared_entry_scopes_pass(self):
+        data = json.loads((ROOT / "tests/fixtures/models/testcase-model.json").read_text(encoding="utf-8"))
+        data["cases"][0]["shared_entry_scope_id"] = "SCOPE-METRIC-A"
+        data["cases"][1]["shared_entry_scope_id"] = "SCOPE-METRIC-B"
+        data["shared_entry_scopes"] = [
+            self.scope("SCOPE-METRIC-A", "适用入口（指标A全部TC均需逐项执行）", "TC001", "A"),
+            self.scope("SCOPE-METRIC-B", "适用入口（指标B全部TC均需逐项执行）", "TC002", "B"),
+        ]
+        self.assertEqual([], validate_testcase_model(data))
+
+        text = """- 多指标样式
+    - 适用入口（指标A全部TC均需逐项执行）
+        - A模拟环境
+            - 指标卡
+                - A模拟入口1
+                - A模拟入口2
+                - A模拟入口3
+        - A正式环境
+            - 指标卡
+                - A正式入口1
+                - A正式入口2
+                - A正式入口3
+    - 适用入口（指标B全部TC均需逐项执行）
+        - B模拟环境
+            - 指标卡
+                - B模拟入口1
+                - B模拟入口2
+                - B模拟入口3
+        - B正式环境
+            - 指标卡
+                - B正式入口1
+                - B正式入口2
+                - B正式入口3
+    - 功能测试
+        - 客户列表查询入口
+            - TC001
+                - 条件过滤
+                    - 输入已确认的客户编号并查询
+                        - 返回集合仅包含该客户编号对应记录
+    - 数据测试
+        - 客户列表查询入口
+            - TC002
+                - 分页状态
+                    - 切换到第二页
+                        - 查询请求保留已生效筛选条件和排序字段
+"""
+        scopes = shared_entry_scopes_details(validate_markdown_text(text))
+        self.assertEqual(2, len(scopes))
+        self.assertEqual(
+            ["适用入口（指标A全部TC均需逐项执行）", "适用入口（指标B全部TC均需逐项执行）"],
+            [scope["scope_title"] for scope in scopes],
+        )
+
+    def test_new_and_legacy_scope_fields_cannot_coexist(self):
+        data = self.model()
+        data["shared_entry_scopes"] = [
+            self.scope("SCOPE-002", "适用入口（第二范围全部TC均需逐项执行）", "TC001", "B")
+        ]
+        errors = validate_testcase_model(data)
+        self.assertTrue(any("SHARED_ENTRY_SCOPE_FIELDS_CONFLICT" in item for item in errors))
+
+    def test_scope_reference_and_reverse_mapping_are_per_scope(self):
+        data = json.loads((ROOT / "tests/fixtures/models/testcase-model.json").read_text(encoding="utf-8"))
+        data["cases"][0]["shared_entry_scope_id"] = "SCOPE-MISSING"
+        data["shared_entry_scopes"] = [
+            self.scope("SCOPE-001", "适用入口（第一范围全部TC均需逐项执行）", "TC001", "A")
+        ]
+        errors = validate_testcase_model(data)
+        self.assertTrue(any("SHARED_ENTRY_SCOPE_REFERENCE_INVALID" in item for item in errors))
         self.assertTrue(any("SHARED_ENTRY_SCOPE_TC_MISMATCH" in item for item in errors))
 
 

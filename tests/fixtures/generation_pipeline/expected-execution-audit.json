@@ -1,0 +1,20 @@
+{
+  "maximum_calls": {
+    "validate_models": 2,
+    "validate_xmind_md": 2,
+    "md_to_xmind": 1,
+    "build_task_manifest": 1,
+    "build_testcase_index": 1,
+    "validate_task": 1
+  },
+  "forbidden_calls": [
+    "validate_release"
+  ],
+  "forbidden_paths": [
+    "scripts/_*.py",
+    "testcases/**"
+  ],
+  "required_final_stage": "delivery_summary",
+  "fail_fast": true,
+  "maximum_repair_attempts_per_stage": 1
+}

@@ -22,6 +22,8 @@ Manifest 至少记录：
 
 来源组合哈希必须复算，正式 passed 产物禁止全零哈希。文本内容统一移除 UTF-8 BOM 并将 CRLF/CR 归一为 LF，已知二进制产物保持原始字节；组合哈希包含规范化仓库相对路径、稳定分隔符和内容，路径排序后计算。Manifest、Evidence 和 Assessment 引用复用公共 Hash 实现，不维护重复算法。所有产物路径必须是仓库内相对路径，禁止绝对路径和 `..` 越界。计数不得为负，Manifest 的待确认数量以 Requirement Model 的 Confirmation Summary 为唯一主来源，并与报告交叉验证。relation 只允许新增、补充、替代、废弃；替代和废弃必须填写存在且不形成循环的 supersedes。
 
+Manifest 只能由 `scripts/build_task_manifest.py` 从正式模型和文件确定性生成，并使用临时文件校验后原子替换；禁止 AI 手写自定义结构。较低 `RULE_VERSION` 的历史正式 Manifest 继续按其存储版本契约复验，不因当前规则升级而改写历史业务文件或 Index。
+
 ### Manifest 状态职责
 
 `confirmation_only` 是 Manifest 之前的独立工作流阶段：只保存 Requirement Analysis Checkpoint 和 Evidence，不创建正式或 pending Manifest，不写 Index，也不生成草稿报告、Risk Matrix、Testcase Model、XMind Markdown 或 Workbook。以下 `pending` 契约仅用于历史兼容或显式旧流程，不强制迁移。
@@ -40,7 +42,7 @@ Manifest 至少记录：
 2. 校验报告与 Markdown。
 3. 转换并复验 Workbook；Markdown 与 `content.json` 必须递归比较根标题、每个节点标题、子节点数量、顺序和父子层级，首个差异需输出完整路径、差异类型及双方值。
 4. 生成并校验 Manifest。
-5. 原子更新索引，确保 artifact_id 唯一。
+5. 仅使用 `scripts/build_testcase_index.py` 原子更新索引；已有 artifact_id 直接失败，不覆盖旧行。
 6. 运行 `scripts/validate_testcase_index.py testcases/index.md`，确认每个 `testcases/**/manifest.json` 下的 passed Manifest 按 artifact_id 和 Manifest 路径唯一登记，且正式路径真实存在。
 7. 记录新增、补充、替代或废弃关系。
 

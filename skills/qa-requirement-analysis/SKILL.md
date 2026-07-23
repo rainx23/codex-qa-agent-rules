@@ -11,20 +11,22 @@ confirmed Fact 必须有非 inference 的可验证来源，不能使用 low conf
 
 ## 规则加载
 
-1. 完整读取 `../../rules/core/evidence-rules.md`。
-2. 完整读取 `../../rules/core/confirmation-gate.md`。
-3. 完整读取 `../../rules/core/analysis-report-contract.md`。
-4. 完整读取 `../../rules/core/traceability-rules.md`。
-5. 完整读取 `../../rules/core/structured-model-contract.md`。
-6. 完整读取 `../../rules/core/conversation-delivery-contract.md`。
-7. 对禅道或同类分段需求，读取 `../../rules/profiles/zentao.md`，并以第三部分产品规则作为默认验收依据。
-8. 仅读取与需求匹配的其他 `../../rules/profiles` 文件。
-9. 用户要求生成最终用例时，将结构化结果交给 `../qa-testcase-design/SKILL.md`。
+1. 完整读取 `../../rules/core/runtime-efficiency-rules.md`，同一任务不重复加载已经读取的规则或完整 Schema。
+2. 完整读取 `../../rules/core/evidence-rules.md`。
+3. 完整读取 `../../rules/core/confirmation-gate.md`。
+4. 完整读取 `../../rules/core/analysis-report-contract.md`。
+5. 完整读取 `../../rules/core/traceability-rules.md`。
+6. 完整读取 `../../rules/core/structured-model-contract.md`。
+7. 完整读取 `../../rules/core/conversation-delivery-contract.md`。
+8. 对禅道或同类分段需求，读取 `../../rules/profiles/zentao.md`，并以第三部分产品规则作为默认验收依据。
+9. 仅读取与需求匹配的其他 `../../rules/profiles` 文件。
+10. 用户要求生成最终用例时，将结构化结果交给 `../qa-testcase-design/SKILL.md`。
 
 ## 执行流程
 
 0. 先判断显式意图。只有用户明确要求需求预审/评审、完整性检查、缺失冲突歧义检查且未要求测试用例/XMind，或明确“只分析问题、暂不生成测试用例”时进入 `workflow_stage=pre_review`；同时要求预审/评审和生成/编写测试用例或 XMind 时必须进入 delivery，和普通“分析需求并编写测试用例”一样记录完整原始任务范围并执行 confirmation_only 两阶段链。若本轮消息是在回答已有 Confirmation，则读取此前 Checkpoint，将消息作为确认回复处理，不把它误判为独立新需求，也不要求用户重复“继续生成”。
 1. 确认每个需求来源均可读取，并说明本次分析范围。
+   - 默认不扫描历史 `testcases/`；写模型前使用 `../../scripts/describe_model_contract.py requirement` 或合法 Fixture，不猜测字段。
 2. 分析禅道需求时，区分第一部分业务背景与第三部分产品实现规则；优先采用用户确认的范围，不把普通背景与计划差异直接判定为阻塞冲突。
 3. 提取业务目标、系统或页面入口、角色、主流程、字段规则、数据定义、验收标准、异常行为和明确排除项。
 4. 建立事实表，区分确定事实、冲突事实、推断事实和缺失事实；每个核心结论都必须附允许的证据来源标签。

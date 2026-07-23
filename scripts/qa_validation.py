@@ -38,6 +38,7 @@ ENTRY_PLACEHOLDER_RE = re.compile(r"^(?:入口|页面|弹窗)[A-Z一二三四五
 TRUNCATION_MARKERS = ("...", "……")
 AMBIGUOUS_BOOLEAN_RE = re.compile(r"(?<![A-Za-z0-9_])AND(?![A-Za-z0-9_]).*(?<![A-Za-z0-9_])OR(?![A-Za-z0-9_])|(?<![A-Za-z0-9_])OR(?![A-Za-z0-9_]).*(?<![A-Za-z0-9_])AND(?![A-Za-z0-9_])", re.IGNORECASE)
 SHARED_ENTRY_SCOPE_TITLE = "适用入口（以下全部TC均需逐项执行）"
+SHARED_ENTRY_SCOPE_TITLE_RE = re.compile(r"^适用入口（.+）$")
 SHARED_ENTRY_SCOPE_MIN_ENTRIES = 6
 SHARED_ENTRY_ABBREVIATIONS = ("上述", "同上", "前述", "等入口", "其余入口", "其他入口", "同前")
 
@@ -234,11 +235,10 @@ def validate_markdown_text(markdown: str, source: Path | str = "<memory>") -> Ou
     if not root.children:
         errors.append(f"{source}:{root.line}: 根节点缺少测试维度")
 
-    scope_nodes = [child for child in root.children if child.title == SHARED_ENTRY_SCOPE_TITLE]
-    if len(scope_nodes) > 1:
-        errors.append(f"{source}:{root.line}: 全局适用入口范围只能出现一次")
-    shared_scope = scope_nodes[0] if scope_nodes else None
-    if shared_scope:
+    scope_nodes = [child for child in root.children if SHARED_ENTRY_SCOPE_TITLE_RE.fullmatch(child.title)]
+    if len({scope.title for scope in scope_nodes}) != len(scope_nodes):
+        errors.append(f"{source}:{root.line}: 多个适用入口范围的标题必须唯一")
+    for shared_scope in scope_nodes:
         scope_paths: set[tuple[str, str, str]] = set()
         if not shared_scope.children:
             errors.append(f"{source}:{shared_scope.line}: 全局适用入口范围不能为空")
@@ -279,7 +279,7 @@ def validate_markdown_text(markdown: str, source: Path | str = "<memory>") -> Ou
             if any(marker in node.title for marker in SHARED_ENTRY_ABBREVIATIONS):
                 errors.append(f"{source}:{node.line}: 全局适用入口已启用，TC步骤和预期禁止使用上述/同上/等入口等省略写法")
 
-    dimension_nodes = [child for child in root.children if child.title != SHARED_ENTRY_SCOPE_TITLE]
+    dimension_nodes = [child for child in root.children if child not in scope_nodes]
     if not dimension_nodes:
         errors.append(f"{source}:{root.line}: 根节点缺少测试维度")
 
@@ -344,7 +344,7 @@ def validate_markdown_text(markdown: str, source: Path | str = "<memory>") -> Ou
                     schema = "TC-测试点-步骤-预期" if grouped else "TC-一级业务模块-二级功能点-步骤-预期"
                     errors.append(f"{source}:{tc.line}: {tc.title} 层级必须严格为 {schema}")
             expected_nodes.extend(path[-1] for path in paths)
-            if not multi_entry and grouped and shared_scope is None:
+            if not multi_entry and grouped and not scope_nodes:
                 compressed = _compressed_entry_error(tc)
                 if compressed is not None:
                     message = (
@@ -463,28 +463,36 @@ def testcase_details(outline: Outline) -> dict[str, dict[str, Any]]:
     return result
 
 
-def shared_entry_scope_details(outline: Outline) -> dict[str, Any] | None:
-    """Extract the optional fully expanded global entry scope from a validated outline."""
+def shared_entry_scopes_details(outline: Outline) -> list[dict[str, Any]]:
+    """Extract all fully expanded entry scopes in root order."""
 
-    scope = next((child for child in outline.root.children if child.title == SHARED_ENTRY_SCOPE_TITLE), None)
-    if scope is None:
-        return None
-    return {
-        "scope_title": scope.title,
-        "groups": [
-            {
-                "group_name": group.title,
-                "subgroups": [
-                    {
-                        "subgroup_name": subgroup.title,
-                        "entries": [{"entry_name": entry.title} for entry in subgroup.children],
-                    }
-                    for subgroup in group.children
-                ],
-            }
-            for group in scope.children
-        ],
-    }
+    return [
+        {
+            "scope_title": scope.title,
+            "groups": [
+                {
+                    "group_name": group.title,
+                    "subgroups": [
+                        {
+                            "subgroup_name": subgroup.title,
+                            "entries": [{"entry_name": entry.title} for entry in subgroup.children],
+                        }
+                        for subgroup in group.children
+                    ],
+                }
+                for group in scope.children
+            ],
+        }
+        for scope in outline.root.children
+        if SHARED_ENTRY_SCOPE_TITLE_RE.fullmatch(scope.title)
+    ]
+
+
+def shared_entry_scope_details(outline: Outline) -> dict[str, Any] | None:
+    """Backward-compatible single-scope extractor."""
+
+    scopes = shared_entry_scopes_details(outline)
+    return scopes[0] if len(scopes) == 1 else None
 
 
 _TRACE_ALIASES = {
@@ -634,17 +642,18 @@ def validate_traceability_mapping(
                 if record.change_id and record.change_id not in risk.get("change_ids", []):
                     errors.append(f"第 {record.line} 行 Diff 变更与风险 {risk_id} 的风险矩阵映射不一致")
     if testcase_model is not None and outline is not None:
-        actual_scope = shared_entry_scope_details(outline)
-        model_scope = testcase_model.get("shared_entry_scope")
-        if isinstance(model_scope, dict):
-            expected_scope = {
-                "scope_title": model_scope.get("scope_title"),
-                "groups": model_scope.get("groups", []),
-            }
-            if actual_scope != expected_scope:
-                errors.append("Testcase Model shared_entry_scope 与 XMind 全局适用入口不一致")
-        elif actual_scope is not None:
-            errors.append("XMind 存在全局适用入口，但 Testcase Model 未定义 shared_entry_scope")
+        actual_scopes = shared_entry_scopes_details(outline)
+        legacy_scope = testcase_model.get("shared_entry_scope")
+        model_scopes = (
+            [legacy_scope] if isinstance(legacy_scope, dict)
+            else [scope for scope in testcase_model.get("shared_entry_scopes", []) if isinstance(scope, dict)]
+        )
+        expected_scopes = [
+            {"scope_title": scope.get("scope_title"), "groups": scope.get("groups", [])}
+            for scope in model_scopes
+        ]
+        if actual_scopes != expected_scopes:
+            errors.append("Testcase Model shared entry scopes 与 XMind 适用入口范围不一致")
         model_tcs = {case.get("tc_id") for case in testcase_model.get("cases", [])}
         xmind_tcs = {node.title for node in outline.tc_nodes}
         if model_tcs != xmind_tcs:

@@ -20,6 +20,10 @@
 | `render_delivery_summary.py` | 从 Manifest 和结构化模型确定性渲染中文聊天交付摘要 | 是 |
 | `validate_delivery_summary.py` | 校验摘要固定章节、状态、路径、数量和 Confirmation 一致性 | 是 |
 | `qa_workflow.py` | 管理一次授权、confirmation_only、集中回复回写和自动续跑状态 | 是 |
+| `describe_model_contract.py` | 从唯一可执行契约源输出稳定的精简字段、枚举、嵌套、约束和最小示例 | 是 |
+| `init_task_models.py` | 创建任务目录、Evidence Snapshot 和不含虚构业务内容的模型顶层骨架 | 是 |
+| `build_task_manifest.py` | 从已校验模型与正式文件确定性、原子地生成并校验 Manifest | 是 |
+| `run_generation_pipeline.py` | 按固定失败即停止顺序执行正式链并记录命令、退出码和修复次数 | 是 |
 | `qa_modes.py` | 显式路由 pre_review、知识候选提示和只读 extract_candidate | 是 |
 | `render_confirmation_summary.py` | 从最小 Requirement Checkpoint 渲染第一阶段集中确认回复 | 是 |
 | `validate_task.py` | 快速复验单个当前业务产物链与当前 Index 记录 | 是 |
@@ -37,6 +41,8 @@
 - 正式产物在更新索引后运行 `python scripts/validate_formal_artifacts.py`；单个 Workbook 可使用 `python scripts/verify_xmind.py path/to/case.xmind --markdown path/to/case.xmind.md` 复验。
 - 最终聊天交付使用 `python scripts/render_delivery_summary.py --manifest path/to/manifest.json --check`；可选 `--output` 保存副本，独立文件使用 `validate_delivery_summary.py --manifest ... --summary ...` 校验。完整用例摘要固定展示八类测试维度覆盖。
 - 第一阶段集中确认使用 `python scripts/render_confirmation_summary.py --requirement path/to/checkpoint.json`；该阶段不得创建 Manifest 或草稿测试产物。
+- 写模型前使用 `python scripts/describe_model_contract.py requirement|risk|testcase|manifest` 查看精简契约；初始化使用 `python scripts/init_task_models.py --task-dir ... --source ... --mode confirmation_only|formal_generation --source-id ...`。
+- Manifest 使用 `python scripts/build_task_manifest.py ...` 生成，禁止手写；完整正式链可使用 `run_generation_pipeline.py`，并通过 `--audit` 保存执行审计。
 - `qa_modes.py` 的 pre_review 与知识候选函数只处理模式边界和结构化结果；候选提示不触发检索或持久化，extract_candidate 也不写入知识库。
 - 日常交付使用 `python scripts/validate_task.py --manifest path/to/manifest.json --test tests.test_related_module`；规则发布使用 `python scripts/validate_release.py`，不得在普通业务任务中无条件执行后者。
 - 来源组合 Hash 统一由 `file_hash_utils.py` 处理：文本换行和 UTF-8 BOM 归一，二进制保持原始字节，规范化相对路径参与组合 Hash。
@@ -47,5 +53,6 @@
 
 - 新增、删除或改变脚本命令、输入输出时，更新本 README、检查清单、CI 静态契约和测试。
 - 生成脚本不得在校验模式中修改文件。
+- 日常生成不得在本目录创建 `_*.py` 临时脚本；失败流水线不得调用后续正式阶段。
 
 版本与完整变更历史统一见 [CHANGELOG.md](../CHANGELOG.md)。

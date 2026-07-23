@@ -6,6 +6,24 @@
 
 ## [Unreleased]
 
+## [2.18.0] - 2026-07-23
+
+### Added
+
+- 新增运行效率规则、精简模型契约查看器、任务模型初始化器、确定性 Manifest 构建器和带执行审计的失败即停止正式流水线。
+- 新增多个独立 `shared_entry_scopes` 的兼容模型能力、XMind/Workbook 追踪支持，以及模型失败、Manifest 失败、Index 原子回滚和调用次数预算回归。
+
+### Changed
+
+- Manifest 只能由正式脚本从模型和文件派生，Index 只接受完整校验通过的 passed Manifest；重复 artifact id 不再覆盖原行。
+- 日常任务默认不扫描历史 `testcases/`、不创建 `scripts/_*.py`、不运行发布级全量门禁；每阶段即时校验且最多一次自动修复。
+- 既有较低 `RULE_VERSION` 的正式 Manifest 按其存储契约继续复验，避免版本升级时改写历史业务产物和正式 Index。
+
+### Fixed
+
+- 阻止模型失败后继续生成 Workbook/Manifest/Index、Manifest 失败后更新 Index，以及未运行 `validate_task.py` 却声明完成。
+- 修复单一 `shared_entry_scope` 无法表达同一套件多个独立 6+ 入口组的问题。
+
 ## [2.17.0] - 2026-07-23
 
 ### Added

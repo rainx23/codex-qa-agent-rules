@@ -244,6 +244,7 @@ flowchart TD
 ## 快速校验与发布校验
 
 - 日常业务产物：`python scripts/validate_task.py --manifest <current-manifest>`。它只复验当前 Requirement/Risk/Testcase、XMind Markdown、Workbook、Manifest、当前 Index 记录、通过 `--test` 指定的相关测试和 `git diff --check`，不扫描全部历史产物、不运行全量单元测试。
+- 写结构化模型前先运行 `python scripts/describe_model_contract.py requirement|risk|testcase|manifest`；需要新任务骨架时使用 `init_task_models.py`。Manifest 必须由 `build_task_manifest.py` 生成，禁止手写。
 - 规则或版本发布：修改 rules、skills、schemas、scripts、tests、RULE_VERSION、CHANGELOG 或 CI 时运行 `python scripts/validate_release.py`。该入口保留全量单元测试、全部正式历史产物、Schema、Skill、版本、仓库文档、知识库、CI 和跨平台相关门禁。
 
 ## 分析报告模式
@@ -300,7 +301,7 @@ flowchart TD
                         - 预期结果
 ```
 
-同一核心规则覆盖多个真实测试入口时仍只保留一个 TC。完整入口为 2 至 5 个时，入口拆成独立平级分支：公共入口结构为 `TC → 测试点 → 具体入口 → 步骤 → 预期`，无公共入口结构为 `TC → 一级业务模块 → 二级功能点 → 具体入口 → 步骤 → 预期`，每个入口都写自己的步骤和预期。完整入口不少于 6 个且步骤、预期完全一致时，根节点下增加唯一的全局适用入口范围，TC 使用公共步骤：
+同一核心规则覆盖多个真实测试入口时仍只保留一个 TC。完整入口为 2 至 5 个时，入口拆成独立平级分支：公共入口结构为 `TC → 测试点 → 具体入口 → 步骤 → 预期`，无公共入口结构为 `TC → 一级业务模块 → 二级功能点 → 具体入口 → 步骤 → 预期`，每个入口都写自己的步骤和预期。完整入口不少于 6 个且步骤、预期完全一致时，根节点下增加对应的适用入口范围；同一套件可有多个独立范围，TC 使用公共步骤：
 
 ```text
 - 业务根节点
@@ -320,7 +321,7 @@ flowchart TD
 
 关键约束：TC 必须严格匹配 `TC` 加三位数字并从 `TC001` 全局连续；缩进固定为 4 个空格；本地文件不使用代码块；相同规则的页面、字段或弹窗优先合并；模糊断言会被拒绝；不得虚构字段、SQL 和页面入口。明确的状态值或状态转换可以包含“正常”，泛化的“页面正常/功能正常”仍会失败。排序属于“功能测试”，不单独建立“排序测试”一级维度。
 
-完整规则见 [testcase-quality-rules.md](rules/core/testcase-quality-rules.md)。当前格式不增加独立“前置条件”或“优先级”层级，前置条件融入入口、测试点或步骤，优先级保留在分析报告和追踪矩阵中；`entry_branches` 只表达 2 至 5 个入口的同一 TC 分支，`shared_entry_scope` 表达不少于 6 个入口的全局执行范围，二者都不增加 TC 计数。
+完整规则见 [testcase-quality-rules.md](rules/core/testcase-quality-rules.md)。当前格式不增加独立“前置条件”或“优先级”层级，前置条件融入入口、测试点或步骤，优先级保留在分析报告和追踪矩阵中；`entry_branches` 只表达 2 至 5 个入口的同一 TC 分支，旧 `shared_entry_scope` 表达一个 6+ 入口范围，新 `shared_entry_scopes` 表达多个独立 6+ 入口范围，均不增加 TC 计数。
 
 明确列出两个及以上业务条件维度时，Requirement Analysis Model 必须先建立条件矩阵；每个 required combination 由行为型 `condition_coverage` 覆盖。业务条件维度与固定八类测试分类维度分开建模；当前 `RULE_VERSION` 的 passed requirement/combined 正式用例产物必须完整填写 `test_dimension_assessment`，历史旧版本、pending/failed 与无 Requirement 的纯 diff 产物不强制回写。TC 的 `dimension` 决定唯一 XMind 一级节点，`secondary_dimensions` 只用于追踪和统计。配置项存在性不计入行为覆盖。同规则多入口使用不含纯入口名称的 `core_deduplication_key` 合并为一个 TC，并按入口数量选择独立分支或全局适用入口范围。
 
@@ -457,7 +458,7 @@ python scripts/validate_testcase_index.py testcases/index.md
 python scripts/validate_formal_artifacts.py
 ```
 
-输入是目标索引和已通过校验的 Manifest；成功后原子写入一条唯一 `artifact_id` 记录；无效 Manifest 会阻止更新。
+输入是目标索引和已通过校验的 passed Manifest；成功后原子写入一条唯一 `artifact_id` 记录；无效 Manifest 或重复 artifact id 会阻止更新并保留原 Index。固定正式链可由 `run_generation_pipeline.py` 执行并输出审计 JSON。
 
 ### 9. 发布前检查
 

@@ -47,6 +47,8 @@
 
 ## 全局门禁
 
+- 所有 QA 生成任务先加载 `rules/core/runtime-efficiency-rules.md`，遵守最小规则读取、逐阶段校验、失败即停止、单阶段最多一次自动修复、确定性 Manifest/Index 与日常 `validate_task.py` 门禁。
+
 - 待确认点按 rules/core/confirmation-gate.md 分级；发现首个 blocking 后停止 Risk/Testcase/XMind/Manifest 下游生成，但继续扫描剩余需求并一次性集中返回全部问题。新流程不得为确认前状态生成草稿 Risk、Testcase 或 XMind。
 - 用户说跳过、不用管、继续生成或按默认处理时继续，但报告保留待确认点，未确认内容不得写成事实。
 - 需求与 Diff 并存时必须输出需求-Diff-测试点追踪矩阵；只有双重证据充分时才可称为疑似缺陷。

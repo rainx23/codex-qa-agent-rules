@@ -11,7 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from build_testcase_index import HEADER, build_row
+from build_testcase_index import HEADER, build_row, update
 from md_to_xmind import convert_file
 from qa_contracts import DIMENSIONS, read_rule_version, stable_source_hash
 from validate_testcase_index import _cells, validate_index
@@ -189,6 +189,30 @@ class TestcaseIndexTests(unittest.TestCase):
         shutil.copy2(self.manifest, fixtures / "manifest.json")
         self.write_index(self.row())
         self.assertEqual([], validate_index(self.index))
+
+    def test_update_requires_passed_manifest_and_rejects_duplicate_artifact(self):
+        update(self.index, self.manifest)
+        original = self.index.read_text(encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "artifact_id 已存在"):
+            update(self.index, self.manifest)
+        self.assertEqual(original, self.index.read_text(encoding="utf-8"))
+
+        data = self.load_manifest()
+        data["validation_status"] = "pending"
+        self.write_manifest(data)
+        with self.assertRaises(ValueError):
+            update(self.index, self.manifest)
+        self.assertEqual(original, self.index.read_text(encoding="utf-8"))
+
+    def test_failed_manifest_does_not_create_or_change_index(self):
+        self.write_index()
+        original = self.index.read_text(encoding="utf-8")
+        data = self.load_manifest()
+        data["case_count"] = 99
+        self.write_manifest(data)
+        with self.assertRaises(ValueError):
+            update(self.index, self.manifest)
+        self.assertEqual(original, self.index.read_text(encoding="utf-8"))
 
 
     def test_cells_preserves_windows_paths_and_only_unescapes_markdown_tokens(self):

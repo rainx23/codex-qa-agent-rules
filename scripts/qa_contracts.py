@@ -484,6 +484,9 @@ def requirement_schema(version: str) -> dict[str, Any]:
         ["schema_version", "analysis_id", "report_mode", "source_type", "source_ids", "analysis_scope", "business_goal", "acceptance_basis", "facts", "confirmation_points", "risks", "acceptance_criteria", "regression_scope", "matched_profiles", "data_validation_required", "data_validation_reason", "recommended_validation_method", "sql_generation_status", "validation_missing_information"],
         {
             "schema_version": {"const": SCHEMA_VERSION}, "analysis_id": _string(),
+            "model_id": _string(), "rule_version": {"const": version},
+            "generated_at": _string(pattern=CAPTURED_AT_PATTERN),
+            "generated_timezone": {"enum": list(ALLOWED_TIMEZONES)},
             "report_mode": {"enum": ["requirement", "combined"]},
             "source_type": {"enum": list(SOURCE_TYPES)},
             "source_ids": _strings(1), "analysis_scope": _string(), "business_goal": _string(),
@@ -784,7 +787,11 @@ def risk_matrix_schema(version: str) -> dict[str, Any]:
     )
     body = _object(
         ["schema_version", "matrix_id", "analysis_ids", "risk_items", "coverage_summary"],
-        {"schema_version": {"const": SCHEMA_VERSION}, "matrix_id": _string(), "analysis_ids": _strings(1), "risk_items": {"type": "array", "items": risk, "minItems": 1}, "coverage_summary": {"type": "object"}},
+        {"schema_version": {"const": SCHEMA_VERSION}, "matrix_id": _string(), "model_id": _string(),
+         "report_mode": {"enum": list(REPORT_MODES)}, "workflow_stage": {"enum": list(WORKFLOW_STAGES)},
+         "rule_version": {"const": version}, "generated_at": _string(pattern=CAPTURED_AT_PATTERN),
+         "generated_timezone": {"enum": list(ALLOWED_TIMEZONES)}, "analysis_ids": _strings(1),
+         "risk_items": {"type": "array", "items": risk, "minItems": 1}, "coverage_summary": {"type": "object"}},
     )
     return _base_schema("Risk Coverage Matrix", version, body)
 
@@ -845,6 +852,15 @@ def testcase_schema(version: str) -> dict[str, Any]:
             "groups": {"type": "array", "items": shared_scope_group, "minItems": 1},
         },
     )
+    shared_entry_scope_v2 = _object(
+        ["scope_id", "scope_title", "applies_to_tc_ids", "groups"],
+        {
+            "scope_id": _string(),
+            "scope_title": _string(pattern=r"^适用入口（.+）$"),
+            "applies_to_tc_ids": {"type": "array", "items": _string(pattern=TC_PATTERN), "minItems": 1, "uniqueItems": True},
+            "groups": {"type": "array", "items": shared_scope_group, "minItems": 1},
+        },
+    )
     core_deduplication_factors = _object(
         ["business_object", "trigger_condition", "core_action", "core_assertion", "risk_semantics"],
         {
@@ -885,10 +901,15 @@ def testcase_schema(version: str) -> dict[str, Any]:
     )
     body = _object(
         ["schema_version", "root_title", "cases"],
-        {"schema_version": {"const": SCHEMA_VERSION}, "model_id": _string(), "root_title": _string(), "cases": {"type": "array", "items": case, "minItems": 1},
+        {"schema_version": {"const": SCHEMA_VERSION}, "model_id": _string(),
+         "report_mode": {"enum": list(REPORT_MODES)}, "workflow_stage": {"enum": list(WORKFLOW_STAGES)},
+         "rule_version": {"const": version}, "generated_at": _string(pattern=CAPTURED_AT_PATTERN),
+         "generated_timezone": {"enum": list(ALLOWED_TIMEZONES)}, "root_title": _string(),
+         "cases": {"type": "array", "items": case, "minItems": 1},
          "branch_count": {"type": "integer", "minimum": 0}, "execution_instance_count": {"type": "integer", "minimum": 0},
          "execution_instances": {"type": "array", "items": execution_instance},
-         "shared_entry_scope": shared_entry_scope},
+         "shared_entry_scope": shared_entry_scope,
+         "shared_entry_scopes": {"type": "array", "items": shared_entry_scope_v2, "minItems": 1}},
     )
     return _base_schema("Testcase Model", version, body)
 
@@ -1687,10 +1708,25 @@ def validate_testcase_model(data: dict[str, Any]) -> list[str]:
     cases = data.get("cases", []) if isinstance(data.get("cases"), list) else []
     tc_ids, id_errors = _unique_ids(cases, "tc_id")
     errors.extend(id_errors)
-    shared_scope = data.get("shared_entry_scope") if isinstance(data.get("shared_entry_scope"), dict) else None
-    shared_scope_id = shared_scope.get("scope_id") if shared_scope else None
-    shared_scope_paths: set[tuple[str, str, str]] = set()
-    if shared_scope:
+    legacy_shared_scope = data.get("shared_entry_scope") if isinstance(data.get("shared_entry_scope"), dict) else None
+    new_shared_scopes = data.get("shared_entry_scopes") if isinstance(data.get("shared_entry_scopes"), list) else []
+    if legacy_shared_scope and new_shared_scopes:
+        errors.append("SHARED_ENTRY_SCOPE_FIELDS_CONFLICT: shared_entry_scope 与 shared_entry_scopes 不能同时使用")
+    shared_scopes = [legacy_shared_scope] if legacy_shared_scope else [
+        scope for scope in new_shared_scopes if isinstance(scope, dict)
+    ]
+    scope_ids = [str(scope.get("scope_id", "")) for scope in shared_scopes]
+    scope_titles = [str(scope.get("scope_title", "")) for scope in shared_scopes]
+    if len(scope_ids) != len(set(scope_ids)):
+        errors.append("SHARED_ENTRY_SCOPE_DUPLICATE_ID: shared_entry_scopes.scope_id 必须唯一")
+    if len(scope_titles) != len(set(scope_titles)):
+        errors.append("SHARED_ENTRY_SCOPE_DUPLICATE_TITLE: shared_entry_scopes.scope_title 必须唯一")
+    shared_scope_by_id = {str(scope.get("scope_id")): scope for scope in shared_scopes}
+    scope_paths_by_id: dict[str, set[tuple[str, str, str]]] = {}
+    for shared_scope in shared_scopes:
+        shared_scope_id = str(shared_scope.get("scope_id", ""))
+        shared_scope_paths: set[tuple[str, str, str]] = set()
+        scope_paths_by_id[shared_scope_id] = shared_scope_paths
         group_names: list[str] = []
         abbreviated_markers = ("上述", "同上", "前述", "等入口", "其余入口", "其他入口", "同前")
         for group in shared_scope.get("groups", []):
@@ -1713,7 +1749,7 @@ def validate_testcase_model(data: dict[str, Any]) -> list[str]:
             if len(subgroup_names) != len(set(subgroup_names)):
                 errors.append(f"SHARED_ENTRY_SCOPE_DUPLICATE_SUBGROUP: {group_name} 分组名称重复")
         if len(group_names) != len(set(group_names)):
-            errors.append("SHARED_ENTRY_SCOPE_DUPLICATE_GROUP: 一级范围分组名称重复")
+            errors.append(f"SHARED_ENTRY_SCOPE_DUPLICATE_GROUP: {shared_scope_id} 一级范围分组名称重复")
         if len(shared_scope_paths) < SHARED_ENTRY_SCOPE_MIN_ENTRIES:
             errors.append(
                 f"SHARED_ENTRY_SCOPE_REQUIRES_SIX_OR_MORE: 共享入口范围至少需要 {SHARED_ENTRY_SCOPE_MIN_ENTRIES} 个完整入口，实际 {len(shared_scope_paths)}"
@@ -1748,7 +1784,7 @@ def validate_testcase_model(data: dict[str, Any]) -> list[str]:
                 f"SIX_OR_MORE_ENTRIES_REQUIRE_SHARED_SCOPE: {tc_id} 有 {len(branches)} 个入口，必须使用 shared_entry_scope 公共步骤结构"
             )
         if scope_reference:
-            if not shared_scope or scope_reference != shared_scope_id:
+            if str(scope_reference) not in shared_scope_by_id:
                 errors.append(f"SHARED_ENTRY_SCOPE_REFERENCE_INVALID: {tc_id} 引用不存在的 {scope_reference}")
             if branches:
                 errors.append(f"SHARED_ENTRY_SCOPE_MIXED_WITH_BRANCHES: {tc_id} 不得同时使用 shared_entry_scope 与 entry_branches")
@@ -1817,16 +1853,20 @@ def validate_testcase_model(data: dict[str, Any]) -> list[str]:
         errors.append(
             f"IDENTICAL_RULE_NOT_MERGED_TO_ENTRY_BRANCHES: {duplicate_ids} 应合并为一个 TC 的平级 entry_branches"
         )
-    if shared_scope:
+    for shared_scope in shared_scopes:
+        shared_scope_id = str(shared_scope.get("scope_id", ""))
         expected_scope_tcs = {str(item) for item in shared_scope.get("applies_to_tc_ids", [])}
-        actual_scope_tcs = {str(case.get("tc_id")) for case in cases if case.get("shared_entry_scope_id") == shared_scope_id}
+        actual_scope_tcs = {
+            str(case.get("tc_id")) for case in cases
+            if str(case.get("shared_entry_scope_id", "")) == shared_scope_id
+        }
         if expected_scope_tcs != actual_scope_tcs:
             errors.append(
                 f"SHARED_ENTRY_SCOPE_TC_MISMATCH: applies_to_tc_ids={sorted(expected_scope_tcs)} 实际引用={sorted(actual_scope_tcs)}"
             )
         unknown_scope_tcs = expected_scope_tcs - tc_ids
         if unknown_scope_tcs:
-            errors.append(f"SHARED_ENTRY_SCOPE_UNKNOWN_TC: {sorted(unknown_scope_tcs)}")
+            errors.append(f"SHARED_ENTRY_SCOPE_UNKNOWN_TC: {shared_scope_id} {sorted(unknown_scope_tcs)}")
     branches = {branch.get("branch_id") for case in cases for branch in case.get("entry_branches", [])}
     actual_branch_count = len(branches)
     if "branch_count" in data and data.get("branch_count") != actual_branch_count:
@@ -2204,16 +2244,23 @@ def validate_model_links(
     diff_risks = {item.get("risk_id"): item for item in (diff or {}).get("risks", [])}
     defect_ids = {item.get("defect_id") for item in (diff or {}).get("suspected_defects", [])}
     cases = {item.get("tc_id"): item for item in testcase_model.get("cases", [])}
-    shared_scope = testcase_model.get("shared_entry_scope") if isinstance(testcase_model.get("shared_entry_scope"), dict) else {}
-    shared_scope_paths = {
-        (
-            str(group.get("group_name", "")),
-            str(subgroup.get("subgroup_name", "")),
-            str(entry.get("entry_name", "")),
-        )
-        for group in shared_scope.get("groups", [])
-        for subgroup in group.get("subgroups", [])
-        for entry in subgroup.get("entries", [])
+    legacy_scope = testcase_model.get("shared_entry_scope")
+    shared_scopes = (
+        [legacy_scope] if isinstance(legacy_scope, dict)
+        else [scope for scope in testcase_model.get("shared_entry_scopes", []) if isinstance(scope, dict)]
+    )
+    shared_scope_paths_by_id = {
+        str(scope.get("scope_id")): {
+            (
+                str(group.get("group_name", "")),
+                str(subgroup.get("subgroup_name", "")),
+                str(entry.get("entry_name", "")),
+            )
+            for group in scope.get("groups", [])
+            for subgroup in group.get("subgroups", [])
+            for entry in subgroup.get("entries", [])
+        }
+        for scope in shared_scopes
     }
     facts_by_id = {item.get("fact_id"): item for item in (requirement or {}).get("facts", [])}
     facts = set(facts_by_id)
@@ -2452,6 +2499,9 @@ def validate_model_links(
                         errors.append(f"CONDITION_COVERAGE_ASSERTION_MAPPING_REQUIRED: {combination_id}")
                         continue
                     if case.get("shared_entry_scope_id"):
+                        shared_scope_paths = shared_scope_paths_by_id.get(
+                            str(case.get("shared_entry_scope_id")), set()
+                        )
                         normalized_scope_path = tuple(str(item) for item in (scope_path or []))
                         matching_scope_paths = [
                             path for path in shared_scope_paths

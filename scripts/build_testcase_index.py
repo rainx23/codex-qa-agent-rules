@@ -95,7 +95,16 @@ def update(index: Path, manifest: Path) -> None:
     data, errors = validate_manifest_file(manifest)
     if errors:
         raise ValueError("；".join(errors))
-    root = index.resolve().parent.parent if index.resolve().parent.name == "testcases" else index.resolve().parent
+    if data.get("validation_status") != "passed":
+        raise ValueError("只有 validation_status=passed 的正式 Manifest 才能更新 Index")
+    resolved_index = index.resolve()
+    root = next(
+        (
+            candidate for candidate in (resolved_index.parent, *resolved_index.parents)
+            if (candidate / "RULE_VERSION").is_file() and (candidate / "AGENTS.md").is_file()
+        ),
+        resolved_index.parent.parent if resolved_index.parent.name == "testcases" else resolved_index.parent,
+    )
     try:
         indexed_manifest = manifest.resolve().relative_to(root).as_posix()
     except ValueError as exc:
@@ -105,21 +114,35 @@ def update(index: Path, manifest: Path) -> None:
     lines = migrate_index_text(text).splitlines()
     marker = f"artifact_id={data['artifact_id']}"
     positions = [position for position, line in enumerate(lines) if marker in line]
-    if len(positions) > 1:
-        raise ValueError(f"索引中 artifact_id 重复：{data['artifact_id']}")
+    if positions:
+        raise ValueError(f"索引中 artifact_id 已存在，禁止重复写入：{data['artifact_id']}")
     manifest_positions = [
         position for position, line in enumerate(lines)
         if len(_cells(line)) == 11 and _cells(line)[9].replace("\\", "/") == indexed_manifest
     ]
-    if len(manifest_positions) > 1 or (manifest_positions and manifest_positions != positions):
+    if manifest_positions:
         raise ValueError(f"索引中 Manifest 路径重复或绑定其他 artifact_id：{indexed_manifest}")
-    if positions:
-        lines[positions[0]] = row
-    else:
-        lines.append(row)
-    _atomic_write(index, "\n".join(lines).rstrip() + "\n")
-    if sum(marker in line for line in index.read_text(encoding="utf-8").splitlines()) != 1:
-        raise ValueError("索引原子更新后 artifact_id 唯一性校验失败")
+    lines.append(row)
+    candidate_text = "\n".join(lines).rstrip() + "\n"
+    index.parent.mkdir(parents=True, exist_ok=True)
+    temporary: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            "w", encoding="utf-8", delete=False, dir=index.parent, suffix=".index.tmp"
+        ) as handle:
+            handle.write(candidate_text)
+            temporary = Path(handle.name)
+        from validate_testcase_index import validate_index
+
+        canonical_index = root / "testcases/index.md"
+        validation_errors = validate_index(temporary) if index.resolve() == canonical_index.resolve() else []
+        if validation_errors:
+            raise ValueError("Index 更新后校验失败：" + "；".join(validation_errors))
+        temporary.replace(index)
+        temporary = None
+    finally:
+        if temporary is not None and temporary.exists():
+            temporary.unlink()
 
 
 def main(argv: list[str] | None = None) -> int:
