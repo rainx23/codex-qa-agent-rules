@@ -7,7 +7,7 @@ description: 用于基于证据设计 QA 测试点和最小有效 XMind Markdown
 
 完整读取并执行仓库根目录的正式 Skill：
 
-skills/qa-testcase-design/SKILL.md
+@${CODEBUDDY_SKILL_DIR}/../../../skills/qa-testcase-design/SKILL.md
 
 上述文件是本 Skill 的唯一权威工作流正文。
 

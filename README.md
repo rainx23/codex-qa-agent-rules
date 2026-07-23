@@ -46,7 +46,7 @@
 
 ## CodeBuddy 使用
 
-CodeBuddy 使用仓库根目录的 [CODEBUDDY.md](CODEBUDDY.md) 作为显式适配入口，并继续以 [AGENTS.md](AGENTS.md) 作为角色边界、任务路由、规则优先级和全局门禁的唯一权威来源。
+CodeBuddy 使用仓库根目录的 [CODEBUDDY.md](CODEBUDDY.md) 作为显式适配入口，并通过 `@AGENTS.md` 导入 [AGENTS.md](AGENTS.md)。`AGENTS.md` 仍是角色边界、任务路由、规则优先级和全局门禁的唯一权威来源。
 
 CodeBuddy 原生 Skill 包装入口位于 [.codebuddy/skills](.codebuddy/skills/)。包装文件仅负责引用根目录 `skills/*/SKILL.md`，不复制正式工作流、核心规则、业务 Profile、Schema 或校验脚本。
 

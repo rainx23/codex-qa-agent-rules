@@ -18,9 +18,11 @@ CodeBuddy 开始任务时先读取仓库根目录：
 
 `CODEBUDDY.md`
 
-随后由 `CODEBUDDY.md` 引导读取：
+`CODEBUDDY.md` 通过以下 CodeBuddy 文件导入语法加载：
 
-`AGENTS.md`
+`@AGENTS.md`
+
+根目录 `AGENTS.md` 仍是角色边界、任务路由、规则优先级和全局门禁的唯一权威来源。
 
 命中具体 QA 任务后，再通过本目录的包装 Skill 进入根目录正式 Skill。
 

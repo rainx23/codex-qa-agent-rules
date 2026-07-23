@@ -149,8 +149,8 @@ def validate_codebuddy_adapter(root: Path) -> list[str]:
         errors.append("缺少 CodeBuddy 总入口 CODEBUDDY.md")
     else:
         entry_text = entry_path.read_text(encoding="utf-8-sig")
-        if "AGENTS.md" not in entry_text:
-            errors.append("CODEBUDDY.md 未引用唯一权威入口 AGENTS.md")
+        if not re.search(r"(?m)^@AGENTS\.md\s*$", entry_text):
+            errors.append("CODEBUDDY.md 未通过 @AGENTS.md 导入唯一权威入口")
         if ".codebuddy/skills/" not in entry_text:
             errors.append("CODEBUDDY.md 未说明 .codebuddy/skills/ 包装入口")
         if "scripts/validate_release.py" not in entry_text:
@@ -214,7 +214,9 @@ def validate_codebuddy_adapter(root: Path) -> list[str]:
             )
 
         wrapper_text = wrapper_path.read_text(encoding="utf-8-sig")
-        expected_reference = f"skills/{skill_name}/SKILL.md"
+        expected_reference = (
+            f"@${{CODEBUDDY_SKILL_DIR}}/../../../skills/{skill_name}/SKILL.md"
+        )
 
         if expected_reference not in wrapper_text:
             errors.append(

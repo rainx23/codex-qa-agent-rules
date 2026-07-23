@@ -38,6 +38,8 @@ class CodeBuddyAdapterValidationTests(unittest.TestCase):
                 [
                     "# CodeBuddy QA 测试分析总入口",
                     "",
+                    "@AGENTS.md",
+                    "",
                     "完整读取 AGENTS.md。",
                     "",
                     "原生包装入口位于 .codebuddy/skills/。",
@@ -79,7 +81,7 @@ class CodeBuddyAdapterValidationTests(unittest.TestCase):
                         "",
                         "完整读取并执行仓库根目录的正式 Skill：",
                         "",
-                        f"skills/{skill_name}/SKILL.md",
+                        f"@${{CODEBUDDY_SKILL_DIR}}/../../../skills/{skill_name}/SKILL.md",
                         "",
                         "上述文件是本 Skill 的唯一权威工作流正文。",
                         "",
@@ -145,8 +147,8 @@ class CodeBuddyAdapterValidationTests(unittest.TestCase):
         text = wrapper.read_text(encoding="utf-8")
         wrapper.write_text(
             text.replace(
-                "skills/qa-alpha/SKILL.md",
-                "skills/qa-other/SKILL.md",
+                "@${CODEBUDDY_SKILL_DIR}/../../../skills/qa-alpha/SKILL.md",
+                "@${CODEBUDDY_SKILL_DIR}/../../../skills/qa-other/SKILL.md",
             ),
             encoding="utf-8",
             newline="\n",
@@ -156,6 +158,22 @@ class CodeBuddyAdapterValidationTests(unittest.TestCase):
 
         self.assertTrue(
             any("CodeBuddy Skill 未引用正式 Skill" in error for error in errors)
+        )
+
+    def test_plain_agents_text_without_import_is_rejected(self) -> None:
+        entry = self.root / "CODEBUDDY.md"
+        text = entry.read_text(encoding="utf-8")
+        entry.write_text(
+            text.replace("@AGENTS.md", "AGENTS.md"),
+            encoding="utf-8",
+            newline="\n",
+        )
+
+        errors = validate_codebuddy_adapter(self.root)
+
+        self.assertIn(
+            "CODEBUDDY.md 未通过 @AGENTS.md 导入唯一权威入口",
+            errors,
         )
 
     def test_missing_codebuddy_entry_is_rejected(self) -> None:

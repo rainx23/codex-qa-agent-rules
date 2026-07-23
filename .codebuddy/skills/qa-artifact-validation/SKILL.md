@@ -7,7 +7,7 @@ description: 用于校验 QA 分析报告、XMind Markdown、XMind Workbook、Ma
 
 完整读取并执行仓库根目录的正式 Skill：
 
-skills/qa-artifact-validation/SKILL.md
+@${CODEBUDDY_SKILL_DIR}/../../../skills/qa-artifact-validation/SKILL.md
 
 上述文件是本 Skill 的唯一权威工作流正文。
 

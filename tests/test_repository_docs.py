@@ -31,6 +31,7 @@ def create_repository(root: Path) -> None:
     (root / ".codebuddy/skills").mkdir(parents=True, exist_ok=True)
     (root / "CODEBUDDY.md").write_text(
         "# CodeBuddy\n\n"
+        "@AGENTS.md\n\n"
         "读取 AGENTS.md。\n\n"
         "包装入口位于 .codebuddy/skills/。\n\n"
         "发布前运行 scripts/validate_release.py。\n",

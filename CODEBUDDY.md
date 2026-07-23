@@ -1,5 +1,7 @@
 # CodeBuddy QA 测试分析总入口
 
+@AGENTS.md
+
 ## 唯一权威规则入口
 
 开始任何任务前，必须完整读取仓库根目录的 `AGENTS.md`。

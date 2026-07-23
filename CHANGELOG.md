@@ -21,6 +21,7 @@
 - 现有 Codex 使用方式、QA 工作流、规则路径、Schema、脚本和测试产物结构保持不变。
 - 仓库文档校验器新增 CodeBuddy 适配门禁，校验总入口、包装 Skill 清单、Frontmatter 描述和正式 Skill 引用一致性。
 - 将当前 active 正式测试产物重新校验并同步到 RULE_VERSION 2.17.0；保留已被替代产物的原始历史版本。
+- CodeBuddy 总入口改为通过 `@AGENTS.md` 显式导入正式全局规则，包装 Skill 改为使用 `${CODEBUDDY_SKILL_DIR}` 和 `@file` 加载根目录正式 Skill。
 
 ## [2.16.0] - 2026-07-23
 
