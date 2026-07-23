@@ -1,0 +1,7 @@
+[
+  {
+    "op": "add",
+    "path": "/risk_items/0/testcase_ids/-",
+    "value": "TC003"
+  }
+]

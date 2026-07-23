@@ -26,11 +26,12 @@ description: 用于基于证据设计 QA 测试点和最小有效 XMind Markdown
 2. 先建立并校验 `../../rules/schemas/risk-coverage-matrix.schema.json` 约束的 Risk Coverage Matrix，不得从原始需求文本直接跳到用例。
    - Risk Evidence 只能从关联 Fact/Acceptance Criteria 派生；confirmed TC 的 Risk 与 Fact 链必须全部 confirmed/current。字段结构证据不得扩写为业务行为预期。
 3. 根据证据选择等价类、边界、决策表、状态流转、用户路径、Pairwise 或风险驱动等技术。
-   - Requirement Model 存在条件矩阵时，先复验 grouped cross product 生成集合，再逐项消费 required combination；每项必须生成行为型 `condition_coverage`，明确命中/不命中数据、可观察结果以及真实 `branch_id`、`step_index`、`expected_index`。配置选项存在性只作为独立结构/容量覆盖；blocking 未解决时不得进入本步骤或生成草稿定位，更不得伪造行为 Oracle。
+   - Requirement Model 存在条件矩阵时，先复验 grouped cross product 生成集合，再逐项消费 required combination；行为型覆盖只写入 Testcase `cases[].condition_coverage[]`，其中 `combination_id` 必须引用 Requirement 已存在的组合，并明确命中/不命中数据、可观察结果以及真实 `branch_id`、`step_index`、`expected_index`。禁止把 `condition_coverage` 写入 Requirement `required_combinations[]`。配置选项存在性只作为独立结构/容量覆盖；blocking 未解决时不得进入本步骤或生成草稿定位，更不得伪造行为 Oracle。
 4. 每个可独立诊断的风险原则上设计一个用例。仅当核心规则、触发条件、操作、数据来源/口径、断言、风险和保护上下文等价时合并；正式/模拟数据源、权限、数据类型、异常路径或不同 P0 风险会改变定位时必须拆分。同一规则覆盖多个真实入口时，只有上述维度完全一致才能保留一个 TC：完整入口为 2 至 5 个时，每个入口渲染为独立平级分支并各自包含步骤和预期；完整入口不少于 6 个时使用对应的 `shared_entry_scope` 或 `shared_entry_scopes[]`，各 TC 只引用一个 Scope 并保留公共步骤和预期。入口差异导致数据源、权限、预期、异常路径、风险或失败定位不同则拆分 TC。
    - 使用不含纯入口名称的 `core_deduplication_key` 做确定性合并判断；模拟/正式仅入口不同必须合并。允许拆分时必须让真实差异进入核心去重因子，并记录拆分依据。
 5. 每个保留的 TC 都必须映射需求、Diff 或历史缺陷，并具有独立失败诊断。
 6. 建立并校验 `../../rules/schemas/testcase-model.schema.json` 约束的 Testcase Model，然后按入口数量选择受支持的固定 XMind 层级，并从 `TC001` 开始全局连续编号。
+   - 使用 `../../scripts/update_task_model.py` 原子写入正式模型；Testcase coverage 完成后，将每个组合实际覆盖它的 TC ID 精确回填到 Requirement `covered_by_tc_ids`。任一方向缺失、额外映射、未知组合、未知 TC 或同一 TC 重复覆盖同一组合都必须失败。
    - `dimension` 根据核心风险和主要 Oracle 选择并决定唯一 XMind 一级节点；`secondary_dimensions` 只做追踪与统计，不能复制 TC、不能与主维度相同或重复。树按主维度分组后不要求遍历顺序仍按 TC 编号递增。
    - 单入口：保留既有 `TC → 测试点 → 步骤 → 预期` 或直接模块层级，不人为增加入口层。
    - 2 至 5 个入口：分组结构使用 `TC → 测试点 → 具体入口 → 步骤 → 预期`；直连结构使用 `TC → 一级模块 → 二级功能点 → 具体入口 → 步骤 → 预期`。至少包含两个有名称的平级入口、各入口独立的步骤和预期；禁止混入公共直连步骤，也禁止“分别打开/依次进入多个入口”等拼接文本。

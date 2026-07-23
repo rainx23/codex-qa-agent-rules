@@ -2441,20 +2441,46 @@ def validate_model_links(
         coverage_by_id: dict[str, list[tuple[str, dict[str, Any]]]] = {}
         behavior_locations: dict[tuple[str, str, int], str] = {}
         for tc_id, case in cases.items():
+            seen_coverage_ids: set[str] = set()
             for coverage in case.get("condition_coverage", []):
                 if isinstance(coverage, dict) and isinstance(coverage.get("combination_id"), str):
-                    coverage_by_id.setdefault(coverage["combination_id"], []).append((tc_id, coverage))
+                    combination_id = coverage["combination_id"]
+                    if combination_id in seen_coverage_ids:
+                        errors.append(
+                            f"CONDITION_COVERAGE_DUPLICATED: {tc_id} 重复覆盖 {combination_id}"
+                        )
+                    seen_coverage_ids.add(combination_id)
+                    coverage_by_id.setdefault(combination_id, []).append((tc_id, coverage))
+        unknown_coverage = set(coverage_by_id) - set(required_by_id)
+        for combination_id in sorted(unknown_coverage):
+            tc_ids = sorted({tc_id for tc_id, _ in coverage_by_id[combination_id]})
+            errors.append(
+                f"CONDITION_COVERAGE_UNKNOWN_COMBINATION: {combination_id} 被 {tc_ids} 引用但 Requirement 中不存在"
+            )
         for combination_id, combination in required_by_id.items():
-            mapped_tcs = set(combination.get("covered_by_tc_ids", []))
+            declared_tcs = combination.get("covered_by_tc_ids", [])
+            if len(declared_tcs) != len(set(declared_tcs)):
+                errors.append(
+                    f"REQUIRED_COMBINATION_TC_DUPLICATED: {combination_id} covered_by_tc_ids 包含重复 TC"
+                )
+            mapped_tcs = set(declared_tcs)
             unknown_tcs = mapped_tcs - cases.keys()
             if unknown_tcs:
                 errors.append(
-                    f"REQUIRED_COMBINATION_UNCOVERED: {combination_id} 引用不存在 TC：{sorted(unknown_tcs)}"
+                    f"REQUIRED_COMBINATION_UNKNOWN_TESTCASE: {combination_id} 引用不存在 TC：{sorted(unknown_tcs)}"
                 )
-            linked = [
-                (tc_id, coverage) for tc_id, coverage in coverage_by_id.get(str(combination_id), [])
-                if tc_id in mapped_tcs
-            ]
+            linked = coverage_by_id.get(str(combination_id), [])
+            actual_tcs = {tc_id for tc_id, _ in linked}
+            for tc_id in sorted(actual_tcs - mapped_tcs):
+                errors.append(
+                    f"CONDITION_COVERAGE_REVERSE_INDEX_MISSING: {tc_id} 覆盖 {combination_id}，"
+                    "但 Requirement covered_by_tc_ids 未声明该 TC"
+                )
+            for tc_id in sorted((mapped_tcs & cases.keys()) - actual_tcs):
+                errors.append(
+                    f"REQUIRED_COMBINATION_FORWARD_COVERAGE_MISSING: {combination_id} 声明 {tc_id}，"
+                    "但 Testcase cases[].condition_coverage 未引用该组合"
+                )
             behavior = [item for item in linked if item[1].get("coverage_type") == "behavior"]
             if not behavior:
                 if validation_status == "pending":
@@ -2590,11 +2616,6 @@ def validate_model_links(
                                 errors.append(f"CONDITION_COVERAGE_NOT_INDEPENDENT: {prior} 与 {combination_id}")
                             else:
                                 behavior_locations[location] = str(combination_id)
-        unknown_coverage = set(coverage_by_id) - set(required_by_id)
-        if unknown_coverage:
-            errors.append(
-                f"REQUIRED_COMBINATION_UNCOVERED: testcase 引用不存在 required combination：{sorted(unknown_coverage)}"
-            )
         behavior_coverages = [
             coverage for entries in coverage_by_id.values() for _, coverage in entries
             if coverage.get("coverage_type") == "behavior"

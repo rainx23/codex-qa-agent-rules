@@ -27,11 +27,13 @@ confirmed Fact 必须有非 inference 的可验证来源，不能使用 low conf
 0. 先判断显式意图。只有用户明确要求需求预审/评审、完整性检查、缺失冲突歧义检查且未要求测试用例/XMind，或明确“只分析问题、暂不生成测试用例”时进入 `workflow_stage=pre_review`；同时要求预审/评审和生成/编写测试用例或 XMind 时必须进入 delivery，和普通“分析需求并编写测试用例”一样记录完整原始任务范围并执行 confirmation_only 两阶段链。若本轮消息是在回答已有 Confirmation，则读取此前 Checkpoint，将消息作为确认回复处理，不把它误判为独立新需求，也不要求用户重复“继续生成”。
 1. 确认每个需求来源均可读取，并说明本次分析范围。
    - 默认不扫描历史 `testcases/`；写模型前使用 `../../scripts/describe_model_contract.py requirement` 或合法 Fixture，不猜测字段。
+   - 新任务先用 `../../scripts/init_task_models.py` 建立骨架，再通过 `../../scripts/update_task_model.py` 的 JSON Patch stdin/文件更新；禁止创建 `tmp_build_models.py`、`scripts/_*.py` 或其他一次性拼接脚本。
 2. 分析禅道需求时，区分第一部分业务背景与第三部分产品实现规则；优先采用用户确认的范围，不把普通背景与计划差异直接判定为阻塞冲突。
 3. 提取业务目标、系统或页面入口、角色、主流程、字段规则、数据定义、验收标准、异常行为和明确排除项。
 4. 建立事实表，区分确定事实、冲突事实、推断事实和缺失事实；每个核心结论都必须附允许的证据来源标签。
    - 每个 Fact 引用与其陈述直接对应的精确行号和 excerpt；验收标准只复用关联 Fact 的 Evidence。字段存在、字段清单或支持多值/可追加多个值只证明结构或容量，不得推导过滤、统计、自动去重、重复拒绝/合并、保存、删除、继承或唯一性等行为；confirmed 行为 Fact 必须有明确表达同类行为的 current Evidence。
    - 明确列出两个及以上条件维度时，在 Risk 之前建立结构化条件矩阵；按业务有效分组声明 fixed values、variable dimensions 和 expected count，由确定性 grouped cross product 生成 expected set，并要求 required + excluded 完整覆盖；配置存在性不得冒充行为覆盖。
+   - `condition_matrix.required_combinations[]` 只允许定义 `combination_id`、`dimension_values`、`covered_by_tc_ids`；禁止写入 `condition_coverage`。`covered_by_tc_ids` 仅是 Testcase `cases[].condition_coverage` 的反向索引，正式阶段由用例设计回填并双向复验。
    - 对正式用例任务固定扫描八个测试分类维度并填写 `test_dimension_assessment`；每类只能出现一次，未覆盖必须记录 not_applicable、explicitly_excluded、pending 或 blocked 的证据化原因。另用 `condition_matrix_applicability` 判断业务条件矩阵是否适用，并用 `scope_dispositions` 记录正式范围项处置。
 5. 进入确认前置阶段 `workflow_stage=confirmation_only`。发现首个 blocking Confirmation 后立即停止 Risk Coverage Matrix、Testcase Model、XMind、正式报告、Manifest 和 Index 的生成，但不得停止剩余需求分析；继续完成全部来源、十类需求要素、八类测试维度、条件矩阵适用性和剩余 Confirmation 扫描。
 6. 建立并校验 `../../rules/schemas/requirement-analysis.schema.json` 约束的最小 Requirement Analysis Checkpoint。保存完整 Evidence、原始任务范围、Fact、验收依据、八维扫描、条件维度、风险方向和全部 Confirmation；`downstream_artifacts_generated` 必须为空。不要创建 pending Manifest，也不要生成草稿报告、草稿 Risk、草稿 Testcase 或草稿 XMind。

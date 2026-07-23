@@ -6,6 +6,17 @@
 
 ## [Unreleased]
 
+## [2.19.0] - 2026-07-23
+
+### Added
+
+- 新增共享 `update_task_model.py` JSON Patch 更新工具，提供字段白名单、即时 Schema 校验和失败原子回滚，替代一次性模型拼接脚本。
+
+### Changed
+
+- 明确 Requirement required combination 只定义组合，Testcase `cases[].condition_coverage` 承担覆盖声明，并强制 `covered_by_tc_ids` 双向精确一致。
+- `validate_models.py` 为模型、文件、JSON Pointer、稳定错误码和消息输出统一定位信息；精简契约、Skills、文档和端到端回归同步更新。
+
 ## [2.18.0] - 2026-07-23
 
 ### Added

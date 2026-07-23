@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$comment": "Generated from scripts/qa_contracts.py; do not edit manually.",
-  "x-rule-version": "2.18.0",
+  "x-rule-version": "2.19.0",
   "title": "Testcase Model",
   "type": "object",
   "additionalProperties": false,
@@ -34,7 +34,7 @@
       ]
     },
     "rule_version": {
-      "const": "2.18.0"
+      "const": "2.19.0"
     },
     "generated_at": {
       "type": "string",

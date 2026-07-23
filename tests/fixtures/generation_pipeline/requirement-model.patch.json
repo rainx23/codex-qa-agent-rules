@@ -1,0 +1,83 @@
+[
+  {
+    "op": "replace",
+    "path": "/report_mode",
+    "value": "requirement"
+  },
+  {
+    "op": "add",
+    "path": "/condition_matrix",
+    "value": {
+      "dimensions": [
+        {
+          "dimension_id": "environment",
+          "dimension_name": "Environment",
+          "values": ["simulation", "production"]
+        },
+        {
+          "dimension_id": "metric",
+          "dimension_name": "Metric",
+          "values": ["metric_a", "metric_b", "metric_c"]
+        }
+      ],
+      "combination_generation": {
+        "mode": "grouped_cross_product",
+        "groups": [
+          {
+            "group_id": "six_required_combinations",
+            "fixed_values": {},
+            "variable_dimensions": [
+              {
+                "dimension_id": "environment",
+                "values": ["simulation", "production"]
+              },
+              {
+                "dimension_id": "metric",
+                "values": ["metric_a", "metric_b", "metric_c"]
+              }
+            ],
+            "expected_combination_count": 6
+          }
+        ]
+      },
+      "required_combinations": [
+        {
+          "combination_id": "COMB-01",
+          "dimension_values": {"environment": "simulation", "metric": "metric_a"},
+          "covered_by_tc_ids": ["TC001"]
+        },
+        {
+          "combination_id": "COMB-02",
+          "dimension_values": {"environment": "simulation", "metric": "metric_b"},
+          "covered_by_tc_ids": ["TC002"]
+        },
+        {
+          "combination_id": "COMB-03",
+          "dimension_values": {"environment": "simulation", "metric": "metric_c"},
+          "covered_by_tc_ids": ["TC003"]
+        },
+        {
+          "combination_id": "COMB-04",
+          "dimension_values": {"environment": "production", "metric": "metric_a"},
+          "covered_by_tc_ids": ["TC001"]
+        },
+        {
+          "combination_id": "COMB-05",
+          "dimension_values": {"environment": "production", "metric": "metric_b"},
+          "covered_by_tc_ids": ["TC002"]
+        },
+        {
+          "combination_id": "COMB-06",
+          "dimension_values": {"environment": "production", "metric": "metric_c"},
+          "covered_by_tc_ids": ["TC003"]
+        }
+      ],
+      "excluded_combinations": [],
+      "coverage_summary": {
+        "required_combination_count": 6,
+        "covered_combination_count": 6,
+        "excluded_combination_count": 0
+      }
+    }
+  }
+]

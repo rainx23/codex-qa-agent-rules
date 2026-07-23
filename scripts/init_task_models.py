@@ -176,6 +176,10 @@ def main(argv: list[str] | None = None) -> int:
         parser.exit(1, f"FAIL {exc}\n")
     for path in outputs:
         print(f"PASS {path}")
+    print(
+        "NEXT use scripts/update_task_model.py with JSON Patch data; "
+        "do not create temporary model-building scripts"
+    )
     print("SUMMARY passed=1 warning=0 failed=0")
     return 0
 

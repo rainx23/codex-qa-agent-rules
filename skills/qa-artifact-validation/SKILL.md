@@ -7,6 +7,8 @@ description: 用于校验 QA 分析报告、XMind Markdown、XMind Workbook、Ma
 
 模型校验职责分离：`validate_schemas.py` 校验仓库契约与固定 Fixture；`validate_models.py` 校验本次真实模型；`validate_manifest.py` 对最终报告、模型、XMind、Workbook 和计数做全链路复验。
 
+正式模型必须由 `init_task_models.py` 初始化并通过 `update_task_model.py` 的 JSON Patch 数据更新，禁止依赖一次性 Python 拼接脚本。第一次 `validate_models.py` 失败时，只允许依据其 `model`、`file`、`json_pointer`、`error_code`、`message` 定位后修复一次并再校验一次；第二次仍失败立即停止，后续 XMind 转换、Manifest 和 Index 调用次数均为 0。
+
 将本 Skill 的根目录解析为当前 `SKILL.md` 向上两级的仓库根目录。
 
 开始校验前完整读取 `../../rules/core/conversation-delivery-contract.md`，并将聊天回复视为正式交付的一部分。

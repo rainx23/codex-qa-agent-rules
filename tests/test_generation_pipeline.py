@@ -74,7 +74,7 @@ class GenerationPipelineTests(unittest.TestCase):
             self.assertEqual([], risk["risk_items"])
             self.assertEqual([], testcase["cases"])
             for model in (requirement, risk, testcase):
-                self.assertEqual("2.18.0", model["rule_version"])
+                self.assertEqual("2.19.0", model["rule_version"])
                 self.assertEqual("confirmation_only", model["workflow_stage"])
                 self.assertEqual("Asia/Shanghai", model["generated_timezone"])
 

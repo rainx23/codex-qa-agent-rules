@@ -258,7 +258,7 @@ class ConfirmationWorkflowTests(unittest.TestCase):
         self.assertEqual([], errors)
 
     def test_rule_version_is_2_18_0(self):
-        self.assertEqual("2.18.0", read_rule_version(ROOT))
+        self.assertEqual("2.19.0", read_rule_version(ROOT))
 
 
 if __name__ == "__main__":

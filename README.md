@@ -244,7 +244,8 @@ flowchart TD
 ## 快速校验与发布校验
 
 - 日常业务产物：`python scripts/validate_task.py --manifest <current-manifest>`。它只复验当前 Requirement/Risk/Testcase、XMind Markdown、Workbook、Manifest、当前 Index 记录、通过 `--test` 指定的相关测试和 `git diff --check`，不扫描全部历史产物、不运行全量单元测试。
-- 写结构化模型前先运行 `python scripts/describe_model_contract.py requirement|risk|testcase|manifest`；需要新任务骨架时使用 `init_task_models.py`。Manifest 必须由 `build_task_manifest.py` 生成，禁止手写。
+- 写结构化模型前先运行 `python scripts/describe_model_contract.py requirement|risk|testcase|manifest`；需要新任务骨架时使用 `init_task_models.py`，随后只用 `update_task_model.py --model requirement|risk|testcase --file <model.json> --stdin` 接收 JSON Patch 数组并原子更新。工具拒绝未知字段、身份元数据修改和 Requirement combination 中的 `condition_coverage`，失败不落盘；禁止临时 Python 模型拼接脚本。Manifest 必须由 `build_task_manifest.py` 生成，禁止手写。
+- 可执行的更新示例位于 `tests/fixtures/generation_pipeline/*-model.patch.json`：Requirement 示例只写组合定义与 `covered_by_tc_ids`，Testcase 示例只在 `cases[].condition_coverage` 声明覆盖关系；三份补丁生成的模型必须一起通过 `validate_models.py`。
 - 规则或版本发布：修改 rules、skills、schemas、scripts、tests、RULE_VERSION、CHANGELOG 或 CI 时运行 `python scripts/validate_release.py`。该入口保留全量单元测试、全部正式历史产物、Schema、Skill、版本、仓库文档、知识库、CI 和跨平台相关门禁。
 
 ## 分析报告模式

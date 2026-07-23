@@ -12,6 +12,7 @@
 | --- | --- | --- |
 | `test_*.py` | 单元与集成测试 | 是 |
 | `test_generation_pipeline.py` | 精简契约、模型初始化、确定性 Manifest、失败即停止和执行预算回归 | 是 |
+| `test_generation_contract_fix.py` | condition coverage 归属、双向索引、可定位错误、原子模型更新与六组合脱敏 Fixture 回归 | 是 |
 | `test_anti_hallucination_contracts.py` | 反幻觉、门禁、模型和 SQL 配置反例 | 是 |
 | `test_anti_hallucination_fixtures.py` | 八类独立反幻觉 Fixture 的统一回归入口 | 是 |
 | `fixtures/anti_hallucination/` | confirmed inference、blocking gate、DDL partial、模糊断言、缺失证据、虚构标识符、疑似缺陷、API health scope 的合法/非法输入与 Golden | 是 |

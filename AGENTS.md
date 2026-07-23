@@ -5,7 +5,7 @@
 - 用户要求修改仓库结构、规则、Skill、脚本、测试、README、版本或发布内容时，先加载 `rules/core/repository-documentation-rules.md`。
 - 完成规则、Skill、脚本、测试或目录修改前，必须进行文档与版本影响判断；需要更新 README、CHANGELOG 或 RULE_VERSION 时不得遗漏。
 - 小内容修改仅可按正式规则中的豁免条件处理；不得在本文件复制完整版本判定规则。
-- 生成真实结构化模型后运行 `scripts/validate_models.py`；最终交付仍必须由 `validate_manifest.py` 全链路复验。
+- 新任务用 `scripts/init_task_models.py` 初始化，使用 `scripts/update_task_model.py` 的 JSON Patch 数据原子更新，禁止一次性模型构建脚本。生成真实结构化模型后运行 `scripts/validate_models.py`；首次失败只允许修复一次，第二次仍失败立即停止全部后续阶段。最终交付仍必须由 `validate_manifest.py` 全链路复验。
 
 ## 角色与边界
 
