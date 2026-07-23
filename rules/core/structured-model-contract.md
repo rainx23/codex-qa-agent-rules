@@ -15,7 +15,7 @@ Testcase Model 的 `dimension` 是决定 XMind 一级节点的唯一主维度；
 
 ## 交接顺序
 
-1. 需求 Skill 先生成 `workflow_stage=confirmation_only` 的最小 Requirement Analysis Checkpoint；若无 blocking，立即切换到 `formal_generation`。存在 blocking 时仅渲染集中确认聊天回复，不生成正式报告或下游测试模型。
+1. 显式需求预审使用 `workflow_stage=pre_review` 及可选 `pre_review_issues`、`pre_review_conclusion`，完成后停止，不进入交付链。普通正式任务由需求 Skill 先生成 `workflow_stage=confirmation_only` 的最小 Requirement Analysis Checkpoint；若无 blocking，立即切换到 `formal_generation`。存在 blocking 时仅渲染集中确认聊天回复，不生成正式报告或下游测试模型。
 2. Diff Skill 接收可选 Requirement Analysis Model，生成 Diff Impact Model；存在需求模型时以其验收标准判断覆盖。
 3. 用例 Skill 接收需求模型、可选 Diff 模型和历史缺陷，先生成 Risk Coverage Matrix，再生成 Testcase Model。
 4. Testcase Model 渲染固定 XMind Markdown；模型字段不得成为新的 XMind 节点。
@@ -35,7 +35,7 @@ Evidence 不是可自由复制的说明文字：Acceptance Criteria 必须从关
 
 ## Confirmation 与交付状态
 
-`workflow_stage` 可为 `confirmation_only`、`formal_generation` 或 `completed`，对历史模型为可选字段。`confirmation_only` 必须保存 `original_task_scope`、完整扫描 Checkpoint、八类测试维度和条件矩阵适用性；Confirmation 还必须保存问题、当前证据、不确定点、影响范围、可选答案和当前处理。该阶段的正式 Risk 列表为空，仅允许 `risk_directions`，且不得存在任何下游产物声明。
+`workflow_stage` 可为 `pre_review`、`confirmation_only`、`formal_generation` 或 `completed`，对历史模型为可选字段。`pre_review` 必须填写问题清单与 `ready / conditionally_ready / not_ready` 结论，正式 Risk 为空，不保存正式流程 Checkpoint，也不得进入下游生成。`confirmation_only` 必须保存 `original_task_scope`、完整扫描 Checkpoint、八类测试维度和条件矩阵适用性；Confirmation 还必须保存问题、当前证据、不确定点、影响范围、可选答案和当前处理。该阶段的正式 Risk 列表为空，仅允许 `risk_directions`，且不得存在任何下游产物声明。
 
 Requirement Model 校验只判断结构、Fact/Confirmation 引用、核心 missing Fact 的 blocking 关联，以及 resolved/skipped 的证据完整性。未解决的 blocking Confirmation 本身不构成模型结构错误；它通过统一 Confirmation Summary 影响 Manifest 状态。
 
@@ -100,6 +100,7 @@ Testcase Value Assessment Model 保存可复算的测试用例价值评估结果
 ## 数据与知识模型
 
 - Knowledge Table、Logic Version、Metric、Requirement Knowledge 和 Data Validation Model 由 `scripts/qa_contracts.py` 统一生成 Schema。
+- Knowledge Candidate Model 是显式 `extract_candidate` 的只读清单，只接受 confirmed Fact、resolved Confirmation 及 current Evidence，状态固定为 candidate；它不写入 Requirement、Risk、Testcase、XMind 或 Manifest，且不触发 persist。
 - 完整 DDL 使用 `schema_scope=complete` 并保存原始/规范化哈希；原文中明确存在的主键、唯一键、Duplicate/Aggregate Key、分区、分桶、索引、Engine 和 Properties 必须全部稳定提取，否则降级为 `partial` 或 `blocked`。局部字段使用 `partial`，不得覆盖 complete 版本。
 - Data Validation Model 使用 `required`、`optional`、`not_required`、`blocked`；验证方式使用 `sql`、`cross_source_reconciliation`、`mixed`、`not_applicable`、`blocked`。指标准确性默认必须有关联 SQL。
 - Validation SQL 使用全局 `SQLV###`，直接对数使用 `REC###`；它们可被多个 TC 复用，必须与需求、风险和 TC 建立引用关系。知识、SQL 和对数模型不得成为新的 XMind 层级。

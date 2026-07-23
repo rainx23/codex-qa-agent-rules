@@ -31,6 +31,7 @@ description: 用于校验 QA 分析报告、XMind Markdown、XMind Workbook、Ma
 13. `confirmation_only` 阶段不接收 Manifest，也不要求任何 `draft_*` 路径。blocking 解除后进入正式阶段，从已更新 Checkpoint 首次生成正式链；全部正式门禁通过后才生成或更新 Workbook、passed Manifest 和 index。历史 pending Manifest 仍按旧契约兼容复验。
 14. `validation_status` 与 `sql_status` 分开判定。报告、模型、Markdown、Workbook 完整时允许 `passed + sql_status=blocked`；不得因 SQL 缺少 DDL/执行条件把测试设计降级为 pending，也不得为解除阻塞伪造 SQL 或执行证据。
 15. Manifest 校验后运行 `python ../../scripts/render_delivery_summary.py --manifest <manifest.json> --check`，使用 stdout 的固定 Markdown 作为最终聊天回复主体。passed、pending、failed 均必须渲染；不得只输出内部校验命令结果。脚本输出后只可增加一句极简人工说明，不得删除固定章节。
+16. `pre_review` 不接收任何正式测试产物。正式交付通过且存在明显可复用 confirmed Fact 或 resolved Confirmation 时，仅追加一次知识候选提示，不在本 Skill 内执行检索、比较、提取或持久化；用户明确要求后交给 `qa-knowledge-management` 的 `extract_candidate`。
 
 ## 可选 Testcase Value Assessment 校验
 

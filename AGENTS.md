@@ -23,7 +23,9 @@
 
 ## 任务路由
 
+- 本仓库共 6 个 QA Skills：4 个核心交付链 Skills（Requirement → Diff → Testcase → Artifact）和 2 个按需支撑型 Skills（Knowledge、API Automation）。支撑型 Skill 不作为每次任务都执行的主链步骤。
 - 禅道、OpenSpec、Markdown、截图、新需求或需求分析：执行 skills/qa-requirement-analysis/SKILL.md。
+- 只有用户明确要求需求预审/评审、完整性检查、缺失冲突歧义检查或“只分析问题、暂不生成用例”时进入 `pre_review`；普通“分析需求并编写测试用例”继续执行 confirmation_only 两阶段正式交付链。
 - diff、commit、变更评审或影响分析：执行 skills/qa-diff-impact-analysis/SKILL.md。
 - 测试点、测试用例、XMind Markdown、P0/P1/P2：执行 skills/qa-testcase-design/SKILL.md。
 - 产物验收、格式校验、转换、索引或发布前检查：执行 skills/qa-artifact-validation/SKILL.md。
@@ -31,7 +33,7 @@
 - 验证 SQL 生成、静态规范或 SQL/REC 产物校验：同时执行 rules/core/sql-coding-standards.md 和 qa-artifact-validation 的 SQL 门禁。
 - 同时存在需求和 Diff：先需求分析，再 Diff 影响分析，最后用例设计与产物校验。
 - 禅道需求额外加载 `rules/profiles/zentao.md`；其证据优先级和冲突处理是唯一权威定义，其他入口不得复制或改写该列表。
-- 咨询、评审、给建议或先分析不要改：只输出问题、风险和建议，不生成最终用例，除非用户明确要求。
+- 显式需求预审完成后只输出问题、风险和 ready/conditionally_ready/not_ready 结论，不生成 Risk/Testcase/XMind/Manifest/Index，也不自动进入正式用例流程。
 - 缺陷或执行反馈：分析现象、影响、复现、可能原因、漏测原因和补充测试点，不凭缺陷反推需求事实。
 
 ## 输出模式

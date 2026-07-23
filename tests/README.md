@@ -23,6 +23,7 @@
 | `test_testcase_index.py` | passed Manifest 索引唯一性、漏登、重复和正式路径完整性 | 是 |
 | `test_delivery_summary.py` | passed/pending/failed 对话摘要、Confirmation、路径、计数、顺序和 CLI 契约 | 是 |
 | `test_confirmation_workflow.py` | 一次授权、confirmation_only、集中确认、部分/批量回复、自动续跑和快慢校验分层 | 是 |
+| `test_pre_review_and_knowledge_candidates.py` | 显式 pre_review 路由/禁产物/不续跑，以及知识候选提示、来源边界和不自动持久化 | 是 |
 | `test_dimension_assessment.py` | 八类测试维度扫描、主辅维度、covered 引用和单主维度复核 warning | 是 |
 | `test_analysis_report_validation.py` | 分析报告主摘要 ID 唯一性与 passed 正式用例措辞门禁 | 是 |
 | `fixtures/value-assessment/` | computed 合法模型组、Golden、Hash 错误、评分篡改和未知 TC 的独立 Assessment Fixture | 是 |
@@ -43,6 +44,7 @@
 - 产物治理兼容测试覆盖文本换行/BOM Hash、二进制 Hash、完整 Manifest/index 一致性及 Workbook 完整树复验。
 - 回归测试覆盖 blocking Confirmation 解决后的 Fact/计数迁移、原始任务自动续跑契约、正式产物完整性，以及 XMind 无损语义精简、符号、截断和逻辑优先级行为。
 - confirmation_only 回归固定覆盖确认前无 Risk/Testcase/XMind/Manifest/Index、首个问题后继续扫描、批量与部分回答、旧 pending/passed 兼容、快速校验不触发全量门禁，以及正式阶段继续通过 Manifest 全链复验。
+- pre_review 与 extract_candidate 回归只覆盖新增模式边界，不复制现有 Evidence、Fact、Confirmation、正式产物或知识持久化测试。
 - 回归测试覆盖 `validation_status=passed + sql_status=blocked`、证据精度与索引全量覆盖；这些规则均使用通用 Fixture，不绑定特定业务样例。
 - 对话摘要回归使用正式 passed 产物与临时 pending/failed Fixture，验证固定章节、文件用途、无 Confirmation 时的“无”、计数单一来源、跨平台路径和无 ANSI 输出。
 - 测试运行期工作区必须创建在系统临时目录并由测试生命周期清理；`tests/fixtures/` 只保存固定、可复用输入，不得在其中创建随机运行目录，即使测试异常也不得残留。

@@ -20,6 +20,7 @@
 | `render_delivery_summary.py` | 从 Manifest 和结构化模型确定性渲染中文聊天交付摘要 | 是 |
 | `validate_delivery_summary.py` | 校验摘要固定章节、状态、路径、数量和 Confirmation 一致性 | 是 |
 | `qa_workflow.py` | 管理一次授权、confirmation_only、集中回复回写和自动续跑状态 | 是 |
+| `qa_modes.py` | 显式路由 pre_review、知识候选提示和只读 extract_candidate | 是 |
 | `render_confirmation_summary.py` | 从最小 Requirement Checkpoint 渲染第一阶段集中确认回复 | 是 |
 | `validate_task.py` | 快速复验单个当前业务产物链与当前 Index 记录 | 是 |
 | `validate_release.py` | 统一执行规则修改和版本发布的全量门禁 | 是 |
@@ -36,6 +37,7 @@
 - 正式产物在更新索引后运行 `python scripts/validate_formal_artifacts.py`；单个 Workbook 可使用 `python scripts/verify_xmind.py path/to/case.xmind --markdown path/to/case.xmind.md` 复验。
 - 最终聊天交付使用 `python scripts/render_delivery_summary.py --manifest path/to/manifest.json --check`；可选 `--output` 保存副本，独立文件使用 `validate_delivery_summary.py --manifest ... --summary ...` 校验。完整用例摘要固定展示八类测试维度覆盖。
 - 第一阶段集中确认使用 `python scripts/render_confirmation_summary.py --requirement path/to/checkpoint.json`；该阶段不得创建 Manifest 或草稿测试产物。
+- `qa_modes.py` 的 pre_review 与知识候选函数只处理模式边界和结构化结果；候选提示不触发检索或持久化，extract_candidate 也不写入知识库。
 - 日常交付使用 `python scripts/validate_task.py --manifest path/to/manifest.json --test tests.test_related_module`；规则发布使用 `python scripts/validate_release.py`，不得在普通业务任务中无条件执行后者。
 - 来源组合 Hash 统一由 `file_hash_utils.py` 处理：文本换行和 UTF-8 BOM 归一，二进制保持原始字节，规范化相对路径参与组合 Hash。
 - 外部工作区的 Manifest 仍从规则仓库读取 `RULE_VERSION`，但来源、证据和正式产物相对路径从 Manifest 所在工作区解析；绝对路径、`..` 和 resolve 后越界仍被拒绝。

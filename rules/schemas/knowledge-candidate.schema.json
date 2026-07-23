@@ -1,0 +1,243 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Generated from scripts/qa_contracts.py; do not edit manually.",
+  "x-rule-version": "2.15.0",
+  "title": "Knowledge Candidate Model",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "extraction_mode",
+    "candidates"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "2.0.0"
+    },
+    "extraction_mode": {
+      "const": "extract_candidate"
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "candidate_id",
+          "knowledge_type",
+          "statement",
+          "source_fact_ids",
+          "source_confirmation_ids",
+          "evidence_references",
+          "applicable_scope",
+          "existing_knowledge_ids",
+          "comparison_result",
+          "recommended_action",
+          "conflict_reason",
+          "status"
+        ],
+        "properties": {
+          "candidate_id": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^KC-\\d{3}$"
+          },
+          "knowledge_type": {
+            "type": "string",
+            "minLength": 1
+          },
+          "statement": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_fact_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "source_confirmation_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "evidence_references": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source_type",
+                "storage_type",
+                "source_path",
+                "snapshot_path",
+                "source_record_id",
+                "line_start",
+                "line_end",
+                "commit_sha",
+                "content_hash",
+                "excerpt",
+                "captured_at",
+                "captured_timezone",
+                "evidence_status"
+              ],
+              "properties": {
+                "source_type": {
+                  "enum": [
+                    "user_confirmation",
+                    "requirement",
+                    "zentao_section_3",
+                    "openspec",
+                    "markdown",
+                    "screenshot",
+                    "diff",
+                    "code_context",
+                    "acceptance_criteria",
+                    "formal_change_record",
+                    "api_document",
+                    "sql_definition",
+                    "complete_ddl",
+                    "knowledge_table",
+                    "historical_defect",
+                    "pasted_text",
+                    "chat_snapshot"
+                  ]
+                },
+                "storage_type": {
+                  "enum": [
+                    "file",
+                    "snapshot"
+                  ]
+                },
+                "source_path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "snapshot_path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "source_record_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "line_start": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1
+                },
+                "line_end": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1
+                },
+                "commit_sha": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^[0-9a-fA-F]{7,40}$"
+                },
+                "content_hash": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^sha256:[0-9a-fA-F]{64}$"
+                },
+                "excerpt": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "captured_at": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$"
+                },
+                "captured_timezone": {
+                  "enum": [
+                    "Asia/Shanghai",
+                    "UTC"
+                  ]
+                },
+                "evidence_status": {
+                  "enum": [
+                    "current",
+                    "stale",
+                    "reconfirm_required"
+                  ]
+                },
+                "stale_reason": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "working_tree_evidence": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "minItems": 1
+          },
+          "applicable_scope": {
+            "type": "string",
+            "minLength": 1
+          },
+          "existing_knowledge_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "comparison_result": {
+            "enum": [
+              "missing",
+              "consistent",
+              "conflicting",
+              "superseding"
+            ]
+          },
+          "recommended_action": {
+            "enum": [
+              "create",
+              "merge",
+              "reject_duplicate",
+              "reconfirm",
+              "supersede"
+            ]
+          },
+          "conflict_reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "const": "candidate"
+          }
+        }
+      }
+    }
+  }
+}

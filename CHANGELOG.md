@@ -6,6 +6,22 @@
 
 ## [Unreleased]
 
+## [2.15.0] - 2026-07-22
+
+### Added
+
+- 新增仅由明确需求预审意图触发的 `pre_review`，复用 Requirement Analysis/Evidence/Fact/Confirmation，并禁止生成或自动续跑正式测试产物。
+- 新增 `qa-knowledge-management` 的显式 `extract_candidate` 模式、只提示一次的候选提取邀请以及 candidate-only Schema；默认任务不自动检索、提取或持久化知识。
+
+### Changed
+
+- 文档统一为“6 个 QA Skills / 4 个核心交付链 Skills”，仓库文档校验器从实际 `skills/*/SKILL.md` 派生清单并与根 README 比对。
+
+### Fixed
+
+- `extract_candidate` 独立复验 completed 正式模型、Confirmation Summary 与 resolved Confirmation 来源，提示上下文支持用户简短回复“提取”；混合“需求评审并生成用例”继续进入 delivery。
+- 知识候选请求在正向匹配前识别“不要/无需/暂不/先不/别提取”等明确否定意图，候选提示上下文中的否定短回复不再误触发提取。
+
 ## [2.14.0] - 2026-07-22
 
 ### Added

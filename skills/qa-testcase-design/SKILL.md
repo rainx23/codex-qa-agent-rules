@@ -21,7 +21,7 @@ description: 用于基于证据设计 QA 测试点和最小有效 XMind Markdown
 
 ## 执行流程
 
-1. `workflow_stage=confirmation_only` 或存在未解决 blocking 时不得启动本 Skill，不得生成 Risk Coverage Matrix、Testcase Model、草稿用例或 XMind。阻塞归零并切换到 `formal_generation` 后，接收已回写确认结果的 Requirement Analysis Model，并在同一次原始授权下自动恢复用例任务。
+1. `workflow_stage=pre_review|confirmation_only` 或存在未解决 blocking 时不得启动本 Skill，不得生成 Risk Coverage Matrix、Testcase Model、草稿用例或 XMind。pre_review 完成后不自动续跑；confirmation_only 阻塞归零并切换到 `formal_generation` 后，接收已回写确认结果的 Requirement Analysis Model，并在同一次原始授权下自动恢复用例任务。
 2. 先建立并校验 `../../rules/schemas/risk-coverage-matrix.schema.json` 约束的 Risk Coverage Matrix，不得从原始需求文本直接跳到用例。
    - Risk Evidence 只能从关联 Fact/Acceptance Criteria 派生；confirmed TC 的 Risk 与 Fact 链必须全部 confirmed/current。字段结构证据不得扩写为业务行为预期。
 3. 根据证据选择等价类、边界、决策表、状态流转、用户路径、Pairwise 或风险驱动等技术。
