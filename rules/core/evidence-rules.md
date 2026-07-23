@@ -2,17 +2,17 @@
 
 ## 事实模型
 
-分析前建立结构化事实表，区分确定事实、冲突事实、推断事实和缺失事实。核心结论必须标注来源：需求原文、用户补充、OpenSpec、截图、Markdown 文件、Diff、代码上下文、接口说明、SQL 口径、历史缺陷或推断需确认。
+分析前建立结构化事实表，区分确定事实、冲突事实、推断事实和缺失事实。核心结论必须标注来源：需求原文、用户补充、截图、Markdown 文件、Diff、代码上下文、接口说明、SQL 口径、历史缺陷或推断需确认。
 
 ## Evidence Reference
 
-`source_type` is a closed enum: `user_confirmation`, `requirement`, `zentao_section_3`, `acceptance_criteria`, `formal_change_record`, `openspec`, `markdown`, `screenshot`, `diff`, `code_context`, `api_document`, `sql_definition`, `complete_ddl`, `knowledge_table`, `historical_defect`, `pasted_text`, `chat_snapshot`. 每条 Evidence 必须显式声明 `storage_type=file|snapshot`，不得再从 `source_type` 猜测存储方式。
+`source_type` is a closed enum: `user_confirmation`, `requirement`, `zentao_section_3`, `acceptance_criteria`, `formal_change_record`, `markdown`, `screenshot`, `diff`, `code_context`, `api_document`, `sql_definition`, `complete_ddl`, `knowledge_table`, `historical_defect`, `pasted_text`, `chat_snapshot`. 每条 Evidence 必须显式声明 `storage_type=file|snapshot`，不得再从 `source_type` 猜测存储方式。
 
 事实、变更、影响链、风险、疑似缺陷和验收标准必须使用可追溯的 `evidence_references`。每条必须完整包含 `source_type`、`storage_type`、`source_path`、`snapshot_path`、`source_record_id`、`line_start`、`line_end`、`commit_sha`、`content_hash`、`excerpt`、`captured_at`、`captured_timezone` 和 `evidence_status`；允许为 null 的字段仍必须出现，并由 storage type 决定其合法性。
 
 ### File Evidence
 
-`file` 适用于仓库内真实文件。必须填写仓库内相对 `source_path`，`snapshot_path=null`，并复验文件存在性、SHA-256、文本行号和 excerpt。requirement、openspec、markdown、diff、code_context、api_document、sql_definition、complete_ddl 和 knowledge_table 只允许 file。diff/code_context 还必须提供合法 commit SHA；仅当明确 `working_tree_evidence=true` 时允许 commit_sha 为 null。
+`file` 适用于仓库内真实文件。必须填写仓库内相对 `source_path`，`snapshot_path=null`，并复验文件存在性、SHA-256、文本行号和 excerpt。requirement、markdown、diff、code_context、api_document、sql_definition、complete_ddl 和 knowledge_table 只允许 file。diff/code_context 还必须提供合法 commit SHA；仅当明确 `working_tree_evidence=true` 时允许 commit_sha 为 null。
 
 ### Snapshot Evidence
 

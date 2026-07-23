@@ -25,7 +25,7 @@
 
 当前规则版本以根目录 [RULE_VERSION](RULE_VERSION) 为唯一来源；Schema、Manifest、CI 和产物索引都校验该版本，禁止在多个脚本中分别维护版本号。
 
-它支持禅道、OpenSpec、Markdown、截图、用户补充规则、Git Diff、Commit、分支和代码上下文，重点解决测试工作中常见的规则遗漏、无证据推断、重复用例、模糊预期、Diff 影响范围不完整和交付格式不统一。
+它支持禅道、Markdown、截图、用户补充规则、Git Diff、Commit、分支和代码上下文，重点解决测试工作中常见的规则遗漏、无证据推断、重复用例、模糊预期、Diff 影响范围不完整和交付格式不统一。
 
 > 这不是业务自动化测试框架，不是单纯的 XMind 转换工具，也不是默认修改业务代码的 Agent。它的本质是：测试分析规则 + QA Skills + 用例设计规范 + XMind 产物生成 + 自动质量校验 + 测试产物治理。
 
@@ -33,7 +33,7 @@
 
 | 输入 | 能力 | 输出 |
 | --- | --- | --- |
-| 禅道、OpenSpec、Markdown、截图、用户补充 | 需求理解、规则拆解、待确认点和验收基准 | 需求分析报告、风险和回归范围 |
+| 禅道、Markdown、截图、用户补充 | 需求理解、规则拆解、待确认点和验收基准 | 需求分析报告、风险和回归范围 |
 | Commit、Diff、分支、工作区变更 | 变更范围、调用链、需求覆盖和影响分析 | Diff 分析报告、疑似风险和测试点 |
 | 已确认需求和风险 | 风险矩阵、去重和最小有效用例集 | 固定格式 XMind Markdown |
 | Testcase、Risk、Requirement 和 Evidence | 可复算、可解释的测试用例价值评估 | 可选 Testcase Value Assessment Model、人工审核建议 |
@@ -45,7 +45,7 @@
 
 ## 适用场景
 
-- 禅道、OpenSpec、Markdown、文本需求和截图辅助分析。
+- 禅道、Markdown、文本需求和截图辅助分析。
 - 单 Commit、Commit 范围、分支、工作区及暂存区 Diff 分析。
 - 需求与代码 Diff 联动验收、公共逻辑和调用链影响分析。
 - 测试点、最小有效用例集和 XMind 测试用例设计。
@@ -67,7 +67,7 @@
 
 ```mermaid
 flowchart TD
-    I["用户输入<br/>禅道 / OpenSpec / Markdown / 截图<br/>Git Diff / Commit / 分支<br/>用户补充规则"] --> A["AGENTS.md<br/>任务识别、边界和 Skill 路由"]
+    I["用户输入<br/>禅道 / Markdown / 截图<br/>Git Diff / Commit / 分支<br/>用户补充规则"] --> A["AGENTS.md<br/>任务识别、边界和 Skill 路由"]
     A --> S["QA Skills<br/>需求分析 / Diff 影响 / 用例设计 / 产物校验"]
     S --> R["规则层<br/>rules/core 通用规则<br/>rules/profiles 业务专项"]
     R --> O["测试产物<br/>分析报告 / XMind Markdown / .xmind<br/>Manifest / testcases/index.md"]
@@ -151,7 +151,7 @@ flowchart TD
 
 | Skill | 触发场景 | 主要职责 | 主要输出 |
 | --- | --- | --- | --- |
-| [`qa-requirement-analysis`](skills/qa-requirement-analysis/SKILL.md) | 禅道、OpenSpec、Markdown、截图、需求评审 | 需求理解、事实拆解、待确认点、验收基准、风险和回归范围 | 需求分析结果 |
+| [`qa-requirement-analysis`](skills/qa-requirement-analysis/SKILL.md) | 禅道、Markdown、截图、需求评审 | 需求理解、事实拆解、待确认点、验收基准、风险和回归范围 | 需求分析结果 |
 | [`qa-diff-impact-analysis`](skills/qa-diff-impact-analysis/SKILL.md) | Commit、Diff、分支、工作区变更 | 变更范围、调用链、需求覆盖、疑似风险和回归范围 | Diff 影响分析 |
 | [`qa-testcase-design`](skills/qa-testcase-design/SKILL.md) | 测试点、测试用例、XMind、P0/P1/P2 | 风险矩阵、去重、最小有效用例集和固定格式输出 | XMind Markdown |
 | [`qa-artifact-validation`](skills/qa-artifact-validation/SKILL.md) | 校验、转换、发布、索引 | 报告、Markdown、Workbook、Manifest 和索引校验 | 校验结果和最终产物 |
@@ -243,7 +243,7 @@ flowchart TD
 
 | 模式 | 典型输入 | 必需章节 | 不强制内容 |
 | --- | --- | --- | --- |
-| 纯需求 `requirement` | 禅道、OpenSpec、Markdown、截图、粘贴需求 | 本次分析范围、需求理解、规则拆解、证据来源、待确认点、风险点、测试点摘要、回归范围 | 疑似缺陷、追踪矩阵 |
+| 纯需求 `requirement` | 禅道、Markdown、截图、粘贴需求 | 本次分析范围、需求理解、规则拆解、证据来源、待确认点、风险点、测试点摘要、回归范围 | 疑似缺陷、追踪矩阵 |
 | 纯 Diff `diff` | Commit、范围、分支、工作区或暂存区 | 本次分析范围、Commit/Diff 对比范围、Diff 涉及文件、核心改动点、证据来源、待确认点、疑似风险点、疑似缺陷、测试点摘要、回归范围 | 无需求基准时不要求追踪矩阵 |
 | 联动 `combined` | 需求和 Diff 同时存在 | 本次分析范围、需求理解、Diff 理解、证据来源、待确认点、风险点、疑似缺陷、测试点摘要、回归范围、追踪矩阵 | 无 |
 

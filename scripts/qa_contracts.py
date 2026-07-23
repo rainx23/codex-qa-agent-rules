@@ -25,7 +25,7 @@ REPORT_MODES = ("requirement", "diff", "combined")
 FACT_CATEGORIES = ("confirmed", "conflicting", "inferred", "missing")
 SOURCE_TYPES = (
     "user_confirmation", "requirement", "zentao_section_3",
-    "openspec", "markdown", "screenshot", "diff", "code_context",
+    "markdown", "screenshot", "diff", "code_context",
     "acceptance_criteria", "formal_change_record", "api_document", "sql_definition",
     "complete_ddl", "knowledge_table", "historical_defect", "pasted_text", "chat_snapshot",
 )

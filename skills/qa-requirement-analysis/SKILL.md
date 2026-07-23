@@ -1,6 +1,6 @@
 ---
 name: qa-requirement-analysis
-description: 用于分析禅道、OpenSpec、Markdown、截图或粘贴文本中的 QA 需求，建立基于证据的事实、待确认门禁、风险、验收标准和回归范围。适用于需求分析、新需求评审以及 Diff 分析前的需求基线建立。Requirement analysis, Zentao, OpenSpec, acceptance baseline, QA risk and regression scope.
+description: 用于分析禅道、Markdown、截图或粘贴文本中的 QA 需求，建立基于证据的事实、待确认门禁、风险、验收标准和回归范围。适用于需求分析、新需求评审以及 Diff 分析前的需求基线建立。Requirement analysis, Zentao, Markdown, acceptance baseline, QA risk and regression scope.
 ---
 
 # QA 需求分析（QA Requirement Analysis）

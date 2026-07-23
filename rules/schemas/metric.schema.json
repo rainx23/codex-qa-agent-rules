@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$comment": "Generated from scripts/qa_contracts.py; do not edit manually.",
-  "x-rule-version": "2.15.0",
+  "x-rule-version": "2.16.0",
   "title": "Metric Model",
   "type": "object",
   "additionalProperties": false,

@@ -97,7 +97,7 @@ TRACE_FIELD_GROUPS = (
 )
 ALLOWED_COVERAGE = {"已覆盖", "疑似遗漏", "实现不一致", "需求外变更", "无法判断"}
 ALLOWED_EVIDENCE = re.compile(
-    r"需求原文|用户补充|OpenSpec|截图|Markdown(?: 文件)?|Diff|代码上下文|接口说明|SQL 口径|历史缺陷|推断",
+    r"需求原文|用户补充|截图|Markdown(?: 文件)?|Diff|代码上下文|接口说明|SQL 口径|历史缺陷|推断",
     re.IGNORECASE,
 )
 
@@ -179,7 +179,7 @@ def detect_mode(text: str, requested_mode: str = "auto") -> str:
     )
     has_trace = "需求-Diff-测试点追踪矩阵" in bodies
     evidence = _body(bodies, "证据来源")
-    evidence_has_requirement = bool(re.search(r"需求|OpenSpec|禅道", evidence, re.IGNORECASE))
+    evidence_has_requirement = bool(re.search(r"需求|禅道", evidence, re.IGNORECASE))
     evidence_has_diff = bool(re.search(r"Diff|代码上下文|Commit", evidence, re.IGNORECASE))
     if has_trace or (has_requirement and has_diff) or (
         has_requirement and evidence_has_requirement and evidence_has_diff

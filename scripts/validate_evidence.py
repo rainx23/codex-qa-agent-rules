@@ -16,7 +16,7 @@ EVIDENCE_REQUIRED_FIELDS = (
     "captured_timezone", "evidence_status",
 )
 FILE_ONLY_SOURCE_TYPES = {
-    "requirement", "openspec", "markdown", "diff", "code_context", "api_document",
+    "requirement", "markdown", "diff", "code_context", "api_document",
     "sql_definition", "complete_ddl", "knowledge_table",
 }
 SNAPSHOT_ONLY_SOURCE_TYPES = {"user_confirmation", "pasted_text", "chat_snapshot"}
