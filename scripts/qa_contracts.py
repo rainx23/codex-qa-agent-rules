@@ -486,7 +486,7 @@ def requirement_schema(version: str) -> dict[str, Any]:
             "schema_version": {"const": SCHEMA_VERSION}, "analysis_id": _string(),
             "report_mode": {"enum": ["requirement", "combined"]},
             "source_type": {"enum": list(SOURCE_TYPES)},
-            "source_ids": _strings(min_items=1), "analysis_scope": _string(), "business_goal": _string(),
+            "source_ids": _strings(1), "analysis_scope": _string(), "business_goal": _string(),
             "acceptance_basis": _string(), "facts": {"type": "array", "items": fact, "minItems": 1},
             "confirmation_points": {"type": "array", "items": confirmation},
             "risks": {"type": "array", "items": risk}, "acceptance_criteria": {"type": "array", "items": criterion},

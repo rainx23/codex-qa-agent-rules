@@ -86,12 +86,20 @@ class OpenSpecRemovalTests(unittest.TestCase):
         model = load_json(
             ROOT / "tests/fixtures/models/requirement-analysis.json"
         )
+
+        baseline_errors = validate_requirement_model(
+            model,
+            evidence_root=ROOT,
+        )
+        self.assertEqual([], baseline_errors)
+
         model["source_type"] = "openspec"
 
-        self.assertNotEqual(
-            [],
-            validate_requirement_model(model, evidence_root=ROOT),
+        openspec_errors = validate_requirement_model(
+            model,
+            evidence_root=ROOT,
         )
+        self.assertTrue(openspec_errors)
 
 
 if __name__ == "__main__":
