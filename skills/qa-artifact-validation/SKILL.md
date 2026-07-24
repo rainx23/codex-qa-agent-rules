@@ -32,7 +32,7 @@ description: 用于校验 QA 分析报告、XMind Markdown、XMind Workbook、Ma
 12. 原始任务同时要求需求分析和测试用例时，passed 交付必须具备并复验 Requirement Analysis Model、Risk Coverage Matrix、Testcase Model、XMind Markdown、Workbook 和 Manifest；缺少任一项不得声明完成。
 13. `confirmation_only` 阶段不接收 Manifest，也不要求任何 `draft_*` 路径。blocking 解除后进入正式阶段，从已更新 Checkpoint 首次生成正式链；不得先生成空模型再用 JSON Patch 循环修补。
 14. `validation_status` 与 `sql_status` 分开判定。报告、模型、Markdown、Workbook 完整时允许 `passed + sql_status=blocked`。
-15. Manifest 和当前任务校验通过后运行 `python ../../scripts/render_delivery_summary.py --manifest <manifest.json> --check`。摘要只渲染一次，校验器不得再次调用渲染器或重新执行完整产物链。
+15. Manifest 和当前任务校验通过后运行 `python ../../scripts/render_delivery_summary.py --manifest <manifest.json> --check`，使用单次确定性渲染结果作为最终聊天回复主体。摘要只渲染一次，校验器不得再次调用渲染器或重新执行完整产物链。
 16. `pre_review` 不接收任何正式测试产物。正式交付通过且存在明显可复用 confirmed Fact 或 resolved Confirmation 时，仅追加一次知识候选提示。
 
 ## 可选 Testcase Value Assessment 校验
