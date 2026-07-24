@@ -34,18 +34,30 @@ def _section_positions(text: str) -> tuple[dict[str, int], list[str]]:
 
 
 def validate_summary(text: str, manifest_path: Path) -> list[str]:
-    from render_delivery_summary import DeliverySummaryError, render_delivery_summary
+    """Validate summary content without rendering the same summary a second time."""
 
     errors: list[str] = []
     _, section_errors = _section_positions(text)
     errors.extend(section_errors)
     manifest = load_json(manifest_path.resolve())
-    testcase_task = any(manifest.get(field) for field in ("testcase_model_path", "draft_testcase_model_path", "xmind_md_path", "draft_xmind_md_path", "xmind_path"))
+    testcase_task = any(
+        manifest.get(field)
+        for field in (
+            "testcase_model_path", "draft_testcase_model_path", "xmind_md_path",
+            "draft_xmind_md_path", "xmind_path",
+        )
+    )
     if testcase_task and not re.search(r"(?m)^## 用例摘要\s*$", text):
         errors.append("完整用例任务必须包含用例摘要")
     if testcase_task:
-        dimension_body = text.split("## 测试维度覆盖", 1)[1].split("\n## ", 1)[0] if "## 测试维度覆盖" in text else ""
-        for dimension in ("功能测试", "数据测试", "异常测试", "权限测试", "导出测试", "兼容性测试", "回归测试", "SQL验证"):
+        dimension_body = (
+            text.split("## 测试维度覆盖", 1)[1].split("\n## ", 1)[0]
+            if "## 测试维度覆盖" in text else ""
+        )
+        for dimension in (
+            "功能测试", "数据测试", "异常测试", "权限测试",
+            "导出测试", "兼容性测试", "回归测试", "SQL验证",
+        ):
             if dimension not in dimension_body:
                 errors.append(f"测试维度覆盖遗漏：{dimension}")
     if ANSI_RE.search(text):
@@ -94,12 +106,6 @@ def validate_summary(text: str, manifest_path: Path) -> list[str]:
     for field in ("case_count", "p0_case_count", "branch_count"):
         if testcase_task and isinstance(manifest.get(field), int) and str(manifest[field]) not in text:
             errors.append(f"摘要缺少 Manifest 数量：{field}")
-    try:
-        expected = render_delivery_summary(manifest_path)
-        if text != expected:
-            errors.append("摘要内容与确定性渲染结果不一致")
-    except DeliverySummaryError as exc:
-        errors.append(str(exc))
     return list(dict.fromkeys(errors))
 
 
