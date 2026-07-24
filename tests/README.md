@@ -22,6 +22,7 @@
 | `test_evidence_precision.py` | 证据精确定位、派生链、confirmed/current 链路和字段结构边界 | 是 |
 | `test_testcase_index.py` | passed Manifest 索引唯一性、漏登、重复和正式路径完整性 | 是 |
 | `test_delivery_summary.py` | passed/pending/failed 对话摘要、Confirmation、路径、计数、顺序和 CLI 契约 | 是 |
+| `test_one_pass_pipeline.py` | 模型单次读取、Markdown 单次解析、摘要不二次渲染、当前任务真实阶段审计和发布/日常门禁分离 | 是 |
 | `test_confirmation_workflow.py` | 一次授权、confirmation_only、集中确认、部分/批量回复、自动续跑和快慢校验分层 | 是 |
 | `test_pre_review_and_knowledge_candidates.py` | 显式 pre_review 路由/禁产物/不续跑，以及知识候选提示、来源边界和不自动持久化 | 是 |
 | `test_openspec_removal.py` | OpenSpec 来源硬删除、保留来源、当前路由/Skill、生成 Schema 与历史 JSON 无依赖 | 是 |
@@ -35,6 +36,7 @@
 ## 使用入口
 
 - 独立反幻觉回归：`python -m unittest discover -s tests -p test_anti_hallucination_fixtures.py -v`。
+- 一次生成链路回归：`python -m unittest tests.test_one_pass_pipeline -v`。
 - 测试用例价值评估回归：运行 `test_testcase_value_assessment.py`、`test_testcase_value_cli.py`、`test_testcase_value_golden.py` 和 `test_testcase_value_ci_contract.py`。
 - 全量回归：`python -m unittest discover -s tests -v`。
 
@@ -51,6 +53,7 @@
 - 对话摘要回归使用正式 passed 产物与临时 pending/failed Fixture，验证固定章节、文件用途、无 Confirmation 时的“无”、计数单一来源、跨平台路径和无 ANSI 输出。
 - 测试运行期工作区必须创建在系统临时目录并由测试生命周期清理；`tests/fixtures/` 只保存固定、可复用输入，不得在其中创建随机运行目录，即使测试异常也不得残留。
 - 条件矩阵、配置存在性/行为分离、多入口核心去重和正式产物统一扫描分别由对应 `test_condition_matrix_*`、`test_entry_branch_*`、`test_shared_entry_scope.py` 与 `test_formal_artifact_scan.py` 覆盖；全局适用入口测试固定 6 个入口阈值、完整展开、禁用简称和模型/XMind 映射。
+- 一次生成链路回归必须固定验证同一模型文件只加载一次、同一 Markdown 只解析一次、摘要校验不再调用渲染器、子进程输出不直接回灌上下文，以及日常入口不执行全量历史扫描。
 - Golden 变化必须经过人工确认，测试运行时不得自动创建或覆盖 Golden，也不为不同操作系统或 Python 版本维护不同副本。
 - Fixture 和 Golden 只服务测试，不作为业务历史版本说明。
 - CodeBuddy 适配回归必须覆盖总入口缺失、包装 Skill 缺失、Frontmatter 描述漂移和正式 Skill 引用错误；测试只验证薄包装一致性，不复制正式 QA 工作流测试。
