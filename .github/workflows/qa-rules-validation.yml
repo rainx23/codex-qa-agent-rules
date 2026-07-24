@@ -88,6 +88,8 @@ jobs:
           python scripts/validate_api_automation.py --model tests/fixtures/models/api-automation-valid.json
           python scripts/validate_api_automation_artifacts.py --artifact tests/fixtures/api/api-artifact-valid.json --model tests/fixtures/models/api-automation-valid.json
           python scripts/validate_execution_instances.py --execution tests/fixtures/execution/execution-model-valid.json --testcase tests/fixtures/models/testcase-model-multi-entry.json --risk tests/fixtures/models/risk-coverage-matrix.json --requirement tests/fixtures/models/requirement-analysis.json --defects tests/fixtures/execution/defects.json
+      - name: Validate one-pass generation pipeline
+        run: python -m unittest tests.test_one_pass_pipeline -v
       - name: Run behavior tests
         run: |
           python -m unittest discover -s tests -p test_schema_migration.py -v
