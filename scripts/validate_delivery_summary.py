@@ -103,9 +103,15 @@ def validate_summary(text: str, manifest_path: Path) -> list[str]:
                 errors.append(f"Confirmation Summary 与 Requirement Model 不一致：{label}")
     if not any(token in text for token in ("- 无", "`CONF-")):
         errors.append("待确认点为空时必须明确输出无，有记录时必须输出 CONF ID")
-    for field in ("case_count", "p0_case_count", "branch_count"):
-        if testcase_task and isinstance(manifest.get(field), int) and str(manifest[field]) not in text:
-            errors.append(f"摘要缺少 Manifest 数量：{field}")
+    count_lines = {
+        "case_count": "TC 数量",
+        "p0_case_count": "P0 TC 数量",
+        "branch_count": "入口分支数量",
+    }
+    for field, label in count_lines.items():
+        value = manifest.get(field)
+        if testcase_task and isinstance(value, int) and f"- {label}：{value}" not in text:
+            errors.append(f"摘要数量与 Manifest 不一致：{field}")
     return list(dict.fromkeys(errors))
 
 
