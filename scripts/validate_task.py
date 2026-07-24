@@ -165,7 +165,7 @@ def run_task_validation(
 
 
 def _safe_audit_path(path: Path, root: Path) -> Path:
-    resolved = path.resolve()
+    resolved = path.resolve() if path.is_absolute() else (root / path).resolve()
     if resolved != root and root not in resolved.parents:
         raise ValueError(f"audit 路径必须位于仓库内：{path}")
     return resolved
